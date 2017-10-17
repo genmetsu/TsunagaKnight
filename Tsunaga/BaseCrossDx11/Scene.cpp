@@ -169,15 +169,15 @@ namespace basecross {
 				}
 			}
 			//Dパッド上
-			//if (CntlVec[0].wButtons & XINPUT_GAMEPAD_DPAD_UP) {
-			//	//カメラ位置を寄る
-			//	m_CameraArmLen -= 0.1f;
-			//	if (m_CameraArmLen <= 2.0f) {
-			//		m_CameraArmLen = 2.0f;
-			//	}
-			//}
+			if (CntlVec[0].wButtons & XINPUT_GAMEPAD_DPAD_UP) {
+				//カメラ位置を寄る
+				m_CameraArmLen -= 0.1f;
+				if (m_CameraArmLen <= 2.0f) {
+					m_CameraArmLen = 2.0f;
+				}
+			}
 
-			/*if (CntlVec[0].fThumbRX != 0) {
+			if (CntlVec[0].fThumbRX != 0) {
 				m_CameraXZRad -= CntlVec[0].fThumbRX * 0.05f;
 				if (abs(m_CameraXZRad) >= XM_2PI) {
 					m_CameraXZRad = 0;
@@ -191,7 +191,7 @@ namespace basecross {
 				else if (m_CameraYRad <= 0.2) {
 					m_CameraYRad = 0.2;
 				}
-			}*/
+			}
 
 			m_CamerAt = GetSphereObject()->GetPosition();
 			Vec3 CameraLocalEye =
