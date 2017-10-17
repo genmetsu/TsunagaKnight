@@ -154,7 +154,7 @@ namespace basecross {
 		}
 		//描画オブジェクトの更新
 		m_PNTDrawObject->OnUpdate();
-		m_WallSprite->OnUpdate();
+		//m_WallSprite->OnUpdate();
 
 		//コントローラの取得
 		auto CntlVec = App::GetApp()->GetInputDevice().GetControlerVec();
