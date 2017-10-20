@@ -1029,7 +1029,7 @@ namespace basecross {
 		m_Division(Division),
 		m_TextureFileName(TextureFileName),
 		m_Trace(Trace),
-		m_Scale(5.0f, 5.0f, 5.0f),
+		m_Scale(0.25f, 0.25f, 0.25f),
 		m_BaseY(m_Scale.y / 2.0f),
 		m_Qt(),
 		m_Pos(Pos),

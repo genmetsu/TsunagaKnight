@@ -95,6 +95,12 @@ namespace basecross {
 		@param[out]	Proj	Ë‰es—ñ‚ğó‚¯æ‚éQÆ
 		@return	‚È‚µ
 		*/
+
+		shared_ptr<EnemyObject> GetEnemyObject() const
+		{
+			return m_Enemy;
+		}
+
 		//--------------------------------------------------------------------------------------
 		void GetViewProjMatrix(Mat4x4& View, Mat4x4& Proj)const;
 		//--------------------------------------------------------------------------------------

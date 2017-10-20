@@ -217,9 +217,10 @@ namespace basecross {
 			v->OnDraw();
 		}
 		m_SphereObject->OnDraw();
+		m_Enemy->OnDraw();
 		m_PNTDrawObject->OnDraw();
 		m_WallSprite->OnDraw();
-		m_Enemy->OnDraw();
+		;
 		//デフォルト描画の終了
 		Dev->EndDefaultDraw();
 	}
