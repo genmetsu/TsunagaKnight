@@ -13,6 +13,7 @@ namespace basecross {
 		shared_ptr<SquareObject> m_SquareObject;				///<平面オブジェクト
 		shared_ptr<CylinderObject> m_CylinderObject;				///<シリンダーオブジェクト
 		shared_ptr<SphereObject> m_SphereObject;				///<球オブジェクト
+		shared_ptr<EnemyObject> m_Enemy;
 		vector<shared_ptr<BoxBase>> m_BoxVec;		///<ボックスの配列
 
 		shared_ptr<PNTDrawObject>	m_PNTDrawObject;				///<描画オブジェクト

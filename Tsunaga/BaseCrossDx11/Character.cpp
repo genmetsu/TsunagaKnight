@@ -1019,6 +1019,85 @@ namespace basecross {
 		Dev->InitializeStates();
 	}
 
+	
 
+	EnemyObject::EnemyObject(const shared_ptr<Scene> PtrScene,
+		UINT Division, const wstring& TextureFileName, bool Trace, const Vec3& Pos) :
+		m_Scene(PtrScene),
+		ObjectInterface(),
+		ShapeInterface(),
+		m_Division(Division),
+		m_TextureFileName(TextureFileName),
+		m_Trace(Trace),
+		m_Scale(5.0f, 5.0f, 5.0f),
+		m_BaseY(m_Scale.y / 2.0f),
+		m_Qt(),
+		m_Pos(Pos),
+		m_Velocity(0, 0, 0),
+		m_Gravity(0, -9.8f, 0),
+		m_GravityVelocity(0, 0, 0),
+		m_JumpLock(false),
+		m_BeforePos(Pos),
+		m_Mass(1.0f)
+	{}
+	EnemyObject::~EnemyObject() {}
+
+	void EnemyObject::CollisionWithBoxes(const Vec3 & BeforePos)
+	{
+	}
+	void EnemyObject::CollisionWithCylinder(const Vec3 & BeforePos)
+	{
+	}
+	void EnemyObject::RotToHead(float LerpFact)
+	{
+	}
+	SPHERE EnemyObject::GetSPHERE() const
+	{
+		SPHERE sp;
+		sp.m_Center = m_Pos;
+		sp.m_Radius = m_Scale.y * 0.5f;
+		return sp;
+	}
+	void EnemyObject::OnCreate()
+	{
+		vector<VertexPositionNormalTexture> vertices;
+		vector<uint16_t> indices;
+		MeshUtill::CreateSphere(1.0f, m_Division, vertices, indices);
+		//メッシュの作成（変更できない）
+		m_SphereMesh = MeshResource::CreateMeshResource(vertices, indices, false);
+		//テクスチャの作成
+		m_TextureResource = ObjectFactory::Create<TextureResource>(m_TextureFileName, L"WIC");
+	}
+	void EnemyObject::OnUpdate()
+	{
+	}
+	void EnemyObject::OnCollision()
+	{
+	}
+	void EnemyObject::OnRotation()
+	{
+	}
+	void EnemyObject::OnDraw()
+	{
+		auto ShPtrScene = m_Scene.lock();
+		if (!ShPtrScene) {
+			return;
+		}
+		//行列の定義
+		Mat4x4 World;
+		//ワールド行列の決定
+		World.affineTransformation(
+			m_Scale,			//スケーリング
+			Vec3(0, 0, 0),		//回転の中心（重心）
+			m_Qt,				//回転角度
+			m_Pos				//位置
+		);
+		ShPtrScene->GetPNTDrawObject()->AddDrawMesh(
+			m_SphereMesh,
+			m_TextureResource,
+			World,
+			true
+		);
+	}
 }
 //end basecross

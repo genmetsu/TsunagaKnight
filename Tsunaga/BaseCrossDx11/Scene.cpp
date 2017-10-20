@@ -130,7 +130,9 @@ namespace basecross {
 			Vec2(-480, 260),
 			4,4);
 
-
+		m_Enemy = ObjectFactory::Create<EnemyObject>(
+			GetThis<Scene>(),
+			18, strTexture2, true, Vec3(1.0f, 0.125f, 0.0f));
 	}
 
 
@@ -217,6 +219,7 @@ namespace basecross {
 		m_SphereObject->OnDraw();
 		m_PNTDrawObject->OnDraw();
 		m_WallSprite->OnDraw();
+		m_Enemy->OnDraw();
 		//デフォルト描画の終了
 		Dev->EndDefaultDraw();
 	}
