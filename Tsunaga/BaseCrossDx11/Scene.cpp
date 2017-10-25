@@ -141,6 +141,7 @@ namespace basecross {
 		m_SquareObject->OnUpdate();
 		m_CylinderObject->OnUpdate();
 		m_SphereObject->OnUpdate();
+		m_Enemy->OnUpdate();
 		for (auto& v : m_BoxVec) {
 			v->OnUpdate();
 		}

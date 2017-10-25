@@ -1037,6 +1037,7 @@ namespace basecross {
 		m_Gravity(0, -9.8f, 0),
 		m_GravityVelocity(0, 0, 0),
 		m_JumpLock(false),
+		m_Speed(4.0f),
 		m_BeforePos(Pos),
 		m_Mass(1.0f)
 	{}
@@ -1044,6 +1045,82 @@ namespace basecross {
 
 	void EnemyObject::CollisionWithBoxes(const Vec3 & BeforePos)
 	{
+		//前回のターンからの経過時間を求める
+		float ElapsedTime = App::GetApp()->GetElapsedTime();
+		//衝突判定
+		auto ShPtrScene = m_Scene.lock();
+		for (auto& v : ShPtrScene->GetBoxVec()) 
+		{
+			if (v == GetThis<BoxBase>())
+			{
+				//相手が自分自身なら処理しない
+				continue;
+			}
+			OBB DestObb = v->GetOBB();
+			OBB SrcObb = GetOBB();
+			SrcObb.m_Center = BeforePos;
+			float HitTime;
+			Vec3 CollisionVelosity = (m_Pos - BeforePos) / ElapsedTime;
+			if (HitTest::CollisionTestObbObb(SrcObb, CollisionVelosity, DestObb, 0, ElapsedTime, HitTime)) 
+			{
+				m_Pos = BeforePos + CollisionVelosity * HitTime;
+				float SpanTime = ElapsedTime - HitTime;
+				//m_Posが動いたのでOBBを再取得
+				SrcObb = GetOBB();
+				Vec3 HitPoint;
+				//最近接点を得るための判定
+				HitTest::ClosestPtPointOBB(SrcObb.m_Center, DestObb, HitPoint);
+				//衝突法線をHitPointとm_Posから導く
+				Vec3 Normal = m_Pos - HitPoint;
+				Normal.normalize();
+				//速度をスライドさせて設定する
+				m_Velocity = ProjUtil::Slide(m_Velocity, Normal);
+				//Y方向はなし
+				m_Velocity.y = 0;
+				//最後に衝突点から余った時間分だけ新しい値で移動させる
+				m_Pos = m_Pos + m_Velocity * SpanTime;
+				//追い出し処理
+				//少しづつ相手の領域から退避する
+				//最大10回退避するが、それでも衝突していたら次回ターンに任せる
+				int count = 0;
+				while (count < 20)
+				{
+					//退避する係数
+					float MiniSpan = 0.001f;
+					//もう一度衝突判定
+					//m_Posが動いたのでOBBを再取得
+					SrcObb = GetOBB();
+					if (HitTest::OBB_OBB(SrcObb, DestObb)) 
+					{
+						//最近接点を得るための判定
+						HitTest::ClosestPtPointOBB(SrcObb.m_Center, DestObb, HitPoint);
+						//衝突していたら追い出し処理
+						Vec3 EscapeNormal = SrcObb.m_Center - HitPoint;
+						EscapeNormal.y = 0;
+						EscapeNormal.normalize();
+						m_Pos = m_Pos + EscapeNormal * MiniSpan;
+					}
+					else 
+					{
+						break;
+					}
+					count++;
+				}
+			}
+		}
+	}
+
+	OBB EnemyObject::GetOBB()const {
+		Mat4x4 World;
+		//ワールド行列の決定
+		World.affineTransformation(
+			m_Scale,			//スケーリング
+			Vec3(0, 0, 0),		//回転の中心（重心）
+			m_Qt,				//回転角度
+			m_Pos				//位置
+		);
+		OBB obb(Vec3(1.0f, 1.0f, 1.0f), World);
+		return obb;
 	}
 	void EnemyObject::CollisionWithCylinder(const Vec3 & BeforePos)
 	{
@@ -1058,6 +1135,30 @@ namespace basecross {
 		sp.m_Radius = m_Scale.y * 0.5f;
 		return sp;
 	}
+
+	void EnemyObject::UpdateVelosity() {
+		auto ShPtrScene = m_Scene.lock();
+		if (!ShPtrScene) {
+			return;
+		}
+		//フォース（力）
+		Vec3 Force(0, 0, 0);
+		//プレイヤーを向く方向ベクトル
+		Vec3 ToPlayerVec =
+			ShPtrScene->GetSphereObject()->GetPosition() - m_Pos;
+		//縦方向は計算しない
+		ToPlayerVec.y = 0;
+		ToPlayerVec *= m_Speed;
+		//力を掛ける方向を決める
+		Force = ToPlayerVec - m_Velocity;
+		//力と質量から加速を求める
+		Vec3 Accel = Force / m_Mass;
+		//前回のターンからの経過時間を求める
+		float ElapsedTime = App::GetApp()->GetElapsedTime();
+		//速度を加速する
+		m_Velocity += Accel * ElapsedTime;
+	}
+
 	void EnemyObject::OnCreate()
 	{
 		vector<VertexPositionNormalTexture> vertices;
