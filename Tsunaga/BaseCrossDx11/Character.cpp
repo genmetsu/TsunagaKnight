@@ -1043,25 +1043,38 @@ namespace basecross {
 	{}
 	EnemyObject::~EnemyObject() {}
 
+	OBB EnemyObject::GetOBB()const {
+		Mat4x4 World;
+		//ワールド行列の決定
+		World.affineTransformation(
+			m_Scale,			//スケーリング
+			Vec3(0, 0, 0),		//回転の中心（重心）
+			m_Qt,				//回転角度
+			m_Pos				//位置
+		);
+		OBB obb(Vec3(1.0f, 1.0f, 1.0f), World);
+		return obb;
+	}
+
 	void EnemyObject::CollisionWithBoxes(const Vec3 & BeforePos)
 	{
 		//前回のターンからの経過時間を求める
 		float ElapsedTime = App::GetApp()->GetElapsedTime();
 		//衝突判定
 		auto ShPtrScene = m_Scene.lock();
-		for (auto& v : ShPtrScene->GetBoxVec()) 
+		for (auto& v : ShPtrScene->GetBoxVec())
 		{
-			if (v == GetThis<BoxBase>())
-			{
-				//相手が自分自身なら処理しない
-				continue;
-			}
+			//if (v == GetThis<BoxBase>())
+			//{
+			//	//相手が自分自身なら処理しない
+			//	continue;
+			//}
 			OBB DestObb = v->GetOBB();
 			OBB SrcObb = GetOBB();
 			SrcObb.m_Center = BeforePos;
 			float HitTime;
 			Vec3 CollisionVelosity = (m_Pos - BeforePos) / ElapsedTime;
-			if (HitTest::CollisionTestObbObb(SrcObb, CollisionVelosity, DestObb, 0, ElapsedTime, HitTime)) 
+			if (HitTest::CollisionTestObbObb(SrcObb, CollisionVelosity, DestObb, 0, ElapsedTime, HitTime))
 			{
 				m_Pos = BeforePos + CollisionVelosity * HitTime;
 				float SpanTime = ElapsedTime - HitTime;
@@ -1090,7 +1103,7 @@ namespace basecross {
 					//もう一度衝突判定
 					//m_Posが動いたのでOBBを再取得
 					SrcObb = GetOBB();
-					if (HitTest::OBB_OBB(SrcObb, DestObb)) 
+					if (HitTest::OBB_OBB(SrcObb, DestObb))
 					{
 						//最近接点を得るための判定
 						HitTest::ClosestPtPointOBB(SrcObb.m_Center, DestObb, HitPoint);
@@ -1100,7 +1113,7 @@ namespace basecross {
 						EscapeNormal.normalize();
 						m_Pos = m_Pos + EscapeNormal * MiniSpan;
 					}
-					else 
+					else
 					{
 						break;
 					}
@@ -1110,18 +1123,6 @@ namespace basecross {
 		}
 	}
 
-	OBB EnemyObject::GetOBB()const {
-		Mat4x4 World;
-		//ワールド行列の決定
-		World.affineTransformation(
-			m_Scale,			//スケーリング
-			Vec3(0, 0, 0),		//回転の中心（重心）
-			m_Qt,				//回転角度
-			m_Pos				//位置
-		);
-		OBB obb(Vec3(1.0f, 1.0f, 1.0f), World);
-		return obb;
-	}
 	void EnemyObject::CollisionWithCylinder(const Vec3 & BeforePos)
 	{
 		//前回のターンからの経過時間を求める
