@@ -1124,6 +1124,58 @@ namespace basecross {
 	}
 	void EnemyObject::CollisionWithCylinder(const Vec3 & BeforePos)
 	{
+		//前回のターンからの経過時間を求める
+		float ElapsedTime = App::GetApp()->GetElapsedTime();
+		//衝突判定
+		auto ShPtrScene = m_Scene.lock();
+		auto cyOb = ShPtrScene->GetCylinderObject();
+		CYLINDER cy = cyOb->GetCYLINDER();
+		SPHERE Sp = GetSPHERE();
+		Sp.m_Center = BeforePos;
+		float HitTime;
+		//相手の速度
+		Vec3 DestVelocity(0, 0, 0);
+		Vec3 SrcVelocity = m_Pos - BeforePos;
+		Vec3 CollisionVelosity = (SrcVelocity - DestVelocity) / ElapsedTime;
+		if (HitTest::CollisionTestSphereCylinder(Sp, CollisionVelosity, cy, 0, ElapsedTime, HitTime)) {
+			m_JumpLock = false;
+			m_Pos = BeforePos + CollisionVelosity * HitTime;
+			float SpanTime = ElapsedTime - HitTime;
+			//m_Posが動いたのでSPHEREを再取得
+			Sp = GetSPHERE();
+			Vec3 HitPoint;
+			//最近接点を得るための判定
+			HitTest::SPHERE_CYLINDER(Sp, cy, HitPoint);
+			//衝突法線をHitPointとm_Posから導く
+			Vec3 Normal = m_Pos - HitPoint;
+			Normal.normalize();
+			Vec3 angle(XMVector3AngleBetweenNormals(Normal, Vec3(0, 1, 0)));
+			if (angle.x <= 0.01f) {
+				//平面の上
+				m_GravityVelocity = Vec3(0, 0, 0);
+			}
+			else {
+				//重力をスライドさせて設定する
+				//これで、斜めのボックスを滑り落ちるようになる
+				m_GravityVelocity = ProjUtil::Slide(m_GravityVelocity, Normal);
+			}
+			//速度をスライドさせて設定する
+			m_Velocity = ProjUtil::Slide(m_Velocity, Normal);
+			//Y方向は重力に任せる
+			m_Velocity.y = 0;
+			//最後に衝突点から余った時間分だけ新しい値で移動させる
+			m_Pos = m_Pos + m_Velocity * SpanTime;
+			m_Pos = m_Pos + m_GravityVelocity * SpanTime;
+			//もう一度衝突判定
+			//m_Posが動いたのでSPHEREを再取得
+			Sp = GetSPHERE();
+			if (HitTest::SPHERE_CYLINDER(Sp, cy, HitPoint)) {
+				//衝突していたら追い出し処理
+				Vec3 EscapeNormal = Sp.m_Center - HitPoint;
+				EscapeNormal.normalize();
+				m_Pos = HitPoint + EscapeNormal * Sp.m_Radius;
+			}
+		}
 	}
 	void EnemyObject::RotToHead(float LerpFact)
 	{
@@ -1171,9 +1223,19 @@ namespace basecross {
 	}
 	void EnemyObject::OnUpdate()
 	{
+		//1つ前の位置を取っておく
+		m_BeforePos = m_Pos;
+		//速度を変化させる
+		UpdateVelosity();
+		//前回のターンからの経過時間を求める
+		float ElapsedTime = App::GetApp()->GetElapsedTime();
+		//速度に合わせて位置の変更
+		m_Pos += m_Velocity * ElapsedTime;
 	}
 	void EnemyObject::OnCollision()
 	{
+		CollisionWithBoxes(m_BeforePos);
+		CollisionWithCylinder(m_BeforePos);
 	}
 	void EnemyObject::OnRotation()
 	{

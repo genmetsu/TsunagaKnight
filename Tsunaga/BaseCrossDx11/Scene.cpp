@@ -104,7 +104,7 @@ namespace basecross {
 		strTexture = DataDir + L"wall.jpg";
 
 		//移動ボックス
-		m_BoxVec.push_back(
+		/*m_BoxVec.push_back(
 			ObjectFactory::Create<MoveBoxObject>(
 				GetThis<Scene>(), strTexture, false,
 				Vec3(0.25f, 0.5f, 0.5f),
@@ -112,7 +112,7 @@ namespace basecross {
 				Vec3(0.0f, 0.25f, 5.0f)
 				)
 		);
-
+*/
 
 		wstring strTexture2 = DataDir + L"trace.png";
 		//球の作成
@@ -150,6 +150,12 @@ namespace basecross {
 		for (auto& v : m_BoxVec) {
 			v->OnCollision();
 		}
+
+		m_Enemy->OnCollision();
+		for (auto& v : m_BoxVec) {
+			v->OnCollision();
+		}
+
 		//回転処理
 		m_SphereObject->OnRotation();
 		for (auto& v : m_BoxVec) {
