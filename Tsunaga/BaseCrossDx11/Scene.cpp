@@ -147,10 +147,6 @@ namespace basecross {
 		}
 		//Õ“Ë”»’è
 		m_SphereObject->OnCollision();
-		for (auto& v : m_BoxVec) {
-			v->OnCollision();
-		}
-
 		m_Enemy->OnCollision();
 		for (auto& v : m_BoxVec) {
 			v->OnCollision();
