@@ -715,6 +715,11 @@ namespace basecross {
 		Vec3 m_BeforePos;	//1つ前の位置
 		float m_Mass;
 		float m_Speed;	//追いかけるスピード
+		float m_FrameCount;
+		bool m_Tackle;
+		float m_StopTime;
+		float m_TackleDis;
+		float m_TackleSpeed;
 
 
 		//--------------------------------------------------------------------------------------
@@ -839,6 +844,7 @@ namespace basecross {
 		*/
 		//--------------------------------------------------------------------------------------
 		virtual void OnDraw()override;
+
 	};
 
 

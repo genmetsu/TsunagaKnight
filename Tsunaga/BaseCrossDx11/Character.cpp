@@ -1037,9 +1037,14 @@ namespace basecross {
 		m_Gravity(0, -9.8f, 0),
 		m_GravityVelocity(0, 0, 0),
 		m_JumpLock(false),
-		m_Speed(4.0f),
+		m_Speed(0.5f),
 		m_BeforePos(Pos),
-		m_Mass(1.0f)
+		m_Mass(1.0f),
+		m_FrameCount(0.0f),
+		m_Tackle(false),
+		m_StopTime(2.0f),
+		m_TackleDis(2.0f),
+		m_TackleSpeed(10.0f)
 	{}
 	EnemyObject::~EnemyObject() {}
 
@@ -1199,6 +1204,32 @@ namespace basecross {
 		//プレイヤーを向く方向ベクトル
 		Vec3 ToPlayerVec =
 			ShPtrScene->GetSphereObject()->GetPosition() - m_Pos;
+
+		float dis = ToPlayerVec.length();
+		if (m_FrameCount > m_StopTime * 60.0f)
+		{
+			m_Tackle = true;
+		}
+
+		if (m_Tackle == true)
+		{
+            ToPlayerVec.y = 0;
+			ToPlayerVec *= m_TackleSpeed;
+			Force = ToPlayerVec - m_Velocity;
+			Vec3 Accel = Force / m_Mass;
+			float ElapsedTime = App::GetApp()->GetElapsedTime();
+			m_Velocity += Accel * ElapsedTime;
+			return;
+		}
+
+		float f = bsm::length(ShPtrScene->GetSphereObject()->GetPosition() - m_Pos);
+		if (f < m_TackleDis)
+		{
+			m_Velocity = Vec3(0,0,0);
+			m_FrameCount++;
+			return;
+		}
+
 		//縦方向は計算しない
 		ToPlayerVec.y = 0;
 		ToPlayerVec *= m_Speed;

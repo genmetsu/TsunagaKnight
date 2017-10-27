@@ -132,7 +132,7 @@ namespace basecross {
 
 		m_Enemy = ObjectFactory::Create<EnemyObject>(
 			GetThis<Scene>(),
-			18, strTexture2, true, Vec3(1.0f, 0.125f, 0.0f));
+			18, strTexture2, true, Vec3(1.0f, 0.125f, 3.0f));
 	}
 
 
