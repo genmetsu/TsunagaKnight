@@ -1,15 +1,14 @@
-
 //--------------------------------------------------------------------------------------
-// File: VSPVTStatic.hlsl
+// File: VSPTSprite.hlsl
 //
 //--------------------------------------------------------------------------------------
 
 #include "INCStructs.hlsli"
 #include "INCSimpleConstant.hlsli"
 
-PSPNTInput main(VSPNTInput input)
+PSPCTInput main(VSPCTInput input)
 {
-	PSPNTInput result;
+	PSPCTInput result;
 	//頂点の位置を変換
 	float4 pos = float4(input.position.xyz, 1.0f);
 	//ワールド変換
@@ -20,13 +19,8 @@ PSPNTInput main(VSPNTInput input)
 	pos = mul(pos, Projection);
 	//ピクセルシェーダに渡す変数に設定
 	result.position = pos;
-	//ライティング
-	result.norm = mul(input.norm, (float3x3)World);
-	result.norm = normalize(result.norm);
-	//スペキュラー
-	float3 H = normalize(normalize(-LightDir.xyz) + normalize(EyePos.xyz - pos.xyz));
-	result.specular = Specular * dot(result.norm, H);
-	//テクスチャUV
+	result.color = input.color;
 	result.tex = input.tex;
+
 	return result;
 }

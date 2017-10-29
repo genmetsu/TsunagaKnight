@@ -1,15 +1,33 @@
-
 //--------------------------------------------------------------------------------------
-// File: VSPVTStatic.hlsl
+// File: VSPVTBone.hlsl
 //
 //--------------------------------------------------------------------------------------
 
 #include "INCStructs.hlsli"
 #include "INCSimpleConstant.hlsli"
 
-PSPNTInput main(VSPNTInput input)
+void Skin(inout VSPNTBoneInput vin, uniform int boneCount)
+{
+	float4x3 skinning = 0;
+
+	[unroll]
+	for (int i = 0; i < boneCount; i++)
+	{
+		skinning += Bones[vin.indices[i]] * vin.weights[i];
+	}
+
+	vin.position.xyz = mul(vin.position, skinning);
+	vin.norm = mul(vin.norm, (float3x3)skinning);
+}
+
+
+
+PSPNTInput main(VSPNTBoneInput input)
 {
 	PSPNTInput result;
+
+	Skin(input, 4);
+
 	//頂点の位置を変換
 	float4 pos = float4(input.position.xyz, 1.0f);
 	//ワールド変換
