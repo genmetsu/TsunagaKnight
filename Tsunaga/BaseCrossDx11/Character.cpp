@@ -11,12 +11,12 @@ namespace basecross {
 	//--------------------------------------------------------------------------------------
 	///	平面実体
 	//--------------------------------------------------------------------------------------
-	SquareObject::SquareObject(const shared_ptr<Scene> PtrScene,
-		const wstring& TextureFileName, const Vec3& Scale, const Quat& Qt, const Vec3& Pos) :
-		m_Scene(PtrScene),
-		ObjectInterface(),
-		ShapeInterface(),
-		m_TextureFileName(TextureFileName),
+	SquareObject::SquareObject(const shared_ptr<Stage>& StagePtr,
+		const wstring& TextureResName, const wstring& NormalTextureResName,
+		const Vec3& Scale, const Quat& Qt, const Vec3& Pos) :
+		GameObject(StagePtr),
+		m_TextureResName(TextureResName),
+		m_NormalTextureResName(NormalTextureResName),
 		m_Scale(Scale),
 		m_Qt(Qt),
 		m_Pos(Pos)
@@ -37,859 +37,506 @@ namespace basecross {
 			0, 1, 2,
 			1, 3, 2,
 		};
+		vector<VertexPositionNormalTangentTexture> new_vertices;
+		BcRenderer::ConvertToNormalVertex(vertices, new_vertices);
 		//メッシュの作成（変更できない）
-		m_SquareMesh = MeshResource::CreateMeshResource(vertices, indices, false);
+		m_SquareMesh = MeshResource::CreateMeshResource(new_vertices, indices, false);
 	}
 
 
 	void SquareObject::OnCreate() {
+
 		CreateBuffers(m_Scale.x, m_Scale.y);
-		//テクスチャの作成
-		m_TextureResource = ObjectFactory::Create<TextureResource>(m_TextureFileName, L"WIC");
+
+		//行列の定義
+		Mat4x4 World;
+		World.affineTransformation(
+			m_Scale,
+			Vec3(0, 0, 0),
+			m_Qt,
+			m_Pos
+		);
+
+		auto TexPtr = App::GetApp()->GetResource<TextureResource>(m_TextureResName);
+		auto NormTexPtr = App::GetApp()->GetResource<TextureResource>(m_NormalTextureResName);
+
+		m_PtrObj = make_shared<BcDrawObject>();
+		m_PtrObj->m_MeshRes = m_SquareMesh;
+		m_PtrObj->m_TextureRes = TexPtr;
+		m_PtrObj->m_NormalTextureRes = NormTexPtr;
+		m_PtrObj->m_WorldMatrix = World;
+		m_PtrObj->m_Camera = GetStage<Stage>()->GetCamera();
+		m_PtrObj->m_OwnShadowmapActive = true;
+		m_PtrObj->m_SamplerState = SamplerState::LinearWrap;
+		m_PtrObj->m_ShadowmapUse = false;
+		m_PtrObj->m_FogEnabled = true;
+		//フォグはきつめに
+		m_PtrObj->m_FogColor = Col4(0.3f, 0.3f, 0.3f, 1.0f);
+		m_PtrObj->m_FogStart = -10.0f;
+		m_PtrObj->m_FogEnd = -30.0f;
+
+
 	}
 	void SquareObject::OnUpdate() {
 	}
+
 	void SquareObject::OnDraw() {
-		auto ShPtrScene = m_Scene.lock();
-		if (!ShPtrScene) {
-			return;
+		m_PtrObj->m_Camera = GetStage<Stage>()->GetCamera();
+		auto shptr = m_Renderer.lock();
+		if (!shptr) {
+			shptr = GetStage<Stage>()->FindTagGameObject<BcPNTnTStaticRenderer>(L"BcPNTnTStaticRenderer");
+			m_Renderer = shptr;
 		}
-		//行列の定義
-		Mat4x4 World;
-		//ワールド行列の決定
-		World.affineTransformation(
-			m_Scale,			//スケーリング
-			Vec3(0, 0, 0),		//回転の中心（重心）
-			m_Qt,				//回転角度
-			m_Pos				//位置
-		);
-		ShPtrScene->GetPNTDrawObject()->AddDrawMesh(
-			m_SquareMesh,
-			m_TextureResource,
-			World,
-			false,
-			true
-		);
+		shptr->AddDrawObject(m_PtrObj);
+	}
+
+	//--------------------------------------------------------------------------------------
+	//class MultiSpark : public MultiParticle;
+	//用途: 複数のスパーククラス
+	//--------------------------------------------------------------------------------------
+	//構築と破棄
+	MultiSpark::MultiSpark(shared_ptr<Stage>& StagePtr) :
+		MultiParticle(StagePtr)
+	{}
+	MultiSpark::~MultiSpark() {}
+
+	//初期化
+	void MultiSpark::OnCreate() {
+		//加算描画処理をする
+		SetAddType(true);
+		//タグの追加
+		AddTag(L"MultiSpark");
+	}
+
+
+	void MultiSpark::InsertSpark(const Vec3& Pos) {
+		auto ParticlePtr = InsertParticle(64);
+		ParticlePtr->m_EmitterPos = Pos;
+		ParticlePtr->SetTextureResource(L"SPARK_TX");
+		ParticlePtr->m_MaxTime = 0.5f;
+		vector<ParticleSprite>& pSpriteVec = ParticlePtr->GetParticleSpriteVec();
+		for (auto& rParticleSprite : ParticlePtr->GetParticleSpriteVec()) {
+			rParticleSprite.m_LocalPos.x = Util::RandZeroToOne() * 0.1f - 0.05f;
+			rParticleSprite.m_LocalPos.y = Util::RandZeroToOne() * 0.1f;
+			rParticleSprite.m_LocalPos.z = Util::RandZeroToOne() * 0.1f - 0.05f;
+			rParticleSprite.m_LocalScale = Vec2(0.2, 0.2);
+			//各パーティクルの移動速度を指定
+			rParticleSprite.m_Velocity = Vec3(
+				rParticleSprite.m_LocalPos.x * 30.0f,
+				rParticleSprite.m_LocalPos.y * 30.0f,
+				rParticleSprite.m_LocalPos.z * 30.0f
+			);
+			//色の指定
+			int r = (int)((Util::RandZeroToOne() * 0.5f + 0.3f) * 256.0f);
+			int g = (int)((Util::RandZeroToOne() * 0.5f + 0.3f) * 256.0f);
+			int b = (int)((Util::RandZeroToOne() * 0.5f + 0.3f) * 256.0f);
+			r = r >> 7;
+			g = g >> 7;
+			b = b >> 7;
+			rParticleSprite.m_Color = Col4((float)r, (float)g, (float)b, 1.0f);
+		}
+	}
+
+	void MultiSpark::OnUpdate() {
+		MultiParticle::OnUpdate();
+		float ElapsedTime = App::GetApp()->GetElapsedTime();
+
+		for (auto ParticlePtr : GetParticleVec()) {
+			for (auto& rParticleSprite : ParticlePtr->GetParticleSpriteVec()) {
+				if (rParticleSprite.m_Active) {
+					rParticleSprite.m_Color += 0.01f;
+					rParticleSprite.m_Color.w = 1.0f;
+					if (rParticleSprite.m_Color.x >= 1.0f) {
+						rParticleSprite.m_Color.x = 1.0f;
+					}
+					if (rParticleSprite.m_Color.y >= 1.0f) {
+						rParticleSprite.m_Color.y = 1.0f;
+					}
+					if (rParticleSprite.m_Color.z >= 1.0f) {
+						rParticleSprite.m_Color.z = 1.0f;
+					}
+				}
+			}
+		}
+
 	}
 
 
 	//--------------------------------------------------------------------------------------
-	///	シリンダー実体
+	//class MultiFire : public MultiParticle;
+	//用途: 複数の炎クラス
 	//--------------------------------------------------------------------------------------
-	CylinderObject::CylinderObject(const shared_ptr<Scene> PtrScene,
-		const wstring& TextureFileName, const Vec3& Scale, const Quat& Qt, const Vec3& Pos) :
-		m_Scene(PtrScene),
-		ObjectInterface(),
-		ShapeInterface(),
-		m_TextureFileName(TextureFileName),
+	//構築と破棄
+	MultiFire::MultiFire(shared_ptr<Stage>& StagePtr) :
+		MultiParticle(StagePtr)
+	{}
+	MultiFire::~MultiFire() {}
+
+	//初期化
+	void MultiFire::OnCreate() {
+		//タグの追加
+		AddTag(L"MultiFire");
+	}
+
+	void MultiFire::InsertFire(const Vec3& Pos) {
+		auto ParticlePtr = InsertParticle(16);
+		ParticlePtr->m_EmitterPos = Pos;
+		ParticlePtr->SetTextureResource(L"FIRE_TX");
+		ParticlePtr->m_MaxTime = 0.5f;
+		vector<ParticleSprite>& pSpriteVec = ParticlePtr->GetParticleSpriteVec();
+		for (auto& rParticleSprite : ParticlePtr->GetParticleSpriteVec()) {
+			rParticleSprite.m_LocalPos.x = Util::RandZeroToOne() * 0.1f - 0.05f;
+			rParticleSprite.m_LocalPos.y = Util::RandZeroToOne() * 0.1f;
+			rParticleSprite.m_LocalPos.z = Util::RandZeroToOne() * 0.1f - 0.05f;
+			//各パーティクルの移動速度を指定
+			rParticleSprite.m_Velocity = Vec3(
+				rParticleSprite.m_LocalPos.x * 5.0f,
+				rParticleSprite.m_LocalPos.y * 5.0f,
+				rParticleSprite.m_LocalPos.z * 5.0f
+			);
+			//色の指定
+			rParticleSprite.m_Color = Col4(1.0f, 1.0f, 1.0f, 1.0f);
+		}
+	}
+
+	//--------------------------------------------------------------------------------------
+	///	Simple描画をする球体
+	//--------------------------------------------------------------------------------------
+
+	ChildObject::ChildObject(const shared_ptr<Stage>& StagePtr,
+		const shared_ptr<GameObject>& ParentPtr,
+		const wstring& TextureResName, const Vec3& Scale, const Quat& Qt, const Vec3& Pos,
+		bool OwnShadowActive) :
+		GameObject(StagePtr),
+		m_ParentPtr(ParentPtr),
+		m_TextureResName(TextureResName),
 		m_Scale(Scale),
 		m_Qt(Qt),
-		m_Pos(Pos)
-	{}
-	CylinderObject::~CylinderObject() {}
+		m_Pos(Pos),
+		m_OwnShadowActive(OwnShadowActive),
+		m_LerpToParent(0.2f),
+		m_LerpToChild(0.2f),
+		m_Attack1ToRot(0)
+		{}
+	ChildObject::~ChildObject() {}
 
-	CYLINDER CylinderObject::GetCYLINDER()const {
-		CYLINDER cy;
-		cy.m_Radius = m_Scale.x;
-		float halfY = m_Scale.y * 0.5f;
-		cy.m_PointTop = bsm::Vec3(m_Pos.x, m_Pos.y + halfY, m_Pos.z);
-		cy.m_PointBottom = bsm::Vec3(m_Pos.x, m_Pos.y - halfY, m_Pos.z);
-		return cy;
-	}
+	void ChildObject::OnCreate() {
+		//タグの追加
+		AddTag(L"ChildObject");
 
+		//Rigidbodyの初期化
+		auto PtrGameStage = GetStage<GameStage>();
+		Rigidbody body;
+		body.m_Owner = GetThis<GameObject>();
+		body.m_Mass = 1.0f;
+		body.m_Scale = m_Scale;
+		body.m_Quat = m_Qt;
+		body.m_Pos = m_Pos;
+		body.m_CollType = CollType::typeSPHERE;
+		body.m_IsCollisionActive = false;
+		body.m_IsFixed = true;
+//		body.m_IsDrawActive = true;
+		body.SetToBefore();
+		m_Rigidbody = PtrGameStage->AddRigidbody(body);
 
-	void CylinderObject::OnCreate() {
-		vector<VertexPositionNormalTexture> vertices;
-		vector<uint16_t> indices;
-		MeshUtill::CreateCylinder(1.0f, 2.0f,18, vertices, indices);
-		//メッシュの作成（変更できない）
-		m_CylinderMesh = MeshResource::CreateMeshResource(vertices, indices, false);
-		//テクスチャの作成
-		m_TextureResource = ObjectFactory::Create<TextureResource>(m_TextureFileName, L"WIC");
-	}
-	void CylinderObject::OnUpdate() {
-	}
+		//メッシュの取得
+		auto MeshPtr = App::GetApp()->GetResource<MeshResource>(L"DEFAULT_SPHERE");
 
-	void CylinderObject::OnDraw() {
-		auto ShPtrScene = m_Scene.lock();
-		if (!ShPtrScene) {
-			return;
-		}
 		//行列の定義
 		Mat4x4 World;
-		//ワールド行列の決定
 		World.affineTransformation(
-			m_Scale,			//スケーリング
-			Vec3(0, 0, 0),		//回転の中心（重心）
-			m_Qt,				//回転角度
-			m_Pos				//位置
+			m_Scale,
+			Vec3(0, 0, 0),
+			m_Qt,
+			m_Pos
 		);
-		ShPtrScene->GetPNTDrawObject()->AddDrawMesh(
-			m_CylinderMesh,
-			m_TextureResource,
-			World,
-			true
+		auto TexPtr = App::GetApp()->GetResource<TextureResource>(m_TextureResName);
+		//描画データの構築
+		m_PtrObj = make_shared<SimpleDrawObject>();
+		m_PtrObj->m_MeshRes = MeshPtr;
+		m_PtrObj->m_TextureRes = TexPtr;
+		m_PtrObj->m_WorldMatrix = World;
+		m_PtrObj->m_Camera = GetStage<Stage>()->GetCamera();
+		m_PtrObj->m_OwnShadowmapActive = m_OwnShadowActive;
+		m_PtrObj->m_ShadowmapUse = true;
+
+		//シャドウマップ描画データの構築
+		m_PtrShadowmapObj = make_shared<ShadowmapObject>();
+		m_PtrShadowmapObj->m_MeshRes = MeshPtr;
+		//描画データの行列をコピー
+		m_PtrShadowmapObj->m_WorldMatrix = World;
+		m_PtrShadowmapObj->m_Camera = GetStage<Stage>()->GetCamera();
+		//ステートマシンの構築
+		m_StateMachine.reset(new StateMachine<ChildObject>(GetThis<ChildObject>()));
+		//ステート初期値設定
+		m_StateMachine->ChangeState(ChildComplianceState::Instance());
+
+	}
+
+	void ChildObject::OnUpdate() {
+		//ステートマシン更新
+		m_StateMachine->Update();
+	}
+
+
+	void ChildObject::OnDrawShadowmap() {
+		//行列の定義
+		Mat4x4 World;
+		World.affineTransformation(
+			m_Rigidbody->m_Scale,
+			Vec3(0, 0, 0),
+			m_Rigidbody->m_Quat,
+			m_Rigidbody->m_Pos
 		);
+		//描画データの行列をコピー
+		m_PtrShadowmapObj->m_WorldMatrix = World;
+		m_PtrShadowmapObj->m_Camera = GetStage<Stage>()->GetCamera();
+		auto shptr = m_ShadowmapRenderer.lock();
+		if (!shptr) {
+			shptr = GetStage<Stage>()->FindTagGameObject<ShadowmapRenderer>(L"ShadowmapRenderer");
+			m_ShadowmapRenderer = shptr;
+		}
+		shptr->AddDrawObject(m_PtrShadowmapObj);
+	}
+
+	void ChildObject::OnDraw() {
+		//行列の定義
+		Mat4x4 World;
+		World.affineTransformation(
+			m_Rigidbody->m_Scale,
+			Vec3(0, 0, 0),
+			m_Rigidbody->m_Quat,
+			m_Rigidbody->m_Pos
+		);
+		m_PtrObj->m_WorldMatrix = World;
+		m_PtrObj->m_Camera = GetStage<Stage>()->GetCamera();
+		auto shptr = m_Renderer.lock();
+		if (!shptr) {
+			shptr = GetStage<Stage>()->FindTagGameObject<SimplePNTStaticRenderer2>(L"SimplePNTStaticRenderer2");
+			m_Renderer = shptr;
+		}
+		shptr->AddDrawObject(m_PtrObj);
+	}
+
+	void ChildObject::GetWorldMatrix(Mat4x4& m) const {
+		//行列の定義
+		Mat4x4 World;
+		World.affineTransformation(
+			m_Rigidbody->m_Scale,
+			Vec3(0, 0, 0),
+			m_Rigidbody->m_Quat,
+			m_Rigidbody->m_Pos
+		);
+		m = World;
+	}
+
+	enum class ParentFlg {
+		NoParent,
+		Player,
+		Child
+	};
+
+	void ChildObject::UpdateBehavior(){
+		//前回のターンからの経過時間を求める
+		float ElapsedTime = App::GetApp()->GetElapsedTime();
+		auto shptr = m_ParentPtr.lock();
+		//親のワールド行列を取得する変数
+		Mat4x4 ParMat;
+		if (shptr) {
+			ParentFlg flg = ParentFlg::NoParent;
+			//行列取得用のインターフェイスを持ってるかどうか
+			auto matintptr = dynamic_pointer_cast<MatrixInterface>(shptr);
+			if (matintptr) {
+				matintptr->GetWorldMatrix(ParMat);
+				if (shptr->FindTag(L"Player")) {
+					flg = ParentFlg::Player;
+				}
+				else if (shptr->FindTag(L"ChildObject")) {
+					flg = ParentFlg::Child;
+				}
+			}
+			Mat4x4 World;
+			World.identity();
+			float LerpNum = 0.2f;
+			switch (flg) {
+			case ParentFlg::Player:
+				//行列の定義
+				World = m_PlayerLocalMatrix;
+				LerpNum = m_LerpToParent;
+				break;
+			case ParentFlg::Child:
+				//行列の定義
+				World = m_ChildLocalMatrix;
+				LerpNum = m_LerpToChild;
+				break;
+			default:
+				break;
+			}
+			if (flg != ParentFlg::NoParent) {
+				//スケーリングを1.0にした行列に変換
+				ParMat.scaleIdentity();
+				//行列の反映
+				World *= ParMat;
+				//この時点でWorldは目標となる位置
+				Vec3 toPos = World.transInMatrix();
+				//補間処理で移動位置を決定
+				auto CalcPos = Lerp::CalculateLerp(m_Rigidbody->m_BeforePos, toPos, 0, 1.0f, LerpNum, Lerp::rate::Linear);
+				Vec3 DammiPos;
+				World.decompose(m_Rigidbody->m_Scale, m_Rigidbody->m_Quat, DammiPos);
+				Vec3 Velo = CalcPos - m_Rigidbody->m_BeforePos;
+				Velo /= ElapsedTime;
+				m_Rigidbody->m_Velocity = Velo;
+			}
+		}
+	}
+
+
+	void ChildObject::ComplianceStartBehavior() {
+		//ローカル行列の定義
+		m_PlayerLocalMatrix.affineTransformation(
+			m_Rigidbody->m_Scale,
+			Vec3(0, 0, 0),
+			Quat(),
+			Vec3(0, 0, -0.25f)
+		);
+		//このステートではチャイルドの場合も同じ
+		m_ChildLocalMatrix = m_PlayerLocalMatrix;
+		m_LerpToParent = m_LerpToChild = 0.2f;
+	}
+
+	//攻撃１行動の開始
+	void ChildObject::Attack1StartBehavior() {
+		m_Attack1ToRot = 0.1f;
+		//ローカル行列の定義
+		m_PlayerLocalMatrix.affineTransformation(
+			m_Rigidbody->m_Scale,
+			Vec3(0, 0, 0),
+			Quat(Vec3(1.0, 0, 0), m_Attack1ToRot),
+			Vec3(0, 0.25f, 0.0f)
+		);
+		m_ChildLocalMatrix.affineTransformation(
+			m_Rigidbody->m_Scale,
+			Vec3(0, 0, 0),
+			Quat(),
+			Vec3(0, 0.25f, -0.25f)
+		);
+		m_LerpToParent = m_LerpToChild = 0.5f;
+
+	}
+
+	bool ChildObject::Attack1ExcuteBehavior() {
+		m_Attack1ToRot += 0.1f;
+		if (m_Attack1ToRot >= (XM_PI + 0.5f)) {
+			m_Attack1ToRot = 0.0f;
+			return true;
+		}
+		//ローカル行列の定義
+		Vec3 Pos(0,sin(m_Attack1ToRot) * 0.25f, -cos(m_Attack1ToRot) * 0.25f);
+		m_PlayerLocalMatrix.affineTransformation(
+			m_Rigidbody->m_Scale,
+			Vec3(0, 0, 0),
+			Quat(Vec3(1.0, 0, 0), m_Attack1ToRot),
+			Pos
+		);
+		return false;
 	}
 
 
 
 
-
-
 	//--------------------------------------------------------------------------------------
-	///	球実体
+	///	追従ステート（ChildObject）
 	//--------------------------------------------------------------------------------------
-	SphereObject::SphereObject(const shared_ptr<Scene> PtrScene,
-		UINT Division, const wstring& TextureFileName, bool Trace, const Vec3& Pos) :
-		m_Scene(PtrScene),
-		ObjectInterface(),
-		ShapeInterface(),
-		m_Division(Division),
-		m_TextureFileName(TextureFileName),
-		m_Trace(Trace),
-		m_Scale(0.25f, 0.25f, 0.25f),
-		m_BaseY(m_Scale.y / 2.0f),
-		m_Qt(),
-		m_Pos(Pos),
-		m_Velocity(0,0,0),
-		m_Gravity(0,-9.8f,0),
-		m_GravityVelocity(0,0,0),
-		m_JumpLock(false),
-		m_BeforePos(Pos),
-		m_Mass(1.0f)
-	{}
-	SphereObject::~SphereObject() {}
+	IMPLEMENT_SINGLETON_INSTANCE(ChildComplianceState)
 
-	Vec3 SphereObject::GetMoveVector() const {
-		Vec3 Angle(0, 0, 0);
-		auto ShPtrScene = m_Scene.lock();
-		if (!ShPtrScene) {
-			return Angle;
-		}
-		Vec3 CameraEye, CameraAt;
-		ShPtrScene->GetCameraEyeAt(CameraEye, CameraAt);
+	void ChildComplianceState::Enter(const shared_ptr<ChildObject>& Obj) {
+		Obj->ComplianceStartBehavior();
+		//何もしない
+	}
+
+	void ChildComplianceState::Execute(const shared_ptr<ChildObject>& Obj) {
+		Obj->UpdateBehavior();
 
 		//コントローラの取得
 		auto CntlVec = App::GetApp()->GetInputDevice().GetControlerVec();
 		if (CntlVec[0].bConnected) {
-			if (CntlVec[0].fThumbLX != 0 || CntlVec[0].fThumbLY != 0) {
-				float MoveLength = 0;	//動いた時のスピード
-										//進行方向の向きを計算
-				Vec3 Front = m_Pos - CameraEye;
-				Front.y = 0;
-				Front.normalize();
-				//進行方向向きからの角度を算出
-				float FrontAngle = atan2(Front.z, Front.x);
-				//コントローラの向き計算
-				float MoveX = CntlVec[0].fThumbLX;
-				float MoveZ = CntlVec[0].fThumbLY;
-				Vec2 MoveVec(MoveX, MoveZ);
-				float MoveSize = MoveVec.length();
-				//コントローラの向きから角度を計算
-				float CntlAngle = atan2(-MoveX, MoveZ);
-				//トータルの角度を算出
-				float TotalAngle = FrontAngle + CntlAngle;
-				//角度からベクトルを作成
-				Angle = Vec3(cos(TotalAngle), 0, sin(TotalAngle));
-				//正規化する
-				Angle.normalize();
-				//移動サイズを設定。
-				Angle *= MoveSize;
-				//Y軸は変化させない
-				Angle.y = 0;
+			//Xボタン
+			if (CntlVec[0].wPressedButtons & XINPUT_GAMEPAD_X) {
+				Obj->GetStateMachine()->ChangeState(ChildAttack1State::Instance());
 			}
 		}
-		return Angle;
+
 	}
 
-
-
-
-	SPHERE SphereObject::GetSPHERE()const {
-		SPHERE sp;
-		sp.m_Center = m_Pos;
-		sp.m_Radius =  m_Scale.y * 0.5f;
-		return sp;
-	}
-
-	void SphereObject::CollisionWithCylinder(const Vec3& BeforePos) {
-		//前回のターンからの経過時間を求める
-		float ElapsedTime = App::GetApp()->GetElapsedTime();
-		//衝突判定
-		auto ShPtrScene = m_Scene.lock();
-		auto cyOb = ShPtrScene->GetCylinderObject();
-		CYLINDER cy = cyOb->GetCYLINDER();
-		SPHERE Sp = GetSPHERE();
-		Sp.m_Center = BeforePos;
-		float HitTime;
-		//相手の速度
-		Vec3 DestVelocity(0, 0, 0);
-		Vec3 SrcVelocity = m_Pos - BeforePos;
-		Vec3 CollisionVelosity = (SrcVelocity - DestVelocity) / ElapsedTime;
-		if (HitTest::CollisionTestSphereCylinder(Sp, CollisionVelosity, cy, 0, ElapsedTime, HitTime)) {
-			m_JumpLock = false;
-			m_Pos = BeforePos + CollisionVelosity * HitTime;
-			float SpanTime = ElapsedTime - HitTime;
-			//m_Posが動いたのでSPHEREを再取得
-			Sp = GetSPHERE();
-			Vec3 HitPoint;
-			//最近接点を得るための判定
-			HitTest::SPHERE_CYLINDER(Sp, cy, HitPoint);
-			//衝突法線をHitPointとm_Posから導く
-			Vec3 Normal = m_Pos - HitPoint;
-			Normal.normalize();
-			Vec3 angle(XMVector3AngleBetweenNormals(Normal, Vec3(0, 1, 0)));
-			if (angle.x <= 0.01f) {
-				//平面の上
-				m_GravityVelocity = Vec3(0, 0, 0);
-			}
-			else {
-				//重力をスライドさせて設定する
-				//これで、斜めのボックスを滑り落ちるようになる
-				m_GravityVelocity = ProjUtil::Slide(m_GravityVelocity, Normal);
-			}
-			//速度をスライドさせて設定する
-			m_Velocity = ProjUtil::Slide(m_Velocity, Normal);
-			//Y方向は重力に任せる
-			m_Velocity.y = 0;
-			//最後に衝突点から余った時間分だけ新しい値で移動させる
-			m_Pos = m_Pos + m_Velocity * SpanTime;
-			m_Pos = m_Pos + m_GravityVelocity * SpanTime;
-			//もう一度衝突判定
-			//m_Posが動いたのでSPHEREを再取得
-			Sp = GetSPHERE();
-			if (HitTest::SPHERE_CYLINDER(Sp, cy, HitPoint)) {
-				//衝突していたら追い出し処理
-				Vec3 EscapeNormal = Sp.m_Center - HitPoint;
-				EscapeNormal.normalize();
-				m_Pos = HitPoint + EscapeNormal * Sp.m_Radius;
-			}
-		}
-	}
-
-
-	void SphereObject::CollisionWithBoxes(const Vec3& BeforePos) {
-		//前回のターンからの経過時間を求める
-		float ElapsedTime = App::GetApp()->GetElapsedTime();
-		//衝突判定
-		auto ShPtrScene = m_Scene.lock();
-		for (auto& v : ShPtrScene->GetBoxVec()) {
-			OBB Obb = v->GetOBB();
-			SPHERE Sp = GetSPHERE();
-			Sp.m_Center = BeforePos;
-			float HitTime;
-			//相手の速度
-			Vec3 DestVelocity(0, 0, 0);
-			auto MovBoxPtr = dynamic_pointer_cast<MoveBoxObject>(v);
-			if (MovBoxPtr) {
-				DestVelocity = MovBoxPtr->GetPosition() - MovBoxPtr->GetBeforePos();
-				Obb.m_Center = MovBoxPtr->GetBeforePos();
-			}
-			Vec3 SrcVelocity = m_Pos - BeforePos;
-
-			Vec3 CollisionVelosity = (SrcVelocity - DestVelocity) / ElapsedTime;
-			if (HitTest::CollisionTestSphereObb(Sp, CollisionVelosity, Obb, 0, ElapsedTime, HitTime)) {
-				m_JumpLock = false;
-				m_Pos = BeforePos + CollisionVelosity * HitTime;
-				float SpanTime = ElapsedTime - HitTime;
-				//m_Posが動いたのでSPHEREを再取得
-				Sp = GetSPHERE();
-				Vec3 HitPoint;
-				//最近接点を得るための判定
-				HitTest::SPHERE_OBB(Sp, Obb, HitPoint);
-				//衝突法線をHitPointとm_Posから導く
-				Vec3 Normal = m_Pos - HitPoint;
-				Normal.normalize();
-				Vec3 angle(XMVector3AngleBetweenNormals(Normal, Vec3(0, 1, 0)));
-				if (angle.x <= 0.01f) {
-					//平面の上
-					m_GravityVelocity = Vec3(0, 0, 0);
-				}
-				else {
-					//重力をスライドさせて設定する
-					//これで、斜めのボックスを滑り落ちるようになる
-					m_GravityVelocity = ProjUtil::Slide(m_GravityVelocity, Normal);
-				}
-				if (MovBoxPtr) {
-					//お互いに反発する
-					Vec3 TgtVelo = CollisionVelosity * 0.5f;
-					if (TgtVelo.length() < 1.0f) {
-						//衝突時の速度が小さかったら、速度を作り出す
-						TgtVelo = MovBoxPtr->GetPosition() - m_Pos;
-						TgtVelo.normalize();
-						TgtVelo *= 2.0f;
-					}
-					Vec3 DestVelo(XMVector3Reflect(-TgtVelo, Normal));
-					DestVelo.y = 0;
-					MovBoxPtr->SetVelocity(DestVelo);
-					//速度を反発させて設定する
-					m_Velocity = XMVector3Reflect(TgtVelo, -Normal);
-				}
-				else {
-					//速度をスライドさせて設定する
-					m_Velocity = ProjUtil::Slide(m_Velocity, Normal);
-				}
-				//Y方向は重力に任せる
-				m_Velocity.y = 0;
-				//最後に衝突点から余った時間分だけ新しい値で移動させる
-				m_Pos = m_Pos + m_Velocity * SpanTime;
-				m_Pos = m_Pos + m_GravityVelocity * SpanTime;
-				//もう一度衝突判定
-				//m_Posが動いたのでSPHEREを再取得
-				Sp = GetSPHERE();
-				if (HitTest::SPHERE_OBB(Sp, Obb, HitPoint)) {
-					//衝突していたら追い出し処理
-					Vec3 EscapeNormal = Sp.m_Center - HitPoint;
-					EscapeNormal.normalize();
-					m_Pos = HitPoint + EscapeNormal * Sp.m_Radius;
-				}
-			}
-		}
-	}
-
-
-
-	void SphereObject::OnCreate() {
-		vector<VertexPositionNormalTexture> vertices;
-		vector<uint16_t> indices;
-		MeshUtill::CreateSphere(1.0f, m_Division,vertices, indices);
-		//メッシュの作成（変更できない）
-		m_SphereMesh = MeshResource::CreateMeshResource(vertices, indices, false);
-		//テクスチャの作成
-		m_TextureResource = ObjectFactory::Create<TextureResource>(m_TextureFileName, L"WIC");
-	}
-	void SphereObject::OnUpdate() {
-		//1つ前の位置を取っておく
-		m_BeforePos = m_Pos;
-		//前回のターンからの経過時間を求める
-		float ElapsedTime = App::GetApp()->GetElapsedTime();
-		//コントローラの取得
-		auto CntlVec = App::GetApp()->GetInputDevice().GetControlerVec();
-		auto ShPtrScene = m_Scene.lock();
-		if (!ShPtrScene) {
-			return;
-		}
-		if (CntlVec[0].bConnected) {
-			if (!m_JumpLock) {
-				//Aボタン
-				if (CntlVec[0].wPressedButtons & XINPUT_GAMEPAD_A) {
-					m_BeforePos.y += 0.01f;
-					m_Pos.y += 0.01f;
-					m_GravityVelocity = Vec3(0, 4.0f, 0);
-					m_JumpLock = true;
-				}
-			}
-			Vec3 Direction = GetMoveVector();
-			if (Direction.length() < 0.1f) {
-				m_Velocity *= 0.9f;
-			}
-			else {
-				m_Velocity = Direction * 5.0f;
-			}
-		}
-		m_Pos += (m_Velocity * ElapsedTime);
-		m_GravityVelocity += m_Gravity * ElapsedTime;
-		m_Pos += m_GravityVelocity * ElapsedTime;
-		if (m_Pos.y <= m_BaseY) {
-			m_Pos.y = m_BaseY;
-			m_GravityVelocity = Vec3(0, 0, 0);
-			m_JumpLock = false;
-		}
-	}
-
-	void SphereObject::OnCollision() {
-		//衝突判定
-		CollisionWithBoxes(m_BeforePos);
-		CollisionWithCylinder(m_BeforePos);
-	}
-
-	void SphereObject::RotToHead(float LerpFact) {
-		if (LerpFact <= 0.0f) {
-			//補間係数が0以下なら何もしない
-			return;
-		}
-		//回転の更新
-		//Velocityの値で、回転を変更する
-		Vec3 Temp = m_Velocity;
-		Temp.normalize();
-		float ToAngle = atan2(Temp.x, Temp.z);
-		Quat Qt;
-		Qt.rotationRollPitchYawFromVector(Vec3(0, ToAngle, 0));
-		Qt.normalize();
-		//現在と目標を補間
-		if (LerpFact >= 1.0f) {
-			m_Qt = Qt;
-		}
-		else {
-			m_Qt = XMQuaternionSlerp(m_Qt, Qt, LerpFact);
-		}
-	}
-
-	void SphereObject::OnRotation() {
-		//回転
-		RotToHead(0.1f);
-	}
-
-
-
-	void SphereObject::OnDraw() {
-		auto ShPtrScene = m_Scene.lock();
-		if (!ShPtrScene) {
-			return;
-		}
-		//行列の定義
-		Mat4x4 World;
-		//ワールド行列の決定
-		World.affineTransformation(
-			m_Scale,			//スケーリング
-			Vec3(0, 0, 0),		//回転の中心（重心）
-			m_Qt,				//回転角度
-			m_Pos				//位置
-		);
-		ShPtrScene->GetPNTDrawObject()->AddDrawMesh(
-			m_SphereMesh,
-			m_TextureResource,
-			World,
-			true
-		);
+	void ChildComplianceState::Exit(const shared_ptr<ChildObject>& Obj) {
+		//何もしない
 	}
 
 	//--------------------------------------------------------------------------------------
-	///	固定のボックス実体
+	///	攻撃ステート１（ChildObject）
 	//--------------------------------------------------------------------------------------
-	BoxObject::BoxObject(const shared_ptr<Scene> PtrScene,
-		const wstring& TextureFileName, bool Trace, 
-		const Vec3& Scale,
-		const Quat& Qt,
-		const Vec3& Pos) :
-		BoxBase(),
-		m_Scene(PtrScene),
-		m_TextureFileName(TextureFileName),
-		m_Trace(Trace),
-		m_Scale(Scale),
-		m_Qt(Qt),
-		m_Pos(Pos)
-	{}
-	BoxObject::~BoxObject() {}
+	IMPLEMENT_SINGLETON_INSTANCE(ChildAttack1State)
 
-	OBB BoxObject::GetOBB()const {
-		Mat4x4 World;
-		//ワールド行列の決定
-		World.affineTransformation(
-			m_Scale,			//スケーリング
-			Vec3(0, 0, 0),		//回転の中心（重心）
-			m_Qt,				//回転角度
-			m_Pos				//位置
-		);
-		OBB obb(Vec3(1.0f, 1.0f, 1.0f), World);
-		return obb;
+	void ChildAttack1State::Enter(const shared_ptr<ChildObject>& Obj) {
+		Obj->Attack1StartBehavior();
+		//何もしない
 	}
 
-
-	void BoxObject::OnCreate() {
-		vector<VertexPositionNormalTexture> vertices;
-		vector<uint16_t> indices;
-		MeshUtill::CreateCube(1.0f, vertices, indices);
-		//メッシュの作成（変更できない）
-		m_BoxMesh = MeshResource::CreateMeshResource(vertices, indices, false);
-
-		//テクスチャの作成
-		m_TextureResource = ObjectFactory::Create<TextureResource>(m_TextureFileName, L"WIC");
-	}
-	void BoxObject::OnUpdate() {
-	}
-
-	void BoxObject::OnDraw() {
-		auto ShPtrScene = m_Scene.lock();
-		if (!ShPtrScene) {
+	void ChildAttack1State::Execute(const shared_ptr<ChildObject>& Obj) {
+		if (Obj->Attack1ExcuteBehavior()) {
+			Obj->GetStateMachine()->ChangeState(ChildComplianceState::Instance());
 			return;
 		}
-		//行列の定義
-		Mat4x4 World;
-		//ワールド行列の決定
-		World.affineTransformation(
-			m_Scale,			//スケーリング
-			Vec3(0, 0, 0),		//回転の中心（重心）
-			m_Qt,				//回転角度
-			m_Pos				//位置
-		);
-		ShPtrScene->GetPNTDrawObject()->AddDrawMesh(
-			m_BoxMesh,
-			m_TextureResource,
-			World,
-			true
-		);
+		Obj->UpdateBehavior();
 	}
 
-	//--------------------------------------------------------------------------------------
-	///	移動ボックス実体
-	//--------------------------------------------------------------------------------------
-	MoveBoxObject::MoveBoxObject(const shared_ptr<Scene> PtrScene,
-		const wstring& TextureFileName, bool Trace,
-		const Vec3& Scale,
-		const Quat& Qt,
-		const Vec3& Pos) :
-		BoxBase(),
-		m_Scene(PtrScene),
-		m_TextureFileName(TextureFileName),
-		m_Trace(Trace),
-		m_Scale(Scale),
-		m_Qt(Qt),
-		m_Pos(Pos),
-		m_Velocity(0,0,0),
-		m_Mass(1.0f),
-		m_Speed(4.0f),
-		m_BeforePos(Pos)
-	{}
-	MoveBoxObject::~MoveBoxObject() {}
-
-	OBB MoveBoxObject::GetOBB()const {
-		Mat4x4 World;
-		//ワールド行列の決定
-		World.affineTransformation(
-			m_Scale,			//スケーリング
-			Vec3(0, 0, 0),		//回転の中心（重心）
-			m_Qt,				//回転角度
-			m_Pos				//位置
-		);
-		OBB obb(Vec3(1.0f, 1.0f, 1.0f), World);
-		return obb;
-	}
-
-
-	void MoveBoxObject::OnCreate() {
-		vector<VertexPositionNormalTexture> vertices;
-		vector<uint16_t> indices;
-		MeshUtill::CreateCube(1.0f, vertices, indices);
-		//メッシュの作成（変更できない）
-		m_MoveBoxMesh = MeshResource::CreateMeshResource(vertices, indices, false);
-		//テクスチャの作成
-		m_TextureResource = ObjectFactory::Create<TextureResource>(m_TextureFileName, L"WIC");
-	}
-
-	void MoveBoxObject::UpdateVelosity() {
-		auto ShPtrScene = m_Scene.lock();
-		if (!ShPtrScene) {
-			return;
-		}
-		//フォース（力）
-		Vec3 Force(0, 0, 0);
-		//プレイヤーを向く方向ベクトル
-		Vec3 ToPlayerVec = 
-			ShPtrScene->GetSphereObject()->GetPosition() - m_Pos;
-		//縦方向は計算しない
-		ToPlayerVec.y = 0;
-		ToPlayerVec *= m_Speed;
-		//力を掛ける方向を決める
-		Force = ToPlayerVec - m_Velocity;
-		//力と質量から加速を求める
-		Vec3 Accel = Force / m_Mass;
-		//前回のターンからの経過時間を求める
-		float ElapsedTime = App::GetApp()->GetElapsedTime();
-		//速度を加速する
-		m_Velocity += Accel * ElapsedTime;
-	}
-
-	void MoveBoxObject::CollisionWithBoxes(const Vec3& BeforePos) {
-		//前回のターンからの経過時間を求める
-		float ElapsedTime = App::GetApp()->GetElapsedTime();
-		//衝突判定
-		auto ShPtrScene = m_Scene.lock();
-		for (auto& v : ShPtrScene->GetBoxVec()) {
-			if (v == GetThis<BoxBase>()) {
-				//相手が自分自身なら処理しない
-				continue;
-			}
-			OBB DestObb = v->GetOBB();
-			OBB SrcObb = GetOBB();
-			SrcObb.m_Center = BeforePos;
-			float HitTime;
-			Vec3 CollisionVelosity = (m_Pos - BeforePos) / ElapsedTime;
-			if (HitTest::CollisionTestObbObb(SrcObb, CollisionVelosity, DestObb, 0, ElapsedTime, HitTime)) {
-				m_Pos = BeforePos + CollisionVelosity * HitTime;
-				float SpanTime = ElapsedTime - HitTime;
-				//m_Posが動いたのでOBBを再取得
-				SrcObb = GetOBB();
-				Vec3 HitPoint;
-				//最近接点を得るための判定
-				HitTest::ClosestPtPointOBB(SrcObb.m_Center, DestObb, HitPoint);
-				//衝突法線をHitPointとm_Posから導く
-				Vec3 Normal = m_Pos - HitPoint;
-				Normal.normalize();
-				//速度をスライドさせて設定する
-				m_Velocity = ProjUtil::Slide(m_Velocity, Normal);
-				//Y方向はなし
-				m_Velocity.y = 0;
-				//最後に衝突点から余った時間分だけ新しい値で移動させる
-				m_Pos = m_Pos + m_Velocity * SpanTime;
-				//追い出し処理
-				//少しづつ相手の領域から退避する
-				//最大10回退避するが、それでも衝突していたら次回ターンに任せる
-				int count = 0;
-				while (count < 20) {
-					//退避する係数
-					float MiniSpan = 0.001f;
-					//もう一度衝突判定
-					//m_Posが動いたのでOBBを再取得
-					SrcObb = GetOBB();
-					if (HitTest::OBB_OBB(SrcObb, DestObb)) {
-						//最近接点を得るための判定
-						HitTest::ClosestPtPointOBB(SrcObb.m_Center, DestObb, HitPoint);
-						//衝突していたら追い出し処理
-						Vec3 EscapeNormal = SrcObb.m_Center - HitPoint;
-						EscapeNormal.y = 0;
-						EscapeNormal.normalize();
-						m_Pos = m_Pos + EscapeNormal * MiniSpan;
-					}
-					else {
-						break;
-					}
-					count++;
-				}
-			}
-		}
-	}
-
-	void MoveBoxObject::RotToHead(float LerpFact) {
-		if (LerpFact <= 0.0f) {
-			//補間係数が0以下なら何もしない
-			return;
-		}
-		//回転の更新
-		//Velocityの値で、回転を変更する
-		Vec3 Temp = m_Velocity;
-		Temp.normalize();
-		float ToAngle = atan2(Temp.x, Temp.z);
-		Quat Qt;
-		Qt.rotationRollPitchYawFromVector(Vec3(0, ToAngle, 0));
-		Qt.normalize();
-		//現在と目標を補間
-		if (LerpFact >= 1.0f) {
-			m_Qt = Qt;
-		}
-		else {
-			m_Qt = XMQuaternionSlerp(m_Qt, Qt, LerpFact);
-		}
-	}
-
-	void MoveBoxObject::OnUpdate() {
-		//1つ前の位置を取っておく
-		m_BeforePos = m_Pos;
-		//速度を変化させる
-		UpdateVelosity();
-		//前回のターンからの経過時間を求める
-		float ElapsedTime = App::GetApp()->GetElapsedTime();
-		//速度に合わせて位置の変更
-		m_Pos += m_Velocity * ElapsedTime;
-	}
-
-	void MoveBoxObject::OnCollision() {
-		//衝突判定
-		CollisionWithBoxes(m_BeforePos);
-	}
-
-	void MoveBoxObject::OnRotation() {
-		//回転
-		RotToHead(0.1f);
+	void ChildAttack1State::Exit(const shared_ptr<ChildObject>& Obj) {
+		//何もしない
 	}
 
 
 
-	void MoveBoxObject::OnDraw() {
-		auto ShPtrScene = m_Scene.lock();
-		if (!ShPtrScene) {
-			return;
-		}
-		//行列の定義
-		Mat4x4 World;
-		//ワールド行列の決定
-		World.affineTransformation(
-			m_Scale,			//スケーリング
-			Vec3(0, 0, 0),		//回転の中心（重心）
-			m_Qt,				//回転角度
-			m_Pos				//位置
-		);
-		ShPtrScene->GetPNTDrawObject()->AddDrawMesh(
-			m_MoveBoxMesh,
-			m_TextureResource,
-			World,
-			true
-		);
-	}
-
-
-	//--------------------------------------------------------------------------------------
-	///	PNT頂点オブジェクトの描画クラス
-	//--------------------------------------------------------------------------------------
-	PNTDrawObject::PNTDrawObject(const shared_ptr<Scene> PtrScene) :
-		m_Scene(PtrScene)
-	{}
-	PNTDrawObject::~PNTDrawObject() {}
-
-	void PNTDrawObject::AddDrawMesh(const shared_ptr<MeshResource>& MeshRes,
-		const shared_ptr<TextureResource>& TextureRes,
-		const Mat4x4& WorldMat,
-		bool Trace, bool Wrap) {
-		DrawObject Obj;
-		Obj.m_MeshRes = MeshRes;
-		Obj.m_TextureRes = TextureRes;
-		Obj.m_WorldMatrix = WorldMat;
-		Obj.m_Trace = Trace;
-		Obj.m_Wrap = Wrap;
-		m_DrawObjectVec.push_back(Obj);
-	}
-
-	void PNTDrawObject::OnUpdate() {
-		m_DrawObjectVec.clear();
-	}
-
-	void PNTDrawObject::OnDraw() {
-		if (m_Scene.expired()) {
-			//シーンが無効ならリターン
-			return;
-		}
-		auto Dev = App::GetApp()->GetDeviceResources();
-		auto pD3D11DeviceContext = Dev->GetD3DDeviceContext();
-		auto RenderState = Dev->GetRenderState();
-		//各オブジェクト共通処理
-		//シェーダの設定
-		pD3D11DeviceContext->VSSetShader(VSPNTStatic::GetPtr()->GetShader(), nullptr, 0);
-		pD3D11DeviceContext->PSSetShader(PSPNTStatic::GetPtr()->GetShader(), nullptr, 0);
-		//インプットレイアウトの設定
-		pD3D11DeviceContext->IASetInputLayout(VSPNTStatic::GetPtr()->GetInputLayout());
-		//描画方法（3角形）
-		pD3D11DeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-		//デプスステンシルステート
-		pD3D11DeviceContext->OMSetDepthStencilState(RenderState->GetDepthDefault(), 0);
-		//サンプラーの準備
-		ID3D11SamplerState* pSamplerClamp = RenderState->GetLinearClamp();
-		ID3D11SamplerState* pSamplerWrap = RenderState->GetLinearWrap();
-		//ストライドとオフセット
-		UINT stride = sizeof(VertexPositionNormalTexture);
-		UINT offset = 0;
-		//行列の定義
-		Mat4x4 View, Proj;
-		//ライティング
-		Vec4 LightDir;
-		auto ShPtrScene = m_Scene.lock();
-		ShPtrScene->GetViewProjMatrix(View, Proj);
-		ShPtrScene->GetLightDir(LightDir);
-		//ビュー行列の決定
-		//転置する
-		View.transpose();
-		//射影行列の決定
-		//転置する
-		Proj.transpose();
-		//コンスタントバッファの準備
-		PNTStaticConstantBuffer sb;
-		sb.View = View;
-		sb.Projection = Proj;
-		sb.LightDir = LightDir;
-		//ディフューズ
-		sb.Diffuse = Col4(1.0f, 1.0f, 1.0f, 1.0f);
-		//エミッシブ加算。
-		sb.Emissive = Col4(0.4f, 0.4f, 0.4f, 0);
-		//個別処理
-		for (auto& v : m_DrawObjectVec) {
-			//転置する
-			v.m_WorldMatrix.transpose();
-			//ワールド行列の決定
-			sb.World = v.m_WorldMatrix;
-			//コンスタントバッファの更新
-			pD3D11DeviceContext->UpdateSubresource(CBPNTStatic::GetPtr()->GetBuffer(), 0, nullptr, &sb, 0, 0);
-			//コンスタントバッファの設定
-			ID3D11Buffer* pConstantBuffer = CBPNTStatic::GetPtr()->GetBuffer();
-			ID3D11Buffer* pNullConstantBuffer = nullptr;
-			//頂点シェーダに渡す
-			pD3D11DeviceContext->VSSetConstantBuffers(0, 1, &pConstantBuffer);
-			//ピクセルシェーダに渡す
-			pD3D11DeviceContext->PSSetConstantBuffers(0, 1, &pConstantBuffer);
-			//頂点バッファのセット
-			pD3D11DeviceContext->IASetVertexBuffers(0, 1, v.m_MeshRes->GetVertexBuffer().GetAddressOf(), &stride, &offset);
-			//インデックスバッファのセット
-			pD3D11DeviceContext->IASetIndexBuffer(v.m_MeshRes->GetIndexBuffer().Get(), DXGI_FORMAT_R16_UINT, 0);
-			//テクスチャの設定
-			ID3D11ShaderResourceView* pNull[1] = { 0 };
-			pD3D11DeviceContext->PSSetShaderResources(0, 1, v.m_TextureRes->GetShaderResourceView().GetAddressOf());
-			//サンプラー
-			if (v.m_Wrap) {
-				pD3D11DeviceContext->PSSetSamplers(0, 1, &pSamplerWrap);
-			}
-			else {
-				pD3D11DeviceContext->PSSetSamplers(0, 1, &pSamplerClamp);
-			}
-			//ブレンドステート
-			if (v.m_Trace) {
-				//透明処理
-				pD3D11DeviceContext->OMSetBlendState(RenderState->GetAlphaBlendEx(), nullptr, 0xffffffff);
-				//透明処理の場合は、ラスタライザステートを変更して2回描画
-				//ラスタライザステート（裏面描画）
-				pD3D11DeviceContext->RSSetState(RenderState->GetCullFront());
-				//描画
-				pD3D11DeviceContext->DrawIndexed(v.m_MeshRes->GetNumIndicis(), 0, 0);
-				//ラスタライザステート（表面描画）
-				pD3D11DeviceContext->RSSetState(RenderState->GetCullBack());
-				//描画
-				pD3D11DeviceContext->DrawIndexed(v.m_MeshRes->GetNumIndicis(), 0, 0);
-			}
-			else {
-				//透明処理しない
-				pD3D11DeviceContext->OMSetBlendState(RenderState->GetOpaque(), nullptr, 0xffffffff);
-				//ラスタライザステート（表面描画）
-				pD3D11DeviceContext->RSSetState(RenderState->GetCullBack());
-				//描画
-				pD3D11DeviceContext->DrawIndexed(v.m_MeshRes->GetNumIndicis(), 0, 0);
-			}
-		}
-		//後始末
-		Dev->InitializeStates();
-	}
 
 	//--------------------------------------------------------------------------------------
 	///	ラッピング処理されたスプライト
 	//--------------------------------------------------------------------------------------
-	WrappedSprite::WrappedSprite(const wstring& TextureFileName, bool Trace, 
-		const Vec2& StartScale, const Vec2& StartPos,
+	SpriteBase::SpriteBase(const shared_ptr<Stage>& StagePtr,
+		const wstring& TextureResName, 
+		const Vec2& StartScale, 
+		float StartRot,
+		const Vec2& StartPos,
 		UINT XWrap, UINT YWrap) :
-		ObjectInterface(),
-		ShapeInterface(),
-		m_TextureFileName(TextureFileName),
-		m_Trace(Trace),
+		GameObject(StagePtr),
+		m_TextureResName(TextureResName),
 		m_Scale(StartScale),
-		m_Rot(0),
+		m_Rot(StartRot),
 		m_Pos(StartPos),
 		m_XWrap(XWrap),
 		m_YWrap(YWrap),
-		m_TotalTime(0)
+		m_Emissive(0,0,0,0),
+		m_BlendState(BlendState::Opaque)
 	{}
-	WrappedSprite::~WrappedSprite() {}
-	void WrappedSprite::OnCreate() {
+	void SpriteBase::OnCreate() {
 		float HelfSize = 0.5f;
-		//頂点配列(縦横10個ずつ表示)
+		//頂点配列(縦横指定数ずつ表示)
 		m_BackupVertices = {
-			{ VertexPositionColorTexture(Vec3(-HelfSize, HelfSize, 0),Col4(1.0f,0,0,1.0f), Vec2(0.0f, 0.0f)) },
-			{ VertexPositionColorTexture(Vec3(HelfSize, HelfSize, 0), Col4(0, 1.0f, 0, 1.0f), Vec2((float)m_XWrap, 0.0f)) },
-			{ VertexPositionColorTexture(Vec3(-HelfSize, -HelfSize, 0), Col4(0, 0, 1.0f, 1.0f), Vec2(0.0f, (float)m_YWrap)) },
-			{ VertexPositionColorTexture(Vec3(HelfSize, -HelfSize, 0), Col4(1.0f, 1.0f, 0, 1.0f), Vec2((float)m_XWrap, (float)m_YWrap)) },
+			{ VertexPositionColorTexture(Vec3(-HelfSize, HelfSize, 0),Col4(1.0f,1.0f,1.0f,1.0f), Vec2(0.0f, 0.0f)) },
+			{ VertexPositionColorTexture(Vec3(HelfSize, HelfSize, 0), Col4(1.0f,1.0f,1.0f,1.0f), Vec2((float)m_XWrap, 0.0f)) },
+			{ VertexPositionColorTexture(Vec3(-HelfSize, -HelfSize, 0), Col4(1.0f,1.0f,1.0f,1.0f), Vec2(0.0f, (float)m_YWrap)) },
+			{ VertexPositionColorTexture(Vec3(HelfSize, -HelfSize, 0), Col4(1.0f,1.0f,1.0f,1.0f), Vec2((float)m_XWrap, (float)m_YWrap)) },
 		};
+		//頂点の初期修正（仮想関数呼びだし）
+		AdjustVertex();
 		//インデックス配列
 		vector<uint16_t> indices = { 0, 1, 2, 1, 3, 2 };
 		//メッシュの作成（変更できる）
 		m_SquareMesh = MeshResource::CreateMeshResource(m_BackupVertices, indices, true);
-		//テクスチャの作成
-		m_TextureResource = TextureResource::CreateTextureResource(m_TextureFileName, L"WIC");
 	}
 
-	void WrappedSprite::UpdateVertex(float ElapsedTime) {
-		m_TotalTime += ElapsedTime;
-		if (m_TotalTime >= 1.0f) {
-			m_TotalTime = 0;
-		}
-
+	void SpriteBase::OnUpdate() {
+		float ElapsedTime = App::GetApp()->GetElapsedTime();
 		auto Dev = App::GetApp()->GetDeviceResources();
 		auto pD3D11DeviceContext = Dev->GetD3DDeviceContext();
-
 		//頂点の変更
 		//D3D11_MAP_WRITE_DISCARDは重要。この処理により、GPUに邪魔されない
 		D3D11_MAP mapType = D3D11_MAP_WRITE_DISCARD;
@@ -906,46 +553,21 @@ namespace basecross {
 		//頂点の変更
 		VertexPositionColorTexture* vertices
 			= (VertexPositionColorTexture*)mappedBuffer.pData;
-		for (size_t i = 0; i < m_SquareMesh->GetNumVertices(); i++) {
-			Vec2 UV = m_BackupVertices[i].textureCoordinate;
-			if (UV.x == 0.0f) {
-				UV.x = m_TotalTime;
-			}
-			else if (UV.x == 4.0f) {
-				UV.x += m_TotalTime;
-			}
-			vertices[i] = VertexPositionColorTexture(
-				m_BackupVertices[i].position,
-				m_BackupVertices[i].color,
-				UV
-			);
-
-		}
+		//仮想関数呼び出し
+		UpdateVertex(ElapsedTime, vertices);
 		//アンマップ
 		pD3D11DeviceContext->Unmap(m_SquareMesh->GetVertexBuffer().Get(), 0);
-
-	}
-
-
-	void WrappedSprite::OnUpdate() {
-		float ElapsedTime = App::GetApp()->GetElapsedTime();
-		m_Rot += ElapsedTime;
-		if (m_Rot >= XM_2PI) {
-			m_Rot = 0;
-		}
-		UpdateVertex(ElapsedTime);
 	}
 
 
 
-	void WrappedSprite::OnDraw() {
+	void SpriteBase::OnDraw() {
+		auto TexPtr = App::GetApp()->GetResource<TextureResource>(m_TextureResName);
 		auto Dev = App::GetApp()->GetDeviceResources();
 		auto pD3D11DeviceContext = Dev->GetD3DDeviceContext();
 		auto RenderState = Dev->GetRenderState();
-
-		//行列の定義
-		Mat4x4 World, Proj;
 		//ワールド行列の決定
+		Mat4x4 World;
 		World.affineTransformation2D(
 			m_Scale,			//スケーリング
 			Vec2(0, 0),		//回転の中心（重心）
@@ -955,14 +577,13 @@ namespace basecross {
 		//射影行列の決定
 		float w = static_cast<float>(App::GetApp()->GetGameWidth());
 		float h = static_cast<float>(App::GetApp()->GetGameHeight());
-		Proj = XMMatrixOrthographicLH(w, h, -1.0, 1.0f);
+		Mat4x4 Proj(XMMatrixOrthographicLH(w, h, -1.0, 1.0f));
 		//行列の合成
 		World *= Proj;
-
 		//コンスタントバッファの準備
 		SpriteConstantBuffer sb;
-		//エミッシブ加算は行わない。
-		sb.Emissive = Col4(0, 0, 0, 0);
+		//エミッシブ加算。
+		sb.Emissive = m_Emissive;
 		//行列の設定
 		sb.World = World;
 		//コンスタントバッファの更新
@@ -991,15 +612,17 @@ namespace basecross {
 		pD3D11DeviceContext->PSSetShader(PSPCTSprite::GetPtr()->GetShader(), nullptr, 0);
 		//インプットレイアウトの設定
 		pD3D11DeviceContext->IASetInputLayout(VSPCTSprite::GetPtr()->GetInputLayout());
-
 		//ブレンドステート
-		if (m_Trace) {
-			//透明処理
-			pD3D11DeviceContext->OMSetBlendState(RenderState->GetAlphaBlendEx(), nullptr, 0xffffffff);
-		}
-		else {
-			//透明処理しない
+		switch (m_BlendState) {
+		case BlendState::Opaque:
 			pD3D11DeviceContext->OMSetBlendState(RenderState->GetOpaque(), nullptr, 0xffffffff);
+			break;
+		case BlendState::Trace:
+			pD3D11DeviceContext->OMSetBlendState(RenderState->GetAlphaBlendEx(), nullptr, 0xffffffff);
+			break;
+		case BlendState::Additive:
+			pD3D11DeviceContext->OMSetBlendState(RenderState->GetAdditive(), nullptr, 0xffffffff);
+			break;
 		}
 		//デプスステンシルステート
 		pD3D11DeviceContext->OMSetDepthStencilState(RenderState->GetDepthNone(), 0);
@@ -1008,7 +631,7 @@ namespace basecross {
 
 		//テクスチャとサンプラーの設定
 		ID3D11ShaderResourceView* pNull[1] = { 0 };
-		pD3D11DeviceContext->PSSetShaderResources(0, 1, m_TextureResource->GetShaderResourceView().GetAddressOf());
+		pD3D11DeviceContext->PSSetShaderResources(0, 1, TexPtr->GetShaderResourceView().GetAddressOf());
 		//ラッピングサンプラー
 		ID3D11SamplerState* pSampler = RenderState->GetLinearWrap();
 		pD3D11DeviceContext->PSSetSamplers(0, 1, &pSampler);
@@ -1018,281 +641,399 @@ namespace basecross {
 		//後始末
 		Dev->InitializeStates();
 	}
+	//--------------------------------------------------------------------------------------
+	///	回転するスプライト
+	//--------------------------------------------------------------------------------------
+	RotateSprite::RotateSprite(const shared_ptr<Stage>& StagePtr,
+		const wstring& TextureResName, 
+		const Vec2& StartScale,
+		float StartRot,
+		const Vec2& StartPos,
+		UINT XWrap, UINT YWrap):
+		SpriteBase(StagePtr, TextureResName, StartScale, StartRot, StartPos, XWrap, YWrap),
+		m_TotalTime(0)
+	{
+		SetBlendState(BlendState::Additive);
+	}
 
-	
+	void RotateSprite::AdjustVertex() {
+		//頂点色を変更する
+		for (size_t i = 0; i < m_BackupVertices.size();i++) {
+			switch (i) {
+			case 0:
+				m_BackupVertices[i].color = Col4(1.0f, 0.0f, 0.0f, 1.0f);
+				break;
+			case 1:
+				m_BackupVertices[i].color = Col4(0.0f, 1.0f, 0.0f, 1.0f);
+				break;
+			case 2:
+				m_BackupVertices[i].color = Col4(0.0f, 0.0f, 1.0f, 1.0f);
+				break;
+			case 3:
+				m_BackupVertices[i].color = Col4(1.0f, 1.0f, 0, 1.0);
+				break;
+			}
+		}
+	}
 
-	EnemyObject::EnemyObject(const shared_ptr<Scene> PtrScene,
-		UINT Division, const wstring& TextureFileName, bool Trace, const Vec3& Pos) :
-		m_Scene(PtrScene),
-		ObjectInterface(),
-		ShapeInterface(),
-		m_Division(Division),
-		m_TextureFileName(TextureFileName),
-		m_Trace(Trace),
-		m_Scale(0.25f, 0.25f, 0.25f),
-		m_BaseY(m_Scale.y / 2.0f),
-		m_Qt(),
+	void RotateSprite::UpdateVertex(float ElapsedTime, VertexPositionColorTexture* vertices) {
+		m_Rot += ElapsedTime;
+		if (m_Rot >= XM_2PI) {
+			m_Rot = 0;
+		}
+		m_TotalTime += ElapsedTime;
+		if (m_TotalTime >= 1.0f) {
+			m_TotalTime = 0;
+		}
+		for (size_t i = 0; i < m_SquareMesh->GetNumVertices(); i++) {
+			Vec2 UV(m_BackupVertices[i].textureCoordinate);
+			if (UV.x == 0.0f) {
+				UV.x = m_TotalTime;
+			}
+			else if (UV.x == 4.0f) {
+				UV.x += m_TotalTime;
+			}
+			vertices[i] = VertexPositionColorTexture(
+				m_BackupVertices[i].position,
+				m_BackupVertices[i].color,
+				UV
+			);
+		}
+
+
+	}
+
+
+	//--------------------------------------------------------------------------------------
+	///	メッセージを表示するスプライト
+	//--------------------------------------------------------------------------------------
+	MessageSprite::MessageSprite(const shared_ptr<Stage>& StagePtr,
+		const wstring& TextureResName,
+		const Vec2& StartScale,
+		float StartRot,
+		const Vec2& StartPos,
+		UINT XWrap, UINT YWrap) :
+		SpriteBase(StagePtr, TextureResName, StartScale, StartRot, StartPos, XWrap, YWrap),
+		m_TotalTime(0)
+	{
+		SetBlendState(BlendState::Trace);
+	}
+
+	void MessageSprite::AdjustVertex() {
+		//ここでは何もしない
+	}
+
+	void  MessageSprite::UpdateVertex(float ElapsedTime, VertexPositionColorTexture* vertices) {
+		m_TotalTime += (ElapsedTime * 5.0f);
+		if (m_TotalTime >= XM_2PI) {
+			m_TotalTime = 0;
+		}
+		float sin_val = sin(m_TotalTime) * 0.5f + 0.5f;
+		Col4 UpdateCol(1.0f, 1.0f, 1.0f, sin_val);
+		for (size_t i = 0; i < m_SquareMesh->GetNumVertices(); i++) {
+			vertices[i] = VertexPositionColorTexture(
+				m_BackupVertices[i].position,
+				UpdateCol,
+				m_BackupVertices[i].textureCoordinate
+			);
+
+		}
+	}
+
+
+	//--------------------------------------------------------------------------------------
+	///	EnemyObject
+	//--------------------------------------------------------------------------------------
+
+	EnemyObject::EnemyObject(const shared_ptr<Stage>& StagePtr,
+		const shared_ptr<GameObject>& ParentPtr,
+		const wstring& TextureResName, const Vec3& Scale, const Quat& Qt, const Vec3& Pos,
+		bool OwnShadowActive) :
+		GameObject(StagePtr),
+		m_ParentPtr(ParentPtr),
+		m_TextureResName(TextureResName),
+		m_Scale(Scale),
+		m_Qt(Qt),
 		m_Pos(Pos),
-		m_Velocity(0, 0, 0),
-		m_Gravity(0, -9.8f, 0),
-		m_GravityVelocity(0, 0, 0),
-		m_JumpLock(false),
-		m_Speed(0.5f),
 		m_BeforePos(Pos),
-		m_Mass(1.0f),
 		m_FrameCount(0.0f),
+		m_Speed(1.0f),
 		m_Tackle(false),
 		m_StopTime(2.0f),
-		m_TackleDis(2.0f),
-		m_TackleSpeed(10.0f)
+		m_TackleDis(1.0f),
+		m_TackleSpeed(5.0f),
+		m_OwnShadowActive(OwnShadowActive),
+		m_LerpToParent(0.2f),
+		m_LerpToChild(0.2f),
+		m_Attack1ToRot(0)
+
 	{}
 	EnemyObject::~EnemyObject() {}
 
-	OBB EnemyObject::GetOBB()const {
-		Mat4x4 World;
-		//ワールド行列の決定
-		World.affineTransformation(
-			m_Scale,			//スケーリング
-			Vec3(0, 0, 0),		//回転の中心（重心）
-			m_Qt,				//回転角度
-			m_Pos				//位置
-		);
-		OBB obb(Vec3(1.0f, 1.0f, 1.0f), World);
-		return obb;
-	}
+	void EnemyObject::OnCreate() {
+		//タグの追加
+		AddTag(L"EnemyObject");
 
-	void EnemyObject::CollisionWithBoxes(const Vec3 & BeforePos)
-	{
-		//前回のターンからの経過時間を求める
-		float ElapsedTime = App::GetApp()->GetElapsedTime();
-		//衝突判定
-		auto ShPtrScene = m_Scene.lock();
-		for (auto& v : ShPtrScene->GetBoxVec())
-		{
-			//if (v == GetThis<BoxBase>())
-			//{
-			//	//相手が自分自身なら処理しない
-			//	continue;
-			//}
-			OBB DestObb = v->GetOBB();
-			OBB SrcObb = GetOBB();
-			SrcObb.m_Center = BeforePos;
-			float HitTime;
-			Vec3 CollisionVelosity = (m_Pos - BeforePos) / ElapsedTime;
-			if (HitTest::CollisionTestObbObb(SrcObb, CollisionVelosity, DestObb, 0, ElapsedTime, HitTime))
-			{
-				m_Pos = BeforePos + CollisionVelosity * HitTime;
-				float SpanTime = ElapsedTime - HitTime;
-				//m_Posが動いたのでOBBを再取得
-				SrcObb = GetOBB();
-				Vec3 HitPoint;
-				//最近接点を得るための判定
-				HitTest::ClosestPtPointOBB(SrcObb.m_Center, DestObb, HitPoint);
-				//衝突法線をHitPointとm_Posから導く
-				Vec3 Normal = m_Pos - HitPoint;
-				Normal.normalize();
-				//速度をスライドさせて設定する
-				m_Velocity = ProjUtil::Slide(m_Velocity, Normal);
-				//Y方向はなし
-				m_Velocity.y = 0;
-				//最後に衝突点から余った時間分だけ新しい値で移動させる
-				m_Pos = m_Pos + m_Velocity * SpanTime;
-				//追い出し処理
-				//少しづつ相手の領域から退避する
-				//最大10回退避するが、それでも衝突していたら次回ターンに任せる
-				int count = 0;
-				while (count < 20)
-				{
-					//退避する係数
-					float MiniSpan = 0.001f;
-					//もう一度衝突判定
-					//m_Posが動いたのでOBBを再取得
-					SrcObb = GetOBB();
-					if (HitTest::OBB_OBB(SrcObb, DestObb))
-					{
-						//最近接点を得るための判定
-						HitTest::ClosestPtPointOBB(SrcObb.m_Center, DestObb, HitPoint);
-						//衝突していたら追い出し処理
-						Vec3 EscapeNormal = SrcObb.m_Center - HitPoint;
-						EscapeNormal.y = 0;
-						EscapeNormal.normalize();
-						m_Pos = m_Pos + EscapeNormal * MiniSpan;
-					}
-					else
-					{
-						break;
-					}
-					count++;
-				}
-			}
-		}
-	}
+		//Rigidbodyの初期化
+		auto PtrGameStage = GetStage<GameStage>();
+		Rigidbody body;
+		body.m_Owner = GetThis<GameObject>();
+		body.m_Mass = 1.0f;
+		body.m_Scale = m_Scale;
+		body.m_Quat = m_Qt;
+		body.m_Pos = m_Pos;
+		body.m_CollType = CollType::typeSPHERE;
+		body.m_IsCollisionActive = false;
+		body.m_IsFixed = true;
+		//		body.m_IsDrawActive = true;
+		body.SetToBefore();
+		m_Rigidbody = PtrGameStage->AddRigidbody(body);
 
-	void EnemyObject::CollisionWithCylinder(const Vec3 & BeforePos)
-	{
-		//前回のターンからの経過時間を求める
-		float ElapsedTime = App::GetApp()->GetElapsedTime();
-		//衝突判定
-		auto ShPtrScene = m_Scene.lock();
-		auto cyOb = ShPtrScene->GetCylinderObject();
-		CYLINDER cy = cyOb->GetCYLINDER();
-		SPHERE Sp = GetSPHERE();
-		Sp.m_Center = BeforePos;
-		float HitTime;
-		//相手の速度
-		Vec3 DestVelocity(0, 0, 0);
-		Vec3 SrcVelocity = m_Pos - BeforePos;
-		Vec3 CollisionVelosity = (SrcVelocity - DestVelocity) / ElapsedTime;
-		if (HitTest::CollisionTestSphereCylinder(Sp, CollisionVelosity, cy, 0, ElapsedTime, HitTime)) {
-			m_JumpLock = false;
-			m_Pos = BeforePos + CollisionVelosity * HitTime;
-			float SpanTime = ElapsedTime - HitTime;
-			//m_Posが動いたのでSPHEREを再取得
-			Sp = GetSPHERE();
-			Vec3 HitPoint;
-			//最近接点を得るための判定
-			HitTest::SPHERE_CYLINDER(Sp, cy, HitPoint);
-			//衝突法線をHitPointとm_Posから導く
-			Vec3 Normal = m_Pos - HitPoint;
-			Normal.normalize();
-			Vec3 angle(XMVector3AngleBetweenNormals(Normal, Vec3(0, 1, 0)));
-			if (angle.x <= 0.01f) {
-				//平面の上
-				m_GravityVelocity = Vec3(0, 0, 0);
-			}
-			else {
-				//重力をスライドさせて設定する
-				//これで、斜めのボックスを滑り落ちるようになる
-				m_GravityVelocity = ProjUtil::Slide(m_GravityVelocity, Normal);
-			}
-			//速度をスライドさせて設定する
-			m_Velocity = ProjUtil::Slide(m_Velocity, Normal);
-			//Y方向は重力に任せる
-			m_Velocity.y = 0;
-			//最後に衝突点から余った時間分だけ新しい値で移動させる
-			m_Pos = m_Pos + m_Velocity * SpanTime;
-			m_Pos = m_Pos + m_GravityVelocity * SpanTime;
-			//もう一度衝突判定
-			//m_Posが動いたのでSPHEREを再取得
-			Sp = GetSPHERE();
-			if (HitTest::SPHERE_CYLINDER(Sp, cy, HitPoint)) {
-				//衝突していたら追い出し処理
-				Vec3 EscapeNormal = Sp.m_Center - HitPoint;
-				EscapeNormal.normalize();
-				m_Pos = HitPoint + EscapeNormal * Sp.m_Radius;
-			}
-		}
-	}
-	void EnemyObject::RotToHead(float LerpFact)
-	{
-	}
-	SPHERE EnemyObject::GetSPHERE() const
-	{
-		SPHERE sp;
-		sp.m_Center = m_Pos;
-		sp.m_Radius = m_Scale.y * 0.5f;
-		return sp;
-	}
+		//メッシュの取得
+		auto MeshPtr = App::GetApp()->GetResource<MeshResource>(L"DEFAULT_SPHERE");
 
-	void EnemyObject::UpdateVelosity() {
-		auto ShPtrScene = m_Scene.lock();
-		if (!ShPtrScene) {
-			return;
-		}
-		//フォース（力）
-		Vec3 Force(0, 0, 0);
-		//プレイヤーを向く方向ベクトル
-		Vec3 ToPlayerVec =
-			ShPtrScene->GetSphereObject()->GetPosition() - m_Pos;
-
-		float dis = ToPlayerVec.length();
-		if (m_FrameCount > m_StopTime * 60.0f)
-		{
-			m_Tackle = true;
-		}
-
-		if (m_Tackle == true)
-		{
-            ToPlayerVec.y = 0;
-			ToPlayerVec *= m_TackleSpeed;
-			Force = ToPlayerVec - m_Velocity;
-			Vec3 Accel = Force / m_Mass;
-			float ElapsedTime = App::GetApp()->GetElapsedTime();
-			m_Velocity += Accel * ElapsedTime;
-			return;
-		}
-
-		float f = bsm::length(ShPtrScene->GetSphereObject()->GetPosition() - m_Pos);
-		if (f < m_TackleDis)
-		{
-			m_Velocity = Vec3(0,0,0);
-			m_FrameCount++;
-			return;
-		}
-
-		//縦方向は計算しない
-		ToPlayerVec.y = 0;
-		ToPlayerVec *= m_Speed;
-		//力を掛ける方向を決める
-		Force = ToPlayerVec - m_Velocity;
-		//力と質量から加速を求める
-		Vec3 Accel = Force / m_Mass;
-		//前回のターンからの経過時間を求める
-		float ElapsedTime = App::GetApp()->GetElapsedTime();
-		//速度を加速する
-		m_Velocity += Accel * ElapsedTime;
-	}
-
-	void EnemyObject::OnCreate()
-	{
-		vector<VertexPositionNormalTexture> vertices;
-		vector<uint16_t> indices;
-		MeshUtill::CreateSphere(1.0f, m_Division, vertices, indices);
-		//メッシュの作成（変更できない）
-		m_SphereMesh = MeshResource::CreateMeshResource(vertices, indices, false);
-		//テクスチャの作成
-		m_TextureResource = ObjectFactory::Create<TextureResource>(m_TextureFileName, L"WIC");
-	}
-	void EnemyObject::OnUpdate()
-	{
-		//1つ前の位置を取っておく
-		m_BeforePos = m_Pos;
-		//速度を変化させる
-		UpdateVelosity();
-		//前回のターンからの経過時間を求める
-		float ElapsedTime = App::GetApp()->GetElapsedTime();
-		//速度に合わせて位置の変更
-		m_Pos += m_Velocity * ElapsedTime;
-	}
-	void EnemyObject::OnCollision()
-	{
-		CollisionWithBoxes(m_BeforePos);
-		CollisionWithCylinder(m_BeforePos);
-	}
-	void EnemyObject::OnRotation()
-	{
-	}
-	void EnemyObject::OnDraw()
-	{
-		auto ShPtrScene = m_Scene.lock();
-		if (!ShPtrScene) {
-			return;
-		}
 		//行列の定義
 		Mat4x4 World;
-		//ワールド行列の決定
 		World.affineTransformation(
-			m_Scale,			//スケーリング
-			Vec3(0, 0, 0),		//回転の中心（重心）
-			m_Qt,				//回転角度
-			m_Pos				//位置
+			m_Scale,
+			Vec3(0, 0, 0),
+			m_Qt,
+			m_Pos
 		);
-		ShPtrScene->GetPNTDrawObject()->AddDrawMesh(
-			m_SphereMesh,
-			m_TextureResource,
-			World,
-			true
-		);
+		auto TexPtr = App::GetApp()->GetResource<TextureResource>(m_TextureResName);
+		//描画データの構築
+		m_PtrObj = make_shared<SimpleDrawObject>();
+		m_PtrObj->m_MeshRes = MeshPtr;
+		m_PtrObj->m_TextureRes = TexPtr;
+		m_PtrObj->m_WorldMatrix = World;
+		m_PtrObj->m_Camera = GetStage<Stage>()->GetCamera();
+		m_PtrObj->m_OwnShadowmapActive = m_OwnShadowActive;
+		m_PtrObj->m_ShadowmapUse = true;
+
+		//シャドウマップ描画データの構築
+		m_PtrShadowmapObj = make_shared<ShadowmapObject>();
+		m_PtrShadowmapObj->m_MeshRes = MeshPtr;
+		//描画データの行列をコピー
+		m_PtrShadowmapObj->m_WorldMatrix = World;
+		m_PtrShadowmapObj->m_Camera = GetStage<Stage>()->GetCamera();
+		//ステートマシンの構築
+		//m_StateMachine.reset(new StateMachine<EnemyObject>(GetThis<EnemyObject>()));
+		//ステート初期値設定
+		//m_StateMachine->ChangeState(ChildComplianceState::Instance());
+
 	}
+
+	void EnemyObject::OnUpdate() {
+		//前回のターンからの経過時間を求める
+		float ElapsedTime = App::GetApp()->GetElapsedTime();
+		auto shptr = m_ParentPtr.lock();
+		//親のワールド行列を取得する変数
+		Mat4x4 ParMat;
+		if (shptr) {
+			//行列取得用のインターフェイスを持ってるかどうか
+			auto matintptr = dynamic_pointer_cast<MatrixInterface>(shptr);
+			if (matintptr) {
+				matintptr->GetWorldMatrix(ParMat);
+			}
+
+			Mat4x4 World;
+			World.identity();
+			//行列の定義
+			World = m_PlayerLocalMatrix;
+			//スケーリングを1.0にした行列に変換
+			ParMat.scaleIdentity();
+			//行列の反映
+			World *= ParMat;
+			//この時点でWorldは目標となる位置
+			Vec3 toPos = World.transInMatrix();
+			Vec3 ToPosVec = toPos - m_Rigidbody->m_Pos;
+			//距離を求める
+			float dis = ToPosVec.length();
+			if (m_FrameCount > m_StopTime * 60.0f)
+			{
+				m_Tackle = true;
+			}
+			if (m_Tackle == true) {
+				ToPosVec.normalize();
+
+				ToPosVec *= m_TackleSpeed;
+
+				m_Rigidbody->m_Velocity = ToPosVec;
+				return;
+			}
+			if (dis <= m_TackleDis) {
+				m_Rigidbody->m_Velocity = Vec3(0, 0, 0);
+
+				m_FrameCount++;
+			}
+			else {
+				ToPosVec.normalize();
+
+				ToPosVec *= m_Speed;
+
+				m_Rigidbody->m_Velocity = ToPosVec;
+			}
+		}
+	}
+
+
+	void EnemyObject::OnDrawShadowmap() {
+		//行列の定義
+		Mat4x4 World;
+		World.affineTransformation(
+			m_Rigidbody->m_Scale,
+			Vec3(0, 0, 0),
+			m_Rigidbody->m_Quat,
+			m_Rigidbody->m_Pos
+		);
+		//描画データの行列をコピー
+		m_PtrShadowmapObj->m_WorldMatrix = World;
+		m_PtrShadowmapObj->m_Camera = GetStage<Stage>()->GetCamera();
+		auto shptr = m_ShadowmapRenderer.lock();
+		if (!shptr) {
+			shptr = GetStage<Stage>()->FindTagGameObject<ShadowmapRenderer>(L"ShadowmapRenderer");
+			m_ShadowmapRenderer = shptr;
+		}
+		shptr->AddDrawObject(m_PtrShadowmapObj);
+	}
+
+	void EnemyObject::OnDraw() {
+		//行列の定義
+		Mat4x4 World;
+		World.affineTransformation(
+			m_Rigidbody->m_Scale,
+			Vec3(0, 0, 0),
+			m_Rigidbody->m_Quat,
+			m_Rigidbody->m_Pos
+		);
+		m_PtrObj->m_WorldMatrix = World;
+		m_PtrObj->m_Camera = GetStage<Stage>()->GetCamera();
+		auto shptr = m_Renderer.lock();
+		if (!shptr) {
+			shptr = GetStage<Stage>()->FindTagGameObject<SimplePNTStaticRenderer2>(L"SimplePNTStaticRenderer2");
+			m_Renderer = shptr;
+		}
+		shptr->AddDrawObject(m_PtrObj);
+	}
+
+	void EnemyObject::GetWorldMatrix(Mat4x4& m) const {
+		//行列の定義
+		Mat4x4 World;
+		World.affineTransformation(
+			m_Rigidbody->m_Scale,
+			Vec3(0, 0, 0),
+			m_Rigidbody->m_Quat,
+			m_Rigidbody->m_Pos
+		);
+		m = World;
+	}
+
+	void EnemyObject::UpdateBehavior() {
+		//前回のターンからの経過時間を求める
+		float ElapsedTime = App::GetApp()->GetElapsedTime();
+		auto shptr = m_ParentPtr.lock();
+		//親のワールド行列を取得する変数
+		Mat4x4 ParMat;
+		if (shptr) {
+			ParentFlg flg = ParentFlg::NoParent;
+			//行列取得用のインターフェイスを持ってるかどうか
+			auto matintptr = dynamic_pointer_cast<MatrixInterface>(shptr);
+			if (matintptr) {
+				matintptr->GetWorldMatrix(ParMat);
+				if (shptr->FindTag(L"Player")) {
+					flg = ParentFlg::Player;
+				}
+				else if (shptr->FindTag(L"ChildObject")) {
+					flg = ParentFlg::Child;
+				}
+			}
+			Mat4x4 World;
+			World.identity();
+			float LerpNum = 0.2f;
+			switch (flg) {
+			case ParentFlg::Player:
+				//行列の定義
+				World = m_PlayerLocalMatrix;
+				LerpNum = m_LerpToParent;
+				break;
+			case ParentFlg::Child:
+				//行列の定義
+				World = m_ChildLocalMatrix;
+				LerpNum = m_LerpToChild;
+				break;
+			default:
+				break;
+			}
+			if (flg != ParentFlg::NoParent) {
+				//スケーリングを1.0にした行列に変換
+				ParMat.scaleIdentity();
+				//行列の反映
+				World *= ParMat;
+				//この時点でWorldは目標となる位置
+				Vec3 toPos = World.transInMatrix();
+				//補間処理で移動位置を決定
+				auto CalcPos = Lerp::CalculateLerp(m_Rigidbody->m_BeforePos, toPos, 0, 1.0f, LerpNum, Lerp::rate::Linear);
+				Vec3 DammiPos;
+				World.decompose(m_Rigidbody->m_Scale, m_Rigidbody->m_Quat, DammiPos);
+				Vec3 Velo = CalcPos - m_Rigidbody->m_BeforePos;
+				Velo /= ElapsedTime;
+				m_Rigidbody->m_Velocity = Velo;
+			}
+		}
+	}
+
+
+	void EnemyObject::ComplianceStartBehavior() {
+		//ローカル行列の定義
+		m_PlayerLocalMatrix.affineTransformation(
+			m_Rigidbody->m_Scale,
+			Vec3(0, 0, 0),
+			Quat(),
+			Vec3(0, 0, -0.25f)
+		);
+		//このステートではチャイルドの場合も同じ
+		m_ChildLocalMatrix = m_PlayerLocalMatrix;
+		m_LerpToParent = m_LerpToChild = 0.2f;
+	}
+
+	//攻撃１行動の開始
+	void EnemyObject::Attack1StartBehavior() {
+		m_Attack1ToRot = 0.1f;
+		//ローカル行列の定義
+		m_PlayerLocalMatrix.affineTransformation(
+			m_Rigidbody->m_Scale,
+			Vec3(0, 0, 0),
+			Quat(Vec3(1.0, 0, 0), m_Attack1ToRot),
+			Vec3(0, 0.25f, 0.0f)
+		);
+		m_ChildLocalMatrix.affineTransformation(
+			m_Rigidbody->m_Scale,
+			Vec3(0, 0, 0),
+			Quat(),
+			Vec3(0, 0.25f, -0.25f)
+		);
+		m_LerpToParent = m_LerpToChild = 0.5f;
+
+	}
+
+	bool EnemyObject::Attack1ExcuteBehavior() {
+		m_Attack1ToRot += 0.1f;
+		if (m_Attack1ToRot >= (XM_PI + 0.5f)) {
+			m_Attack1ToRot = 0.0f;
+			return true;
+		}
+		//ローカル行列の定義
+		Vec3 Pos(0, sin(m_Attack1ToRot) * 0.25f, -cos(m_Attack1ToRot) * 0.25f);
+		m_PlayerLocalMatrix.affineTransformation(
+			m_Rigidbody->m_Scale,
+			Vec3(0, 0, 0),
+			Quat(Vec3(1.0, 0, 0), m_Attack1ToRot),
+			Pos
+		);
+		return false;
+	}
+
+
+
 }
 //end basecross

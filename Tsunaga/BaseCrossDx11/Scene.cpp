@@ -9,224 +9,181 @@
 namespace basecross {
 
 	//--------------------------------------------------------------------------------------
+	///	ステージ（シーンで管理するインターフェイス）
+	//--------------------------------------------------------------------------------------
+	void Stage::OnPreCreate() {
+		//Rigidbodyマネージャの初期化
+		m_RigidbodyManager
+			= ObjectFactory::Create<RigidbodyManager>(GetThis<Stage>());
+	}
+
+
+	//追加オブジェクトの指定
+	void Stage::PushBackGameObject(const shared_ptr<GameObject>& Ptr) {
+		//このステージはクリエイト後である
+		if (IsCreated()) {
+			m_WaitAddObjectVec.push_back(Ptr);
+		}
+		else {
+			//クリエイト前
+			m_GameObjectVec.push_back(Ptr);
+		}
+	}
+	//削除オブジェクトの指定
+	void Stage::RemoveBackGameObject(const shared_ptr<GameObject>& Ptr) {
+		m_WaitRemoveObjectVec.push_back(Ptr);
+	}
+	//オブジェクトの削除
+	void Stage::RemoveTargetGameObject(const shared_ptr<GameObject>& targetobj) {
+		auto it = m_GameObjectVec.begin();
+		while (it != m_GameObjectVec.end()) {
+			if (*it == targetobj) {
+				m_GameObjectVec.erase(it);
+				return;
+			}
+			it++;
+		}
+		m_RigidbodyManager->RemoveOwnRigidbody(targetobj);
+	}
+	//追加や削除待ちになってるオブジェクトを追加削除する
+	void Stage::SetWaitToObjectVec() {
+		if (!m_WaitRemoveObjectVec.empty()) {
+			for (auto Ptr : m_WaitRemoveObjectVec) {
+				RemoveTargetGameObject(Ptr);
+			}
+		}
+		m_WaitRemoveObjectVec.clear();
+		if (!m_WaitAddObjectVec.empty()) {
+			for (auto Ptr : m_WaitAddObjectVec) {
+				m_GameObjectVec.push_back(Ptr);
+			}
+		}
+		m_WaitAddObjectVec.clear();
+	}
+
+	void Stage::FindTagGameObjectVec(const wstring& TagName, vector<shared_ptr<GameObject>>& Ret) const {
+		Ret.clear();
+		for (auto& v : GetGameObjectVec()) {
+			if (v->FindTag(TagName)) {
+				Ret.push_back(v);
+			}
+		}
+	}
+
+	shared_ptr<RigidbodyManager> Stage::GetRigidbodyManager() const {
+		return m_RigidbodyManager;
+	}
+
+	shared_ptr<Rigidbody> Stage::AddRigidbody(const Rigidbody& body) {
+		return m_RigidbodyManager->AddRigidbody(body);
+	}
+
+	void Stage::RemoveOwnRigidbody(const shared_ptr<GameObject>& OwnerPtr) {
+		m_RigidbodyManager->RemoveOwnRigidbody(OwnerPtr);
+	}
+
+	const vector<shared_ptr<Rigidbody>>& Stage::GetRigidbodyVec()const {
+		return m_RigidbodyManager->GetRigidbodyVec();
+	}
+	const vector<CollisionState>& Stage::GetCollisionStateVec()const {
+		return m_RigidbodyManager->GetCollisionStateVec();
+	}
+	shared_ptr<Rigidbody> Stage::GetOwnRigidbody(const shared_ptr<GameObject>& OwnerPtr) {
+		return m_RigidbodyManager->GetOwnRigidbody(OwnerPtr);
+	}
+
+
+
+
+	//--------------------------------------------------------------------------------------
 	///	ゲームシーン
 	//--------------------------------------------------------------------------------------
 	Scene::Scene() :
-		SceneInterface(),
-		m_CamerEye(0, 5.0, -5.0f),
-		m_CamerAt(0, 0, 0),
-		m_CamerUp(0, 1.0f, 0),
-		m_FovY(XM_PIDIV4),
-		m_CameraXZRad(0.0f),
-		m_CameraYRad(XM_PIDIV4 + 0.5f),
-		m_CameraArmLen(5.0f),
-		m_LightDir(0.5f, -1.0f, 0.5f, 1.0f)
+		SceneInterface()
 	{
-		m_LightDir.normalize();
 	}
 
-	void Scene::GetViewProjMatrix(Mat4x4& View, Mat4x4& Proj)const {
-		View = XMMatrixLookAtLH(m_CamerEye, m_CamerAt, m_CamerUp);
-		float w = static_cast<float>(App::GetApp()->GetGameWidth());
-		float h = static_cast<float>(App::GetApp()->GetGameHeight());
-		Proj = XMMatrixPerspectiveFovLH(XM_PIDIV4, w / h, 1.0f, 100.0f);
-
-	}
-
-	void Scene::GetLightDir(Vec4& LightDir)const {
-		LightDir = m_LightDir;
-	}
-
-
-	void Scene::OnCreate() {
+	void Scene::CreateResources() {
 		wstring DataDir;
 		//サンプルのためアセットディレクトリを取得
 		App::GetApp()->GetAssetsDirectory(DataDir);
 		//各ゲームは以下のようにデータディレクトリを取得すべき
 		//App::GetApp()->GetDataDirectory(DataDir);
-
 		wstring strTexture = DataDir + L"sky.jpg";
-		//平面の作成
-		Quat(Vec3(1.0f, 0, 0), XM_PIDIV2);
-		m_SquareObject = ObjectFactory::Create<SquareObject>(
-			GetThis<Scene>(),
-			strTexture,
-			Vec3(50.0f, 50.0f, 1.0f),
-			Quat(Vec3(1.0f, 0, 0), XM_PIDIV2),
-			Vec3(0.0f, 0.0f, 0.0f)
-			);
-
-		m_CylinderObject = ObjectFactory::Create<CylinderObject>(
-			GetThis<Scene>(),
-			strTexture,
-			Vec3(5.0f, 1.0f, 5.0f),
-			Quat(Vec3(0.0f, 1.0, 0), 0),
-			Vec3(0.0f, 0.5f, 10.0f)
-			);
-
-		m_BoxVec.push_back(
-			ObjectFactory::Create<BoxObject>(
-				GetThis<Scene>(), strTexture, false,
-				Vec3(5.0f, 0.5f, 5.0f),
-				Quat(),
-				Vec3(5.0f, 0.25f, 0.0f)
-				)
-		);
-
-		m_BoxVec.push_back(
-			ObjectFactory::Create<BoxObject>(
-				GetThis<Scene>(), strTexture, false,
-				Vec3(3.0f, 1.0f, 3.0f),
-				Quat(),
-				Vec3(5.0f, 0.5f, 0.0f)
-				)
-		);
-
-		m_BoxVec.push_back(
-			ObjectFactory::Create<BoxObject>(
-				GetThis<Scene>(), strTexture, false,
-				Vec3(3.0f, 1.0f, 3.0f),
-				Quat(),
-				Vec3(-3.5f, 0.5f, 0.0f)
-				)
-		);
-
-		m_BoxVec.push_back(
-			ObjectFactory::Create<BoxObject>(
-				GetThis<Scene>(), strTexture, false,
-				Vec3(5.0f, 0.5f, 5.0f),
-				Quat(Vec3(0, 0, 1), -XM_PIDIV4),
-				Vec3(-5.0f, 1.0f, 0.0f)
-				)
-		);
-
+		App::GetApp()->RegisterTexture(L"SKY_TX", strTexture);
+		strTexture = DataDir + L"trace.png";
+		App::GetApp()->RegisterTexture(L"TRACE_TX", strTexture);
+		strTexture = DataDir + L"StageMessage.png";
+		App::GetApp()->RegisterTexture(L"MESSAGE_TX", strTexture);
 
 		strTexture = DataDir + L"wall.jpg";
+		App::GetApp()->RegisterTexture(L"WALL_TX", strTexture);
+		strTexture = DataDir + L"wall_normal.png";
+		App::GetApp()->RegisterTexture(L"WALL_NORMAL_TX", strTexture);
 
-		//移動ボックス
-		/*m_BoxVec.push_back(
-			ObjectFactory::Create<MoveBoxObject>(
-				GetThis<Scene>(), strTexture, false,
-				Vec3(0.25f, 0.5f, 0.5f),
-				Quat(),
-				Vec3(0.0f, 0.25f, 5.0f)
-				)
-		);
-*/
-
-		wstring strTexture2 = DataDir + L"trace.png";
-		//球の作成
-		m_SphereObject = ObjectFactory::Create<SphereObject>(
-			GetThis<Scene>(),
-			18, strTexture2, true, Vec3(0.0f, 0.125f, 0.0f));
+		strTexture = DataDir + L"Brown.png";
+		App::GetApp()->RegisterTexture(L"BROWN_TX", strTexture);
+		strTexture = DataDir + L"normal2.png";
+		App::GetApp()->RegisterTexture(L"NORMAL2_TX", strTexture);
 
 
-		//PNT描画オブジェクトの作成
-		m_PNTDrawObject = ObjectFactory::Create<PNTDrawObject>(GetThis<Scene>());
+		//ボーンモデルのリソース
+		auto ModelMesh = MeshResource::CreateBoneModelMesh(DataDir, L"Chara_R.bmf");
+		App::GetApp()->RegisterResource(L"Chara_R_MESH", ModelMesh);
+		//ボーンモデルのタンジェント付きリソース
+		ModelMesh = MeshResource::CreateBoneModelMeshWithTangent(DataDir, L"Chara_R.bmf");
+		App::GetApp()->RegisterResource(L"Chara_R_MESH_WITH_TAN", ModelMesh);
+		//法線マップ
+		strTexture = DataDir + L"Chara_R_narmal.png";
+		App::GetApp()->RegisterTexture(L"Chara_R_NORMAL_TX", strTexture);
 
-		strTexture = DataDir + L"trace.png";
-		m_WallSprite = ObjectFactory::Create<WrappedSprite>(strTexture, true,
-			Vec2(160, 160),
-			Vec2(-480, 260),
-			4,4);
+		//スタティックモデルのリソースとして読み込み
+		auto StaticModelMesh = MeshResource::CreateStaticModelMesh(DataDir, L"Character_01.bmf");
+		App::GetApp()->RegisterResource(L"MODEL_MESH", StaticModelMesh);
 
-		m_Enemy = ObjectFactory::Create<EnemyObject>(
-			GetThis<Scene>(),
-			18, strTexture2, true, Vec3(1.0f, 0.125f, 3.0f));
+		//スタティックモデルのタンジェント付きリソースとして読み込み
+		StaticModelMesh = MeshResource::CreateStaticModelMeshWithTangent(DataDir, L"Character_01.bmf");
+		App::GetApp()->RegisterResource(L"MODEL_MESH_WITH_TAN", StaticModelMesh);
+		//法線マップ
+		strTexture = DataDir + L"Character_2_normal.png";
+		App::GetApp()->RegisterTexture(L"MODEL_NORMAL_TX", strTexture);
+		//エフェクト
+		strTexture = DataDir + L"spark.png";
+		App::GetApp()->RegisterTexture(L"SPARK_TX", strTexture);
+		strTexture = DataDir + L"fire.png";
+		App::GetApp()->RegisterTexture(L"FIRE_TX", strTexture);
+
+
+
 	}
 
+
+	void Scene::OnCreate() {
+		CreateResources();
+		//自分自身にイベントを送る
+		//これにより各ステージやオブジェクトがCreate時にシーンにアクセスできる
+		PostEvent(0.0f, GetThis<ObjectInterface>(), GetThis<Scene>(), L"ToGameStage");
+	}
 
 	void Scene::OnUpdate() {
-		//更新
-		m_SquareObject->OnUpdate();
-		m_CylinderObject->OnUpdate();
-		m_SphereObject->OnUpdate();
-		m_Enemy->OnUpdate();
-		for (auto& v : m_BoxVec) {
-			v->OnUpdate();
-		}
-		//衝突判定
-		m_SphereObject->OnCollision();
-		m_Enemy->OnCollision();
-		for (auto& v : m_BoxVec) {
-			v->OnCollision();
-		}
-
-		//回転処理
-		m_SphereObject->OnRotation();
-		for (auto& v : m_BoxVec) {
-			v->OnRotation();
-		}
-		//描画オブジェクトの更新
-		m_PNTDrawObject->OnUpdate();
-		//m_WallSprite->OnUpdate();
-
-		//コントローラの取得
-		auto CntlVec = App::GetApp()->GetInputDevice().GetControlerVec();
-		if (CntlVec[0].bConnected) {
-
-			//Dパッド下
-			if (CntlVec[0].wButtons & XINPUT_GAMEPAD_DPAD_DOWN) {
-				//カメラ位置を引く
-				m_CameraArmLen += 0.1f;
-				if (m_CameraArmLen >= 50.0f) {
-					m_CameraArmLen = 50.0f;
-				}
-			}
-			//Dパッド上
-			if (CntlVec[0].wButtons & XINPUT_GAMEPAD_DPAD_UP) {
-				//カメラ位置を寄る
-				m_CameraArmLen -= 0.1f;
-				if (m_CameraArmLen <= 2.0f) {
-					m_CameraArmLen = 2.0f;
-				}
-			}
-
-			if (CntlVec[0].fThumbRX != 0) {
-				m_CameraXZRad -= CntlVec[0].fThumbRX * 0.05f;
-				if (abs(m_CameraXZRad) >= XM_2PI) {
-					m_CameraXZRad = 0;
-				}
-			}
-			if (CntlVec[0].fThumbRY != 0) {
-				m_CameraYRad += CntlVec[0].fThumbRY * 0.05f;
-				if (m_CameraYRad >= XM_PIDIV2 - 0.1f) {
-					m_CameraYRad = XM_PIDIV2 - 0.1f;
-				}
-				else if (m_CameraYRad <= 0.2) {
-					m_CameraYRad = 0.2;
-				}
-			}
-
-			m_CamerAt = GetSphereObject()->GetPosition();
-			Vec3 CameraLocalEye =
-				Vec3(
-					sin(m_CameraXZRad) * m_CameraArmLen * sin(m_CameraYRad),
-					cos(m_CameraYRad) * m_CameraArmLen,
-					-cos(m_CameraXZRad) * m_CameraArmLen * sin(m_CameraYRad)
-				);
-			m_CamerEye = m_CamerAt + CameraLocalEye;
-		}
+		GetActiveStage()->OnPreUpdateStage();
+		GetActiveStage()->OnUpdateStage();
 	}
 	void Scene::OnDraw() {
-		//描画デバイスの取得
-		auto Dev = App::GetApp()->GetDeviceResources();
-		Dev->ClearDefaultViews(Col4(0, 0, 0, 1.0f));
-		//デフォルト描画の開始
-		Dev->StartDefaultDraw();
-		m_SquareObject->OnDraw();
-		m_CylinderObject->OnDraw();
-		for (auto& v : m_BoxVec) {
-			v->OnDraw();
-		}
-		m_SphereObject->OnDraw();
-		m_Enemy->OnDraw();
-		m_PNTDrawObject->OnDraw();
-		m_WallSprite->OnDraw();
-		;
-		//デフォルト描画の終了
-		Dev->EndDefaultDraw();
+		GetActiveStage()->OnDrawStage();
 	}
+
+	void Scene::OnEvent(const shared_ptr<Event>& event) {
+		if (event->m_MsgStr == L"ToGameStage") {
+			//アクティブステージをGameStageに設定
+			ResetActiveStage<GameStage>();
+		}
+		else if (event->m_MsgStr == L"ToEmptyStage") {
+			//アクティブステージをEmptyStageに設定
+			ResetActiveStage<EmptyStage>();
+		}
+	}
+
 
 }
 //end basecross
