@@ -800,6 +800,9 @@ namespace basecross {
 			m_Qt,
 			m_Pos
 		);
+		//ターゲット座標の初期化
+		m_TargetPos = Vec3(0.0f, 0.0f, 0.0f);
+
 		auto TexPtr = App::GetApp()->GetResource<TextureResource>(m_TextureResName);
 		//描画データの構築
 		m_PtrObj = make_shared<SimpleDrawObject>();
@@ -849,30 +852,53 @@ namespace basecross {
 			Vec3 ToPosVec = toPos - m_Rigidbody->m_Pos;
 			//距離を求める
 			float dis = ToPosVec.length();
-			if (m_FrameCount > m_StopTime * 60.0f)
+
+			if (m_FrameCount > m_StopTime * 1.5f * 60.0f)
+			{
+				m_Tackle = false;
+				m_FrameCount = 0.0f;
+			}
+			else if (m_FrameCount > m_StopTime * 60.0f)
 			{
 				m_Tackle = true;
 			}
-			if (m_Tackle == true) {
-				ToPosVec.normalize();
+			if (m_TargetPos == Vec3(0.0f, 0.0f, 0.0f)) {
+				m_TargetPos = toPos;
+			}
+
+			if (m_Tackle == true)
+			{
+				Vec3 Tag = m_TargetPos - m_Rigidbody->m_Pos;
+				
+				/*ToPosVec.normalize();
 
 				ToPosVec *= m_TackleSpeed;
 
-				m_Rigidbody->m_Velocity = ToPosVec;
+				m_Rigidbody->m_Velocity = ToPosVec;*/
+				m_FrameCount++;
 				return;
 			}
-			if (dis <= m_TackleDis) {
-				m_Rigidbody->m_Velocity = Vec3(0, 0, 0);
+			
+			
+			if (m_Tackle == false)
+			{
+				if (dis <= m_TackleDis)
+				{
+					m_Rigidbody->m_Velocity = Vec3(0, 0, 0);
 
-				m_FrameCount++;
+					m_FrameCount++;
+				}
+				else
+				{
+					ToPosVec.normalize();
+
+					ToPosVec *= m_Speed;
+
+					m_Rigidbody->m_Velocity = ToPosVec;
+				}
 			}
-			else {
-				ToPosVec.normalize();
 
-				ToPosVec *= m_Speed;
-
-				m_Rigidbody->m_Velocity = ToPosVec;
-			}
+				
 		}
 	}
 

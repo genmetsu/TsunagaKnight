@@ -554,6 +554,8 @@ namespace basecross {
 		Vec3 m_Pos;
 		//ひとつ前の位置
 		Vec3 m_BeforePos;
+		// 突進の位置座標
+		Vec3 m_TargetPos;
 		//追いかけるスピード
 		float m_Speed;
 		//フレームカウント
