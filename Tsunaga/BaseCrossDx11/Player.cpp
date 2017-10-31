@@ -145,8 +145,8 @@ namespace basecross {
 			//}
 			Vec3 Direction = GetMoveVector();
 			if (length(Direction) < 0.1f) {
-				m_Rigidbody->m_Velocity.x *= 0.9f;
-				m_Rigidbody->m_Velocity.z *= 0.9f;
+				m_Rigidbody->m_Velocity.x *= 0.8f;
+				m_Rigidbody->m_Velocity.z *= 0.8f;
 			}
 			if (m_isStep == true) {
 				m_Rigidbody->m_Velocity += m_StepVec * 2.0f;
@@ -303,6 +303,299 @@ namespace basecross {
 		);
 		m = World;
 
+	}
+
+	//--------------------------------------------------------------------------------------
+	/// プレイヤーの持つ剣
+	//--------------------------------------------------------------------------------------
+
+	Sword::Sword(const shared_ptr<Stage>& StagePtr,
+		const shared_ptr<GameObject>& ParentPtr,
+		const wstring& TextureResName, const Vec3& Scale, const Quat& Qt, const Vec3& Pos,
+		bool OwnShadowActive) :
+		GameObject(StagePtr),
+		m_ParentPtr(ParentPtr),
+		m_TextureResName(TextureResName),
+		m_Scale(Scale),
+		m_Qt(Qt),
+		m_Pos(Pos),
+		m_OwnShadowActive(OwnShadowActive),
+		m_LerpToParent(0.2f),
+		m_LerpToChild(0.2f),
+		m_Attack1ToRot(0)
+	{}
+	Sword::~Sword() {}
+
+	void Sword::OnCreate() {
+		//タグの追加
+		AddTag(L"Sword");
+
+		//Rigidbodyの初期化
+		auto PtrGameStage = GetStage<GameStage>();
+		Rigidbody body;
+		body.m_Owner = GetThis<GameObject>();
+		body.m_Mass = 1.0f;
+		body.m_Scale = m_Scale;
+		body.m_Quat = m_Qt;
+		body.m_Pos = m_Pos;
+		body.m_CollType = CollType::typeSPHERE;
+		body.m_IsCollisionActive = false;
+		body.m_IsFixed = true;
+		//		body.m_IsDrawActive = true;
+		body.SetToBefore();
+		m_Rigidbody = PtrGameStage->AddRigidbody(body);
+
+		//メッシュの取得
+		auto MeshPtr = App::GetApp()->GetResource<MeshResource>(L"DEFAULT_SPHERE");
+
+		//行列の定義
+		Mat4x4 World;
+		World.affineTransformation(
+			m_Scale,
+			Vec3(0, 0, 0),
+			m_Qt,
+			m_Pos
+		);
+		auto TexPtr = App::GetApp()->GetResource<TextureResource>(m_TextureResName);
+		//描画データの構築
+		m_PtrObj = make_shared<SimpleDrawObject>();
+		m_PtrObj->m_MeshRes = MeshPtr;
+		m_PtrObj->m_TextureRes = TexPtr;
+		m_PtrObj->m_WorldMatrix = World;
+		m_PtrObj->m_Camera = GetStage<Stage>()->GetCamera();
+		m_PtrObj->m_OwnShadowmapActive = m_OwnShadowActive;
+		m_PtrObj->m_ShadowmapUse = true;
+
+		//シャドウマップ描画データの構築
+		m_PtrShadowmapObj = make_shared<ShadowmapObject>();
+		m_PtrShadowmapObj->m_MeshRes = MeshPtr;
+		//描画データの行列をコピー
+		m_PtrShadowmapObj->m_WorldMatrix = World;
+		m_PtrShadowmapObj->m_Camera = GetStage<Stage>()->GetCamera();
+		//ステートマシンの構築
+		m_StateMachine.reset(new StateMachine<Sword>(GetThis<Sword>()));
+		//ステート初期値設定
+		m_StateMachine->ChangeState(NonAttackState::Instance());
+
+	}
+
+	void Sword::OnUpdate() {
+		//ステートマシン更新
+		m_StateMachine->Update();
+	}
+
+
+	void Sword::OnDrawShadowmap() {
+		//行列の定義
+		Mat4x4 World;
+		World.affineTransformation(
+			m_Rigidbody->m_Scale,
+			Vec3(0, 0, 0),
+			m_Rigidbody->m_Quat,
+			m_Rigidbody->m_Pos
+		);
+		//描画データの行列をコピー
+		m_PtrShadowmapObj->m_WorldMatrix = World;
+		m_PtrShadowmapObj->m_Camera = GetStage<Stage>()->GetCamera();
+		auto shptr = m_ShadowmapRenderer.lock();
+		if (!shptr) {
+			shptr = GetStage<Stage>()->FindTagGameObject<ShadowmapRenderer>(L"ShadowmapRenderer");
+			m_ShadowmapRenderer = shptr;
+		}
+		shptr->AddDrawObject(m_PtrShadowmapObj);
+	}
+
+	void Sword::OnDraw() {
+		//行列の定義
+		Mat4x4 World;
+		World.affineTransformation(
+			m_Rigidbody->m_Scale,
+			Vec3(0, 0, 0),
+			m_Rigidbody->m_Quat,
+			m_Rigidbody->m_Pos
+		);
+		m_PtrObj->m_WorldMatrix = World;
+		m_PtrObj->m_Camera = GetStage<Stage>()->GetCamera();
+		auto shptr = m_Renderer.lock();
+		if (!shptr) {
+			shptr = GetStage<Stage>()->FindTagGameObject<SimplePNTStaticRenderer2>(L"SimplePNTStaticRenderer2");
+			m_Renderer = shptr;
+		}
+		shptr->AddDrawObject(m_PtrObj);
+	}
+
+	void Sword::GetWorldMatrix(Mat4x4& m) const {
+		//行列の定義
+		Mat4x4 World;
+		World.affineTransformation(
+			m_Rigidbody->m_Scale,
+			Vec3(0, 0, 0),
+			m_Rigidbody->m_Quat,
+			m_Rigidbody->m_Pos
+		);
+		m = World;
+	}
+
+	enum class ParentFlg {
+		NoParent,
+		Player,
+		Child
+	};
+
+	void Sword::UpdateBehavior() {
+		//前回のターンからの経過時間を求める
+		float ElapsedTime = App::GetApp()->GetElapsedTime();
+		auto shptr = m_ParentPtr.lock();
+		//親のワールド行列を取得する変数
+		Mat4x4 ParMat;
+		if (shptr) {
+			ParentFlg flg = ParentFlg::NoParent;
+			//行列取得用のインターフェイスを持ってるかどうか
+			auto matintptr = dynamic_pointer_cast<MatrixInterface>(shptr);
+			if (matintptr) {
+				matintptr->GetWorldMatrix(ParMat);
+				if (shptr->FindTag(L"Player")) {
+					flg = ParentFlg::Player;
+				}
+				else if (shptr->FindTag(L"Sword")) {
+					flg = ParentFlg::Child;
+				}
+			}
+			Mat4x4 World;
+			World.identity();
+			float LerpNum = 0.2f;
+			switch (flg) {
+			case ParentFlg::Player:
+				//行列の定義
+				World = m_PlayerLocalMatrix;
+				LerpNum = m_LerpToParent;
+				break;
+			case ParentFlg::Child:
+				//行列の定義
+				World = m_ChildLocalMatrix;
+				LerpNum = m_LerpToChild;
+				break;
+			default:
+				break;
+			}
+			if (flg != ParentFlg::NoParent) {
+				//スケーリングを1.0にした行列に変換
+				ParMat.scaleIdentity();
+				//行列の反映
+				World *= ParMat;
+				//この時点でWorldは目標となる位置
+				Vec3 toPos = World.transInMatrix();
+				Vec3 DammiPos;
+				World.decompose(m_Rigidbody->m_Scale, m_Rigidbody->m_Quat, DammiPos);
+				Vec3 Velo = toPos - m_Rigidbody->m_Pos;
+				Velo /= ElapsedTime;
+				m_Rigidbody->m_Velocity = Velo;
+			}
+		}
+	}
+
+
+	void Sword::ComplianceStartBehavior() {
+		//ローカル行列の定義
+		m_PlayerLocalMatrix.affineTransformation(
+			m_Rigidbody->m_Scale,
+			Vec3(0, 0, 0),
+			Quat(),
+			Vec3(0, 0, -0.25f)
+		);
+		//このステートではチャイルドの場合も同じ
+		m_ChildLocalMatrix = m_PlayerLocalMatrix;
+		m_LerpToParent = m_LerpToChild = 0.2f;
+	}
+
+	//攻撃１行動の開始
+	void Sword::Attack1StartBehavior() {
+		m_Attack1ToRot = 0.1f;
+		//ローカル行列の定義
+		m_PlayerLocalMatrix.affineTransformation(
+			m_Rigidbody->m_Scale,
+			Vec3(0, 0, 0),
+			Quat(Vec3(1.0, 0, 0), m_Attack1ToRot),
+			Vec3(0, 0.25f, 0.0f)
+		);
+		m_ChildLocalMatrix.affineTransformation(
+			m_Rigidbody->m_Scale,
+			Vec3(0, 0, 0),
+			Quat(),
+			Vec3(0, 0.25f, -0.25f)
+		);
+		m_LerpToParent = m_LerpToChild = 0.5f;
+
+	}
+
+	bool Sword::Attack1ExcuteBehavior() {
+		m_Attack1ToRot += 0.2f;
+		if (m_Attack1ToRot >= (XM_PI + 0.5f)) {
+			m_Attack1ToRot = 0.0f;
+			return true;
+		}
+		//ローカル行列の定義
+		Vec3 Pos(0, sin(m_Attack1ToRot) * 0.25f, -cos(m_Attack1ToRot) * 0.25f);
+		m_PlayerLocalMatrix.affineTransformation(
+			m_Rigidbody->m_Scale,
+			Vec3(0, 0, 0),
+			Quat(Vec3(1.0, 0, 0), m_Attack1ToRot),
+			Pos
+		);
+		return false;
+	}
+
+
+
+
+	//--------------------------------------------------------------------------------------
+	///	追従ステート（Sword）
+	//--------------------------------------------------------------------------------------
+	IMPLEMENT_SINGLETON_INSTANCE(NonAttackState)
+
+		void NonAttackState::Enter(const shared_ptr<Sword>& Obj) {
+		Obj->ComplianceStartBehavior();
+		//何もしない
+	}
+
+	void NonAttackState::Execute(const shared_ptr<Sword>& Obj) {
+		Obj->UpdateBehavior();
+
+		//コントローラの取得
+		auto CntlVec = App::GetApp()->GetInputDevice().GetControlerVec();
+		if (CntlVec[0].bConnected) {
+			//Xボタン
+			if (CntlVec[0].wPressedButtons & XINPUT_GAMEPAD_X) {
+				Obj->GetStateMachine()->ChangeState(Attack1State::Instance());
+			}
+		}
+
+	}
+
+	void NonAttackState::Exit(const shared_ptr<Sword>& Obj) {
+		//何もしない
+	}
+
+	//--------------------------------------------------------------------------------------
+	///	攻撃ステート１（Sword）
+	//--------------------------------------------------------------------------------------
+	IMPLEMENT_SINGLETON_INSTANCE(Attack1State)
+
+		void Attack1State::Enter(const shared_ptr<Sword>& Obj) {
+		Obj->Attack1StartBehavior();
+		//何もしない
+	}
+
+	void Attack1State::Execute(const shared_ptr<Sword>& Obj) {
+		if (Obj->Attack1ExcuteBehavior()) {
+			Obj->GetStateMachine()->ChangeState(NonAttackState::Instance());
+			return;
+		}
+		Obj->UpdateBehavior();
+	}
+
+	void Attack1State::Exit(const shared_ptr<Sword>& Obj) {
+		//何もしない
 	}
 
 

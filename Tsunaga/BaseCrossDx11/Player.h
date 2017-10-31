@@ -117,7 +117,170 @@ namespace basecross {
 		virtual void GetWorldMatrix(Mat4x4& m) const override;
 	};
 
+	//--------------------------------------------------------------------------------------
+	///	プレイヤーの剣(α用）
+	//--------------------------------------------------------------------------------------
+	class Sword : public GameObject, public MatrixInterface {
+		//テクスチャリソース名
+		wstring m_TextureResName;
+		//スケーリング
+		Vec3 m_Scale;
+		//回転
+		Quat m_Qt;
+		//位置
+		Vec3 m_Pos;
+		//親オブジェクト
+		weak_ptr<GameObject> m_ParentPtr;
+		//
+		//Rigidbodyのshared_ptr
+		shared_ptr<Rigidbody> m_Rigidbody;
 
+		//描画データ
+		shared_ptr<SimpleDrawObject> m_PtrObj;
+		//描画オブジェクト(weak_ptr)
+		weak_ptr<SimplePNTStaticRenderer2> m_Renderer;
+		//シャドウマップ用描画データ
+		shared_ptr<ShadowmapObject> m_PtrShadowmapObj;
+		//シャドウマップ描画オブジェクト(weak_ptr)
+		weak_ptr<ShadowmapRenderer> m_ShadowmapRenderer;
+		bool m_OwnShadowActive;
+		//このオブジェクトのプレイヤーから見たローカル行列
+		Mat4x4 m_PlayerLocalMatrix;
+		//プレイヤーの直後（先頭）の場合の補間係数
+		float m_LerpToParent;
+		//このオブジェクトのチャイルドオブジェクトから見たローカル行列
+		Mat4x4 m_ChildLocalMatrix;
+		//チャイルド後の場合の補間係数
+		float m_LerpToChild;
+		//Attack1の場合の目標となる回転
+		float m_Attack1ToRot;
+		//ステートマシーン
+		unique_ptr<StateMachine<Sword>>  m_StateMachine;
+	public:
+		//--------------------------------------------------------------------------------------
+		/*!
+		@brief コンストラクタ
+		@param[in]	StagePtr	ステージのポインタ
+		@param[in]	ParentPtr	親のポインタ
+		@param[in]	TextureResName	テクスチャリソース名
+		@param[in]	Scale	スケーリング
+		@param[in]	Qt	初期回転
+		@param[in]	Pos	位置
+		@param[in]	OwnShadowActive	影描画するかどうか
+		*/
+		//--------------------------------------------------------------------------------------
+		Sword(const shared_ptr<Stage>& StagePtr,
+			const shared_ptr<GameObject>& ParentPtr,
+			const wstring& TextureResName, const Vec3& Scale, const Quat& Qt, const Vec3& Pos,
+			bool OwnShadowActive);
+		//--------------------------------------------------------------------------------------
+		/*!
+		@brief デストラクタ
+		*/
+		//--------------------------------------------------------------------------------------
+		virtual ~Sword();
+		//--------------------------------------------------------------------------------------
+		/*!
+		@brief 初期化
+		@return	なし
+		*/
+		//--------------------------------------------------------------------------------------
+		virtual void OnCreate() override;
+		//--------------------------------------------------------------------------------------
+		/*!
+		@brief 更新
+		@return	なし
+		*/
+		//--------------------------------------------------------------------------------------
+		virtual void OnUpdate()override;
+		//--------------------------------------------------------------------------------------
+		/*!
+		@brief	シャドウマップの描画処理(仮想関数)
+		@return	なし
+		*/
+		//--------------------------------------------------------------------------------------
+		virtual void OnDrawShadowmap() override;
+		//--------------------------------------------------------------------------------------
+		/*!
+		@brief 描画
+		@return	なし
+		*/
+		//--------------------------------------------------------------------------------------
+		virtual void OnDraw()override;
+		//--------------------------------------------------------------------------------------
+		/*!
+		@brief	ステートマシンを得る
+		@return	ステートマシン
+		*/
+		//--------------------------------------------------------------------------------------
+		unique_ptr< StateMachine<Sword> >& GetStateMachine() {
+			return m_StateMachine;
+		}
+		//--------------------------------------------------------------------------------------
+		/*!
+		@brief ワールド行列の取得
+		@return	ワールド行列
+		*/
+		//--------------------------------------------------------------------------------------
+		virtual void GetWorldMatrix(Mat4x4& m) const override;
+		//--------------------------------------------------------------------------------------
+		/*!
+		@brief 追従する行動の開始
+		@return	なし
+		*/
+		//--------------------------------------------------------------------------------------
+		void ComplianceStartBehavior();
+		//--------------------------------------------------------------------------------------
+		/*!
+		@brief 攻撃１行動の開始
+		@return	なし
+		*/
+		//--------------------------------------------------------------------------------------
+		void Attack1StartBehavior();
+		//--------------------------------------------------------------------------------------
+		/*!
+		@brief 攻撃１行動の継続
+		@return	行動が終了したらtrue
+		*/
+		//--------------------------------------------------------------------------------------
+		bool Attack1ExcuteBehavior();
+		//--------------------------------------------------------------------------------------
+		/*!
+		@brief ステート共通処理
+		@return	なし
+		*/
+		//--------------------------------------------------------------------------------------
+		void UpdateBehavior();
+	};
+
+	//--------------------------------------------------------------------------------------
+	///	攻撃しないステート（Sword）
+	//--------------------------------------------------------------------------------------
+	class NonAttackState : public ObjState<Sword>
+	{
+		NonAttackState() {}
+	public:
+		//ステートのインスタンス取得
+		DECLARE_SINGLETON_INSTANCE(NonAttackState)
+		virtual void Enter(const shared_ptr<Sword>& Obj)override;
+		virtual void Execute(const shared_ptr<Sword>& Obj)override;
+		virtual void Exit(const shared_ptr<Sword>& Obj)override;
+	};
+
+
+	//--------------------------------------------------------------------------------------
+	///	攻撃ステート１（Sword）
+	//--------------------------------------------------------------------------------------
+	class Attack1State : public ObjState<Sword>
+	{
+		Attack1State() {}
+	public:
+		//ステートのインスタンス取得
+		DECLARE_SINGLETON_INSTANCE(Attack1State)
+		virtual void Enter(const shared_ptr<Sword>& Obj)override;
+		virtual void Execute(const shared_ptr<Sword>& Obj)override;
+		virtual void Exit(const shared_ptr<Sword>& Obj)override;
+	};
 
 }
 //end basecross
