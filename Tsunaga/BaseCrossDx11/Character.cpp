@@ -762,6 +762,7 @@ namespace basecross {
 		m_StopTime(2.0f),
 		m_TackleDis(1.0f),
 		m_TackleSpeed(5.0f),
+		m_TackleStart(Vec3(0.0f,0.0f,0.0f)),
 		m_OwnShadowActive(OwnShadowActive),
 		m_LerpToParent(0.2f),
 		m_LerpToChild(0.2f),
@@ -853,24 +854,27 @@ namespace basecross {
 			//距離を求める
 			float dis = ToPosVec.length();
 
+			// 突進して1.5秒たったら・・・・
 			if (m_FrameCount > m_StopTime * 1.5f * 60.0f)
 			{
 				m_Tackle = false;
 				m_FrameCount = 0.0f;
-				//m_TargetPos = Vec3(0.0f, 0.0f, 0.0f);
+				m_TargetPos = Vec3(0.0f, 0.0f, 0.0f);
 			}
+			// 止まりはじめ
 			else if (m_FrameCount > m_StopTime * 60.0f && m_Tackle == false)
 			{
 				m_Tackle = true;
 				if (m_TargetPos == Vec3(0.0f, 0.0f, 0.0f)) {
 					m_TargetPos = toPos;
+					m_TackleStart = m_Rigidbody->m_Pos;
 				}
 			}
 			
-
+			// 突進の処理
 			if (m_Tackle == true)
 			{
-				Vec3 Tag = m_TargetPos - m_Rigidbody->m_Pos;
+				Vec3 Tag = m_TargetPos - m_TackleStart;
 				
 				Tag.normalize();
 
@@ -881,7 +885,7 @@ namespace basecross {
 				return;
 			}
 			
-			
+			// エネミー移動処理
 			if (m_Tackle == false)
 			{
 				if (dis <= m_TackleDis)

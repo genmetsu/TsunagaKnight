@@ -569,6 +569,8 @@ namespace basecross {
 		//突撃のスピード
 		float m_TackleSpeed;
 
+		Vec3 m_TackleStart;
+
 		//親オブジェクト
 		weak_ptr<GameObject> m_ParentPtr;
 		//
@@ -691,6 +693,7 @@ namespace basecross {
 		*/
 		//--------------------------------------------------------------------------------------
 		void UpdateBehavior();
+
 	};
 
 
