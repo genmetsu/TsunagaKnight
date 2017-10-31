@@ -857,24 +857,26 @@ namespace basecross {
 			{
 				m_Tackle = false;
 				m_FrameCount = 0.0f;
+				//m_TargetPos = Vec3(0.0f, 0.0f, 0.0f);
 			}
-			else if (m_FrameCount > m_StopTime * 60.0f)
+			else if (m_FrameCount > m_StopTime * 60.0f && m_Tackle == false)
 			{
 				m_Tackle = true;
+				if (m_TargetPos == Vec3(0.0f, 0.0f, 0.0f)) {
+					m_TargetPos = toPos;
+				}
 			}
-			if (m_TargetPos == Vec3(0.0f, 0.0f, 0.0f)) {
-				m_TargetPos = toPos;
-			}
+			
 
 			if (m_Tackle == true)
 			{
 				Vec3 Tag = m_TargetPos - m_Rigidbody->m_Pos;
 				
-				/*ToPosVec.normalize();
+				Tag.normalize();
 
-				ToPosVec *= m_TackleSpeed;
+				Tag *= m_TackleSpeed;
 
-				m_Rigidbody->m_Velocity = ToPosVec;*/
+				m_Rigidbody->m_Velocity = Tag;
 				m_FrameCount++;
 				return;
 			}
