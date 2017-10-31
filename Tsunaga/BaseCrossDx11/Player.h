@@ -25,6 +25,12 @@ namespace basecross {
 		bool m_Trace;
 		///ジャンプのロック
 		bool m_JumpLock;
+		/// ステップ（回避行動）してるかどうか
+		bool m_isStep;
+		/// ステップする方向
+		Vec3 m_StepVec;
+		/// フレームカウント用変数
+		float m_FrameCount;
 		//Rigidbodyのshared_ptr
 		shared_ptr<Rigidbody> m_Rigidbody;
 		///描画データ
