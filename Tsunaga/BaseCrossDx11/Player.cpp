@@ -18,6 +18,8 @@ namespace basecross {
 		m_Trace(Trace),
 		m_BaseY(0.25f / 2.0f),
 		m_Posision(Pos),
+		m_FrameCount(0.0f),
+		m_isStep(false),
 		m_JumpLock(false)
 	{}
 	Player::~Player() {}
@@ -85,6 +87,8 @@ namespace basecross {
 //		body.m_IsDrawActive = true;
 		body.SetToBefore();
 
+		m_StepVec = Vec3(0.0f);
+
 		m_Rigidbody = PtrGameStage->AddRigidbody(body);
 
 		//行列の定義
@@ -122,24 +126,37 @@ namespace basecross {
 		//コントローラの取得
 		auto CntlVec = App::GetApp()->GetInputDevice().GetControlerVec();
 		if (CntlVec[0].bConnected) {
-			if (!m_JumpLock) {
+			//if (!m_JumpLock) {
 				//Aボタン
-				if (CntlVec[0].wPressedButtons & XINPUT_GAMEPAD_A) {
-					m_Rigidbody->m_BeforePos.y += 0.01f;
-					m_Rigidbody->m_Pos.y += 0.01f;
-					m_Rigidbody->m_Velocity += Vec3(0, 4.0f, 0);
-					m_JumpLock = true;
-					//fireの送出
-					auto FirePtr = GetStage<GameStage>()->FindTagGameObject<MultiFire>(L"MultiFire");
-					Vec3 Emitter = m_Rigidbody->m_Pos;
-					Emitter.y -= 0.125f;
-					FirePtr->InsertFire(Emitter);
-				}
+			if (CntlVec[0].wPressedButtons & XINPUT_GAMEPAD_A && m_isStep == false) {
+				//m_Rigidbody->m_Force += Direction * 1000.0f;
+				m_isStep = true;
+
+				m_StepVec = GetMoveVector();
+				m_StepVec.normalize();
+
+				//fireの送出
+				auto FirePtr = GetStage<GameStage>()->FindTagGameObject<MultiFire>(L"MultiFire");
+				Vec3 Emitter = m_Rigidbody->m_Pos;
+				Emitter.y -= 0.125f;
+				FirePtr->InsertFire(Emitter);
 			}
+				
+			//}
 			Vec3 Direction = GetMoveVector();
 			if (length(Direction) < 0.1f) {
 				m_Rigidbody->m_Velocity.x *= 0.9f;
 				m_Rigidbody->m_Velocity.z *= 0.9f;
+			}
+			if (m_isStep == true) {
+				m_Rigidbody->m_Velocity += m_StepVec * 2.0f;
+
+				//Vec2 TempVelo(m_Rigidbody->m_Velocity.x, m_Rigidbody->m_Velocity.z);
+				//TempVelo = XMVector2ClampLength(TempVelo, 0, 100.0f);
+				//m_Rigidbody->m_Velocity.x = TempVelo.x;
+				//m_Rigidbody->m_Velocity.z = TempVelo.y;
+
+				m_FrameCount++;
 			}
 			else {
 				//フォースで変更する場合は以下のように記述
@@ -150,7 +167,12 @@ namespace basecross {
 				TempVelo = XMVector2ClampLength(TempVelo, 0, 5.0f);
 				m_Rigidbody->m_Velocity.x = TempVelo.x;
 				m_Rigidbody->m_Velocity.z = TempVelo.y;
+				
 			}
+		}
+		if (m_FrameCount >= 10.0f) {
+			m_isStep = false;
+			m_FrameCount = 0.0f;
 		}
 		m_Rigidbody->m_Force += m_Rigidbody->m_Gravity * m_Rigidbody->m_Mass;
 	}
