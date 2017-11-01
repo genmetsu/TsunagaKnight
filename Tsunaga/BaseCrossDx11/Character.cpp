@@ -784,7 +784,7 @@ namespace basecross {
 		body.m_Quat = m_Qt;
 		body.m_Pos = m_Pos;
 		body.m_CollType = CollType::typeSPHERE;
-		body.m_IsCollisionActive = false;
+		body.m_IsCollisionActive = true;
 		body.m_IsFixed = true;
 		//		body.m_IsDrawActive = true;
 		body.SetToBefore();

@@ -55,7 +55,7 @@ namespace basecross {
 			);
 
 		//Œ•‚Ìì¬
-		Par = AddGameObject<Sword>(
+		AddGameObject<Sword>(
 			Par,
 			L"SKY_TX",
 			Vec3(0.1f, 0.1f, 0.5f),
@@ -73,7 +73,6 @@ namespace basecross {
 				Quat(),
 				Vec3(x + 2.0f, 0.125f, 0.0f),
 				false);
-
 		}
 
 		
