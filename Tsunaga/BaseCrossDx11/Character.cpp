@@ -888,12 +888,18 @@ namespace basecross {
 			// エネミー移動処理
 			if (m_Tackle == false)
 			{
-				if (dis <= m_TackleDis)
+				if (m_FrameCount > 3.0f)
 				{
 					m_Rigidbody->m_Velocity = Vec3(0, 0, 0);
-
 					m_FrameCount++;
 				}
+				// プレイヤーとエネミーの距離が近くなった時の処理
+				else if (dis <= m_TackleDis)
+				{
+					m_FrameCount++;
+				}
+
+				// プレイヤーに向かう処理
 				else
 				{
 					ToPosVec.normalize();
