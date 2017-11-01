@@ -888,7 +888,7 @@ namespace basecross {
 			// エネミー移動処理
 			if (m_Tackle == false)
 			{
-				if (m_FrameCount > 3.0f)
+				if (m_FrameCount >= 1.0f)
 				{
 					m_Rigidbody->m_Velocity = Vec3(0, 0, 0);
 					m_FrameCount++;
