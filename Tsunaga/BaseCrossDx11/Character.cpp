@@ -740,6 +740,38 @@ namespace basecross {
 		}
 	}
 
+	//--------------------------------------------------------------------------------------
+	///	”wŒiƒXƒvƒ‰ƒCƒg
+	//--------------------------------------------------------------------------------------
+	SkySprite::SkySprite(const shared_ptr<Stage>& StagePtr,
+		const wstring& TextureResName,
+		const Vec2& StartScale,
+		float StartRot,
+		const Vec2& StartPos,
+		UINT XWrap, UINT YWrap) :
+		SpriteBase(StagePtr, TextureResName, StartScale, StartRot, StartPos, XWrap, YWrap),
+		m_TotalTime(0)
+	{
+		SetBlendState(BlendState::Trace);
+	}
+
+	void SkySprite::AdjustVertex() {
+		
+	}
+
+	void SkySprite::UpdateVertex(float ElapsedTime, VertexPositionColorTexture* vertices) {
+		
+		Col4 UpdateCol(1.0f, 1.0f, 1.0f, 1.0f);
+		for (size_t i = 0; i < m_SquareMesh->GetNumVertices(); i++) {
+			vertices[i] = VertexPositionColorTexture(
+				m_BackupVertices[i].position,
+				UpdateCol,
+				m_BackupVertices[i].textureCoordinate
+			);
+		}
+
+	}
+
 
 	//--------------------------------------------------------------------------------------
 	///	EnemyObject
