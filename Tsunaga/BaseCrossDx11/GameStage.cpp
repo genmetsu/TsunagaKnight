@@ -32,6 +32,15 @@ namespace basecross {
 		auto Dev = App::GetApp()->GetDeviceResources();
 		Dev->GetShadowMapRenderTarget(2048.0f);
 
+		//背景スプライトの作成
+		AddGameObject<SkySprite>(
+			L"SKY_TX",
+			Vec2(1280, 500),
+			0.0f,
+			Vec2(0, 300),
+			1, 1
+			);
+
 		//複数使用する球体の登録（リソース登録する）
 		RegisterDefaultSphere();
 
@@ -64,9 +73,9 @@ namespace basecross {
 			false);
 
 		//エネミーの作成
-		for (int i = 0; i < 1; i++) {
+		for (int i = 0; i < 10; i++) {
 			float x = (float)(i + 1);
-			Par = AddGameObject<EnemyObject>(
+			AddGameObject<EnemyObject>(
 				Par,
 				L"SKY_TX",
 				Vec3(0.25f, 0.25f, 0.25f),
@@ -100,23 +109,23 @@ namespace basecross {
 
 
 		//回転するスプライトの作成
-		AddGameObject<RotateSprite>(
+		/*AddGameObject<RotateSprite>(
 			L"TRACE_TX",
 			Vec2(160, 160),
 			0.0f,
 			Vec2(-480, 260),
 			4, 4
-			);
+			);*/
 
 
 		//メッセージを表示するスプライトの作成
-		AddGameObject<MessageSprite>(
+		/*AddGameObject<MessageSprite>(
 			L"MESSAGE_TX",
 			Vec2(256, 64),
 			0.0f,
 			Vec2(480, 260),
 			1, 1
-			);
+			);*/
 
 		//文字列描画オブジェクトの作成
 		AddGameObject<StringDrawObject>();
