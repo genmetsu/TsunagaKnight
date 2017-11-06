@@ -897,13 +897,15 @@ namespace basecross {
 		m_PtrShadowmapObj->m_WorldMatrix = World;
 		m_PtrShadowmapObj->m_Camera = GetStage<Stage>()->GetCamera();
 		//ステートマシンの構築
-		//m_StateMachine.reset(new StateMachine<EnemyObject>(GetThis<EnemyObject>()));
+		m_StateMachine.reset(new StateMachine<EnemyObject>(GetThis<EnemyObject>()));
 		//ステート初期値設定
-		//m_StateMachine->ChangeState(ChildComplianceState::Instance());
+		m_StateMachine->ChangeState(EnemyComplianceState::Instance());
 
 	}
 
 	void EnemyObject::OnUpdate() {
+		//ステートマシン更新
+		m_StateMachine->Update();
 		//前回のターンからの経過時間を求める
 		float ElapsedTime = App::GetApp()->GetElapsedTime();
 		auto shptr = m_ParentPtr.lock();
@@ -1152,6 +1154,56 @@ namespace basecross {
 			Pos
 		);
 		return false;
+	}
+
+	//--------------------------------------------------------------------------------------
+	///	追従ステート（EnemyObject）
+	//--------------------------------------------------------------------------------------
+	IMPLEMENT_SINGLETON_INSTANCE(EnemyComplianceState)
+
+		void EnemyComplianceState::Enter(const shared_ptr<EnemyObject>& Obj) {
+		Obj->ComplianceStartBehavior();
+		//何もしない
+	}
+
+	void EnemyComplianceState::Execute(const shared_ptr<EnemyObject>& Obj) {
+		Obj->UpdateBehavior();
+
+		//コントローラの取得
+		auto CntlVec = App::GetApp()->GetInputDevice().GetControlerVec();
+		if (CntlVec[0].bConnected) {
+			//Xボタン
+			if (CntlVec[0].wPressedButtons & XINPUT_GAMEPAD_X) {
+				Obj->GetStateMachine()->ChangeState(EnemyAttack1State::Instance());
+			}
+		}
+
+	}
+
+	void EnemyComplianceState::Exit(const shared_ptr<EnemyObject>& Obj) {
+		//何もしない
+	}
+
+	//--------------------------------------------------------------------------------------
+	///	攻撃ステート１（EnemyObject）
+	//--------------------------------------------------------------------------------------
+	IMPLEMENT_SINGLETON_INSTANCE(EnemyAttack1State)
+
+		void EnemyAttack1State::Enter(const shared_ptr<EnemyObject>& Obj) {
+		Obj->Attack1StartBehavior();
+		//何もしない
+	}
+
+	void EnemyAttack1State::Execute(const shared_ptr<EnemyObject>& Obj) {
+		if (Obj->Attack1ExcuteBehavior()) {
+			Obj->GetStateMachine()->ChangeState(EnemyAttack1State::Instance());
+			return;
+		}
+		Obj->UpdateBehavior();
+	}
+
+	void EnemyAttack1State::Exit(const shared_ptr<EnemyObject>& Obj) {
+		//何もしない
 	}
 
 

@@ -659,7 +659,7 @@ namespace basecross {
 		//Attack1の場合の目標となる回転
 		float m_Attack1ToRot;
 		//ステートマシーン
-		//unique_ptr<StateMachine<ChildObject>>  m_StateMachine;
+		unique_ptr<StateMachine<EnemyObject>>  m_StateMachine;
 	public:
 		//--------------------------------------------------------------------------------------
 		/*!
@@ -717,9 +717,9 @@ namespace basecross {
 		@return	ステートマシン
 		*/
 		//--------------------------------------------------------------------------------------
-		/*unique_ptr< StateMachine<ChildObject> >& GetStateMachine() {
+		unique_ptr< StateMachine<EnemyObject> >& GetStateMachine() {
 			return m_StateMachine;
-		}*/
+		}
 		//--------------------------------------------------------------------------------------
 		/*!
 		@brief ワールド行列の取得
@@ -774,6 +774,36 @@ namespace basecross {
 			m_AttackPoint = Value;
 		}
 	};
+
+	//--------------------------------------------------------------------------------------
+	///	追従ステート（ChildObject）
+	//--------------------------------------------------------------------------------------
+	class EnemyComplianceState : public ObjState<EnemyObject>
+	{
+		EnemyComplianceState() {}
+	public:
+		//ステートのインスタンス取得
+		DECLARE_SINGLETON_INSTANCE(EnemyComplianceState)
+		virtual void Enter(const shared_ptr<EnemyObject>& Obj)override;
+		virtual void Execute(const shared_ptr<EnemyObject>& Obj)override;
+		virtual void Exit(const shared_ptr<EnemyObject>& Obj)override;
+	};
+
+
+	//--------------------------------------------------------------------------------------
+	///	攻撃ステート１（ChildObject）
+	//--------------------------------------------------------------------------------------
+	class EnemyAttack1State : public ObjState<EnemyObject>
+	{
+		EnemyAttack1State() {}
+	public:
+		//ステートのインスタンス取得
+		DECLARE_SINGLETON_INSTANCE(EnemyAttack1State)
+		virtual void Enter(const shared_ptr<EnemyObject>& Obj)override;
+		virtual void Execute(const shared_ptr<EnemyObject>& Obj)override;
+		virtual void Exit(const shared_ptr<EnemyObject>& Obj)override;
+	};
+
 
 
 }
