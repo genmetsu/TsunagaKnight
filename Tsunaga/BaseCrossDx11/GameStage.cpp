@@ -73,7 +73,7 @@ namespace basecross {
 			false);
 
 		//エネミーの作成
-		for (int i = 0; i < 10; i++) {
+		for (int i = 0; i < 1; i++) {
 			float x = (float)(i + 1);
 			AddGameObject<EnemyObject>(
 				Par,
