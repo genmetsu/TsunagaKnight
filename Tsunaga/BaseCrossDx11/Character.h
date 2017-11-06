@@ -604,6 +604,7 @@ namespace basecross {
 	///	敵オブジェクトの親クラス
 	//--------------------------------------------------------------------------------------
 	class EnemyObject : public GameObject, public MatrixInterface {
+	protected:
 		//テクスチャリソース名
 		wstring m_TextureResName;
 		//スケーリング
@@ -804,7 +805,94 @@ namespace basecross {
 		virtual void Exit(const shared_ptr<EnemyObject>& Obj)override;
 	};
 
+	class NeedleEnemy : public EnemyObject
+	{
+	//テクスチャリソース名
+	wstring m_TextureResName;
+	//スケーリング
+	Vec3 m_Scale;
+	//回転
+	Quat m_Qt;
+	//位置
+	Vec3 m_Pos;
+	//ひとつ前の位置
+	Vec3 m_BeforePos;
+	// 突進の位置座標
+	Vec3 m_TargetPos;
+	//追いかけるスピード
+	float m_Speed;
+	//フレームカウント
+	float m_FrameCount;
+	//突撃するかどうか
+	bool m_Tackle;
+	//突撃する際に止まる時間
+	float m_StopTime;
+	//どれぐらい近づいたら突撃するかの距離
+	float m_TackleDis;
+	//突撃のスピード
+	float m_TackleSpeed;
+	float m_HP;
+	float m_AttackPoint;
+	Vec3 m_TackleStart;
 
+	//親オブジェクト
+	weak_ptr<GameObject> m_ParentPtr;
+	//
+	//Rigidbodyのshared_ptr
+	shared_ptr<Rigidbody> m_Rigidbody;
+
+	//描画データ
+	shared_ptr<SimpleDrawObject> m_PtrObj;
+	//描画オブジェクト(weak_ptr)
+	weak_ptr<SimplePNTStaticRenderer2> m_Renderer;
+	//シャドウマップ用描画データ
+	shared_ptr<ShadowmapObject> m_PtrShadowmapObj;
+	//シャドウマップ描画オブジェクト(weak_ptr)
+	weak_ptr<ShadowmapRenderer> m_ShadowmapRenderer;
+	bool m_OwnShadowActive;
+	//このオブジェクトのプレイヤーから見たローカル行列
+	Mat4x4 m_PlayerLocalMatrix;
+	//プレイヤーの直後（先頭）の場合の補間係数
+	float m_LerpToParent;
+	//このオブジェクトのチャイルドオブジェクトから見たローカル行列
+	Mat4x4 m_ChildLocalMatrix;
+	//チャイルド後の場合の補間係数
+	float m_LerpToChild;
+	//Attack1の場合の目標となる回転
+	float m_Attack1ToRot;
+	//ステートマシーン
+	unique_ptr<StateMachine<EnemyObject>>  m_StateMachine;
+	public:
+		//--------------------------------------------------------------------------------------
+		/*!
+		@brief コンストラクタ
+		@param[in]	StagePtr	ステージのポインタ
+		@param[in]	ParentPtr	親のポインタ
+		@param[in]	TextureResName	テクスチャリソース名
+		@param[in]	Scale	スケーリング
+		@param[in]	Qt	初期回転
+		@param[in]	Pos	位置
+		@param[in]	OwnShadowActive	影描画するかどうか
+		*/
+		//--------------------------------------------------------------------------------------
+		NeedleEnemy(const shared_ptr<Stage>& StagePtr,
+			const shared_ptr<GameObject>& ParentPtr,
+			const wstring& TextureResName, const Vec3& Scale, const Quat& Qt, const Vec3& Pos,
+			bool OwnShadowActive);
+		//--------------------------------------------------------------------------------------
+		/*!
+		@brief デストラクタ
+		*/
+		//--------------------------------------------------------------------------------------
+		virtual ~NeedleEnemy();
+		//--------------------------------------------------------------------------------------
+		/*!
+		@brief 初期化
+		@return	なし
+		*/
+		//--------------------------------------------------------------------------------------
+		//virtual void OnCreate() override;
+	};
 
 }
 //end basecross

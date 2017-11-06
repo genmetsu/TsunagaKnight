@@ -84,7 +84,18 @@ namespace basecross {
 				false);
 		}
 
-		
+		for (int i = 0; i < 1; i++) {
+			float x = (float)(i + 1);
+			AddGameObject<NeedleEnemy>(
+				Par,
+				L"SKY_TX",
+				Vec3(0.5f, 0.5f, 0.5f),
+				Quat(),
+				Vec3(x + 4.0f, 0.125f, 0.0f),
+				false);
+		}
+
+
 
 		//ChildObject�̍쐬
 		/*for (int i = 0; i < 10; i++) {
