@@ -95,6 +95,7 @@ namespace basecross {
 		AddGameObject<MultiSpark>();
 		//ファイアエフェクト
 		AddGameObject<MultiFire>();
+		AddGameObject<AttackSigns>();
 
 		//描画オブジェクトの追加
 		CreateDrawObjects();

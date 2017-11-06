@@ -113,6 +113,18 @@ namespace basecross {
 		void InsertFire(const Vec3& Pos);
 	};
 
+	class AttackSigns : public MultiParticle {
+	public:
+		//構築と破棄
+		AttackSigns(shared_ptr<Stage>& StagePtr);
+		virtual ~AttackSigns();
+		//初期化
+		virtual void OnCreate() override;
+		void InsertSigns(const Vec3& Pos);
+		virtual void OnUpdate() override;
+
+	};
+
 
 	//--------------------------------------------------------------------------------------
 	///	ワールド行列を取得するインターフェイス
