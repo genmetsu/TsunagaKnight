@@ -836,11 +836,13 @@ namespace basecross {
 		m_StopTime(2.0f),
 		m_TackleDis(1.0f),
 		m_TackleSpeed(5.0f),
-		m_TackleStart(Vec3(0.0f,0.0f,0.0f)),
+		m_TackleStart(Vec3(0.0f, 0.0f, 0.0f)),
 		m_OwnShadowActive(OwnShadowActive),
 		m_LerpToParent(0.2f),
 		m_LerpToChild(0.2f),
-		m_Attack1ToRot(0)
+		m_Attack1ToRot(0),
+		m_HP(100),
+		m_AttackPoint(100)
 
 	{}
 	EnemyObject::~EnemyObject() {}
@@ -989,8 +991,9 @@ namespace basecross {
 					m_Rigidbody->m_Velocity = ToPosVec;
 				}
 			}
+	
 
-				
+
 		}
 	}
 

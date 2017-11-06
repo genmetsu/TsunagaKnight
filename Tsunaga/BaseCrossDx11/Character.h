@@ -628,6 +628,8 @@ namespace basecross {
 		float m_TackleDis;
 		//突撃のスピード
 		float m_TackleSpeed;
+		float m_HP;
+		float m_AttackPoint;
 
 		Vec3 m_TackleStart;
 
@@ -754,6 +756,23 @@ namespace basecross {
 		//--------------------------------------------------------------------------------------
 		void UpdateBehavior();
 
+		float GetHP()
+		{
+			return m_HP;
+		}
+		void SetHP(float Value)
+		{
+			m_HP = Value;
+		}
+
+		float GetAttackPoint()
+		{
+			return m_AttackPoint;
+		}
+		void SetAttackPoint(float Value)
+		{
+			m_AttackPoint = Value;
+		}
 	};
 
 
