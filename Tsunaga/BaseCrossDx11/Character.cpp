@@ -199,6 +199,48 @@ namespace basecross {
 		}
 	}
 
+	AttackSigns::AttackSigns(shared_ptr<Stage>& StagePtr) :
+		MultiParticle(StagePtr)
+	{}
+	AttackSigns::~AttackSigns() {}
+
+	//初期化
+	void AttackSigns::OnCreate() {
+		//加算描画処理をする
+		SetAddType(true);
+		//タグの追加
+		AddTag(L"AttackSigns");
+	}
+
+
+	void AttackSigns::InsertSigns(const Vec3& Pos)
+	{
+		auto ParticlePtr = InsertParticle(16);
+		ParticlePtr->m_EmitterPos = Pos;
+		ParticlePtr->SetTextureResource(L"FIRE_TX");
+		ParticlePtr->m_MaxTime = 0.5f;
+		vector<ParticleSprite>& pSpriteVec = ParticlePtr->GetParticleSpriteVec();
+		for (auto& rParticleSprite : ParticlePtr->GetParticleSpriteVec()) {
+			rParticleSprite.m_LocalPos.x = Util::RandZeroToOne() * 0.1f - 0.05f;
+			rParticleSprite.m_LocalPos.y = Util::RandZeroToOne() * 0.1f;
+			rParticleSprite.m_LocalPos.z = Util::RandZeroToOne() * 0.1f - 0.05f;
+			//各パーティクルの移動速度を指定
+			rParticleSprite.m_Velocity = Vec3(
+				rParticleSprite.m_LocalPos.x * 5.0f,
+				rParticleSprite.m_LocalPos.y * 5.0f,
+				rParticleSprite.m_LocalPos.z * 5.0f
+			);
+			//色の指定
+			rParticleSprite.m_Color = Col4(1.0f, 1.0f, 1.0f, 1.0f);
+		}
+	}
+
+	void AttackSigns::OnUpdate()
+	{
+		MultiParticle::OnUpdate();
+		float ElapsedTime = App::GetApp()->GetElapsedTime();
+	}
+
 	//--------------------------------------------------------------------------------------
 	///	Simple描画をする球体
 	//--------------------------------------------------------------------------------------
@@ -929,6 +971,12 @@ namespace basecross {
 				else if (dis <= m_TackleDis)
 				{
 					m_FrameCount++;
+					//fireの送出
+					auto FirePtr = GetStage<GameStage>()->FindTagGameObject<AttackSigns>(L"AttackSigns");
+					Vec3 Emitter = m_Rigidbody->m_Pos;
+					Emitter.y -= 0.125f;
+					FirePtr->InsertSigns(Emitter);
+
 				}
 
 				// プレイヤーに向かう処理
