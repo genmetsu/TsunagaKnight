@@ -221,17 +221,18 @@ namespace basecross {
 		ParticlePtr->m_MaxTime = 0.5f;
 		vector<ParticleSprite>& pSpriteVec = ParticlePtr->GetParticleSpriteVec();
 		for (auto& rParticleSprite : ParticlePtr->GetParticleSpriteVec()) {
-			rParticleSprite.m_LocalPos.x = Util::RandZeroToOne() * 0.1f - 0.05f;
+			rParticleSprite.m_LocalPos.x = Util::RandZeroToOne() * 0.1f;
 			rParticleSprite.m_LocalPos.y = Util::RandZeroToOne() * 0.1f;
 			rParticleSprite.m_LocalPos.z = Util::RandZeroToOne() * 0.1f - 0.05f;
+			rParticleSprite.m_LocalScale = Vec2(0.2f, 0.2f);
 			//各パーティクルの移動速度を指定
 			rParticleSprite.m_Velocity = Vec3(
-				rParticleSprite.m_LocalPos.x * 5.0f,
-				rParticleSprite.m_LocalPos.y * 5.0f,
+				rParticleSprite.m_LocalPos.x * 2.0f,
+				rParticleSprite.m_LocalPos.y * 2.0f,
 				rParticleSprite.m_LocalPos.z * 5.0f
 			);
 			//色の指定
-			rParticleSprite.m_Color = Col4(1.0f, 1.0f, 1.0f, 1.0f);
+			rParticleSprite.m_Color = Col4(0.5f, 0.125f, 0.25f, 1.0f);
 		}
 	}
 
@@ -833,8 +834,8 @@ namespace basecross {
 		m_FrameCount(0.0f),
 		m_Speed(1.0f),
 		m_Tackle(false),
-		m_StopTime(2.0f),
-		m_TackleDis(1.0f),
+		m_StopTime(1.0f),
+		m_TackleDis(0.0f),
 		m_TackleSpeed(5.0f),
 		m_TackleStart(Vec3(0.0f, 0.0f, 0.0f)),
 		m_OwnShadowActive(OwnShadowActive),
@@ -1205,37 +1206,5 @@ namespace basecross {
 	void EnemyAttack1State::Exit(const shared_ptr<EnemyObject>& Obj) {
 		//何もしない
 	}
-
-
-
-	NeedleEnemy::NeedleEnemy(const shared_ptr<Stage>& StagePtr, const shared_ptr<GameObject>& ParentPtr, 
-		const wstring & TextureResName, const Vec3 & Scale, 
-		const Quat & Qt, const Vec3 & Pos, bool OwnShadowActive) :
-		EnemyObject(StagePtr),
-		m_ParentPtr(ParentPtr),
-		m_TextureResName(TextureResName),
-		m_Scale(Scale),
-		m_Qt(Qt),
-		m_Pos(Pos),
-		m_BeforePos(Pos),
-		m_FrameCount(0.0f),
-		m_Speed(1.0f),
-		m_Tackle(false),
-		m_StopTime(2.0f),
-		m_TackleDis(1.0f),
-		m_TackleSpeed(5.0f),
-		m_TackleStart(Vec3(0.0f, 0.0f, 0.0f)),
-		m_OwnShadowActive(OwnShadowActive),
-		m_LerpToParent(0.2f),
-		m_LerpToChild(0.2f),
-		m_Attack1ToRot(0),
-		m_HP(100),
-		m_AttackPoint(100)
-	{}
-
-	NeedleEnemy::~NeedleEnemy()
-	{
-	}
-
 }
 //end basecross
