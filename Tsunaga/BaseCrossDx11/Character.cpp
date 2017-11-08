@@ -887,7 +887,7 @@ namespace basecross {
 		m_FrameCount(0.0f),
 		m_Speed(1.0f),
 		m_Tackle(false),
-		m_StopTime(2.0f),
+		m_StopTime(1.5f),
 		m_TackleDis(1.0f),
 		m_TackleSpeed(5.0f),
 		m_TackleStart(Vec3(0.0f, 0.0f, 0.0f)),
