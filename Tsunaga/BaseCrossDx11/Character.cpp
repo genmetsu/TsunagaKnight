@@ -144,17 +144,6 @@ namespace basecross {
 		for (auto ParticlePtr : GetParticleVec()) {
 			for (auto& rParticleSprite : ParticlePtr->GetParticleSpriteVec()) {
 				if (rParticleSprite.m_Active) {
-					rParticleSprite.m_Color += 0.01f;
-					rParticleSprite.m_Color.w = 1.0f;
-					if (rParticleSprite.m_Color.x >= 1.0f) {
-						rParticleSprite.m_Color.x = 1.0f;
-					}
-					if (rParticleSprite.m_Color.y >= 1.0f) {
-						rParticleSprite.m_Color.y = 1.0f;
-					}
-					if (rParticleSprite.m_Color.z >= 1.0f) {
-						rParticleSprite.m_Color.z = 1.0f;
-					}
 				}
 			}
 		}
@@ -240,6 +229,8 @@ namespace basecross {
 	{
 		MultiParticle::OnUpdate();
 		float ElapsedTime = App::GetApp()->GetElapsedTime();
+
+
 	}
 	//--------------------------------------------------------------------------------------
 	//class StepEffect : public MultiParticle;
@@ -261,15 +252,19 @@ namespace basecross {
 
 	void StepEffect::InsertEffect(const Vec3& Pos)
 	{
-		auto ParticlePtr = InsertParticle(1);
+		auto ParticlePtr = InsertParticle(2);
 		ParticlePtr->m_EmitterPos = Pos;
 		ParticlePtr->SetTextureResource(L"STEP_TX");
 		ParticlePtr->m_MaxTime = 0.5f;
+
+		auto &camera = GetStage()->GetCamera();
+		Vec3 camera_pos = camera.m_CamerEye;
+
+		Vec3 MoveVec = camera_pos - Pos;
+		MoveVec.normalize();
+
 		vector<ParticleSprite>& pSpriteVec = ParticlePtr->GetParticleSpriteVec();
 		for (auto& rParticleSprite : ParticlePtr->GetParticleSpriteVec()) {
-			rParticleSprite.m_LocalPos.x = Util::RandZeroToOne() * 0.1f - 0.05f;
-			rParticleSprite.m_LocalPos.y = Util::RandZeroToOne() * 0.1f;
-			rParticleSprite.m_LocalPos.z = Util::RandZeroToOne() * 0.1f - 0.05f;
 			//各パーティクルの移動速度を指定
 			rParticleSprite.m_Velocity = Vec3(
 				rParticleSprite.m_LocalPos.x * 5.0f,
@@ -285,6 +280,13 @@ namespace basecross {
 	{
 		MultiParticle::OnUpdate();
 		float ElapsedTime = App::GetApp()->GetElapsedTime();
+		for (auto ParticlePtr : GetParticleVec()) {
+			for (auto& rParticleSprite : ParticlePtr->GetParticleSpriteVec()) {
+				if (rParticleSprite.m_Active) {
+					rParticleSprite.m_Color.w -= 0.03f;
+				}
+			}
+		}
 	}
 
 	//--------------------------------------------------------------------------------------
