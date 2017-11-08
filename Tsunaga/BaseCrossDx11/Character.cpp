@@ -207,7 +207,7 @@ namespace basecross {
 	//初期化
 	void AttackSigns::OnCreate() {
 		//加算描画処理をする
-		SetAddType(true);
+		SetAddType(false);
 		//タグの追加
 		AddTag(L"AttackSigns");
 	}
@@ -215,15 +215,16 @@ namespace basecross {
 
 	void AttackSigns::InsertSigns(const Vec3& Pos)
 	{
-		auto ParticlePtr = InsertParticle(16);
+		auto ParticlePtr = InsertParticle(2);
 		ParticlePtr->m_EmitterPos = Pos;
-		ParticlePtr->SetTextureResource(L"FIRE_TX");
+		ParticlePtr->SetTextureResource(L"SPARK_TX");
 		ParticlePtr->m_MaxTime = 0.5f;
 		vector<ParticleSprite>& pSpriteVec = ParticlePtr->GetParticleSpriteVec();
 		for (auto& rParticleSprite : ParticlePtr->GetParticleSpriteVec()) {
 			rParticleSprite.m_LocalPos.x = Util::RandZeroToOne() * 0.1f - 0.05f;
 			rParticleSprite.m_LocalPos.y = Util::RandZeroToOne() * 0.1f;
 			rParticleSprite.m_LocalPos.z = Util::RandZeroToOne() * 0.1f - 0.05f;
+			rParticleSprite.m_LocalScale = Vec2(5.0, 0.1);
 			//各パーティクルの移動速度を指定
 			rParticleSprite.m_Velocity = Vec3(
 				rParticleSprite.m_LocalPos.x * 5.0f,
@@ -231,7 +232,7 @@ namespace basecross {
 				rParticleSprite.m_LocalPos.z * 5.0f
 			);
 			//色の指定
-			rParticleSprite.m_Color = Col4(1.0f, 1.0f, 1.0f, 1.0f);
+			rParticleSprite.m_Color = Col4(1.0f, 0.0f, 0.0f, 1.0f);
 		}
 	}
 
@@ -905,7 +906,7 @@ namespace basecross {
 
 	void EnemyObject::OnUpdate() {
 		//ステートマシン更新
-		m_StateMachine->Update();
+		//m_StateMachine->Update();
 		//前回のターンからの経過時間を求める
 		float ElapsedTime = App::GetApp()->GetElapsedTime();
 		auto shptr = m_ParentPtr.lock();
