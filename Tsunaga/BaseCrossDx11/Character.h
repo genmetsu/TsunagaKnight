@@ -808,60 +808,60 @@ namespace basecross {
 	class NeedleEnemy : public EnemyObject
 	{
 	//テクスチャリソース名
-	wstring m_TextureResName;
+	//wstring m_TextureResName;
 	//スケーリング
-	Vec3 m_Scale;
+	//Vec3 m_Scale;
 	//回転
-	Quat m_Qt;
+	//Quat m_Qt;
 	//位置
-	Vec3 m_Pos;
+	//Vec3 m_Pos;
 	//ひとつ前の位置
-	Vec3 m_BeforePos;
+	//Vec3 m_BeforePos;
 	// 突進の位置座標
-	Vec3 m_TargetPos;
+	//Vec3 m_TargetPos;
 	//追いかけるスピード
-	float m_Speed;
+	//float m_Speed;
 	//フレームカウント
-	float m_FrameCount;
+	//float m_FrameCount;
 	//突撃するかどうか
-	bool m_Tackle;
+	//bool m_Tackle;
 	//突撃する際に止まる時間
-	float m_StopTime;
+	//float m_StopTime;
 	//どれぐらい近づいたら突撃するかの距離
-	float m_TackleDis;
+	//float m_TackleDis;
 	//突撃のスピード
-	float m_TackleSpeed;
-	float m_HP;
-	float m_AttackPoint;
-	Vec3 m_TackleStart;
+	//float m_TackleSpeed;
+	//float m_HP;
+	//float m_AttackPoint;
+	//Vec3 m_TackleStart;
 
-	//親オブジェクト
-	weak_ptr<GameObject> m_ParentPtr;
-	//
-	//Rigidbodyのshared_ptr
-	shared_ptr<Rigidbody> m_Rigidbody;
+	//////親オブジェクト
+	////weak_ptr<GameObject> m_ParentPtr;
+	//////
+	//////Rigidbodyのshared_ptr
+	////shared_ptr<Rigidbody> m_Rigidbody;
 
-	//描画データ
-	shared_ptr<SimpleDrawObject> m_PtrObj;
-	//描画オブジェクト(weak_ptr)
-	weak_ptr<SimplePNTStaticRenderer2> m_Renderer;
-	//シャドウマップ用描画データ
-	shared_ptr<ShadowmapObject> m_PtrShadowmapObj;
-	//シャドウマップ描画オブジェクト(weak_ptr)
-	weak_ptr<ShadowmapRenderer> m_ShadowmapRenderer;
-	bool m_OwnShadowActive;
-	//このオブジェクトのプレイヤーから見たローカル行列
-	Mat4x4 m_PlayerLocalMatrix;
-	//プレイヤーの直後（先頭）の場合の補間係数
-	float m_LerpToParent;
-	//このオブジェクトのチャイルドオブジェクトから見たローカル行列
-	Mat4x4 m_ChildLocalMatrix;
-	//チャイルド後の場合の補間係数
-	float m_LerpToChild;
-	//Attack1の場合の目標となる回転
-	float m_Attack1ToRot;
-	//ステートマシーン
-	unique_ptr<StateMachine<EnemyObject>>  m_StateMachine;
+	//////描画データ
+	////shared_ptr<SimpleDrawObject> m_PtrObj;
+	//////描画オブジェクト(weak_ptr)
+	////weak_ptr<SimplePNTStaticRenderer2> m_Renderer;
+	//////シャドウマップ用描画データ
+	////shared_ptr<ShadowmapObject> m_PtrShadowmapObj;
+	//////シャドウマップ描画オブジェクト(weak_ptr)
+	////weak_ptr<ShadowmapRenderer> m_ShadowmapRenderer;
+	////bool m_OwnShadowActive;
+	//////このオブジェクトのプレイヤーから見たローカル行列
+	////Mat4x4 m_PlayerLocalMatrix;
+	//////プレイヤーの直後（先頭）の場合の補間係数
+	////float m_LerpToParent;
+	//////このオブジェクトのチャイルドオブジェクトから見たローカル行列
+	////Mat4x4 m_ChildLocalMatrix;
+	//////チャイルド後の場合の補間係数
+	////float m_LerpToChild;
+	//////Attack1の場合の目標となる回転
+	////float m_Attack1ToRot;
+	//////ステートマシーン
+	////unique_ptr<StateMachine<EnemyObject>>  m_StateMachine;
 	public:
 		//--------------------------------------------------------------------------------------
 		/*!
