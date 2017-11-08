@@ -214,12 +214,11 @@ namespace basecross {
 		vector<ParticleSprite>& pSpriteVec = ParticlePtr->GetParticleSpriteVec();
 		auto &Camera = GetStage()->GetCamera();
 		Vec3 Camera_Pos = Camera.m_CamerEye;
-
 		Vec3 MoveVec = Camera_Pos - Pos;
 		MoveVec.normalize();
 		for (auto& rParticleSprite : ParticlePtr->GetParticleSpriteVec()) {
-			rParticleSprite.m_LocalScale = Vec2(0.1, 0.1);
-			rParticleSprite.m_LocalPos += MoveVec;
+			rParticleSprite.m_LocalScale = Vec2(0.1f, 0.1f);
+			rParticleSprite.m_LocalPos += MoveVec * 0.5f;
 			//êFÇÃéwíË
 			rParticleSprite.m_Color = Col4(1.0f, 0.0f, 0.0f, 1.0f);
 		}
