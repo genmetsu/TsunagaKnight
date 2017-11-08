@@ -88,7 +88,7 @@ namespace basecross {
 			float x = (float)(i + 1);
 			AddGameObject<NeedleEnemy>(
 				Par,
-				L"SKY_TX",
+				L"FIRE_TX",
 				Vec3(0.5f, 0.5f, 0.5f),
 				Quat(),
 				Vec3(x + 4.0f, 0.125f, 0.0f),
