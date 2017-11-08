@@ -152,7 +152,8 @@ namespace basecross {
 		App::GetApp()->RegisterTexture(L"SPARK_TX", strTexture);
 		strTexture = DataDir + L"fire.png";
 		App::GetApp()->RegisterTexture(L"FIRE_TX", strTexture);
-
+		strTexture = DataDir + L"step.png";
+		App::GetApp()->RegisterTexture(L"STEP_TX", strTexture);
 
 
 	}

@@ -125,6 +125,22 @@ namespace basecross {
 
 	};
 
+	//--------------------------------------------------------------------------------------
+	//class StepEffect : public MultiParticle;
+	//用途: ステップのエフェクト
+	//--------------------------------------------------------------------------------------
+	class StepEffect : public MultiParticle {
+	public:
+		//構築と破棄
+		StepEffect(shared_ptr<Stage>& StagePtr);
+		virtual ~StepEffect();
+		//初期化
+		virtual void OnCreate() override;
+		void InsertEffect(const Vec3& Pos);
+		virtual void OnUpdate() override;
+
+	};
+
 
 	//--------------------------------------------------------------------------------------
 	///	ワールド行列を取得するインターフェイス

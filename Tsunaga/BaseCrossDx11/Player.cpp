@@ -135,11 +135,11 @@ namespace basecross {
 				m_StepVec = GetMoveVector();
 				m_StepVec.normalize();
 
-				//fireの送出
-				auto FirePtr = GetStage<GameStage>()->FindTagGameObject<MultiFire>(L"MultiFire");
+				//エフェクトの再生
+				auto FirePtr = GetStage<GameStage>()->FindTagGameObject<StepEffect>(L"StepEffect");
 				Vec3 Emitter = m_Rigidbody->m_Pos;
 				Emitter.y -= 0.125f;
-				FirePtr->InsertFire(Emitter);
+				FirePtr->InsertEffect(Emitter);
 			}
 				
 			//}
