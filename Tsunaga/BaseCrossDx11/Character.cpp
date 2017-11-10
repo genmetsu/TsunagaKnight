@@ -914,7 +914,7 @@ namespace basecross {
 		body.m_Pos = m_Pos;
 		body.m_CollType = CollType::typeSPHERE;
 		body.m_IsCollisionActive = true;
-		body.m_IsFixed = true;
+		body.m_IsFixed = false;
 		//		body.m_IsDrawActive = true;
 		body.SetToBefore();
 		m_Rigidbody = PtrGameStage->AddRigidbody(body);

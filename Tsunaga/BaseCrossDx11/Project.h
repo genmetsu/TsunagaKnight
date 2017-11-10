@@ -5,7 +5,7 @@
 
 #pragma once
 
-
+#include <Windows.h>
 #include "resource.h"
 #include "ProjectShader.h"
 #include "ProjectBehavior.h"
@@ -16,7 +16,3 @@
 #include "Character.h"
 #include "Player.h"
 #include "GameStage.h"
-
-
-
-
