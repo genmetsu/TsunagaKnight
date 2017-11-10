@@ -1373,13 +1373,23 @@ namespace basecross {
 			}
 		}
 	}
+
 	BulletObject::BulletObject(const shared_ptr<Stage>& StagePtr, 
 		const wstring & TextureResName, 
 		const Vec3 & Scale,
 		const Quat & Qt, 
 		const Vec3 & Pos, bool OwnShadowActive):
-		GameObject(StagePtr)
+		GameObject(StagePtr),
+		m_TextureResName(TextureResName),
+		m_Scale(Scale),
+		m_Qt(Qt),
+		m_Pos(Pos),
+		m_OwnShadowActive(OwnShadowActive),
+		m_LerpToParent(0.2f),
+		m_LerpToChild(0.2f),
+		m_Attack1ToRot(0)
 	{
+
 	}
 	BulletObject::~BulletObject()
 	{
@@ -1458,6 +1468,18 @@ namespace basecross {
 			m_Renderer = shptr;
 		}
 		shptr->AddDrawObject(m_PtrObj);
+	}
+
+	void BulletObject::GetWorldMatrix(Mat4x4& m) const {
+		//s—ñ‚Ì’è‹`
+		Mat4x4 World;
+		World.affineTransformation(
+			m_Rigidbody->m_Scale,
+			Vec3(0, 0, 0),
+			m_Rigidbody->m_Quat,
+			m_Rigidbody->m_Pos
+		);
+		m = World;
 	}
 }
 //end basecross
