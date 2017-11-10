@@ -1004,7 +1004,7 @@ namespace basecross {
 		//Attack1の場合の目標となる回転
 		float m_Attack1ToRot;
 		//ステートマシーン
-		unique_ptr<StateMachine<EnemyObject>>  m_StateMachine;
+		//unique_ptr<StateMachine<EnemyObject>>  m_StateMachine;
 	public:
 		//--------------------------------------------------------------------------------------
 		/*!
@@ -1061,7 +1061,13 @@ namespace basecross {
 		@return	ステートマシン
 		*/
 		//--------------------------------------------------------------------------------------
-		                      
+		//--------------------------------------------------------------------------------------
+		/*!
+		@brief ワールド行列の取得
+		@return	ワールド行列
+		*/
+		//--------------------------------------------------------------------------------------
+		virtual void GetWorldMatrix(Mat4x4& m) const override;
 	};
 
 }
