@@ -144,17 +144,6 @@ namespace basecross {
 		for (auto ParticlePtr : GetParticleVec()) {
 			for (auto& rParticleSprite : ParticlePtr->GetParticleSpriteVec()) {
 				if (rParticleSprite.m_Active) {
-					rParticleSprite.m_Color += 0.01f;
-					rParticleSprite.m_Color.w = 1.0f;
-					if (rParticleSprite.m_Color.x >= 1.0f) {
-						rParticleSprite.m_Color.x = 1.0f;
-					}
-					if (rParticleSprite.m_Color.y >= 1.0f) {
-						rParticleSprite.m_Color.y = 1.0f;
-					}
-					if (rParticleSprite.m_Color.z >= 1.0f) {
-						rParticleSprite.m_Color.z = 1.0f;
-					}
 				}
 			}
 		}
@@ -198,7 +187,10 @@ namespace basecross {
 			rParticleSprite.m_Color = Col4(1.0f, 1.0f, 1.0f, 1.0f);
 		}
 	}
-
+	//--------------------------------------------------------------------------------------
+	//class AttackSigns : public MultiParticle;
+	//用途:敵の攻撃する前兆エフェクト
+	//--------------------------------------------------------------------------------------
 	AttackSigns::AttackSigns(shared_ptr<Stage>& StagePtr) :
 		MultiParticle(StagePtr)
 	{}
@@ -222,12 +214,11 @@ namespace basecross {
 		vector<ParticleSprite>& pSpriteVec = ParticlePtr->GetParticleSpriteVec();
 		auto &Camera = GetStage()->GetCamera();
 		Vec3 Camera_Pos = Camera.m_CamerEye;
-
 		Vec3 MoveVec = Camera_Pos - Pos;
 		MoveVec.normalize();
 		for (auto& rParticleSprite : ParticlePtr->GetParticleSpriteVec()) {
-			rParticleSprite.m_LocalScale = Vec2(0.1, 0.1);
-			rParticleSprite.m_LocalPos += MoveVec;
+			rParticleSprite.m_LocalScale = Vec2(0.1f, 0.1f);
+			rParticleSprite.m_LocalPos += MoveVec * 0.5f;
 			//色の指定
 			rParticleSprite.m_Color = Col4(1.0f, 0.0f, 0.0f, 1.0f);
 		}
@@ -266,15 +257,19 @@ namespace basecross {
 
 	void StepEffect::InsertEffect(const Vec3& Pos)
 	{
-		auto ParticlePtr = InsertParticle(1);
+		auto ParticlePtr = InsertParticle(2);
 		ParticlePtr->m_EmitterPos = Pos;
 		ParticlePtr->SetTextureResource(L"STEP_TX");
 		ParticlePtr->m_MaxTime = 0.5f;
+
+		auto &camera = GetStage()->GetCamera();
+		Vec3 camera_pos = camera.m_CamerEye;
+
+		Vec3 MoveVec = camera_pos - Pos;
+		MoveVec.normalize();
+
 		vector<ParticleSprite>& pSpriteVec = ParticlePtr->GetParticleSpriteVec();
 		for (auto& rParticleSprite : ParticlePtr->GetParticleSpriteVec()) {
-			rParticleSprite.m_LocalPos.x = Util::RandZeroToOne() * 0.1f - 0.05f;
-			rParticleSprite.m_LocalPos.y = Util::RandZeroToOne() * 0.1f;
-			rParticleSprite.m_LocalPos.z = Util::RandZeroToOne() * 0.1f - 0.05f;
 			//各パーティクルの移動速度を指定
 			rParticleSprite.m_Velocity = Vec3(
 				rParticleSprite.m_LocalPos.x * 5.0f,
@@ -290,6 +285,13 @@ namespace basecross {
 	{
 		MultiParticle::OnUpdate();
 		float ElapsedTime = App::GetApp()->GetElapsedTime();
+		for (auto ParticlePtr : GetParticleVec()) {
+			for (auto& rParticleSprite : ParticlePtr->GetParticleSpriteVec()) {
+				if (rParticleSprite.m_Active) {
+					rParticleSprite.m_Color.w -= 0.03f;
+				}
+			}
+		}
 	}
 
 	//--------------------------------------------------------------------------------------
