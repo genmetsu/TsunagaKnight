@@ -1269,5 +1269,17 @@ namespace basecross {
 	{
 	}
 
+	ShootEnemy::ShootEnemy(const shared_ptr<Stage>& StagePtr, const shared_ptr<GameObject>& ParentPtr, 
+		const wstring & TextureResName,
+		const Vec3 & Scale, const Quat & Qt, 
+		const Vec3 & Pos, bool OwnShadowActive):
+		EnemyObject(StagePtr, ParentPtr, TextureResName, Scale, Qt, Pos, OwnShadowActive)
+	{
+	}
+
+	ShootEnemy::~ShootEnemy()
+	{
+	}
+
 }
 //end basecross

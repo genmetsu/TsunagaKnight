@@ -89,12 +89,22 @@ namespace basecross {
 			AddGameObject<NeedleEnemy>(
 				Par,
 				L"FIRE_TX",
-				Vec3(0.5f, 0.5f, 0.5f),
+				Vec3(0.25f, 0.25f, 0.25f),
 				Quat(),
 				Vec3(x + 4.0f, 0.125f, 0.0f),
 				false);
 		}
 
+		for (int i = 0; i < 1; i++) {
+			float x = (float)(i + 1);
+			AddGameObject<ShootEnemy>(
+				Par,
+				L"FIRE_TX",
+				Vec3(0.25f, 0.25f, 0.25f),
+				Quat(),
+				Vec3(x + 5.0f, 0.125f, 0.0f),
+				false);
+		}
 
 
 		//ChildObject�̍쐬
