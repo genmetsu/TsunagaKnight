@@ -106,6 +106,13 @@ namespace basecross {
 				false);
 		}
 
+		/*AddGameObject<BulletObject>(
+			L"SKY_TX",
+			Vec3(0.25f, 0.25f, 0.25f),
+			Quat(),
+			Vec3(2.0f, 0.125f, 0.0f),
+			false);*/
+
 
 		//ChildObject�̍쐬
 		/*for (int i = 0; i < 10; i++) {
