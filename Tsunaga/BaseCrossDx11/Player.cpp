@@ -386,57 +386,53 @@ namespace basecross {
 	}
 
 	void Sword::OnUpdate2() {
-		//vector<shared_ptr<GameObject>> EnemyVec;
-		//GetStage<GameStage>()->FindTagGameObjectVec(L"EnemyObject", EnemyVec);
+		
 
-		//for (auto& v : EnemyVec) {
-		//	//v.get();
-		//	auto n = 
-		//	Vec3 a = v->GetPosition();
-		//	float length = (a - m_Rigidbody->m_Pos).length();
-		//	if (length < 0.3f) {
-		//		Vec3 Emitter = m_Rigidbody->m_Pos;
-		//		Emitter.y -= 0.125f;
-		//		//Spaerkの送出
-		//		auto SpaerkPtr = GetStage<GameStage>()->FindTagGameObject<MultiSpark>(L"MultiSpark");
-		//		SpaerkPtr->InsertSpark(Emitter);
-		//	}
-		//}
+		auto& StateVec = GetStage<GameStage>()->GetCollisionStateVec();
+		for (auto& v : StateVec) {
+			if (v.m_Src == m_Rigidbody.get()) {
+				vector<shared_ptr<GameObject>> EnemyVec;
+				GetStage<GameStage>()->FindTagGameObjectVec(L"EnemyObject", EnemyVec);
 
-		//auto& StateVec = GetStage<GameStage>()->GetCollisionStateVec();
-		//for (auto& v : StateVec) {
-		//	if (v.m_Src == m_Rigidbody.get()) {
-		//		Vec3 Normal = v.m_SrcHitNormal;
-		//		Normal.normalize();
-		//		Vec4 v = (Vec4)XMVector3AngleBetweenNormals(Vec3(0, 1, 0), Normal);
+				for (auto v : EnemyVec) {
+					if (v) {
+						auto Ptr = dynamic_pointer_cast<EnemyObject>(v);
+						Vec3 EnemyPos = Ptr->GetPosition();
+						float length = (EnemyPos - m_Rigidbody->m_Pos).length();
+						if (length < 0.3f) {
+							Vec3 Emitter = m_Rigidbody->m_Pos;
+							Emitter.y -= 0.125f;
+							//Spaerkの送出
+							auto SpaerkPtr = GetStage<GameStage>()->FindTagGameObject<MultiSpark>(L"MultiSpark");
+							SpaerkPtr->InsertSpark(Emitter);
+						}
+					}
+				}
+				break;
 
-		//		Vec3 Emitter = m_Rigidbody->m_Pos;
-		//		Emitter.y -= 0.125f;
-		//		//Spaerkの送出
-		//		auto SpaerkPtr = GetStage<GameStage>()->FindTagGameObject<MultiSpark>(L"MultiSpark");
-		//		SpaerkPtr->InsertSpark(Emitter);
+			}
+			else if (v.m_Dest == m_Rigidbody.get()) {
+				vector<shared_ptr<GameObject>> EnemyVec;
+				GetStage<GameStage>()->FindTagGameObjectVec(L"EnemyObject", EnemyVec);
 
+				for (auto v : EnemyVec) {
 
-		//		break;
-
-		//	}
-		//	else if (v.m_Dest == m_Rigidbody.get()) {
-		//		Vec3 Normal = v.m_SrcHitNormal;
-		//		Normal.normalize();
-		//		Vec4 v = (Vec4)XMVector3AngleBetweenNormals(Vec3(0, 1, 0), Normal);
-
-
-		//		Vec3 Emitter = m_Rigidbody->m_Pos;
-		//		Emitter.y -= 0.125f;
-		//		//Spaerkの送出
-		//		auto SpaerkPtr = GetStage<GameStage>()->FindTagGameObject<MultiSpark>(L"MultiSpark");
-		//		SpaerkPtr->InsertSpark(Emitter);
-
-
-		//		break;
-
-		//	}
-		//}
+					if (v) {
+						auto Ptr = dynamic_pointer_cast<EnemyObject>(v);
+						Vec3 EnemyPos = Ptr->GetPosition();
+						float length = (EnemyPos - m_Rigidbody->m_Pos).length();
+						if (length < 0.3f) {
+							Vec3 Emitter = m_Rigidbody->m_Pos;
+							Emitter.y -= 0.125f;
+							//Spaerkの送出
+							auto SpaerkPtr = GetStage<GameStage>()->FindTagGameObject<MultiSpark>(L"MultiSpark");
+							SpaerkPtr->InsertSpark(Emitter);
+						}
+					}
+				}
+				break;
+			}
+		}
 	}
 
 

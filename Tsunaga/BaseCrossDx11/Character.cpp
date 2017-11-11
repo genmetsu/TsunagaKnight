@@ -1092,6 +1092,10 @@ namespace basecross {
 		shptr->AddDrawObject(m_PtrObj);
 	}
 
+	Vec3 EnemyObject::GetPosition() {
+		return m_Rigidbody->m_Pos;
+	}
+
 	void EnemyObject::GetWorldMatrix(Mat4x4& m) const {
 		//s—ñ‚Ì’è‹`
 		Mat4x4 World;
