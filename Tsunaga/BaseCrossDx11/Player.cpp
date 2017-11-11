@@ -129,6 +129,7 @@ namespace basecross {
 			//if (!m_JumpLock) {
 				//Aボタン
 			if (CntlVec[0].wPressedButtons & XINPUT_GAMEPAD_A && m_isStep == false) {
+				
 				//m_Rigidbody->m_Force += Direction * 1000.0f;
 				m_isStep = true;
 
@@ -339,8 +340,8 @@ namespace basecross {
 		body.m_Quat = m_Qt;
 		body.m_Pos = m_Pos;
 		body.m_CollType = CollType::typeSPHERE;
-		body.m_IsCollisionActive = false;
-		body.m_IsFixed = true;
+		body.m_IsCollisionActive = true;
+		body.m_IsFixed = false;
 		//		body.m_IsDrawActive = true;
 		body.SetToBefore();
 		m_Rigidbody = PtrGameStage->AddRigidbody(body);
@@ -382,6 +383,56 @@ namespace basecross {
 	void Sword::OnUpdate() {
 		//ステートマシン更新
 		m_StateMachine->Update();
+	}
+
+	void Sword::OnUpdate2() {
+		
+
+		auto& StateVec = GetStage<GameStage>()->GetCollisionStateVec();
+		for (auto& v : StateVec) {
+			if (v.m_Src == m_Rigidbody.get()) {
+				vector<shared_ptr<GameObject>> EnemyVec;
+				GetStage<GameStage>()->FindTagGameObjectVec(L"EnemyObject", EnemyVec);
+
+				for (auto v : EnemyVec) {
+					if (v) {
+						auto Ptr = dynamic_pointer_cast<EnemyObject>(v);
+						Vec3 EnemyPos = Ptr->GetPosition();
+						float length = (EnemyPos - m_Rigidbody->m_Pos).length();
+						if (length < 0.3f) {
+							Vec3 Emitter = m_Rigidbody->m_Pos;
+							Emitter.y -= 0.125f;
+							//Spaerkの送出
+							auto SpaerkPtr = GetStage<GameStage>()->FindTagGameObject<MultiSpark>(L"MultiSpark");
+							SpaerkPtr->InsertSpark(Emitter);
+						}
+					}
+				}
+				break;
+
+			}
+			else if (v.m_Dest == m_Rigidbody.get()) {
+				vector<shared_ptr<GameObject>> EnemyVec;
+				GetStage<GameStage>()->FindTagGameObjectVec(L"EnemyObject", EnemyVec);
+
+				for (auto v : EnemyVec) {
+
+					if (v) {
+						auto Ptr = dynamic_pointer_cast<EnemyObject>(v);
+						Vec3 EnemyPos = Ptr->GetPosition();
+						float length = (EnemyPos - m_Rigidbody->m_Pos).length();
+						if (length < 0.3f) {
+							Vec3 Emitter = m_Rigidbody->m_Pos;
+							Emitter.y -= 0.125f;
+							//Spaerkの送出
+							auto SpaerkPtr = GetStage<GameStage>()->FindTagGameObject<MultiSpark>(L"MultiSpark");
+							SpaerkPtr->InsertSpark(Emitter);
+						}
+					}
+				}
+				break;
+			}
+		}
 	}
 
 
