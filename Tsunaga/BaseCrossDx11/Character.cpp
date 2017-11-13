@@ -1317,6 +1317,16 @@ namespace basecross {
 			// “Ëi‚µ‚Ä1.5•b‚½‚Á‚½‚çEEEE
 			if (m_FrameCount > m_StopTime * 1.5f * 60.0f)
 			{
+				vector<shared_ptr<GameObject>> ShootVec;
+				GetStage<GameStage>()->FindTagGameObjectVec(L"BulletObject", ShootVec);
+				for (auto v : ShootVec) {
+					if (v) {
+						
+						auto Ptr = dynamic_pointer_cast<BulletObject>(v);
+						Ptr->SetPosition(ToPosVec*0.25f + m_Rigidbody->m_Pos);
+					}
+				}
+			//	MessageBox(NULL, L"ZZ”ò‚Î‚µ‚½‚¢", L" ", MB_YESNO);
 				m_Tackle = false;
 				m_FrameCount = 0.0f;
 				m_TargetPos = Vec3(0.0f, 0.0f, 0.0f);
@@ -1485,5 +1495,16 @@ namespace basecross {
 		);
 		m = World;
 	}
+
+	Vec3 BulletObject::GetPosition() 
+	{
+		return m_Rigidbody->m_Pos;
+	}
+
+	void BulletObject::SetPosition(Vec3 pos)
+	{
+		m_Rigidbody->m_Pos = pos;	
+	}
+
 }
 //end basecross

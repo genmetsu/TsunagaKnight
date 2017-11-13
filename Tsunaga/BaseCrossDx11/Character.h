@@ -1075,6 +1075,10 @@ namespace basecross {
 		*/
 		//--------------------------------------------------------------------------------------
 		virtual void GetWorldMatrix(Mat4x4& m) const override;
+
+		virtual Vec3 GetPosition() override;
+		 void SetPosition(Vec3 pos);
+
 	};
 
 }

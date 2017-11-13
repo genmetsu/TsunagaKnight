@@ -104,14 +104,17 @@ namespace basecross {
 				Quat(),
 				Vec3(x + 5.0f, 0.125f, 0.0f),
 				false);
+			for (int j = 0;j < 3;j++) {
+				AddGameObject<BulletObject>(
+					L"SPARK_TX",
+					Vec3(0.125f, 0.125f, 0.125f),
+					Quat(),
+					Vec3(2.0f, 0.125f, 0.0f),
+					false);
+			}
 		}
 
-		AddGameObject<BulletObject>(
-			L"FIRE_TX",
-			Vec3(0.25f, 0.25f, 0.25f),
-			Quat(),
-			Vec3(2.0f, 0.125f, 0.0f),
-			false);
+		
 
 
 		//ChildObject�̍쐬
