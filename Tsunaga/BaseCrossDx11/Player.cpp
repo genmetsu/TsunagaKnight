@@ -331,6 +331,8 @@ namespace basecross {
 		//タグの追加
 		AddTag(L"Sword");
 
+		m_is_attacking = false;
+
 		//Rigidbodyの初期化
 		auto PtrGameStage = GetStage<GameStage>();
 		Rigidbody body;
@@ -340,7 +342,7 @@ namespace basecross {
 		body.m_Quat = m_Qt;
 		body.m_Pos = m_Pos;
 		body.m_CollType = CollType::typeSPHERE;
-		body.m_IsCollisionActive = true;
+		body.m_IsCollisionActive = false;
 		body.m_IsFixed = false;
 		//		body.m_IsDrawActive = true;
 		body.SetToBefore();
@@ -386,51 +388,32 @@ namespace basecross {
 	}
 
 	void Sword::OnUpdate2() {
-		
+		//攻撃の衝突判定
+		if (m_is_attacking) {
+			vector<shared_ptr<GameObject>> EnemyVec;
+			GetStage<GameStage>()->FindTagGameObjectVec(L"EnemyObject", EnemyVec);
+			for (auto enemy : EnemyVec) {
+				if (enemy) {
+					auto Ptr = dynamic_pointer_cast<EnemyObject>(enemy);
 
-		auto& StateVec = GetStage<GameStage>()->GetCollisionStateVec();
-		for (auto& v : StateVec) {
-			if (v.m_Src == m_Rigidbody.get()) {
-				vector<shared_ptr<GameObject>> EnemyVec;
-				GetStage<GameStage>()->FindTagGameObjectVec(L"EnemyObject", EnemyVec);
+					Vec3 EnemyPos = Ptr->GetPosition();
+					float length = (EnemyPos - m_Rigidbody->m_Pos).length();
 
-				for (auto v : EnemyVec) {
-					if (v) {
-						auto Ptr = dynamic_pointer_cast<EnemyObject>(v);
-						Vec3 EnemyPos = Ptr->GetPosition();
-						float length = (EnemyPos - m_Rigidbody->m_Pos).length();
-						if (length < 0.3f) {
-							Vec3 Emitter = m_Rigidbody->m_Pos;
-							Emitter.y -= 0.125f;
-							//Spaerkの送出
-							auto SpaerkPtr = GetStage<GameStage>()->FindTagGameObject<MultiSpark>(L"MultiSpark");
-							SpaerkPtr->InsertSpark(Emitter);
-						}
+					float EnemyRadius = Ptr->GetScale() / 2.0f;
+					float SwordRadius = m_Scale.x / 2.0f;
+
+					if (length < EnemyRadius + SwordRadius) {
+						Vec3 Emitter = m_Rigidbody->m_Pos;
+						Emitter.y -= 0.125f;
+
+						//Sparkの送出
+						auto SparkPtr = GetStage<GameStage>()->FindTagGameObject<MultiSpark>(L"MultiSpark");
+						SparkPtr->InsertSpark(Emitter);
+
+						m_is_attacking = false;
+						break;
 					}
 				}
-				break;
-
-			}
-			else if (v.m_Dest == m_Rigidbody.get()) {
-				vector<shared_ptr<GameObject>> EnemyVec;
-				GetStage<GameStage>()->FindTagGameObjectVec(L"EnemyObject", EnemyVec);
-
-				for (auto v : EnemyVec) {
-
-					if (v) {
-						auto Ptr = dynamic_pointer_cast<EnemyObject>(v);
-						Vec3 EnemyPos = Ptr->GetPosition();
-						float length = (EnemyPos - m_Rigidbody->m_Pos).length();
-						if (length < 0.3f) {
-							Vec3 Emitter = m_Rigidbody->m_Pos;
-							Emitter.y -= 0.125f;
-							//Spaerkの送出
-							auto SpaerkPtr = GetStage<GameStage>()->FindTagGameObject<MultiSpark>(L"MultiSpark");
-							SpaerkPtr->InsertSpark(Emitter);
-						}
-					}
-				}
-				break;
 			}
 		}
 	}
@@ -633,8 +616,9 @@ namespace basecross {
 	IMPLEMENT_SINGLETON_INSTANCE(Attack1State)
 
 		void Attack1State::Enter(const shared_ptr<Sword>& Obj) {
+		Obj->SetAttacking(true);
 		Obj->Attack1StartBehavior();
-		//何もしない
+	
 	}
 
 	void Attack1State::Execute(const shared_ptr<Sword>& Obj) {
@@ -646,7 +630,7 @@ namespace basecross {
 	}
 
 	void Attack1State::Exit(const shared_ptr<Sword>& Obj) {
-		//何もしない
+		Obj->SetAttacking(false);
 	}
 
 
