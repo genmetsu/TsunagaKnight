@@ -116,6 +116,10 @@ namespace basecross {
 		strTexture = DataDir + L"StageMessage.png";
 		App::GetApp()->RegisterTexture(L"MESSAGE_TX", strTexture);
 
+		strTexture = DataDir + L"Red.png";
+		App::GetApp()->RegisterTexture(L"RED_TX", strTexture);
+
+
 		strTexture = DataDir + L"wall.jpg";
 		App::GetApp()->RegisterTexture(L"WALL_TX", strTexture);
 		strTexture = DataDir + L"wall_normal.png";

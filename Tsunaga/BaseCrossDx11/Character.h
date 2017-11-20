@@ -1080,6 +1080,42 @@ namespace basecross {
 		 void SetPosition(Vec3 pos);
 
 	};
+	class BossEnemy : public EnemyObject
+	{
+		
+	public:
+		//--------------------------------------------------------------------------------------
+		/*!
+		@brief コンストラクタ
+		@param[in]	StagePtr	ステージのポインタ
+		@param[in]	ParentPtr	親のポインタ
+		@param[in]	TextureResName	テクスチャリソース名
+		@param[in]	Scale	スケーリング
+		@param[in]	Qt	初期回転
+		@param[in]	Pos	位置
+		@param[in]	OwnShadowActive	影描画するかどうか
+		*/
+		//--------------------------------------------------------------------------------------
+		BossEnemy(const shared_ptr<Stage>& StagePtr,
+			const shared_ptr<GameObject>& ParentPtr,
+			const wstring& TextureResName, const Vec3& Scale, const Quat& Qt, const Vec3& Pos,
+			bool OwnShadowActive);
+		//--------------------------------------------------------------------------------------
+		/*!
+		@brief デストラクタ
+		*/
+		//--------------------------------------------------------------------------------------
+		virtual ~BossEnemy();
+
+		virtual void OnUpdate() override;
+		//--------------------------------------------------------------------------------------
+		/*!
+		@brief 初期化
+		@return	なし
+		*/
+		//--------------------------------------------------------------------------------------
+		//virtual void OnCreate() override;
+	};
 
 }
 //end basecross
