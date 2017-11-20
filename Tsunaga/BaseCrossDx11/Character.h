@@ -985,6 +985,8 @@ namespace basecross {
 
 		Vec3 m_TackleStart;
 
+		wstring m_my_Tag;
+
 		//親オブジェクト
 		weak_ptr<GameObject> m_ParentPtr;
 		//
@@ -1027,7 +1029,7 @@ namespace basecross {
 		//--------------------------------------------------------------------------------------
 		BulletObject(const shared_ptr<Stage>& StagePtr,
 			const wstring& TextureResName, const Vec3& Scale, const Quat& Qt, const Vec3& Pos,
-			bool OwnShadowActive);
+			bool OwnShadowActive,const wstring& Tag);
 		//--------------------------------------------------------------------------------------
 		/*!
 		@brief デストラクタ

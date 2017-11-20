@@ -1318,7 +1318,7 @@ namespace basecross {
 			if (m_FrameCount > m_StopTime * 1.5f * 60.0f)
 			{
 				vector<shared_ptr<GameObject>> ShootVec;
-				GetStage<GameStage>()->FindTagGameObjectVec(L"BulletObject", ShootVec);
+				GetStage<GameStage>()->FindTagGameObjectVec(L"Bullet", ShootVec);
 				for (auto v : ShootVec) {
 					if (v) {
 						
@@ -1388,17 +1388,19 @@ namespace basecross {
 		}
 	}
 
-	BulletObject::BulletObject(const shared_ptr<Stage>& StagePtr, 
-		const wstring & TextureResName, 
+	BulletObject::BulletObject(const shared_ptr<Stage>& StagePtr,
+		const wstring & TextureResName,
 		const Vec3 & Scale,
-		const Quat & Qt, 
-		const Vec3 & Pos, bool OwnShadowActive):
+		const Quat & Qt,
+		const Vec3 & Pos, bool OwnShadowActive,
+		const wstring & Tag) :
 		GameObject(StagePtr),
 		m_TextureResName(TextureResName),
 		m_Scale(Scale),
 		m_Qt(Qt),
 		m_Pos(Pos),
 		m_OwnShadowActive(OwnShadowActive),
+		m_my_Tag(Tag),
 		m_LerpToParent(0.2f),
 		m_LerpToChild(0.2f),
 		m_Attack1ToRot(0)
@@ -1410,7 +1412,7 @@ namespace basecross {
 	}
 	void BulletObject::OnCreate()
 	{
-		AddTag(L"BulletObject");
+		AddTag(m_my_Tag);
 
 		//RigidbodyÇÃèâä˙âª
 		auto PtrGameStage = GetStage<GameStage>();
@@ -1549,7 +1551,7 @@ namespace basecross {
 			if (m_FrameCount > m_StopTime * 1.5f * 60.0f)
 			{
 				vector<shared_ptr<GameObject>> BossVec;
-				GetStage<GameStage>()->FindTagGameObjectVec(L"BulletObject", BossVec);
+				GetStage<GameStage>()->FindTagGameObjectVec(L"BossBullet", BossVec);
 				for (auto v : BossVec) {
 					if (v) {
 

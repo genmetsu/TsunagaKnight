@@ -110,7 +110,8 @@ namespace basecross {
 					Vec3(0.125f, 0.125f, 0.125f),
 					Quat(),
 					Vec3(2.0f, 0.125f, 0.0f),
-					false);
+					false,
+					L"Bullet");
 			}
 		}
 		for (int i = 0; i < 1; i++) {
@@ -128,7 +129,8 @@ namespace basecross {
 					Vec3(0.5f, 0.5f, 0.5f),
 					Quat(),
 					Vec3(2.0f, 0.125f, 0.0f),
-					false);
+					false,
+					L"BossBullet");
 			}
 		}
 		
