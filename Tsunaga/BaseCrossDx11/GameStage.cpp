@@ -67,7 +67,7 @@ namespace basecross {
 		AddGameObject<Sword>(
 			Par,
 			L"SKY_TX",
-			Vec3(0.1f, 0.1f, 0.5f),
+			Vec3(0.2f, 0.2f, 0.2f),
 			Quat(),
 			Vec3(0.0f, 0.125f, 0.0f),
 			false);
@@ -122,7 +122,7 @@ namespace basecross {
 				Quat(),
 				Vec3(x + 5.0f, 3.0f, 0.0f),
 				false);
-			for (int j = 0;j < 3;j++) {
+			for (int j = 0; j < 3; j++) {
 				AddGameObject<BulletObject>(
 					L"RED_TX",
 					Vec3(0.5f, 0.5f, 0.5f),
@@ -131,21 +131,6 @@ namespace basecross {
 					false);
 			}
 		}
-		
-
-
-		//ChildObjectの作成
-		/*for (int i = 0; i < 10; i++) {
-			float x = (float)(i + 1);
-			Par = AddGameObject<ChildObject>(
-				Par,
-				L"SKY_TX",
-				Vec3(0.25f, 0.25f, 0.25f),
-				Quat(),
-				Vec3(x, 0.125f, 0.0f),
-				false);
-
-		}*/
 
 		//スパークエフェクト
 		AddGameObject<MultiSpark>();

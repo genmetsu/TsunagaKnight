@@ -797,6 +797,11 @@ namespace basecross {
 		{
 			m_AttackPoint = Value;
 		}
+
+		float GetScale()
+		{
+			return m_Scale.x;
+		}
 	};
 
 	//--------------------------------------------------------------------------------------
