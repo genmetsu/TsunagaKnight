@@ -959,6 +959,10 @@ namespace basecross {
 	void EnemyObject::OnUpdate() {
 		//ステートマシン更新
 		//m_StateMachine->Update();
+
+		//HPの確認
+		CheckHealth();
+
 		//前回のターンからの経過時間を求める
 		float ElapsedTime = App::GetApp()->GetElapsedTime();
 		auto shptr = m_ParentPtr.lock();
@@ -1048,9 +1052,6 @@ namespace basecross {
 
 				}
 			}
-	
-
-
 		}
 	}
 
@@ -1161,6 +1162,13 @@ namespace basecross {
 				Velo /= ElapsedTime;
 				m_Rigidbody->m_Velocity = Velo;
 			}
+		}
+	}
+
+	void EnemyObject::CheckHealth() {
+		if (m_HP <= 0.0f) {
+			auto TexPtr = App::GetApp()->GetResource<TextureResource>(L"TRACE_TX");
+			m_PtrObj->m_TextureRes = TexPtr;
 		}
 	}
 
@@ -1291,6 +1299,9 @@ namespace basecross {
 
 	void ShootEnemy::OnUpdate()
 	{
+		//HPの確認
+		CheckHealth();
+
 		float ElapsedTime = App::GetApp()->GetElapsedTime();
 		auto shptr = m_ParentPtr.lock();
 		//親のワールド行列を取得する変数
@@ -1526,6 +1537,8 @@ namespace basecross {
 
 	void BossEnemy::OnUpdate()
 	{
+		//HPの確認
+		CheckHealth();
 		float ElapsedTime = App::GetApp()->GetElapsedTime();
 		auto shptr = m_ParentPtr.lock();
 		//親のワールド行列を取得する変数

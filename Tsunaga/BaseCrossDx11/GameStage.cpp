@@ -60,17 +60,17 @@ namespace basecross {
 			AddGameObject<Player>(
 			L"TRACE_TX",
 			true,
-			Vec3(0.0f, 0.125f, 0.0f)
+			Vec3(0.0f, 0.5f, 0.0f)
 			);
 
 		//剣の作成
 		AddGameObject<Sword>(
 			Par,
-			L"SKY_TX",
-			Vec3(0.2f, 0.2f, 0.2f),
+			L"SPARK_TX",
+			Vec3(0.4f, 0.4f, 0.4f),
 			Quat(),
-			Vec3(0.0f, 0.125f, 0.0f),
-			false);
+			Vec3(0.0f, 0.5f, 0.0f),
+			true);
 
 		//エネミーの作成
 		for (int i = 0; i < 1; i++) {

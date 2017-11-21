@@ -16,7 +16,7 @@ namespace basecross {
 		GameObject(StagePtr),
 		m_TextureResName(TextureResName),
 		m_Trace(Trace),
-		m_BaseY(0.25f / 2.0f),
+		m_BaseY(0.5f / 2.0f),
 		m_Posision(Pos),
 		m_FrameCount(0.0f),
 		m_isStep(false),
@@ -80,11 +80,12 @@ namespace basecross {
 		Rigidbody body;
 		body.m_Owner = GetThis<GameObject>();
 		body.m_Mass = 1.0f;
-		body.m_Scale = Vec3(0.25f);
+		body.m_Scale = Vec3(0.5f);
 		body.m_Quat = Quat();
 		body.m_Pos = m_Posision;
 		body.m_CollType = CollType::typeSPHERE;
 //		body.m_IsDrawActive = true;
+		body.m_IsFixed = true;
 		body.SetToBefore();
 
 		m_StepVec = Vec3(0.0f);
@@ -126,11 +127,9 @@ namespace basecross {
 		//コントローラの取得
 		auto CntlVec = App::GetApp()->GetInputDevice().GetControlerVec();
 		if (CntlVec[0].bConnected) {
-			//if (!m_JumpLock) {
-				//Aボタン
+			//Aボタン
 			if (CntlVec[0].wPressedButtons & XINPUT_GAMEPAD_A && m_isStep == false) {
-				
-				//m_Rigidbody->m_Force += Direction * 1000.0f;
+			
 				m_isStep = true;
 
 				m_StepVec = GetMoveVector();
@@ -139,11 +138,9 @@ namespace basecross {
 				//エフェクトの再生
 				auto FirePtr = GetStage<GameStage>()->FindTagGameObject<StepEffect>(L"StepEffect");
 				Vec3 Emitter = m_Rigidbody->m_Pos;
-				Emitter.y -= 0.125f;
+				Emitter.y -= m_Rigidbody->m_Scale.y / 2.0f;;
 				FirePtr->InsertEffect(Emitter);
 			}
-				
-			//}
 			Vec3 Direction = GetMoveVector();
 			if (length(Direction) < 0.1f) {
 				m_Rigidbody->m_Velocity.x *= 0.8f;
@@ -151,18 +148,9 @@ namespace basecross {
 			}
 			if (m_isStep == true) {
 				m_Rigidbody->m_Velocity += m_StepVec * 2.0f;
-
-				//Vec2 TempVelo(m_Rigidbody->m_Velocity.x, m_Rigidbody->m_Velocity.z);
-				//TempVelo = XMVector2ClampLength(TempVelo, 0, 100.0f);
-				//m_Rigidbody->m_Velocity.x = TempVelo.x;
-				//m_Rigidbody->m_Velocity.z = TempVelo.y;
-
 				m_FrameCount++;
 			}
 			else {
-				//フォースで変更する場合は以下のように記述
-				//body.m_Force += Direction * 10.0f;
-				//速度で変更する場合は以下のように記述
 				m_Rigidbody->m_Velocity += Direction * 0.5f;
 				Vec2 TempVelo(m_Rigidbody->m_Velocity.x, m_Rigidbody->m_Velocity.z);
 				TempVelo = XMVector2ClampLength(TempVelo, 0, 5.0f);
@@ -184,48 +172,14 @@ namespace basecross {
 			m_Rigidbody->m_Velocity.y = 0;
 			if (m_JumpLock) {
 				Vec3 Emitter = m_Rigidbody->m_Pos;
-				Emitter.y -= 0.125f;
+				Emitter.y -= m_Rigidbody->m_Scale.y / 2.0f;;
 				//Spaerkの送出
 				auto SpaerkPtr = GetStage<GameStage>()->FindTagGameObject<MultiSpark>(L"MultiSpark");
 				SpaerkPtr->InsertSpark(Emitter);
 			}
 			m_JumpLock = false;
 		}
-		auto& StateVec = GetStage<GameStage>()->GetCollisionStateVec();
-		for (auto& v : StateVec) {
-			if (v.m_Src == m_Rigidbody.get()) {
-				Vec3 Normal = v.m_SrcHitNormal;
-				Normal.normalize();
-				Vec4 v = (Vec4)XMVector3AngleBetweenNormals(Vec3(0, 1, 0), Normal);
-				if (v.x < 0.1f) {
-					if (m_JumpLock) {
-						Vec3 Emitter = m_Rigidbody->m_Pos;
-						Emitter.y -= 0.125f;
-						//Spaerkの送出
-						auto SpaerkPtr = GetStage<GameStage>()->FindTagGameObject<MultiSpark>(L"MultiSpark");
-						SpaerkPtr->InsertSpark(Emitter);
-					}
-					m_JumpLock = false;
-					break;
-				}
-			}
-			else if (v.m_Dest == m_Rigidbody.get()) {
-				Vec3 Normal = v.m_SrcHitNormal;
-				Normal.normalize();
-				Vec4 v = (Vec4)XMVector3AngleBetweenNormals(Vec3(0, 1, 0), Normal);
-				if (v.x < 0.1f) {
-					if (m_JumpLock) {
-						Vec3 Emitter = m_Rigidbody->m_Pos;
-						Emitter.y -= 0.125f;
-						//Spaerkの送出
-						auto SpaerkPtr = GetStage<GameStage>()->FindTagGameObject<MultiSpark>(L"MultiSpark");
-						SpaerkPtr->InsertSpark(Emitter);
-					}
-					m_JumpLock = false;
-					break;
-				}
-			}
-		}
+		
 		//回転の更新
 		//Velocityの値で、回転を変更する
 		Vec3 Temp = m_Rigidbody->m_Velocity;
@@ -236,19 +190,6 @@ namespace basecross {
 		Qt.normalize();
 		//現在と目標を補間
 		m_Rigidbody->m_Quat = XMQuaternionSlerp(m_Rigidbody->m_Quat, Qt, 0.1f);
-
-
-/*
-
-		auto LenVec = m_Rigidbody->m_Pos - m_Rigidbody->m_BeforePos;
-		LenVec.y = 0;
-		auto Len = LenVec.length();
-		if (Len > 0) {
-			Vec3 Cross = cross(Vec3(0, 1, 0), LenVec);
-			Quat Span(Cross, Len / 0.5f);
-			m_Rigidbody->m_Quat *= Span;
-		}
-*/
 	}
 
 	void Player::OnDrawShadowmap() {
@@ -394,21 +335,23 @@ namespace basecross {
 			GetStage<GameStage>()->FindTagGameObjectVec(L"EnemyObject", EnemyVec);
 			for (auto enemy : EnemyVec) {
 				if (enemy) {
-					auto Ptr = dynamic_pointer_cast<EnemyObject>(enemy);
+					auto PtrEnemy = dynamic_pointer_cast<EnemyObject>(enemy);
 
-					Vec3 EnemyPos = Ptr->GetPosition();
+					Vec3 EnemyPos = PtrEnemy->GetPosition();
 					float length = (EnemyPos - m_Rigidbody->m_Pos).length();
 
-					float EnemyRadius = Ptr->GetScale() / 2.0f;
+					float EnemyRadius = PtrEnemy->GetScale() / 2.0f;
 					float SwordRadius = m_Scale.x / 2.0f;
 
 					if (length < EnemyRadius + SwordRadius) {
 						Vec3 Emitter = m_Rigidbody->m_Pos;
 						Emitter.y -= 0.125f;
-
 						//Sparkの送出
 						auto SparkPtr = GetStage<GameStage>()->FindTagGameObject<MultiSpark>(L"MultiSpark");
 						SparkPtr->InsertSpark(Emitter);
+
+						//ダメージ処理
+						PtrEnemy->SetHP(0.0f);
 
 						m_is_attacking = false;
 						break;
@@ -535,7 +478,7 @@ namespace basecross {
 			m_Rigidbody->m_Scale,
 			Vec3(0, 0, 0),
 			Quat(),
-			Vec3(0, 0, -0.25f)
+			Vec3(0, 0, -0.5f)
 		);
 		//このステートではチャイルドの場合も同じ
 		m_ChildLocalMatrix = m_PlayerLocalMatrix;
@@ -550,13 +493,13 @@ namespace basecross {
 			m_Rigidbody->m_Scale,
 			Vec3(0, 0, 0),
 			Quat(Vec3(1.0, 0, 0), m_Attack1ToRot),
-			Vec3(0, 0.25f, 0.0f)
+			Vec3(0, 0.5f, 0.0f)
 		);
 		m_ChildLocalMatrix.affineTransformation(
 			m_Rigidbody->m_Scale,
 			Vec3(0, 0, 0),
 			Quat(),
-			Vec3(0, 0.25f, -0.25f)
+			Vec3(0, 0.5f, -0.5f)
 		);
 		m_LerpToParent = m_LerpToChild = 0.5f;
 
@@ -569,7 +512,7 @@ namespace basecross {
 			return true;
 		}
 		//ローカル行列の定義
-		Vec3 Pos(0, sin(m_Attack1ToRot) * 0.25f, -cos(m_Attack1ToRot) * 0.25f);
+		Vec3 Pos(0, sin(m_Attack1ToRot) * 0.5f, -cos(m_Attack1ToRot) * 0.5f);
 		m_PlayerLocalMatrix.affineTransformation(
 			m_Rigidbody->m_Scale,
 			Vec3(0, 0, 0),
