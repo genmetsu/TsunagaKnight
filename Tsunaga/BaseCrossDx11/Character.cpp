@@ -295,304 +295,6 @@ namespace basecross {
 	}
 
 	//--------------------------------------------------------------------------------------
-	///	Simple描画をする球体
-	//--------------------------------------------------------------------------------------
-
-	ChildObject::ChildObject(const shared_ptr<Stage>& StagePtr,
-		const shared_ptr<GameObject>& ParentPtr,
-		const wstring& TextureResName, const Vec3& Scale, const Quat& Qt, const Vec3& Pos,
-		bool OwnShadowActive) :
-		GameObject(StagePtr),
-		m_ParentPtr(ParentPtr),
-		m_TextureResName(TextureResName),
-		m_Scale(Scale),
-		m_Qt(Qt),
-		m_Pos(Pos),
-		m_OwnShadowActive(OwnShadowActive),
-		m_LerpToParent(0.2f),
-		m_LerpToChild(0.2f),
-		m_Attack1ToRot(0)
-		{}
-	ChildObject::~ChildObject() {}
-
-	void ChildObject::OnCreate() {
-		//タグの追加
-		AddTag(L"ChildObject");
-
-		//Rigidbodyの初期化
-		auto PtrGameStage = GetStage<GameStage>();
-		Rigidbody body;
-		body.m_Owner = GetThis<GameObject>();
-		body.m_Mass = 1.0f;
-		body.m_Scale = m_Scale;
-		body.m_Quat = m_Qt;
-		body.m_Pos = m_Pos;
-		body.m_CollType = CollType::typeSPHERE;
-		body.m_IsCollisionActive = false;
-		body.m_IsFixed = true;
-//		body.m_IsDrawActive = true;
-		body.SetToBefore();
-		m_Rigidbody = PtrGameStage->AddRigidbody(body);
-
-		//メッシュの取得
-		auto MeshPtr = App::GetApp()->GetResource<MeshResource>(L"DEFAULT_SPHERE");
-
-		//行列の定義
-		Mat4x4 World;
-		World.affineTransformation(
-			m_Scale,
-			Vec3(0, 0, 0),
-			m_Qt,
-			m_Pos
-		);
-		auto TexPtr = App::GetApp()->GetResource<TextureResource>(m_TextureResName);
-		//描画データの構築
-		m_PtrObj = make_shared<SimpleDrawObject>();
-		m_PtrObj->m_MeshRes = MeshPtr;
-		m_PtrObj->m_TextureRes = TexPtr;
-		m_PtrObj->m_WorldMatrix = World;
-		m_PtrObj->m_Camera = GetStage<Stage>()->GetCamera();
-		m_PtrObj->m_OwnShadowmapActive = m_OwnShadowActive;
-		m_PtrObj->m_ShadowmapUse = true;
-
-		//シャドウマップ描画データの構築
-		m_PtrShadowmapObj = make_shared<ShadowmapObject>();
-		m_PtrShadowmapObj->m_MeshRes = MeshPtr;
-		//描画データの行列をコピー
-		m_PtrShadowmapObj->m_WorldMatrix = World;
-		m_PtrShadowmapObj->m_Camera = GetStage<Stage>()->GetCamera();
-		//ステートマシンの構築
-		m_StateMachine.reset(new StateMachine<ChildObject>(GetThis<ChildObject>()));
-		//ステート初期値設定
-		m_StateMachine->ChangeState(ChildComplianceState::Instance());
-
-	}
-
-	void ChildObject::OnUpdate() {
-		//ステートマシン更新
-		m_StateMachine->Update();
-	}
-
-
-	void ChildObject::OnDrawShadowmap() {
-		//行列の定義
-		Mat4x4 World;
-		World.affineTransformation(
-			m_Rigidbody->m_Scale,
-			Vec3(0, 0, 0),
-			m_Rigidbody->m_Quat,
-			m_Rigidbody->m_Pos
-		);
-		//描画データの行列をコピー
-		m_PtrShadowmapObj->m_WorldMatrix = World;
-		m_PtrShadowmapObj->m_Camera = GetStage<Stage>()->GetCamera();
-		auto shptr = m_ShadowmapRenderer.lock();
-		if (!shptr) {
-			shptr = GetStage<Stage>()->FindTagGameObject<ShadowmapRenderer>(L"ShadowmapRenderer");
-			m_ShadowmapRenderer = shptr;
-		}
-		shptr->AddDrawObject(m_PtrShadowmapObj);
-	}
-
-	void ChildObject::OnDraw() {
-		//行列の定義
-		Mat4x4 World;
-		World.affineTransformation(
-			m_Rigidbody->m_Scale,
-			Vec3(0, 0, 0),
-			m_Rigidbody->m_Quat,
-			m_Rigidbody->m_Pos
-		);
-		m_PtrObj->m_WorldMatrix = World;
-		m_PtrObj->m_Camera = GetStage<Stage>()->GetCamera();
-		auto shptr = m_Renderer.lock();
-		if (!shptr) {
-			shptr = GetStage<Stage>()->FindTagGameObject<SimplePNTStaticRenderer2>(L"SimplePNTStaticRenderer2");
-			m_Renderer = shptr;
-		}
-		shptr->AddDrawObject(m_PtrObj);
-	}
-
-	void ChildObject::GetWorldMatrix(Mat4x4& m) const {
-		//行列の定義
-		Mat4x4 World;
-		World.affineTransformation(
-			m_Rigidbody->m_Scale,
-			Vec3(0, 0, 0),
-			m_Rigidbody->m_Quat,
-			m_Rigidbody->m_Pos
-		);
-		m = World;
-	}
-
-	enum class ParentFlg {
-		NoParent,
-		Player,
-		Child
-	};
-
-	void ChildObject::UpdateBehavior(){
-		//前回のターンからの経過時間を求める
-		float ElapsedTime = App::GetApp()->GetElapsedTime();
-		auto shptr = m_ParentPtr.lock();
-		//親のワールド行列を取得する変数
-		Mat4x4 ParMat;
-		if (shptr) {
-			ParentFlg flg = ParentFlg::NoParent;
-			//行列取得用のインターフェイスを持ってるかどうか
-			auto matintptr = dynamic_pointer_cast<MatrixInterface>(shptr);
-			if (matintptr) {
-				matintptr->GetWorldMatrix(ParMat);
-				if (shptr->FindTag(L"Player")) {
-					flg = ParentFlg::Player;
-				}
-				else if (shptr->FindTag(L"ChildObject")) {
-					flg = ParentFlg::Child;
-				}
-			}
-			Mat4x4 World;
-			World.identity();
-			float LerpNum = 0.2f;
-			switch (flg) {
-			case ParentFlg::Player:
-				//行列の定義
-				World = m_PlayerLocalMatrix;
-				LerpNum = m_LerpToParent;
-				break;
-			case ParentFlg::Child:
-				//行列の定義
-				World = m_ChildLocalMatrix;
-				LerpNum = m_LerpToChild;
-				break;
-			default:
-				break;
-			}
-			if (flg != ParentFlg::NoParent) {
-				//スケーリングを1.0にした行列に変換
-				ParMat.scaleIdentity();
-				//行列の反映
-				World *= ParMat;
-				//この時点でWorldは目標となる位置
-				Vec3 toPos = World.transInMatrix();
-				//補間処理で移動位置を決定
-				auto CalcPos = Lerp::CalculateLerp(m_Rigidbody->m_BeforePos, toPos, 0, 1.0f, LerpNum, Lerp::rate::Linear);
-				Vec3 DammiPos;
-				World.decompose(m_Rigidbody->m_Scale, m_Rigidbody->m_Quat, DammiPos);
-				Vec3 Velo = CalcPos - m_Rigidbody->m_BeforePos;
-				Velo /= ElapsedTime;
-				m_Rigidbody->m_Velocity = Velo;
-			}
-		}
-	}
-
-
-	void ChildObject::ComplianceStartBehavior() {
-		//ローカル行列の定義
-		m_PlayerLocalMatrix.affineTransformation(
-			m_Rigidbody->m_Scale,
-			Vec3(0, 0, 0),
-			Quat(),
-			Vec3(0, 0, -0.25f)
-		);
-		//このステートではチャイルドの場合も同じ
-		m_ChildLocalMatrix = m_PlayerLocalMatrix;
-		m_LerpToParent = m_LerpToChild = 0.2f;
-	}
-
-	//攻撃１行動の開始
-	void ChildObject::Attack1StartBehavior() {
-		m_Attack1ToRot = 0.1f;
-		//ローカル行列の定義
-		m_PlayerLocalMatrix.affineTransformation(
-			m_Rigidbody->m_Scale,
-			Vec3(0, 0, 0),
-			Quat(Vec3(1.0, 0, 0), m_Attack1ToRot),
-			Vec3(0, 0.25f, 0.0f)
-		);
-		m_ChildLocalMatrix.affineTransformation(
-			m_Rigidbody->m_Scale,
-			Vec3(0, 0, 0),
-			Quat(),
-			Vec3(0, 0.25f, -0.25f)
-		);
-		m_LerpToParent = m_LerpToChild = 0.5f;
-
-	}
-
-	bool ChildObject::Attack1ExcuteBehavior() {
-		m_Attack1ToRot += 0.1f;
-		if (m_Attack1ToRot >= (XM_PI + 0.5f)) {
-			m_Attack1ToRot = 0.0f;
-			return true;
-		}
-		//ローカル行列の定義
-		Vec3 Pos(0,sin(m_Attack1ToRot) * 0.25f, -cos(m_Attack1ToRot) * 0.25f);
-		m_PlayerLocalMatrix.affineTransformation(
-			m_Rigidbody->m_Scale,
-			Vec3(0, 0, 0),
-			Quat(Vec3(1.0, 0, 0), m_Attack1ToRot),
-			Pos
-		);
-		return false;
-	}
-
-
-
-
-	//--------------------------------------------------------------------------------------
-	///	追従ステート（ChildObject）
-	//--------------------------------------------------------------------------------------
-	IMPLEMENT_SINGLETON_INSTANCE(ChildComplianceState)
-
-	void ChildComplianceState::Enter(const shared_ptr<ChildObject>& Obj) {
-		Obj->ComplianceStartBehavior();
-		//何もしない
-	}
-
-	void ChildComplianceState::Execute(const shared_ptr<ChildObject>& Obj) {
-		Obj->UpdateBehavior();
-
-		//コントローラの取得
-		auto CntlVec = App::GetApp()->GetInputDevice().GetControlerVec();
-		if (CntlVec[0].bConnected) {
-			//Xボタン
-			if (CntlVec[0].wPressedButtons & XINPUT_GAMEPAD_X) {
-				Obj->GetStateMachine()->ChangeState(ChildAttack1State::Instance());
-			}
-		}
-
-	}
-
-	void ChildComplianceState::Exit(const shared_ptr<ChildObject>& Obj) {
-		//何もしない
-	}
-
-	//--------------------------------------------------------------------------------------
-	///	攻撃ステート１（ChildObject）
-	//--------------------------------------------------------------------------------------
-	IMPLEMENT_SINGLETON_INSTANCE(ChildAttack1State)
-
-	void ChildAttack1State::Enter(const shared_ptr<ChildObject>& Obj) {
-		Obj->Attack1StartBehavior();
-		//何もしない
-	}
-
-	void ChildAttack1State::Execute(const shared_ptr<ChildObject>& Obj) {
-		if (Obj->Attack1ExcuteBehavior()) {
-			Obj->GetStateMachine()->ChangeState(ChildComplianceState::Instance());
-			return;
-		}
-		Obj->UpdateBehavior();
-	}
-
-	void ChildAttack1State::Exit(const shared_ptr<ChildObject>& Obj) {
-		//何もしない
-	}
-
-
-
-
-	//--------------------------------------------------------------------------------------
 	///	ラッピング処理されたスプライト
 	//--------------------------------------------------------------------------------------
 	SpriteBase::SpriteBase(const shared_ptr<Stage>& StagePtr,
@@ -894,8 +596,8 @@ namespace basecross {
 		m_LerpToParent(0.2f),
 		m_LerpToChild(0.2f),
 		m_Attack1ToRot(0),
-		m_HP(100),
-		m_AttackPoint(100)
+		m_HP(100.0f),
+		m_AttackPoint(100.0f)
 
 	{}
 	EnemyObject::~EnemyObject() {}
@@ -918,6 +620,8 @@ namespace basecross {
 		//		body.m_IsDrawActive = true;
 		body.SetToBefore();
 		m_Rigidbody = PtrGameStage->AddRigidbody(body);
+
+		m_isDead = false;
 
 		//メッシュの取得
 		auto MeshPtr = App::GetApp()->GetResource<MeshResource>(L"DEFAULT_SPHERE");
@@ -952,107 +656,16 @@ namespace basecross {
 		//ステートマシンの構築
 		m_StateMachine.reset(new StateMachine<EnemyObject>(GetThis<EnemyObject>()));
 		//ステート初期値設定
-		m_StateMachine->ChangeState(EnemyComplianceState::Instance());
+		m_StateMachine->ChangeState(EnemyOppositionState::Instance());
 
 	}
 
 	void EnemyObject::OnUpdate() {
 		//ステートマシン更新
-		//m_StateMachine->Update();
+		m_StateMachine->Update();
 
 		//HPの確認
 		CheckHealth();
-
-		//前回のターンからの経過時間を求める
-		float ElapsedTime = App::GetApp()->GetElapsedTime();
-		auto shptr = m_ParentPtr.lock();
-		//親のワールド行列を取得する変数
-		Mat4x4 ParMat;
-		if (shptr) {
-			//行列取得用のインターフェイスを持ってるかどうか
-			auto matintptr = dynamic_pointer_cast<MatrixInterface>(shptr);
-			if (matintptr) {
-				matintptr->GetWorldMatrix(ParMat);
-			}
-
-			Mat4x4 World;
-			World.identity();
-			//行列の定義
-			World = m_PlayerLocalMatrix;
-			//スケーリングを1.0にした行列に変換
-			ParMat.scaleIdentity();
-			//行列の反映
-			World *= ParMat;
-			//この時点でWorldは目標となる位置
-			Vec3 toPos = World.transInMatrix();
-			Vec3 ToPosVec = toPos - m_Rigidbody->m_Pos;
-			//距離を求める
-			float dis = ToPosVec.length();
-
-			// 突進して1.5秒たったら・・・・
-			if (m_FrameCount > m_StopTime * 1.5f * 60.0f)
-			{
-				m_Tackle = false;
-				m_FrameCount = 0.0f;
-				m_TargetPos = Vec3(0.0f, 0.0f, 0.0f);
-			}
-			// 止まりはじめ
-			else if (m_FrameCount > m_StopTime * 60.0f && m_Tackle == false)
-			{
-				m_Tackle = true;
-				if (m_TargetPos == Vec3(0.0f, 0.0f, 0.0f)) {
-					m_TargetPos = toPos;
-					m_TackleStart = m_Rigidbody->m_Pos;
-				}
-			}
-			
-			// 突進の処理
-			if (m_Tackle == true)
-			{
-				Vec3 Tag = m_TargetPos - m_TackleStart;
-				
-				Tag.normalize();
-
-				Tag *= m_TackleSpeed;
-				m_Rigidbody->m_Pos.y = m_Scale.y / 2.0f;
-				m_Rigidbody->m_Velocity = Tag;
-				m_FrameCount++;
-				return;
-			}
-			
-			// エネミー移動処理
-			if (m_Tackle == false)
-			{
-				if (m_FrameCount >= 1.0f)
-				{
-					m_Rigidbody->m_Velocity = Vec3(0, 0, 0);
-					m_FrameCount++;
-				}
-				// プレイヤーとエネミーの距離が近くなった時の処理
-				else if (dis <= m_TackleDis)
-				{
-					m_FrameCount++;
-					//fireの送出
-					auto FirePtr = GetStage<GameStage>()->FindTagGameObject<AttackSigns>(L"AttackSigns");
-					Vec3 Emitter = m_Rigidbody->m_Pos;
-					Emitter.y -= 0.125f;
-					FirePtr->InsertSigns(Emitter);
-
-				}
-
-				// プレイヤーに向かう処理
-				else
-				{
-					ToPosVec.normalize();
-
-					ToPosVec *= m_Speed;
-
-					m_Rigidbody->m_Velocity = ToPosVec;
-					m_Rigidbody->m_Pos.y = m_Scale.y / 2.0f;
-
-				}
-			}
-		}
 	}
 
 
@@ -1111,6 +724,12 @@ namespace basecross {
 		m = World;
 	}
 
+	enum class ParentFlg {
+		NoParent,
+		Player,
+		Child
+	};
+
 	void EnemyObject::UpdateBehavior() {
 		//前回のターンからの経過時間を求める
 		float ElapsedTime = App::GetApp()->GetElapsedTime();
@@ -1126,7 +745,7 @@ namespace basecross {
 				if (shptr->FindTag(L"Player")) {
 					flg = ParentFlg::Player;
 				}
-				else if (shptr->FindTag(L"ChildObject")) {
+				else if (shptr->FindTag(L"EnemyObject")) {
 					flg = ParentFlg::Child;
 				}
 			}
@@ -1165,10 +784,102 @@ namespace basecross {
 		}
 	}
 
+	void EnemyObject::OppositionBehavior() {
+		//前回のターンからの経過時間を求める
+		float ElapsedTime = App::GetApp()->GetElapsedTime();
+		auto shptr = m_ParentPtr.lock();
+		//親のワールド行列を取得する変数
+		Mat4x4 ParMat;
+		if (shptr) {
+			//行列取得用のインターフェイスを持ってるかどうか
+			auto matintptr = dynamic_pointer_cast<MatrixInterface>(shptr);
+			if (matintptr) {
+				matintptr->GetWorldMatrix(ParMat);
+			}
+
+			Mat4x4 World;
+			World.identity();
+			//行列の定義
+			World = m_PlayerLocalMatrix;
+			//スケーリングを1.0にした行列に変換
+			ParMat.scaleIdentity();
+			//行列の反映
+			World *= ParMat;
+			//この時点でWorldは目標となる位置
+			Vec3 toPos = World.transInMatrix();
+			Vec3 ToPosVec = toPos - m_Rigidbody->m_Pos;
+			//距離を求める
+			float dis = ToPosVec.length();
+
+			// 突進して1.5秒たったら・・・・
+			if (m_FrameCount > m_StopTime * 1.5f * 60.0f)
+			{
+				m_Tackle = false;
+				m_FrameCount = 0.0f;
+				m_TargetPos = Vec3(0.0f, 0.0f, 0.0f);
+			}
+			// 止まりはじめ
+			else if (m_FrameCount > m_StopTime * 60.0f && m_Tackle == false)
+			{
+				m_Tackle = true;
+				if (m_TargetPos == Vec3(0.0f, 0.0f, 0.0f)) {
+					m_TargetPos = toPos;
+					m_TackleStart = m_Rigidbody->m_Pos;
+				}
+			}
+
+			// 突進の処理
+			if (m_Tackle == true)
+			{
+				Vec3 Tag = m_TargetPos - m_TackleStart;
+				Tag.normalize();
+				Tag *= m_TackleSpeed;
+				m_Rigidbody->m_Pos.y = m_Scale.y / 2.0f;
+				m_Rigidbody->m_Velocity = Tag;
+				m_FrameCount++;
+				return;
+			}
+
+			// エネミー移動処理
+			if (m_Tackle == false)
+			{
+				if (m_FrameCount >= 1.0f)
+				{
+					m_Rigidbody->m_Velocity = Vec3(0, 0, 0);
+					m_FrameCount++;
+				}
+				// プレイヤーとエネミーの距離が近くなった時の処理
+				else if (dis <= m_TackleDis)
+				{
+					m_FrameCount++;
+					//fireの送出
+					auto FirePtr = GetStage<GameStage>()->FindTagGameObject<AttackSigns>(L"AttackSigns");
+					Vec3 Emitter = m_Rigidbody->m_Pos;
+					Emitter.y -= 0.125f;
+					FirePtr->InsertSigns(Emitter);
+				}
+
+				// プレイヤーに向かう処理
+				else
+				{
+					ToPosVec.normalize();
+					ToPosVec *= m_Speed;
+					m_Rigidbody->m_Velocity = ToPosVec;
+					m_Rigidbody->m_Pos.y = m_Scale.y / 2.0f;
+				}
+			}
+		}
+	}
+
 	void EnemyObject::CheckHealth() {
 		if (m_HP <= 0.0f) {
 			auto TexPtr = App::GetApp()->GetResource<TextureResource>(L"TRACE_TX");
 			m_PtrObj->m_TextureRes = TexPtr;
+			if (m_isDead == false) {
+				GetStateMachine()->ChangeState(EnemyComplianceState::Instance());
+				m_isDead = true;
+				return;
+			}
 		}
 	}
 
@@ -1222,6 +933,23 @@ namespace basecross {
 		);
 		return false;
 	}
+	//--------------------------------------------------------------------------------------
+	///	敵対ステート（EnemyObject）
+	//--------------------------------------------------------------------------------------
+	IMPLEMENT_SINGLETON_INSTANCE(EnemyOppositionState)
+	void EnemyOppositionState::Enter(const shared_ptr<EnemyObject>& Obj) {
+		Obj->ComplianceStartBehavior();
+		//何もしない
+	}
+
+	void EnemyOppositionState::Execute(const shared_ptr<EnemyObject>& Obj) {
+		Obj->OppositionBehavior();
+	}
+
+	void EnemyOppositionState::Exit(const shared_ptr<EnemyObject>& Obj) {
+		//何もしない
+	}
+
 
 	//--------------------------------------------------------------------------------------
 	///	追従ステート（EnemyObject）
@@ -1239,8 +967,8 @@ namespace basecross {
 		//コントローラの取得
 		auto CntlVec = App::GetApp()->GetInputDevice().GetControlerVec();
 		if (CntlVec[0].bConnected) {
-			//Xボタン
-			if (CntlVec[0].wPressedButtons & XINPUT_GAMEPAD_X) {
+			//Rボタン
+			if (CntlVec[0].wPressedButtons & XINPUT_GAMEPAD_RIGHT_SHOULDER) {
 				Obj->GetStateMachine()->ChangeState(EnemyAttack1State::Instance());
 			}
 		}
