@@ -73,7 +73,7 @@ namespace basecross {
 			true);
 
 		//エネミーの作成
-		for (int i = 0; i < 1; i++) {
+		for (int i = 0; i < 5; i++) {
 			float x = (float)(i + 1);
 			AddGameObject<EnemyObject>(
 				Par,
@@ -84,7 +84,7 @@ namespace basecross {
 				false);
 		}
 
-		for (int i = 0; i < 1; i++) {
+		for (int i = 0; i < 5; i++) {
 			float x = (float)(i + 1);
 			AddGameObject<NeedleEnemy>(
 				Par,
@@ -114,7 +114,7 @@ namespace basecross {
 					L"Bullet");
 			}
 		}
-		for (int i = 0; i < 1; i++) {
+		/*for (int i = 0; i < 1; i++) {
 			float x = (float)(i + 1);
 			AddGameObject<BossEnemy>(
 				Par,
@@ -132,7 +132,7 @@ namespace basecross {
 					false,
 					L"BossBullet");
 			}
-		}
+		}*/
 
 		//スパークエフェクト
 		AddGameObject<MultiSpark>();
@@ -291,7 +291,7 @@ namespace basecross {
 			}
 		}
 
-		auto fps = App::GetApp()->GetStepTimer().GetFramesPerSecond();
+		/*auto fps = App::GetApp()->GetStepTimer().GetFramesPerSecond();
 		wstring FPS(L"FPS: ");
 		FPS += Util::UintToWStr(fps);
 		FPS += L"\nElapsedTime: ";
@@ -301,7 +301,7 @@ namespace basecross {
 		if (!m_StringDrawObject) {
 			m_StringDrawObject = FindTagGameObject<StringDrawObject>(L"StringDrawObject");
 		}
-		m_StringDrawObject->SetText(FPS);
+		m_StringDrawObject->SetText(FPS);*/
 	}
 
 	void GameStage::OnDrawStage() {

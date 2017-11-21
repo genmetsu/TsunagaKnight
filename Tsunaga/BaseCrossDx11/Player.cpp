@@ -344,21 +344,42 @@ namespace basecross {
 					float SwordRadius = m_Scale.x / 2.0f;
 
 					if (length < EnemyRadius + SwordRadius) {
-						Vec3 Emitter = m_Rigidbody->m_Pos;
-						Emitter.y -= 0.125f;
-						//Sparkの送出
-						auto SparkPtr = GetStage<GameStage>()->FindTagGameObject<MultiSpark>(L"MultiSpark");
-						SparkPtr->InsertSpark(Emitter);
+						if (PtrEnemy->GetHP() > 0) {
+							Vec3 Emitter = m_Rigidbody->m_Pos;
+							Emitter.y -= 0.125f;
+							//Sparkの送出
+							auto SparkPtr = GetStage<GameStage>()->FindTagGameObject<MultiSpark>(L"MultiSpark");
+							SparkPtr->InsertSpark(Emitter);
 
-						//ダメージ処理
-						PtrEnemy->SetHP(0.0f);
+							//ダメージ処理
+							PtrEnemy->SetHP(0.0f);
+							//配列に敵をセットする
+							SetFriends(PtrEnemy);
+							//配列の長さを取って2番目以降なら自分の前の敵を親にする
+							int num = m_friends.size();
+							if (num >= 2) {
+								PtrEnemy->SetParent(m_friends[num - 2]);
+							}
+							
+							wstring FPS(L"うしろのフレンズ: ");
+							FPS += Util::IntToWStr(num);
+							FPS += L"\nElapsedTime: ";
+							float ElapsedTime = App::GetApp()->GetElapsedTime();
+							FPS += Util::FloatToWStr(ElapsedTime);
+							FPS += L"\n";
+							if (!m_StringDrawObject) {
+								m_StringDrawObject = GetStage<GameStage>()->FindTagGameObject<StringDrawObject>(L"StringDrawObject");
+							}
+							m_StringDrawObject->SetText(FPS);
 
-						m_is_attacking = false;
-						break;
+							break;
+						}
 					}
 				}
 			}
 		}
+		
+		
 	}
 
 

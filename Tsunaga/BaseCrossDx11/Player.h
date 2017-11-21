@@ -33,6 +33,7 @@ namespace basecross {
 		float m_FrameCount;
 		//Rigidbodyのshared_ptr
 		shared_ptr<Rigidbody> m_Rigidbody;
+		
 		///描画データ
 		shared_ptr<BcDrawObject> m_PtrObj;
 		//描画オブジェクト(weak_ptr)
@@ -115,6 +116,7 @@ namespace basecross {
 		*/
 		//--------------------------------------------------------------------------------------
 		virtual void GetWorldMatrix(Mat4x4& m) const override;
+		
 	};
 
 	//--------------------------------------------------------------------------------------
@@ -138,6 +140,9 @@ namespace basecross {
 		//Rigidbodyのshared_ptr
 		shared_ptr<Rigidbody> m_Rigidbody;
 
+		//文字列描画オブジェクト
+		shared_ptr<StringDrawObject> m_StringDrawObject;
+
 		//描画データ
 		shared_ptr<SimpleDrawObject> m_PtrObj;
 		//描画オブジェクト(weak_ptr)
@@ -157,6 +162,8 @@ namespace basecross {
 		float m_LerpToChild;
 		//Attack1の場合の目標となる回転
 		float m_Attack1ToRot;
+		//後ろについてくるエネミー
+		vector<weak_ptr<GameObject>> m_friends;
 		//ステートマシーン
 		unique_ptr<StateMachine<Sword>>  m_StateMachine;
 	public:
@@ -261,6 +268,15 @@ namespace basecross {
 		*/
 		//--------------------------------------------------------------------------------------
 		void UpdateBehavior();
+		//--------------------------------------------------------------------------------------
+		/*!
+		@brief 後ろについてくる敵を増やす
+		@return	なし
+		*/
+		//--------------------------------------------------------------------------------------
+		void SetFriends(weak_ptr<GameObject> gameObject) {
+			m_friends.push_back(gameObject);
+		}
 		//--------------------------------------------------------------------------------------
 		/*!
 		@brief 攻撃しているかどうかのbool

@@ -159,172 +159,6 @@ namespace basecross {
 		virtual void GetWorldMatrix(Mat4x4& m) const = 0;
 	};
 
-	//--------------------------------------------------------------------------------------
-	///	プレイヤーを追随する球体
-	//--------------------------------------------------------------------------------------
-	class ChildObject : public GameObject,public MatrixInterface {
-		//テクスチャリソース名
-		wstring m_TextureResName;
-		//スケーリング
-		Vec3 m_Scale;
-		//回転
-		Quat m_Qt;
-		//位置
-		Vec3 m_Pos;
-		//親オブジェクト
-		weak_ptr<GameObject> m_ParentPtr;
-		//
-		//Rigidbodyのshared_ptr
-		shared_ptr<Rigidbody> m_Rigidbody;
-
-		//描画データ
-		shared_ptr<SimpleDrawObject> m_PtrObj;
-		//描画オブジェクト(weak_ptr)
-		weak_ptr<SimplePNTStaticRenderer2> m_Renderer;
-		//シャドウマップ用描画データ
-		shared_ptr<ShadowmapObject> m_PtrShadowmapObj;
-		//シャドウマップ描画オブジェクト(weak_ptr)
-		weak_ptr<ShadowmapRenderer> m_ShadowmapRenderer;
-		bool m_OwnShadowActive;
-		//このオブジェクトのプレイヤーから見たローカル行列
-		Mat4x4 m_PlayerLocalMatrix;
-		//プレイヤーの直後（先頭）の場合の補間係数
-		float m_LerpToParent;
-		//このオブジェクトのチャイルドオブジェクトから見たローカル行列
-		Mat4x4 m_ChildLocalMatrix;
-		//チャイルド後の場合の補間係数
-		float m_LerpToChild;
-		//Attack1の場合の目標となる回転
-		float m_Attack1ToRot;
-		//ステートマシーン
-		unique_ptr<StateMachine<ChildObject>>  m_StateMachine;
-	public:
-		//--------------------------------------------------------------------------------------
-		/*!
-		@brief コンストラクタ
-		@param[in]	StagePtr	ステージのポインタ
-		@param[in]	ParentPtr	親のポインタ
-		@param[in]	TextureResName	テクスチャリソース名
-		@param[in]	Scale	スケーリング
-		@param[in]	Qt	初期回転
-		@param[in]	Pos	位置
-		@param[in]	OwnShadowActive	影描画するかどうか
-		*/
-		//--------------------------------------------------------------------------------------
-		ChildObject(const shared_ptr<Stage>& StagePtr,
-			const shared_ptr<GameObject>& ParentPtr,
-			const wstring& TextureResName, const Vec3& Scale, const Quat& Qt, const Vec3& Pos,
-			bool OwnShadowActive);
-		//--------------------------------------------------------------------------------------
-		/*!
-		@brief デストラクタ
-		*/
-		//--------------------------------------------------------------------------------------
-		virtual ~ChildObject();
-		//--------------------------------------------------------------------------------------
-		/*!
-		@brief 初期化
-		@return	なし
-		*/
-		//--------------------------------------------------------------------------------------
-		virtual void OnCreate() override;
-		//--------------------------------------------------------------------------------------
-		/*!
-		@brief 更新
-		@return	なし
-		*/
-		//--------------------------------------------------------------------------------------
-		virtual void OnUpdate()override;
-		//--------------------------------------------------------------------------------------
-		/*!
-		@brief	シャドウマップの描画処理(仮想関数)
-		@return	なし
-		*/
-		//--------------------------------------------------------------------------------------
-		virtual void OnDrawShadowmap() override;
-		//--------------------------------------------------------------------------------------
-		/*!
-		@brief 描画
-		@return	なし
-		*/
-		//--------------------------------------------------------------------------------------
-		virtual void OnDraw()override;
-		//--------------------------------------------------------------------------------------
-		/*!
-		@brief	ステートマシンを得る
-		@return	ステートマシン
-		*/
-		//--------------------------------------------------------------------------------------
-		unique_ptr< StateMachine<ChildObject> >& GetStateMachine() {
-			return m_StateMachine;
-		}
-		//--------------------------------------------------------------------------------------
-		/*!
-		@brief ワールド行列の取得
-		@return	ワールド行列
-		*/
-		//--------------------------------------------------------------------------------------
-		virtual void GetWorldMatrix(Mat4x4& m) const override;
-		//--------------------------------------------------------------------------------------
-		/*!
-		@brief 追従する行動の開始
-		@return	なし
-		*/
-		//--------------------------------------------------------------------------------------
-		void ComplianceStartBehavior();
-		//--------------------------------------------------------------------------------------
-		/*!
-		@brief 攻撃１行動の開始
-		@return	なし
-		*/
-		//--------------------------------------------------------------------------------------
-		void Attack1StartBehavior();
-		//--------------------------------------------------------------------------------------
-		/*!
-		@brief 攻撃１行動の継続
-		@return	行動が終了したらtrue
-		*/
-		//--------------------------------------------------------------------------------------
-		bool Attack1ExcuteBehavior();
-		//--------------------------------------------------------------------------------------
-		/*!
-		@brief ステート共通処理
-		@return	なし
-		*/
-		//--------------------------------------------------------------------------------------
-		void UpdateBehavior();
-	};
-
-	//--------------------------------------------------------------------------------------
-	///	追従ステート（ChildObject）
-	//--------------------------------------------------------------------------------------
-	class ChildComplianceState : public ObjState<ChildObject>
-	{
-		ChildComplianceState() {}
-	public:
-		//ステートのインスタンス取得
-		DECLARE_SINGLETON_INSTANCE(ChildComplianceState)
-		virtual void Enter(const shared_ptr<ChildObject>& Obj)override;
-		virtual void Execute(const shared_ptr<ChildObject>& Obj)override;
-		virtual void Exit(const shared_ptr<ChildObject>& Obj)override;
-	};
-
-
-	//--------------------------------------------------------------------------------------
-	///	攻撃ステート１（ChildObject）
-	//--------------------------------------------------------------------------------------
-	class ChildAttack1State : public ObjState<ChildObject>
-	{
-		ChildAttack1State() {}
-	public:
-		//ステートのインスタンス取得
-		DECLARE_SINGLETON_INSTANCE(ChildAttack1State)
-		virtual void Enter(const shared_ptr<ChildObject>& Obj)override;
-		virtual void Execute(const shared_ptr<ChildObject>& Obj)override;
-		virtual void Exit(const shared_ptr<ChildObject>& Obj)override;
-	};
-
-
 
 	//--------------------------------------------------------------------------------------
 	///	ラッピング処理されたスプライト（親）
@@ -648,6 +482,9 @@ namespace basecross {
 		float m_HP;
 		float m_AttackPoint;
 
+		//死んだかどうか
+		bool m_isDead;
+
 		Vec3 m_TackleStart;
 
 		//親オブジェクト
@@ -781,11 +618,27 @@ namespace basecross {
 		void UpdateBehavior();
 		//--------------------------------------------------------------------------------------
 		/*!
+		@brief 敵対中の処理
+		@return	なし
+		*/
+		//--------------------------------------------------------------------------------------
+		void OppositionBehavior();
+		//--------------------------------------------------------------------------------------
+		/*!
 		@brief 自分の状態チェック
 		@return	なし
 		*/
 		//--------------------------------------------------------------------------------------
 		void CheckHealth();
+		//--------------------------------------------------------------------------------------
+		/*!
+		@brief 親の設定を行う
+		@return	なし
+		*/
+		//--------------------------------------------------------------------------------------
+		void SetParent(weak_ptr<GameObject> gameObject) {
+			m_ParentPtr = gameObject;
+		};
 
 		float GetHP(){
 			return m_HP;
@@ -807,7 +660,21 @@ namespace basecross {
 	};
 
 	//--------------------------------------------------------------------------------------
-	///	追従ステート（ChildObject）
+	///	敵対ステート（EnemyObject）
+	//--------------------------------------------------------------------------------------
+	class EnemyOppositionState : public ObjState<EnemyObject>
+	{
+		EnemyOppositionState() {}
+	public:
+		//ステートのインスタンス取得
+		DECLARE_SINGLETON_INSTANCE(EnemyOppositionState)
+		virtual void Enter(const shared_ptr<EnemyObject>& Obj)override;
+		virtual void Execute(const shared_ptr<EnemyObject>& Obj)override;
+		virtual void Exit(const shared_ptr<EnemyObject>& Obj)override;
+	};
+
+	//--------------------------------------------------------------------------------------
+	///	追従ステート（EnemyObject）
 	//--------------------------------------------------------------------------------------
 	class EnemyComplianceState : public ObjState<EnemyObject>
 	{
@@ -822,7 +689,7 @@ namespace basecross {
 
 
 	//--------------------------------------------------------------------------------------
-	///	攻撃ステート１（ChildObject）
+	///	攻撃ステート１（EnemyObject）
 	//--------------------------------------------------------------------------------------
 	class EnemyAttack1State : public ObjState<EnemyObject>
 	{
@@ -834,6 +701,11 @@ namespace basecross {
 		virtual void Execute(const shared_ptr<EnemyObject>& Obj)override;
 		virtual void Exit(const shared_ptr<EnemyObject>& Obj)override;
 	};
+
+
+	//--------------------------------------------------------------------------------------
+	///	ニードルエネミー（近接攻撃）
+	//--------------------------------------------------------------------------------------
 
 	class NeedleEnemy : public EnemyObject
 	{
@@ -870,6 +742,10 @@ namespace basecross {
 		//virtual void OnCreate() override;
 	};
 
+
+	//--------------------------------------------------------------------------------------
+	///	弾をうつ敵
+	//--------------------------------------------------------------------------------------
 	class ShootEnemy : public EnemyObject
 	{
 	public:
@@ -1034,6 +910,11 @@ namespace basecross {
 		 void SetPosition(Vec3 pos);
 
 	};
+
+	//--------------------------------------------------------------------------------------
+	/// ボスキャラ　でかい
+	//--------------------------------------------------------------------------------------
+
 	class BossEnemy : public EnemyObject
 	{
 		
