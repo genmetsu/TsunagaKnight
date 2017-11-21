@@ -1009,8 +1009,8 @@ namespace basecross {
 				
 				Tag.normalize();
 
-				Tag *= m_TackleSpeed;			
-
+				Tag *= m_TackleSpeed;
+				m_Rigidbody->m_Pos.y = m_Scale.y / 2.0f;
 				m_Rigidbody->m_Velocity = Tag;
 				m_FrameCount++;
 				return;
@@ -1044,6 +1044,8 @@ namespace basecross {
 					ToPosVec *= m_Speed;
 
 					m_Rigidbody->m_Velocity = ToPosVec;
+					m_Rigidbody->m_Pos.y = m_Scale.y / 2.0f;
+
 				}
 			}
 	
@@ -1383,6 +1385,8 @@ namespace basecross {
 					ToPosVec *= m_Speed;
 
 					m_Rigidbody->m_Velocity = ToPosVec;
+					m_Rigidbody->m_Pos.y = m_Scale.y / 2.0f;
+
 				}
 			}
 		}
@@ -1582,7 +1586,7 @@ namespace basecross {
 				Tag.normalize();
 
 				Tag = Vec3(0.0f, 0.0f, 0.0f);
-
+				m_Rigidbody->m_Pos.y = m_Scale.y / 2.0f;
 				m_Rigidbody->m_Velocity = Tag;
 				m_FrameCount++;
 				return;
@@ -1616,6 +1620,8 @@ namespace basecross {
 					ToPosVec *= m_Speed;
 
 					m_Rigidbody->m_Velocity = ToPosVec;
+					m_Rigidbody->m_Pos.y = m_Scale.y / 2.0f + 3.0f;
+
 				}
 			}
 		}
