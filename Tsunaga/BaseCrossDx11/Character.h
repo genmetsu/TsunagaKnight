@@ -13,6 +13,20 @@ namespace basecross {
 	class GameObject;
 
 	//--------------------------------------------------------------------------------------
+	///	ゲーム全体を管理するマネージャー、スポナー
+	//--------------------------------------------------------------------------------------
+	class GameManager {
+	private:
+		GameManager() {}
+		~GameManager() {}
+		static GameManager* GM;
+
+		//int m_SelectedStageNum;
+		//int m_SelectedLevelNum;
+	public:
+		static GameManager* getInstance();
+	};
+	//--------------------------------------------------------------------------------------
 	///	平面
 	//--------------------------------------------------------------------------------------
 	class SquareObject : public GameObject {
