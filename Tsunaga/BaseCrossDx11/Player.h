@@ -143,10 +143,10 @@ namespace basecross {
 		//文字列描画オブジェクト
 		shared_ptr<StringDrawObject> m_StringDrawObject;
 
-		//描画データ
-		shared_ptr<SimpleDrawObject> m_PtrObj;
+		///描画データ
+		shared_ptr<BcDrawObject> m_PtrObj;
 		//描画オブジェクト(weak_ptr)
-		weak_ptr<SimplePNTStaticRenderer2> m_Renderer;
+		weak_ptr<BcPNTStaticRenderer> m_Renderer;
 		//シャドウマップ用描画データ
 		shared_ptr<ShadowmapObject> m_PtrShadowmapObj;
 		//シャドウマップ描画オブジェクト(weak_ptr)
@@ -164,6 +164,8 @@ namespace basecross {
 		float m_Attack1ToRot;
 		//後ろについてくるエネミー
 		vector<weak_ptr<GameObject>> m_friends;
+		//後ろについてくるエネミーの数
+		int m_friends_num;
 		//ステートマシーン
 		unique_ptr<StateMachine<Sword>>  m_StateMachine;
 	public:

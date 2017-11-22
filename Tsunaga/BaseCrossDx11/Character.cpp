@@ -571,7 +571,7 @@ namespace basecross {
 
 
 	//--------------------------------------------------------------------------------------
-	///	EnemyObject
+	///	敵の親オブジェクト
 	//--------------------------------------------------------------------------------------
 
 	EnemyObject::EnemyObject(const shared_ptr<Stage>& StagePtr,
@@ -667,7 +667,6 @@ namespace basecross {
 		//HPの確認
 		CheckHealth();
 	}
-
 
 	void EnemyObject::OnDrawShadowmap() {
 		//行列の定義
@@ -873,8 +872,8 @@ namespace basecross {
 
 	void EnemyObject::CheckHealth() {
 		if (m_HP <= 0.0f) {
-			auto TexPtr = App::GetApp()->GetResource<TextureResource>(L"TRACE_TX");
-			m_PtrObj->m_TextureRes = TexPtr;
+			/*auto TexPtr = App::GetApp()->GetResource<TextureResource>(L"TRACE_TX");
+			m_PtrObj->m_TextureRes = TexPtr;*/
 			if (m_isDead == false) {
 				GetStateMachine()->ChangeState(EnemyComplianceState::Instance());
 				m_isDead = true;
@@ -1001,7 +1000,9 @@ namespace basecross {
 		//何もしない
 	}
 
-
+	//--------------------------------------------------------------------------------------
+	///	ニードルエネミー（近接）
+	//--------------------------------------------------------------------------------------
 
 	NeedleEnemy::NeedleEnemy(const shared_ptr<Stage>& StagePtr, const shared_ptr<GameObject>& ParentPtr, 
 		const wstring & TextureResName, const Vec3 & Scale, 
@@ -1012,6 +1013,10 @@ namespace basecross {
 	NeedleEnemy::~NeedleEnemy()
 	{
 	}
+
+	//--------------------------------------------------------------------------------------
+	///	銃をうつエネミー（遠距離）
+	//--------------------------------------------------------------------------------------
 
 	ShootEnemy::ShootEnemy(const shared_ptr<Stage>& StagePtr, const shared_ptr<GameObject>& ParentPtr, 
 		const wstring & TextureResName,
@@ -1025,11 +1030,7 @@ namespace basecross {
 	{
 	}
 
-	void ShootEnemy::OnUpdate()
-	{
-		//HPの確認
-		CheckHealth();
-
+	void ShootEnemy::OppositionBehavior() {
 		float ElapsedTime = App::GetApp()->GetElapsedTime();
 		auto shptr = m_ParentPtr.lock();
 		//親のワールド行列を取得する変数
@@ -1062,12 +1063,11 @@ namespace basecross {
 				GetStage<GameStage>()->FindTagGameObjectVec(L"Bullet", ShootVec);
 				for (auto v : ShootVec) {
 					if (v) {
-						
 						auto Ptr = dynamic_pointer_cast<BulletObject>(v);
 						Ptr->SetPosition(ToPosVec*0.25f + m_Rigidbody->m_Pos);
 					}
 				}
-			//	MessageBox(NULL, L"〇〇飛ばしたい", L" ", MB_YESNO);
+				//	MessageBox(NULL, L"〇〇飛ばしたい", L" ", MB_YESNO);
 				m_Tackle = false;
 				m_FrameCount = 0.0f;
 				m_TargetPos = Vec3(0.0f, 0.0f, 0.0f);
@@ -1086,11 +1086,8 @@ namespace basecross {
 			if (m_Tackle == true)
 			{
 				Vec3 Tag = m_TargetPos - m_TackleStart;
-
 				Tag.normalize();
-
 				Tag = Vec3(0.0f, 0.0f, 0.0f);
-
 				m_Rigidbody->m_Velocity = Tag;
 				m_FrameCount++;
 				return;
@@ -1113,16 +1110,13 @@ namespace basecross {
 					Vec3 Emitter = m_Rigidbody->m_Pos;
 					Emitter.y -= 0.125f;
 					FirePtr->InsertSigns(Emitter);
-
 				}
 
 				// プレイヤーに向かう処理
 				else
 				{
 					ToPosVec.normalize();
-
 					ToPosVec *= m_Speed;
-
 					m_Rigidbody->m_Velocity = ToPosVec;
 					m_Rigidbody->m_Pos.y = m_Scale.y / 2.0f;
 
@@ -1130,6 +1124,10 @@ namespace basecross {
 			}
 		}
 	}
+
+	//--------------------------------------------------------------------------------------
+	///	ShootEnemyの撃ち出す弾クラス
+	//--------------------------------------------------------------------------------------
 
 	BulletObject::BulletObject(const shared_ptr<Stage>& StagePtr,
 		const wstring & TextureResName,
@@ -1251,6 +1249,10 @@ namespace basecross {
 		m_Rigidbody->m_Pos = pos;	
 	}
 
+	//--------------------------------------------------------------------------------------
+	/// ボスエネミー
+	//--------------------------------------------------------------------------------------
+
 	BossEnemy::BossEnemy(const shared_ptr<Stage>& StagePtr, 
 		const shared_ptr<GameObject>& ParentPtr,
 		const wstring & TextureResName, const Vec3 & Scale,
@@ -1263,10 +1265,8 @@ namespace basecross {
 	{
 	}
 
-	void BossEnemy::OnUpdate()
+	void BossEnemy::OppositionBehavior()
 	{
-		//HPの確認
-		CheckHealth();
 		float ElapsedTime = App::GetApp()->GetElapsedTime();
 		auto shptr = m_ParentPtr.lock();
 		//親のワールド行列を取得する変数
@@ -1299,7 +1299,6 @@ namespace basecross {
 				GetStage<GameStage>()->FindTagGameObjectVec(L"BossBullet", BossVec);
 				for (auto v : BossVec) {
 					if (v) {
-
 						auto Ptr = dynamic_pointer_cast<BulletObject>(v);
 						Ptr->SetPosition(ToPosVec*0.25f + m_Rigidbody->m_Pos);
 					}
@@ -1323,11 +1322,9 @@ namespace basecross {
 			if (m_Tackle == true)
 			{
 				Vec3 Tag = m_TargetPos - m_TackleStart;
-
 				Tag.normalize();
-
 				Tag = Vec3(0.0f, 0.0f, 0.0f);
-				m_Rigidbody->m_Pos.y = m_Scale.y / 2.0f;
+				m_Rigidbody->m_Pos.y = m_Scale.y / 2.0f + 3.0f;
 				m_Rigidbody->m_Velocity = Tag;
 				m_FrameCount++;
 				return;
@@ -1357,9 +1354,7 @@ namespace basecross {
 				else
 				{
 					ToPosVec.normalize();
-
 					ToPosVec *= m_Speed;
-
 					m_Rigidbody->m_Velocity = ToPosVec;
 					m_Rigidbody->m_Pos.y = m_Scale.y / 2.0f + 3.0f;
 

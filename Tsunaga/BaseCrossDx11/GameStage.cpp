@@ -114,7 +114,7 @@ namespace basecross {
 					L"Bullet");
 			}
 		}
-		/*for (int i = 0; i < 1; i++) {
+		for (int i = 0; i < 1; i++) {
 			float x = (float)(i + 1);
 			AddGameObject<BossEnemy>(
 				Par,
@@ -132,7 +132,7 @@ namespace basecross {
 					false,
 					L"BossBullet");
 			}
-		}*/
+		}
 
 		//スパークエフェクト
 		AddGameObject<MultiSpark>();
