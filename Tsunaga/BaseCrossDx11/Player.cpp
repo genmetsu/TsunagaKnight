@@ -273,7 +273,6 @@ namespace basecross {
 		//タグの追加
 		AddTag(L"Sword");
 
-		m_is_attacking = false;
 		m_friends_num = 0;
 
 		//Rigidbodyの初期化
@@ -334,55 +333,6 @@ namespace basecross {
 	}
 
 	void Sword::OnUpdate2() {
-		//攻撃の衝突判定
-		if (m_is_attacking) {
-			vector<shared_ptr<GameObject>> EnemyVec;
-			GetStage<GameStage>()->FindTagGameObjectVec(L"EnemyObject", EnemyVec);
-			for (auto enemy : EnemyVec) {
-				if (enemy) {
-					auto PtrEnemy = dynamic_pointer_cast<EnemyObject>(enemy);
-
-					Vec3 EnemyPos = PtrEnemy->GetPosition();
-					float length = (EnemyPos - m_Rigidbody->m_Pos).length();
-
-					float EnemyRadius = PtrEnemy->GetScale() / 2.0f;
-					float SwordRadius = m_Scale.x / 2.0f;
-
-					if (length < EnemyRadius + SwordRadius) {
-						if (PtrEnemy->GetHP() > 0) {
-							Vec3 Emitter = m_Rigidbody->m_Pos;
-							Emitter.y -= 0.125f;
-							//Sparkの送出
-							auto SparkPtr = GetStage<GameStage>()->FindTagGameObject<MultiSpark>(L"MultiSpark");
-							SparkPtr->InsertSpark(Emitter);
-
-							//ダメージ処理
-							PtrEnemy->SetHP(0.0f);
-							//配列に敵をセットする
-							SetFriends(PtrEnemy);
-							//配列の長さを取って2番目以降なら自分の前の敵を親にする
-							m_friends_num = m_friends.size();
-							if (m_friends_num >= 2) {
-								PtrEnemy->SetParent(m_friends[m_friends_num - 2]);
-							}
-							
-							wstring FPS(L"うしろのフレンズ: ");
-							FPS += Util::IntToWStr(m_friends_num);
-							FPS += L"\nElapsedTime: ";
-							float ElapsedTime = App::GetApp()->GetElapsedTime();
-							FPS += Util::FloatToWStr(ElapsedTime);
-							FPS += L"\n";
-							if (!m_StringDrawObject) {
-								m_StringDrawObject = GetStage<GameStage>()->FindTagGameObject<StringDrawObject>(L"StringDrawObject");
-							}
-							m_StringDrawObject->SetText(FPS);
-
-							break;
-						}
-					}
-				}
-			}
-		}
 		auto fps = App::GetApp()->GetStepTimer().GetFramesPerSecond();
 		wstring FPS(L"FPS: ");
 		FPS += Util::UintToWStr(fps);
@@ -397,7 +347,6 @@ namespace basecross {
 			m_StringDrawObject = GetStage<GameStage>()->FindTagGameObject<StringDrawObject>(L"StringDrawObject");
 		}
 		m_StringDrawObject->SetText(FPS);
-		
 	}
 
 
@@ -511,6 +460,43 @@ namespace basecross {
 		}
 	}
 
+	void Sword::AttackBehavior() {
+		//攻撃の衝突判定
+		vector<shared_ptr<GameObject>> EnemyVec;
+		GetStage<GameStage>()->FindTagGameObjectVec(L"EnemyObject", EnemyVec);
+		for (auto enemy : EnemyVec) {
+			if (enemy) {
+				auto PtrEnemy = dynamic_pointer_cast<EnemyObject>(enemy);
+
+				Vec3 EnemyPos = PtrEnemy->GetPosition();
+				float length = (EnemyPos - m_Rigidbody->m_Pos).length();
+
+				float EnemyRadius = PtrEnemy->GetScale() / 2.0f;
+				float SwordRadius = m_Scale.x / 2.0f;
+
+				if (length < EnemyRadius + SwordRadius) {
+					if (PtrEnemy->GetHP() > 0) {
+						Vec3 Emitter = m_Rigidbody->m_Pos;
+						Emitter.y -= 0.125f;
+						//Sparkの送出
+						auto SparkPtr = GetStage<GameStage>()->FindTagGameObject<MultiSpark>(L"MultiSpark");
+						SparkPtr->InsertSpark(Emitter);
+
+						//ダメージ処理
+						PtrEnemy->SetHP(0.0f);
+						//配列に敵をセットする
+						SetFriends(PtrEnemy);
+						//配列の長さを取って2番目以降なら自分の前の敵を親にする
+						m_friends_num = m_friends.size();
+						if (m_friends_num >= 2) {
+							PtrEnemy->SetParent(m_friends[m_friends_num - 2]);
+						}
+						break;
+					}
+				}
+			}
+		}
+	}
 
 	void Sword::ComplianceStartBehavior() {
 		//ローカル行列の定義
@@ -599,7 +585,7 @@ namespace basecross {
 	IMPLEMENT_SINGLETON_INSTANCE(Attack1State)
 
 		void Attack1State::Enter(const shared_ptr<Sword>& Obj) {
-		Obj->SetAttacking(true);
+
 		Obj->Attack1StartBehavior();
 	
 	}
@@ -610,10 +596,11 @@ namespace basecross {
 			return;
 		}
 		Obj->UpdateBehavior();
+		Obj->AttackBehavior();
 	}
 
 	void Attack1State::Exit(const shared_ptr<Sword>& Obj) {
-		Obj->SetAttacking(false);
+		
 	}
 
 
