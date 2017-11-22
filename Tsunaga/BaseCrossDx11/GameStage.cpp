@@ -84,7 +84,7 @@ namespace basecross {
 				false);
 		}
 
-		for (int i = 0; i < 5; i++) {
+		for (int i = 0; i < 25; i++) {
 			float x = (float)(i + 1);
 			AddGameObject<NeedleEnemy>(
 				Par,
@@ -95,11 +95,11 @@ namespace basecross {
 				false);
 		}
 
-		for (int i = 0; i < 1; i++) {
+		for (int i = 0; i < 25; i++) {
 			float x = (float)(i + 1);
 			AddGameObject<ShootEnemy>(
 				Par,
-				L"FIRE_TX",
+				L"Checker_TX",
 				Vec3(0.25f, 0.25f, 0.25f),
 				Quat(),
 				Vec3(x + 5.0f, 0.125f, 0.0f),
@@ -118,7 +118,7 @@ namespace basecross {
 			float x = (float)(i + 1);
 			AddGameObject<BossEnemy>(
 				Par,
-				L"FIRE_TX",
+				L"Balloon0_TX",
 				Vec3(2.0f, 2.0f, 2.0f),
 				Quat(),
 				Vec3(x + 5.0f, 3.0f, 0.0f),
