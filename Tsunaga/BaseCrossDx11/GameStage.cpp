@@ -290,18 +290,6 @@ namespace basecross {
 				PostEvent(0.0f, GetThis<ObjectInterface>(), App::GetApp()->GetScene<Scene>(), L"ToEmptyStage");
 			}
 		}
-
-		/*auto fps = App::GetApp()->GetStepTimer().GetFramesPerSecond();
-		wstring FPS(L"FPS: ");
-		FPS += Util::UintToWStr(fps);
-		FPS += L"\nElapsedTime: ";
-		float ElapsedTime = App::GetApp()->GetElapsedTime();
-		FPS += Util::FloatToWStr(ElapsedTime);
-		FPS += L"\n";
-		if (!m_StringDrawObject) {
-			m_StringDrawObject = FindTagGameObject<StringDrawObject>(L"StringDrawObject");
-		}
-		m_StringDrawObject->SetText(FPS);*/
 	}
 
 	void GameStage::OnDrawStage() {

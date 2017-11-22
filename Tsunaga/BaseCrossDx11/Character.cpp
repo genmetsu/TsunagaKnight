@@ -875,8 +875,9 @@ namespace basecross {
 			/*auto TexPtr = App::GetApp()->GetResource<TextureResource>(L"TRACE_TX");
 			m_PtrObj->m_TextureRes = TexPtr;*/
 			if (m_isDead == false) {
-				GetStateMachine()->ChangeState(EnemyComplianceState::Instance());
 				m_isDead = true;
+				m_Rigidbody->m_IsCollisionActive = false;
+				GetStateMachine()->ChangeState(EnemyComplianceState::Instance());
 				return;
 			}
 		}
@@ -904,13 +905,13 @@ namespace basecross {
 			m_Rigidbody->m_Scale,
 			Vec3(0, 0, 0),
 			Quat(Vec3(1.0, 0, 0), m_Attack1ToRot),
-			Vec3(0, 0.25f, 0.0f)
+			Vec3(0, 0.5f, 0.0f)
 		);
 		m_ChildLocalMatrix.affineTransformation(
 			m_Rigidbody->m_Scale,
 			Vec3(0, 0, 0),
 			Quat(),
-			Vec3(0, 0.25f, -0.25f)
+			Vec3(0, 0.5f, -0.5f)
 		);
 		m_LerpToParent = m_LerpToChild = 0.5f;
 
@@ -923,7 +924,7 @@ namespace basecross {
 			return true;
 		}
 		//ローカル行列の定義
-		Vec3 Pos(0, sin(m_Attack1ToRot) * 0.25f, -cos(m_Attack1ToRot) * 0.25f);
+		Vec3 Pos(0, sin(m_Attack1ToRot) * 0.5f, -cos(m_Attack1ToRot) * 0.5f);
 		m_PlayerLocalMatrix.affineTransformation(
 			m_Rigidbody->m_Scale,
 			Vec3(0, 0, 0),
@@ -990,7 +991,7 @@ namespace basecross {
 
 	void EnemyAttack1State::Execute(const shared_ptr<EnemyObject>& Obj) {
 		if (Obj->Attack1ExcuteBehavior()) {
-			Obj->GetStateMachine()->ChangeState(EnemyAttack1State::Instance());
+			Obj->GetStateMachine()->ChangeState(EnemyComplianceState::Instance());
 			return;
 		}
 		Obj->UpdateBehavior();
