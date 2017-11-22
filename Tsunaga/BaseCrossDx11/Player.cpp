@@ -101,8 +101,9 @@ namespace basecross {
 			body.m_Pos
 		);
 
-		m_PtrObj = make_shared<BcDrawObject>();
 		auto TexPtr = App::GetApp()->GetResource<TextureResource>(m_TextureResName);
+		//描画データの構築
+		m_PtrObj = make_shared<BcDrawObject>();
 		m_PtrObj->m_MeshRes = m_SphereMesh;
 		m_PtrObj->m_TextureRes = TexPtr;
 		m_PtrObj->m_WorldMatrix = World;
@@ -273,6 +274,7 @@ namespace basecross {
 		AddTag(L"Sword");
 
 		m_is_attacking = false;
+		m_friends_num = 0;
 
 		//Rigidbodyの初期化
 		auto PtrGameStage = GetStage<GameStage>();
@@ -302,13 +304,16 @@ namespace basecross {
 		);
 		auto TexPtr = App::GetApp()->GetResource<TextureResource>(m_TextureResName);
 		//描画データの構築
-		m_PtrObj = make_shared<SimpleDrawObject>();
+		m_PtrObj = make_shared<BcDrawObject>();
 		m_PtrObj->m_MeshRes = MeshPtr;
 		m_PtrObj->m_TextureRes = TexPtr;
 		m_PtrObj->m_WorldMatrix = World;
 		m_PtrObj->m_Camera = GetStage<Stage>()->GetCamera();
 		m_PtrObj->m_OwnShadowmapActive = m_OwnShadowActive;
 		m_PtrObj->m_ShadowmapUse = true;
+		m_PtrObj->m_BlendState = BlendState::AlphaBlend;
+		//m_PtrObj->m_RasterizerState = RasterizerState::DoubleDraw;
+		m_PtrObj->m_Alpha = 0.0f;
 
 		//シャドウマップ描画データの構築
 		m_PtrShadowmapObj = make_shared<ShadowmapObject>();
@@ -356,13 +361,13 @@ namespace basecross {
 							//配列に敵をセットする
 							SetFriends(PtrEnemy);
 							//配列の長さを取って2番目以降なら自分の前の敵を親にする
-							int num = m_friends.size();
-							if (num >= 2) {
-								PtrEnemy->SetParent(m_friends[num - 2]);
+							m_friends_num = m_friends.size();
+							if (m_friends_num >= 2) {
+								PtrEnemy->SetParent(m_friends[m_friends_num - 2]);
 							}
 							
 							wstring FPS(L"うしろのフレンズ: ");
-							FPS += Util::IntToWStr(num);
+							FPS += Util::IntToWStr(m_friends_num);
 							FPS += L"\nElapsedTime: ";
 							float ElapsedTime = App::GetApp()->GetElapsedTime();
 							FPS += Util::FloatToWStr(ElapsedTime);
@@ -378,7 +383,20 @@ namespace basecross {
 				}
 			}
 		}
-		
+		auto fps = App::GetApp()->GetStepTimer().GetFramesPerSecond();
+		wstring FPS(L"FPS: ");
+		FPS += Util::UintToWStr(fps);
+		FPS += L"\nElapsedTime: ";
+		float ElapsedTime = App::GetApp()->GetElapsedTime();
+		FPS += Util::FloatToWStr(ElapsedTime);
+		FPS += L"\n";
+		FPS += L"うしろのフレンズ: ";
+		FPS += Util::IntToWStr(m_friends_num);
+		FPS += L"\n";
+		if (!m_StringDrawObject) {
+			m_StringDrawObject = GetStage<GameStage>()->FindTagGameObject<StringDrawObject>(L"StringDrawObject");
+		}
+		m_StringDrawObject->SetText(FPS);
 		
 	}
 
@@ -416,7 +434,8 @@ namespace basecross {
 		m_PtrObj->m_Camera = GetStage<Stage>()->GetCamera();
 		auto shptr = m_Renderer.lock();
 		if (!shptr) {
-			shptr = GetStage<Stage>()->FindTagGameObject<SimplePNTStaticRenderer2>(L"SimplePNTStaticRenderer2");
+			auto PtrGameStage = GetStage<GameStage>();
+			shptr = PtrGameStage->FindTagGameObject<BcPNTStaticRenderer>(L"BcPNTStaticRenderer");
 			m_Renderer = shptr;
 		}
 		shptr->AddDrawObject(m_PtrObj);
