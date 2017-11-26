@@ -35,7 +35,7 @@ namespace basecross {
 		//背景スプライトの作成
 		AddGameObject<SkySprite>(
 			L"SKY_TX",
-			Vec2(1280, 500),
+			Vec2(1280, 600),
 			0.0f,
 			Vec2(0, 300),
 			1, 1
@@ -50,9 +50,9 @@ namespace basecross {
 		AddGameObject<SquareObject>(
 			L"WALL_TX",
 			L"WALL_NORMAL_TX",
-			Vec3(50.0f, 50.0f, 1.0f),
+			Vec3(20.0f, 100.0f, 1.0f),
 			Qt,
-			Vec3(0.0f, 0.0f, 0.0f)
+			Vec3(0.0f, 0.0f, 40.0f)
 			);
 
 		//プレイヤーの作成
@@ -73,7 +73,7 @@ namespace basecross {
 			true);
 
 		//エネミーの作成
-		for (int i = 0; i < 5; i++) {
+		/*for (int i = 0; i < 5; i++) {
 			float x = (float)(i + 1);
 			AddGameObject<EnemyObject>(
 				Par,
@@ -82,7 +82,7 @@ namespace basecross {
 				Quat(),
 				Vec3(x + 2.0f, 0.125f, 0.0f),
 				false);
-		}
+		}*/
 
 		for (int i = 0; i < 25; i++) {
 			float x = (float)(i + 1);
@@ -91,7 +91,7 @@ namespace basecross {
 				L"FIRE_TX",
 				Vec3(0.25f, 0.25f, 0.25f),
 				Quat(),
-				Vec3(x + 4.0f, 0.125f, 0.0f),
+				Vec3((float)rand()/ 32767 * 20.0f - 10.0f, 0.125f, 80.0f - (float)rand() / 32767 * 20.0f),
 				false);
 		}
 
@@ -102,7 +102,7 @@ namespace basecross {
 				L"Checker_TX",
 				Vec3(0.25f, 0.25f, 0.25f),
 				Quat(),
-				Vec3(x + 5.0f, 0.125f, 0.0f),
+				Vec3((float)rand() / 32767 * 20.0f - 10.0f, 0.125f, 80.0f - (float)rand() / 32767 * 20.0f),
 				false);
 			for (int j = 0;j < 3;j++) {
 				AddGameObject<BulletObject>(
@@ -119,9 +119,9 @@ namespace basecross {
 			AddGameObject<BossEnemy>(
 				Par,
 				L"Balloon0_TX",
-				Vec3(2.0f, 2.0f, 2.0f),
+				Vec3(3.0f, 3.0f, 3.0f),
 				Quat(),
-				Vec3(x + 5.0f, 3.0f, 0.0f),
+				Vec3(0.0f, 3.0f, 80.0f),
 				false);
 			for (int j = 0; j < 3; j++) {
 				AddGameObject<BulletObject>(
@@ -269,8 +269,8 @@ namespace basecross {
 
 			if (CntlVec[0].fThumbRY != 0) {
 				camera.m_CameraYRad += CntlVec[0].fThumbRY * 0.05f;
-				if (camera.m_CameraYRad >= XM_PIDIV2 - 0.1f) {
-					camera.m_CameraYRad = XM_PIDIV2 - 0.1f;
+				if (camera.m_CameraYRad >= XM_PIDIV2 - 0.05f) {
+					camera.m_CameraYRad = XM_PIDIV2 - 0.05f;
 				}
 				else if (camera.m_CameraYRad <= 0.2) {
 					camera.m_CameraYRad = 0.2;
