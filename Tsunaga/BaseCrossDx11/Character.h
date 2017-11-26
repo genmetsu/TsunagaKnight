@@ -21,8 +21,8 @@ namespace basecross {
 		~GameManager() {}
 		static GameManager* GM;
 
-		//int m_SelectedStageNum;
-		//int m_SelectedLevelNum;
+		float m_player_HP;
+		
 	public:
 		static GameManager* getInstance();
 	};
@@ -462,6 +462,119 @@ namespace basecross {
 		*/
 		//--------------------------------------------------------------------------------------
 		virtual ~SkySprite() {}
+	};
+
+	//--------------------------------------------------------------------------------------
+	///	大砲クラス
+	//--------------------------------------------------------------------------------------
+	class Cannon : public GameObject, public MatrixInterface {
+	protected:
+		//テクスチャリソース名
+		wstring m_TextureResName;
+		//スケーリング
+		Vec3 m_Scale;
+		//回転
+		Quat m_Qt;
+		//位置
+		Vec3 m_Pos;
+
+		//耐久度
+		float m_HP;
+
+		//Rigidbodyのshared_ptr
+		shared_ptr<Rigidbody> m_Rigidbody;
+
+		//描画データ
+		shared_ptr<SimpleDrawObject> m_PtrObj;
+		//描画オブジェクト(weak_ptr)
+		weak_ptr<SimplePNTStaticRenderer2> m_Renderer;
+		//シャドウマップ用描画データ
+		shared_ptr<ShadowmapObject> m_PtrShadowmapObj;
+		//シャドウマップ描画オブジェクト(weak_ptr)
+		weak_ptr<ShadowmapRenderer> m_ShadowmapRenderer;
+		bool m_OwnShadowActive;
+
+	public:
+		//--------------------------------------------------------------------------------------
+		/*!
+		@brief コンストラクタ
+		@param[in]	StagePtr	ステージのポインタ
+		@param[in]	ParentPtr	親のポインタ
+		@param[in]	TextureResName	テクスチャリソース名
+		@param[in]	Scale	スケーリング
+		@param[in]	Qt	初期回転
+		@param[in]	Pos	位置
+		@param[in]	OwnShadowActive	影描画するかどうか
+		*/
+		//--------------------------------------------------------------------------------------
+		Cannon(const shared_ptr<Stage>& StagePtr,
+			const wstring& TextureResName, const Vec3& Scale, const Quat& Qt, const Vec3& Pos,
+			bool OwnShadowActive);
+		//--------------------------------------------------------------------------------------
+		/*!
+		@brief デストラクタ
+		*/
+		//--------------------------------------------------------------------------------------
+		virtual ~Cannon();
+		//--------------------------------------------------------------------------------------
+		/*!
+		@brief 初期化
+		@return	なし
+		*/
+		//--------------------------------------------------------------------------------------
+		virtual void OnCreate() override;
+		//--------------------------------------------------------------------------------------
+		/*!
+		@brief 更新
+		@return	なし
+		*/
+		//--------------------------------------------------------------------------------------
+		virtual void OnUpdate()override;
+		//--------------------------------------------------------------------------------------
+		/*!
+		@brief	シャドウマップの描画処理(仮想関数)
+		@return	なし
+		*/
+		//--------------------------------------------------------------------------------------
+		virtual void OnDrawShadowmap() override;
+		//--------------------------------------------------------------------------------------
+		/*!
+		@brief 描画
+		@return	なし
+		*/
+		//--------------------------------------------------------------------------------------
+		virtual void OnDraw()override;
+		//--------------------------------------------------------------------------------------
+		/*!
+		@brief
+		@return	ワールド行列
+		*/
+		//--------------------------------------------------------------------------------------
+		virtual Vec3 GetPosition() override;
+		//--------------------------------------------------------------------------------------
+		/*!
+		@brief ワールド行列の取得
+		@return	ワールド行列
+		*/
+		//--------------------------------------------------------------------------------------
+		virtual void GetWorldMatrix(Mat4x4& m) const override;
+		//--------------------------------------------------------------------------------------
+		/*!
+		@brief 自分のHPの状態チェック
+		@return	なし
+		*/
+		//--------------------------------------------------------------------------------------
+		void CheckHealth();
+
+		float GetHP() {
+			return m_HP;
+		}
+		void SetHP(float Value) {
+			m_HP = Value;
+		}
+		float GetScale() {
+			return m_Scale.x;
+		}
 	};
 
 	//--------------------------------------------------------------------------------------

@@ -84,7 +84,17 @@ namespace basecross {
 				false);
 		}*/
 
-		for (int i = 0; i < 25; i++) {
+		for (int i = 0; i < 3; i++) {
+			float x = (float)(i);
+			AddGameObject<Cannon>(
+				L"SKY_TX",
+				Vec3(2.0f, 2.0f, 2.0f),
+				Quat(),
+				Vec3(x * 4.0f - 4.0f, 0.125f, -3.0f),
+				false);
+		}
+
+		for (int i = 0; i < 50; i++) {
 			float x = (float)(i + 1);
 			AddGameObject<NeedleEnemy>(
 				Par,
@@ -95,7 +105,7 @@ namespace basecross {
 				false);
 		}
 
-		for (int i = 0; i < 25; i++) {
+		for (int i = 0; i < 50; i++) {
 			float x = (float)(i + 1);
 			AddGameObject<ShootEnemy>(
 				Par,
@@ -109,7 +119,7 @@ namespace basecross {
 					L"SPARK_TX",
 					Vec3(0.125f, 0.125f, 0.125f),
 					Quat(),
-					Vec3(2.0f, 0.125f, 0.0f),
+					Vec3(0.0f, -10.0f, 0.0f),
 					false,
 					L"Bullet");
 			}
@@ -128,7 +138,7 @@ namespace basecross {
 					L"RED_TX",
 					Vec3(0.5f, 0.5f, 0.5f),
 					Quat(),
-					Vec3(2.0f, 0.125f, 0.0f),
+					Vec3(0.0f, -10.0f, 0.0f),
 					false,
 					L"BossBullet");
 			}
