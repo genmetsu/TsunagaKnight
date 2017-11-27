@@ -1066,6 +1066,7 @@ namespace basecross {
 					if (v) {
 						auto Ptr = dynamic_pointer_cast<BulletObject>(v);
 						Ptr->SetPosition(ToPosVec*0.25f + m_Rigidbody->m_Pos);
+						Ptr->Wakeup(Vec3(0.f, 0.f, 0.f),ToPosVec.normalize());
 					}
 				}
 				//	MessageBox(NULL, L"ZZ”ò‚Î‚µ‚½‚¢", L" ", MB_YESNO);
@@ -1248,6 +1249,11 @@ namespace basecross {
 	void BulletObject::SetPosition(Vec3 pos)
 	{
 		m_Rigidbody->m_Pos = pos;	
+	}
+
+	void BulletObject::Wakeup(const Vec3 & Position, const Vec3 & Velocity)
+	{
+		m_Rigidbody->m_Velocity = Velocity;
 	}
 
 	//--------------------------------------------------------------------------------------

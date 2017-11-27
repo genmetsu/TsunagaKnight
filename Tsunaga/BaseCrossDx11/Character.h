@@ -897,6 +897,9 @@ namespace basecross {
 		virtual Vec3 GetPosition() override;
 		 void SetPosition(Vec3 pos);
 
+		 void Wakeup(const Vec3& Position, const Vec3& Velocity);
+
+
 	};
 
 	//--------------------------------------------------------------------------------------
