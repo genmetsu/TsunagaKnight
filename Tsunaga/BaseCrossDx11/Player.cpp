@@ -80,7 +80,7 @@ namespace basecross {
 		Rigidbody body;
 		body.m_Owner = GetThis<GameObject>();
 		body.m_Mass = 1.0f;
-		body.m_Scale = Vec3(0.3f);
+		body.m_Scale = Vec3(0.2f);
 		body.m_Quat = Quat();
 		body.m_Pos = m_Posision;
 		body.m_CollType = CollType::typeCAPSULE;
@@ -92,13 +92,7 @@ namespace basecross {
 
 		m_Rigidbody = PtrGameStage->AddRigidbody(body);
 
-		//メッシュとトランスフォームの差分の設定
-		m_MeshToTransformMatrix.affineTransformation(
-			Vec3(5.0f, 1.0f, 1.0f),
-			Vec3(0.0f, 0.0f, 0.0f),
-			Vec3(0.0f, 0.0f, 0.0f),
-			Vec3(0.0f, -1.0f, 0.0f)
-		);
+		
 
 		//行列の定義
 		Mat4x4 World;
@@ -109,8 +103,7 @@ namespace basecross {
 			body.m_Pos
 		);
 
-		//差分を計算
-		World = m_MeshToTransformMatrix * World;
+		
 
 		auto TexPtr = App::GetApp()->GetResource<TextureResource>(m_TextureResName);
 		//描画データの構築
@@ -235,6 +228,18 @@ namespace basecross {
 			m_Rigidbody->m_Quat,
 			m_Rigidbody->m_Pos
 		);
+
+		//メッシュとトランスフォームの差分の設定
+		m_MeshToTransformMatrix.affineTransformation(
+			Vec3(1.0f, 1.0f, 1.0f),
+			Vec3(0.0f, 0.0f, 0.0f),
+			Vec3(0.0f, XM_PI, 0.0f),
+			Vec3(0.0f, 0.0f, 0.0f)
+		);
+
+		//差分を計算
+		World = m_MeshToTransformMatrix * World;
+
 		m_PtrObj->m_WorldMatrix = World;
 		m_PtrObj->m_Camera = GetStage<Stage>()->GetCamera();
 		auto shptr = m_Renderer.lock();

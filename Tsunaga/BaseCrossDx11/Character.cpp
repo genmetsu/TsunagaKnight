@@ -1024,10 +1024,14 @@ namespace basecross {
 			m_Rigidbody->m_Scale,
 			Vec3(0, 0, 0),
 			Quat(),
+			Vec3(0, m_Scale.y/2.0f, -0.25f)
+		);
+		m_ChildLocalMatrix.affineTransformation(
+			m_Rigidbody->m_Scale,
+			Vec3(0, 0, 0),
+			Quat(),
 			Vec3(0, 0, -0.25f)
 		);
-		//このステートではチャイルドの場合も同じ
-		m_ChildLocalMatrix = m_PlayerLocalMatrix;
 		m_LerpToParent = m_LerpToChild = 0.2f;
 	}
 
