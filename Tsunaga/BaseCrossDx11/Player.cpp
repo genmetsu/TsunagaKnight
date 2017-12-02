@@ -16,7 +16,7 @@ namespace basecross {
 		GameObject(StagePtr),
 		m_TextureResName(TextureResName),
 		m_Trace(Trace),
-		m_BaseY(0.5f / 2.0f),
+		m_BaseY(0.0f),
 		m_Posision(Pos),
 		m_FrameCount(0.0f),
 		m_isStep(false),
@@ -80,10 +80,10 @@ namespace basecross {
 		Rigidbody body;
 		body.m_Owner = GetThis<GameObject>();
 		body.m_Mass = 1.0f;
-		body.m_Scale = Vec3(0.5f);
+		body.m_Scale = Vec3(0.3f);
 		body.m_Quat = Quat();
 		body.m_Pos = m_Posision;
-		body.m_CollType = CollType::typeSPHERE;
+		body.m_CollType = CollType::typeCAPSULE;
 //		body.m_IsDrawActive = true;
 		body.m_IsFixed = true;
 		body.SetToBefore();
@@ -91,6 +91,14 @@ namespace basecross {
 		m_StepVec = Vec3(0.0f);
 
 		m_Rigidbody = PtrGameStage->AddRigidbody(body);
+
+		//メッシュとトランスフォームの差分の設定
+		m_MeshToTransformMatrix.affineTransformation(
+			Vec3(5.0f, 1.0f, 1.0f),
+			Vec3(0.0f, 0.0f, 0.0f),
+			Vec3(0.0f, 0.0f, 0.0f),
+			Vec3(0.0f, -1.0f, 0.0f)
+		);
 
 		//行列の定義
 		Mat4x4 World;
@@ -101,10 +109,13 @@ namespace basecross {
 			body.m_Pos
 		);
 
+		//差分を計算
+		World = m_MeshToTransformMatrix * World;
+
 		auto TexPtr = App::GetApp()->GetResource<TextureResource>(m_TextureResName);
 		//描画データの構築
 		m_PtrObj = make_shared<BcDrawObject>();
-		m_PtrObj->m_MeshRes = m_SphereMesh;
+		m_PtrObj->m_MeshRes = App::GetApp()->GetResource<MeshResource>(L"KUREHA_MESH");;
 		m_PtrObj->m_TextureRes = TexPtr;
 		m_PtrObj->m_WorldMatrix = World;
 		m_PtrObj->m_Camera = GetStage<Stage>()->GetCamera();
@@ -115,7 +126,7 @@ namespace basecross {
 
 		//シャドウマップ描画データの構築
 		m_PtrShadowmapObj = make_shared<ShadowmapObject>();
-		m_PtrShadowmapObj->m_MeshRes = m_SphereMesh;
+		m_PtrShadowmapObj->m_MeshRes = m_PtrObj->m_MeshRes;
 		//描画データの行列をコピー
 		m_PtrShadowmapObj->m_WorldMatrix = World;
 

@@ -58,7 +58,7 @@ namespace basecross {
 		//ÉvÉåÉCÉÑÅ[ÇÃçÏê¨
 		shared_ptr<GameObject> Par = 
 			AddGameObject<Player>(
-			L"TRACE_TX",
+			L"KUREHA_TX",
 			true,
 			Vec3(0.0f, 0.5f, 0.0f)
 			);
@@ -98,7 +98,8 @@ namespace basecross {
 			float x = (float)(i + 1);
 			AddGameObject<NeedleEnemy>(
 				Par,
-				L"FIRE_TX",
+				L"NEEDLE_MESH",
+				L"NEEDLE_TX",
 				Vec3(0.25f, 0.25f, 0.25f),
 				Quat(),
 				Vec3((float)rand()/ 32767 * 20.0f - 10.0f, 0.125f, 80.0f - (float)rand() / 32767 * 20.0f),
@@ -109,6 +110,7 @@ namespace basecross {
 			float x = (float)(i + 1);
 			AddGameObject<ShootEnemy>(
 				Par,
+				L"DEFAULT_SPHERE",
 				L"Checker_TX",
 				Vec3(0.25f, 0.25f, 0.25f),
 				Quat(),
@@ -128,6 +130,7 @@ namespace basecross {
 			float x = (float)(i + 1);
 			AddGameObject<BossEnemy>(
 				Par,
+				L"DEFAULT_SPHERE",
 				L"Balloon0_TX",
 				Vec3(3.0f, 3.0f, 3.0f),
 				Quat(),
@@ -282,8 +285,8 @@ namespace basecross {
 				if (camera.m_CameraYRad >= XM_PIDIV2 - 0.05f) {
 					camera.m_CameraYRad = XM_PIDIV2 - 0.05f;
 				}
-				else if (camera.m_CameraYRad <= 0.2) {
-					camera.m_CameraYRad = 0.2;
+				else if (camera.m_CameraYRad <= 0.5f) {
+					camera.m_CameraYRad = 0.5f;
 				}
 			}
 

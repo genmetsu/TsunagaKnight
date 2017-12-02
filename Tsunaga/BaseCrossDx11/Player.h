@@ -15,6 +15,7 @@ namespace basecross {
 	class Player : public GameObject, public MatrixInterface {
 		///メッシュ
 		shared_ptr<MeshResource> m_SphereMesh;
+		Mat4x4 m_MeshToTransformMatrix;
 		///テクスチャリソース名
 		wstring m_TextureResName;
 		///スケーリングベースの最下地点

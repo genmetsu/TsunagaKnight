@@ -710,11 +710,12 @@ namespace basecross {
 	//--------------------------------------------------------------------------------------
 
 	EnemyObject::EnemyObject(const shared_ptr<Stage>& StagePtr,
-		const shared_ptr<GameObject>& ParentPtr,
+		const shared_ptr<GameObject>& ParentPtr, const wstring& MeshResName,
 		const wstring& TextureResName, const Vec3& Scale, const Quat& Qt, const Vec3& Pos,
 		bool OwnShadowActive) :
 		GameObject(StagePtr),
 		m_ParentPtr(ParentPtr),
+		m_MeshResName(MeshResName),
 		m_TextureResName(TextureResName),
 		m_Scale(Scale),
 		m_Qt(Qt),
@@ -757,7 +758,7 @@ namespace basecross {
 		m_isDead = false;
 
 		//メッシュの取得
-		auto MeshPtr = App::GetApp()->GetResource<MeshResource>(L"DEFAULT_SPHERE");
+		auto MeshPtr = App::GetApp()->GetResource<MeshResource>(m_MeshResName);
 
 		//行列の定義
 		Mat4x4 World;
@@ -1139,9 +1140,10 @@ namespace basecross {
 	//--------------------------------------------------------------------------------------
 
 	NeedleEnemy::NeedleEnemy(const shared_ptr<Stage>& StagePtr, const shared_ptr<GameObject>& ParentPtr, 
+		const wstring& MeshResName,
 		const wstring & TextureResName, const Vec3 & Scale, 
 		const Quat & Qt, const Vec3 & Pos, bool OwnShadowActive) :
-		EnemyObject(StagePtr, ParentPtr, TextureResName, Scale,Qt,Pos, OwnShadowActive)
+		EnemyObject(StagePtr, ParentPtr,MeshResName ,TextureResName, Scale,Qt,Pos, OwnShadowActive)
 	{}
 
 	NeedleEnemy::~NeedleEnemy()
@@ -1153,10 +1155,11 @@ namespace basecross {
 	//--------------------------------------------------------------------------------------
 
 	ShootEnemy::ShootEnemy(const shared_ptr<Stage>& StagePtr, const shared_ptr<GameObject>& ParentPtr, 
+		const wstring& MeshResName,
 		const wstring & TextureResName,
 		const Vec3 & Scale, const Quat & Qt, 
 		const Vec3 & Pos, bool OwnShadowActive):
-		EnemyObject(StagePtr, ParentPtr, TextureResName, Scale, Qt, Pos, OwnShadowActive)
+		EnemyObject(StagePtr, ParentPtr, MeshResName,TextureResName, Scale, Qt, Pos, OwnShadowActive)
 	{
 	}
 
@@ -1399,9 +1402,10 @@ namespace basecross {
 
 	BossEnemy::BossEnemy(const shared_ptr<Stage>& StagePtr, 
 		const shared_ptr<GameObject>& ParentPtr,
+		const wstring& MeshResName,
 		const wstring & TextureResName, const Vec3 & Scale,
 		const Quat & Qt, const Vec3 & Pos, bool OwnShadowActive):
-	EnemyObject(StagePtr, ParentPtr, TextureResName, Scale, Qt, Pos, OwnShadowActive)
+	EnemyObject(StagePtr, ParentPtr, MeshResName,TextureResName, Scale, Qt, Pos, OwnShadowActive)
 	{
 	}
 

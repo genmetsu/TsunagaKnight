@@ -135,10 +135,23 @@ namespace basecross {
 		strTexture = DataDir + L"normal2.png";
 		App::GetApp()->RegisterTexture(L"NORMAL2_TX", strTexture);
 
+		strTexture = DataDir + L"Kureha_Body_Tex.tga";
+		App::GetApp()->RegisterTexture(L"KUREHA_TX", strTexture);
+
+		strTexture = DataDir + L"E_Needle.UV2.png";
+		App::GetApp()->RegisterTexture(L"NEEDLE_TX", strTexture);
+
 
 		//ボーンモデルのリソース
 		auto ModelMesh = MeshResource::CreateBoneModelMesh(DataDir, L"Chara_R.bmf");
 		App::GetApp()->RegisterResource(L"Chara_R_MESH", ModelMesh);
+
+		ModelMesh = MeshResource::CreateBoneModelMesh(DataDir, L"Kureha_fbx_test_1.bmf");
+		App::GetApp()->RegisterResource(L"KUREHA_MESH", ModelMesh);
+
+		ModelMesh = MeshResource::CreateBoneModelMesh(DataDir, L"E_Needle.bmf");
+		App::GetApp()->RegisterResource(L"NEEDLE_MESH", ModelMesh);
+
 		//ボーンモデルのタンジェント付きリソース
 		ModelMesh = MeshResource::CreateBoneModelMeshWithTangent(DataDir, L"Chara_R.bmf");
 		App::GetApp()->RegisterResource(L"Chara_R_MESH_WITH_TAN", ModelMesh);
