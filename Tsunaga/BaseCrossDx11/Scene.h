@@ -28,7 +28,7 @@ namespace basecross {
 			m_FovY(XM_PIDIV4),
 			m_CameraXZRad(0.0f),
 			m_CameraYRad(XM_PIDIV4 + 0.5f),
-			m_CameraArmLen(5.0f)
+			m_CameraArmLen(3.0f)
 		{}
 		//--------------------------------------------------------------------------------------
 		/*!

@@ -8,6 +8,8 @@
 
 namespace basecross {
 
+	GameManager;
+
 	//--------------------------------------------------------------------------------------
 	///	球体のプレイヤー実体
 	//--------------------------------------------------------------------------------------
@@ -80,19 +82,17 @@ namespace basecross {
 		Rigidbody body;
 		body.m_Owner = GetThis<GameObject>();
 		body.m_Mass = 1.0f;
-		body.m_Scale = Vec3(0.2f);
+		body.m_Scale = Vec3(0.15f);
 		body.m_Quat = Quat();
 		body.m_Pos = m_Posision;
 		body.m_CollType = CollType::typeCAPSULE;
-//		body.m_IsDrawActive = true;
+		body.m_IsDrawActive = true;
 		body.m_IsFixed = true;
 		body.SetToBefore();
 
 		m_StepVec = Vec3(0.0f);
 
 		m_Rigidbody = PtrGameStage->AddRigidbody(body);
-
-		
 
 		//行列の定義
 		Mat4x4 World;
@@ -102,8 +102,6 @@ namespace basecross {
 			body.m_Quat,
 			body.m_Pos
 		);
-
-		
 
 		auto TexPtr = App::GetApp()->GetResource<TextureResource>(m_TextureResName);
 		//描画データの構築
@@ -504,6 +502,9 @@ namespace basecross {
 						SetFriends(PtrEnemy);
 						//配列の長さを取って2番目以降なら自分の前の敵を親にする
 						m_friends_num = m_friends.size();
+						auto GM = GameManager::getInstance();
+						GM->SetFriendsNum(m_friends_num);
+						
 						if (m_friends_num >= 2) {
 							PtrEnemy->SetParent(m_friends[m_friends_num - 2]);
 						}
@@ -520,7 +521,7 @@ namespace basecross {
 			m_Rigidbody->m_Scale,
 			Vec3(0, 0, 0),
 			Quat(),
-			Vec3(0, 0, -0.5f)
+			Vec3(0, m_Scale.y/2.0f, -0.5f)
 		);
 		//このステートではチャイルドの場合も同じ
 		m_ChildLocalMatrix = m_PlayerLocalMatrix;

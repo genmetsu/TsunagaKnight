@@ -8,6 +8,8 @@
 
 namespace basecross {
 
+	GameManager;
+
 	//--------------------------------------------------------------------------------------
 	///	ゲームステージ
 	//--------------------------------------------------------------------------------------
@@ -35,11 +37,17 @@ namespace basecross {
 		//背景スプライトの作成
 		AddGameObject<SkySprite>(
 			L"SKY_TX",
-			Vec2(1280, 600),
+			Vec2(1280, 800),
 			0.0f,
-			Vec2(0, 300),
+			Vec2(0, 0),
 			1, 1
 			);
+		/*AddGameObject<SkyBox>(
+			L"SKY_TX",
+			Vec3(200.0f, 200.0f, 200.0f),
+			Quat(),
+			Vec3(0.0f),
+			false);*/
 
 		//複数使用する球体の登録（リソース登録する）
 		RegisterDefaultSphere();
@@ -290,7 +298,17 @@ namespace basecross {
 				}
 			}
 
+			/*auto GM = GameManager::getInstance();
+			int now_friends_num = GM->GetFriendsNum();
+			if (now_friends_num >= 6) {
+				camera.m_CameraArmLen = (float)now_friends_num * 0.5f;
+				if (GetCamera().m_CameraArmLen >= 50.0f) {
+					GetCamera().m_CameraArmLen = 50.0f;
+				}
+			}*/
+
 			camera.m_CamerAt = FindTagGameObject<GameObject>(L"Player")->GetPosition();
+			camera.m_CamerAt.y += 0.5f;
 			Vec3 CameraLocalEye =
 				Vec3(
 					sin(camera.m_CameraXZRad) * camera.m_CameraArmLen * sin(camera.m_CameraYRad),

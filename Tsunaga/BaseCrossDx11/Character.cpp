@@ -19,6 +19,7 @@ namespace basecross {
 		}
 		return GM;
 	}
+
 	//--------------------------------------------------------------------------------------
 	///	平面実体
 	//--------------------------------------------------------------------------------------
@@ -581,6 +582,90 @@ namespace basecross {
 	}
 
 	//--------------------------------------------------------------------------------------
+	///　SkyBox
+	//--------------------------------------------------------------------------------------
+
+	SkyBox::SkyBox(const shared_ptr<Stage>& StagePtr,
+		const wstring& TextureResName, const Vec3& Scale, const Quat& Qt, const Vec3& Pos,
+		bool OwnShadowActive) :
+		GameObject(StagePtr),
+		m_TextureResName(TextureResName),
+		m_Scale(Scale),
+		m_Qt(Qt),
+		m_Pos(Pos),
+		m_OwnShadowActive(OwnShadowActive)
+	{}
+	SkyBox::~SkyBox() {}
+
+	void SkyBox::OnCreate() {
+
+		//Rigidbodyの初期化
+		auto PtrGameStage = GetStage<GameStage>();
+
+		//メッシュの取得
+
+		vector<VertexPositionNormalTexture> vertices;
+		vector<uint16_t> indices;
+		MeshUtill::CreateSphere(-1.0f, 18, vertices, indices);
+		//メッシュの作成（変更できない）
+		auto MeshPtr = MeshResource::CreateMeshResource(vertices, indices, false);
+
+		//行列の定義
+		Mat4x4 World;
+		World.affineTransformation(
+			m_Scale,
+			Vec3(0, 0, 0),
+			m_Qt,
+			m_Pos
+		);
+
+		auto TexPtr = App::GetApp()->GetResource<TextureResource>(m_TextureResName);
+		//描画データの構築
+		m_PtrObj = make_shared<SimpleDrawObject>();
+		m_PtrObj->m_MeshRes = MeshPtr;
+		m_PtrObj->m_TextureRes = TexPtr;
+		m_PtrObj->m_WorldMatrix = World;
+		m_PtrObj->m_Camera = GetStage<Stage>()->GetCamera();
+		m_PtrObj->m_OwnShadowmapActive = m_OwnShadowActive;
+		m_PtrObj->m_ShadowmapUse = true;
+
+		//シャドウマップ描画データの構築
+		m_PtrShadowmapObj = make_shared<ShadowmapObject>();
+		m_PtrShadowmapObj->m_MeshRes = MeshPtr;
+		//描画データの行列をコピー
+		m_PtrShadowmapObj->m_WorldMatrix = World;
+		m_PtrShadowmapObj->m_Camera = GetStage<Stage>()->GetCamera();
+
+	}
+
+	void SkyBox::OnUpdate() {
+
+	}
+
+	void SkyBox::OnDrawShadowmap() {
+		
+	}
+
+	void SkyBox::OnDraw() {
+		//行列の定義
+		Mat4x4 World;
+		World.affineTransformation(
+			m_Scale,
+			Vec3(0, 0, 0),
+			m_Qt,
+			m_Pos
+		);
+		m_PtrObj->m_WorldMatrix = World;
+		m_PtrObj->m_Camera = GetStage<Stage>()->GetCamera();
+		auto shptr = m_Renderer.lock();
+		if (!shptr) {
+			shptr = GetStage<Stage>()->FindTagGameObject<SimplePNTStaticRenderer2>(L"SimplePNTStaticRenderer2");
+			m_Renderer = shptr;
+		}
+		shptr->AddDrawObject(m_PtrObj);
+	}
+
+	//--------------------------------------------------------------------------------------
 	///　大砲オブジェクト
 	//--------------------------------------------------------------------------------------
 
@@ -616,7 +701,12 @@ namespace basecross {
 		m_Rigidbody = PtrGameStage->AddRigidbody(body);
 
 		//メッシュの取得
-		auto MeshPtr = App::GetApp()->GetResource<MeshResource>(L"DEFAULT_SPHERE");
+
+		vector<VertexPositionNormalTexture> vertices;
+		vector<uint16_t> indices;
+		MeshUtill::CreateSphere(1.0f, 18, vertices, indices);
+		//メッシュの作成（変更できない）
+		auto MeshPtr = MeshResource::CreateMeshResource(vertices, indices, false);
 
 		//行列の定義
 		Mat4x4 World;
@@ -783,7 +873,7 @@ namespace basecross {
 
 		//シャドウマップ描画データの構築
 		m_PtrShadowmapObj = make_shared<ShadowmapObject>();
-		m_PtrShadowmapObj->m_MeshRes = MeshPtr;
+		m_PtrShadowmapObj->m_MeshRes = App::GetApp()->GetResource<MeshResource>(L"DEFAULT_SPHERE");
 		//描画データの行列をコピー
 		m_PtrShadowmapObj->m_WorldMatrix = World;
 		m_PtrShadowmapObj->m_Camera = GetStage<Stage>()->GetCamera();
