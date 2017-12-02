@@ -733,7 +733,6 @@ namespace basecross {
 		m_Attack1ToRot(0),
 		m_HP(100.0f),
 		m_AttackPoint(100.0f)
-
 	{}
 	EnemyObject::~EnemyObject() {}
 
@@ -1280,7 +1279,8 @@ namespace basecross {
 		m_my_Tag(Tag),
 		m_LerpToParent(0.2f),
 		m_LerpToChild(0.2f),
-		m_Attack1ToRot(0)
+		m_Attack1ToRot(0),
+		m_ShootSpeed(5.0f)
 	{
 
 	}
@@ -1388,7 +1388,10 @@ namespace basecross {
 	void BulletObject::Wakeup(const Vec3 & Position, const Vec3 & Velocity)
 	{
 		m_Rigidbody->m_Velocity = Velocity;
+
+		m_Pos *= m_ShootSpeed;
 	}
+
 
 	//--------------------------------------------------------------------------------------
 	/// ボスエネミー
