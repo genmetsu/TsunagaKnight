@@ -138,8 +138,8 @@ namespace basecross {
 			float x = (float)(i + 1);
 			AddGameObject<BossEnemy>(
 				Par,
-				L"DEFAULT_SPHERE",
-				L"Balloon0_TX",
+				L"NEEDLE_MESH",
+				L"NEEDLE_TX",
 				Vec3(3.0f, 3.0f, 3.0f),
 				Quat(),
 				Vec3(0.0f, 3.0f, 80.0f),
