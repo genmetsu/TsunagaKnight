@@ -125,48 +125,37 @@ namespace basecross {
 
 
 	void Player::OnUpdate() {
-		//前回のターンからの経過時間を求める
-		float ElapsedTime = App::GetApp()->GetElapsedTime();
-		//コントローラの取得
-		auto CntlVec = App::GetApp()->GetInputDevice().GetControlerVec();
-		if (CntlVec[0].bConnected) {
-			//Aボタン
-			if (CntlVec[0].wPressedButtons & XINPUT_GAMEPAD_A && m_isStep == false) {
-			
-				m_isStep = true;
+		
+		Step();
 
-				m_StepVec = GetMoveVector();
-				m_StepVec.normalize();
+		if (m_isStep == false) {
+			//攻撃の衝突判定
+			vector<shared_ptr<GameObject>> EnemyVec;
+			GetStage<GameStage>()->FindTagGameObjectVec(L"EnemyObject", EnemyVec);
+			for (auto enemy : EnemyVec) {
+				if (enemy) {
+					auto PtrEnemy = dynamic_pointer_cast<EnemyObject>(enemy);
 
-				//エフェクトの再生
-				auto FirePtr = GetStage<GameStage>()->FindTagGameObject<StepEffect>(L"StepEffect");
-				Vec3 Emitter = m_Rigidbody->m_Pos;
-				Emitter.y -= m_Rigidbody->m_Scale.y / 2.0f;;
-				FirePtr->InsertEffect(Emitter);
-			}
-			Vec3 Direction = GetMoveVector();
-			if (length(Direction) < 0.1f) {
-				m_Rigidbody->m_Velocity.x *= 0.8f;
-				m_Rigidbody->m_Velocity.z *= 0.8f;
-			}
-			if (m_isStep == true) {
-				m_Rigidbody->m_Velocity += m_StepVec * 2.0f;
-				m_FrameCount++;
-			}
-			else {
-				m_Rigidbody->m_Velocity += Direction * 0.5f;
-				Vec2 TempVelo(m_Rigidbody->m_Velocity.x, m_Rigidbody->m_Velocity.z);
-				TempVelo = XMVector2ClampLength(TempVelo, 0, 5.0f);
-				m_Rigidbody->m_Velocity.x = TempVelo.x;
-				m_Rigidbody->m_Velocity.z = TempVelo.y;
-				
+					Vec3 EnemyPos = PtrEnemy->GetPosition();
+					float length = (EnemyPos - m_Rigidbody->m_Pos).length();
+
+					float EnemyRadius = PtrEnemy->GetScale() / 2.0f;
+					float PlayerRadius = m_Rigidbody->m_Scale.x;
+
+					if (length <= EnemyRadius + PlayerRadius) {
+						if (PtrEnemy->GetHP() > 0) {
+							Vec3 Emitter = m_Rigidbody->m_Pos;
+							Emitter.y -= 0.125f;
+							//Sparkの送出
+							auto SparkPtr = GetStage<GameStage>()->FindTagGameObject<MultiSpark>(L"MultiSpark");
+							SparkPtr->InsertSpark(Emitter);
+
+							break;
+						}
+					}
+				}
 			}
 		}
-		if (m_FrameCount >= 10.0f) {
-			m_isStep = false;
-			m_FrameCount = 0.0f;
-		}
-		m_Rigidbody->m_Force += m_Rigidbody->m_Gravity * m_Rigidbody->m_Mass;
 	}
 
 	void Player::OnUpdate2() {
@@ -260,6 +249,47 @@ namespace basecross {
 		);
 		m = World;
 
+	}
+
+	void Player::Step() {
+		//前回のターンからの経過時間を求める
+		float ElapsedTime = App::GetApp()->GetElapsedTime();
+		//コントローラの取得
+		auto CntlVec = App::GetApp()->GetInputDevice().GetControlerVec();
+		if (CntlVec[0].bConnected) {
+			//Aボタン
+			if (CntlVec[0].wPressedButtons & XINPUT_GAMEPAD_A && m_isStep == false) {
+				m_isStep = true;
+				m_StepVec = GetMoveVector();
+				m_StepVec.normalize();
+				//エフェクトの再生
+				auto FirePtr = GetStage<GameStage>()->FindTagGameObject<StepEffect>(L"StepEffect");
+				Vec3 Emitter = m_Rigidbody->m_Pos;
+				Emitter.y -= m_Rigidbody->m_Scale.y / 2.0f;;
+				FirePtr->InsertEffect(Emitter);
+			}
+			Vec3 Direction = GetMoveVector();
+			if (length(Direction) < 0.1f) {
+				m_Rigidbody->m_Velocity.x *= 0.8f;
+				m_Rigidbody->m_Velocity.z *= 0.8f;
+			}
+			if (m_isStep == true) {
+				m_Rigidbody->m_Velocity += m_StepVec * 1.3f;
+				m_FrameCount++;
+			}
+			else {
+				m_Rigidbody->m_Velocity += Direction * 0.5f;
+				Vec2 TempVelo(m_Rigidbody->m_Velocity.x, m_Rigidbody->m_Velocity.z);
+				TempVelo = XMVector2ClampLength(TempVelo, 0, 5.0f);
+				m_Rigidbody->m_Velocity.x = TempVelo.x;
+				m_Rigidbody->m_Velocity.z = TempVelo.y;
+			}
+		}
+		if (m_FrameCount >= 10.0f) {
+			m_isStep = false;
+			m_FrameCount = 0.0f;
+		}
+		m_Rigidbody->m_Force += m_Rigidbody->m_Gravity * m_Rigidbody->m_Mass;
 	}
 
 	//--------------------------------------------------------------------------------------
