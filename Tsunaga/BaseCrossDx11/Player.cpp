@@ -91,6 +91,7 @@ namespace basecross {
 		body.SetToBefore();
 
 		m_StepVec = Vec3(0.0f);
+		m_KnockBackVec = Vec3(0.0f);
 
 		m_Rigidbody = PtrGameStage->AddRigidbody(body);
 
@@ -120,42 +121,16 @@ namespace basecross {
 		m_PtrShadowmapObj->m_MeshRes = m_PtrObj->m_MeshRes;
 		//描画データの行列をコピー
 		m_PtrShadowmapObj->m_WorldMatrix = World;
-
+		//ステートマシンの構築
+		m_StateMachine.reset(new StateMachine<Player>(GetThis<Player>()));
+		//ステート初期値設定
+		m_StateMachine->ChangeState(DefaultState::Instance());
 	}
 
 
 	void Player::OnUpdate() {
+		m_StateMachine->Update();
 		
-		Step();
-
-		if (m_isStep == false) {
-			//攻撃の衝突判定
-			vector<shared_ptr<GameObject>> EnemyVec;
-			GetStage<GameStage>()->FindTagGameObjectVec(L"EnemyObject", EnemyVec);
-			for (auto enemy : EnemyVec) {
-				if (enemy) {
-					auto PtrEnemy = dynamic_pointer_cast<EnemyObject>(enemy);
-
-					Vec3 EnemyPos = PtrEnemy->GetPosition();
-					float length = (EnemyPos - m_Rigidbody->m_Pos).length();
-
-					float EnemyRadius = PtrEnemy->GetScale() / 2.0f;
-					float PlayerRadius = m_Rigidbody->m_Scale.x;
-
-					if (length <= EnemyRadius + PlayerRadius) {
-						if (PtrEnemy->GetHP() > 0) {
-							Vec3 Emitter = m_Rigidbody->m_Pos;
-							Emitter.y -= 0.125f;
-							//Sparkの送出
-							auto SparkPtr = GetStage<GameStage>()->FindTagGameObject<MultiSpark>(L"MultiSpark");
-							SparkPtr->InsertSpark(Emitter);
-
-							break;
-						}
-					}
-				}
-			}
-		}
 	}
 
 	void Player::OnUpdate2() {
@@ -290,6 +265,92 @@ namespace basecross {
 			m_FrameCount = 0.0f;
 		}
 		m_Rigidbody->m_Force += m_Rigidbody->m_Gravity * m_Rigidbody->m_Mass;
+	}
+
+	void Player::Damage(Vec3 EnemyPos) {
+		
+	}
+
+	void Player::DefaultBehaviour() {
+		Step();
+
+		if (m_isStep == false) {
+			//攻撃の衝突判定
+			vector<shared_ptr<GameObject>> EnemyVec;
+			GetStage<GameStage>()->FindTagGameObjectVec(L"EnemyObject", EnemyVec);
+			for (auto enemy : EnemyVec) {
+				if (enemy) {
+					auto PtrEnemy = dynamic_pointer_cast<EnemyObject>(enemy);
+
+					Vec3 EnemyPos = PtrEnemy->GetPosition();
+					float length = (EnemyPos - m_Rigidbody->m_Pos).length();
+
+					float EnemyRadius = PtrEnemy->GetScale() / 2.0f;
+					float PlayerRadius = m_Rigidbody->m_Scale.x;
+
+					if (length <= EnemyRadius + PlayerRadius) {
+						if (PtrEnemy->GetHP() > 0) {
+							Vec3 Emitter = m_Rigidbody->m_Pos;
+							Emitter.y -= 0.125f;
+							//Sparkの送出
+							auto SparkPtr = GetStage<GameStage>()->FindTagGameObject<MultiSpark>(L"MultiSpark");
+							SparkPtr->InsertSpark(Emitter);
+							//ノックバック方向の設定
+							m_KnockBackVec = m_Rigidbody->m_Pos - EnemyPos;
+							m_KnockBackVec.y = 0.0f;
+							m_KnockBackVec.normalize();
+							//ダメージステートに変更
+							m_StateMachine->ChangeState(DamagedState::Instance());
+							return;
+						}
+					}
+				}
+			}
+		}
+	}
+
+	void Player::DamagedBehaviour() {
+		m_Rigidbody->m_Velocity += m_KnockBackVec * 0.7f;
+	}
+
+	//--------------------------------------------------------------------------------------
+	///	通常のステート
+	//--------------------------------------------------------------------------------------
+	IMPLEMENT_SINGLETON_INSTANCE(DefaultState)
+
+	void DefaultState::Enter(const shared_ptr<Player>& Obj) {
+		
+	}
+
+	void DefaultState::Execute(const shared_ptr<Player>& Obj) {
+		Obj->DefaultBehaviour();
+	}
+
+	void DefaultState::Exit(const shared_ptr<Player>& Obj) {
+
+	}
+
+	//--------------------------------------------------------------------------------------
+	///	ダメージを受けた後のステート
+	//--------------------------------------------------------------------------------------
+	IMPLEMENT_SINGLETON_INSTANCE(DamagedState)
+
+	void DamagedState::Enter(const shared_ptr<Player>& Obj) {
+		frame_count = 0.0f;
+	}
+
+	void DamagedState::Execute(const shared_ptr<Player>& Obj) {
+		float ElapsedTime = App::GetApp()->GetElapsedTime();
+		Obj->DamagedBehaviour();
+		if (frame_count > 0.3f) {
+			Obj->GetStateMachine()->ChangeState(DefaultState::Instance());
+			return;
+		}
+		frame_count += ElapsedTime;
+	}
+
+	void DamagedState::Exit(const shared_ptr<Player>& Obj) {
+
 	}
 
 	//--------------------------------------------------------------------------------------
