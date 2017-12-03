@@ -159,7 +159,6 @@ namespace basecross {
 				}
 			}
 		}
-
 	}
 
 
@@ -224,13 +223,14 @@ namespace basecross {
 		ParticlePtr->SetTextureResource(L"SPARK_TX");
 		ParticlePtr->m_MaxTime = 1.25f;
 		vector<ParticleSprite>& pSpriteVec = ParticlePtr->GetParticleSpriteVec();
+		//ƒJƒƒ‰‚Ì•ûŒü‚É­‚µˆÚ“®‚³‚¹‚é
 		auto &Camera = GetStage()->GetCamera();
 		Vec3 Camera_Pos = Camera.m_CamerEye;
 		Vec3 MoveVec = Camera_Pos - Pos;
 		MoveVec.normalize();
 		for (auto& rParticleSprite : ParticlePtr->GetParticleSpriteVec()) {
-			rParticleSprite.m_LocalScale = Vec2(0.1f, 0.1f);
-			rParticleSprite.m_LocalPos += MoveVec * 0.5f;
+			rParticleSprite.m_LocalScale = Vec2(0.05f, 0.05f);
+			rParticleSprite.m_LocalPos += (MoveVec+Vec3(0,0.05f,0));
 			//F‚ÌŽw’è
 			rParticleSprite.m_Color = Col4(1.0f, 0.0f, 0.0f, 1.0f);
 		}
@@ -243,7 +243,7 @@ namespace basecross {
 		for (auto ParticlePtr : GetParticleVec()) {
 			for (auto& rParticleSprite : ParticlePtr->GetParticleSpriteVec()) {
 				if (rParticleSprite.m_Active) {
-					rParticleSprite.m_LocalScale.x += 0.3f;
+					rParticleSprite.m_LocalScale.x += 0.15f;
 					rParticleSprite.m_Color.w -= 0.025f;
 				}
 			}
