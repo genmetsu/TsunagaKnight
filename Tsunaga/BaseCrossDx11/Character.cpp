@@ -1114,7 +1114,7 @@ namespace basecross {
 			m_Rigidbody->m_Scale,
 			Vec3(0, 0, 0),
 			Quat(),
-			Vec3(0, m_Scale.y/2.0f, -0.25f)
+			Vec3(0, 0, -0.25f)
 		);
 		m_ChildLocalMatrix.affineTransformation(
 			m_Rigidbody->m_Scale,

@@ -18,7 +18,7 @@ namespace basecross {
 		GameObject(StagePtr),
 		m_TextureResName(TextureResName),
 		m_Trace(Trace),
-		m_BaseY(0.0f),
+		m_BaseY(0.15f),
 		m_Posision(Pos),
 		m_FrameCount(0.0f),
 		m_isStep(false),
@@ -232,7 +232,7 @@ namespace basecross {
 			Vec3(1.0f, 1.0f, 1.0f),
 			Vec3(0.0f, 0.0f, 0.0f),
 			Vec3(0.0f, XM_PI, 0.0f),
-			Vec3(0.0f, 0.0f, 0.0f)
+			Vec3(0.0f, -1.0f, 0.0f)
 		);
 
 		//ç∑ï™ÇåvéZ
