@@ -50,6 +50,8 @@ namespace basecross {
 		*/
 		//--------------------------------------------------------------------------------------
 		Vec3 GetMoveVector();
+		//ステートマシーン
+		unique_ptr<StateMachine<Player>>  m_StateMachine;
 	public:
 		//--------------------------------------------------------------------------------------
 		/*!
@@ -117,7 +119,95 @@ namespace basecross {
 		*/
 		//--------------------------------------------------------------------------------------
 		virtual void GetWorldMatrix(Mat4x4& m) const override;
+
+		//--------------------------------------------------------------------------------------
+		/*!
+		@brief 回避行動
+		@return	なし
+		*/
+		//--------------------------------------------------------------------------------------
+		void Step();
 		
+		//--------------------------------------------------------------------------------------
+		/*!
+		@brief	ステートマシンを得る
+		@return	ステートマシン
+		*/
+		//--------------------------------------------------------------------------------------
+		unique_ptr< StateMachine<Player> >& GetStateMachine() {
+			return m_StateMachine;
+		}
+	};
+
+	//--------------------------------------------------------------------------------------
+	///	通常ステート
+	//--------------------------------------------------------------------------------------
+	class DefaultState : public ObjState<Player>
+	{
+		DefaultState() {}
+	public:
+		//ステートのインスタンス取得
+		DECLARE_SINGLETON_INSTANCE(DefaultState)
+		virtual void Enter(const shared_ptr<Player>& Obj)override;
+		virtual void Execute(const shared_ptr<Player>& Obj)override;
+		virtual void Exit(const shared_ptr<Player>& Obj)override;
+	};
+
+	//--------------------------------------------------------------------------------------
+	///	回避行動ステート
+	//--------------------------------------------------------------------------------------
+	class StepState : public ObjState<Player>
+	{
+		StepState() {}
+	public:
+		//ステートのインスタンス取得
+		DECLARE_SINGLETON_INSTANCE(StepState)
+		virtual void Enter(const shared_ptr<Player>& Obj)override;
+		virtual void Execute(const shared_ptr<Player>& Obj)override;
+		virtual void Exit(const shared_ptr<Player>& Obj)override;
+	};
+
+	//--------------------------------------------------------------------------------------
+	///	ダメージを受けた際のステート
+	//--------------------------------------------------------------------------------------
+	class DamagedState : public ObjState<Player>
+	{
+		DamagedState() {}
+	public:
+		//ステートのインスタンス取得
+		DECLARE_SINGLETON_INSTANCE(DamagedState)
+		virtual void Enter(const shared_ptr<Player>& Obj)override;
+		virtual void Execute(const shared_ptr<Player>& Obj)override;
+		virtual void Exit(const shared_ptr<Player>& Obj)override;
+	};
+
+
+	//--------------------------------------------------------------------------------------
+	///	攻撃ステート
+	//--------------------------------------------------------------------------------------
+	class AttackState : public ObjState<Player>
+	{
+		AttackState() {}
+	public:
+		//ステートのインスタンス取得
+		DECLARE_SINGLETON_INSTANCE(AttackState)
+		virtual void Enter(const shared_ptr<Player>& Obj)override;
+		virtual void Execute(const shared_ptr<Player>& Obj)override;
+		virtual void Exit(const shared_ptr<Player>& Obj)override;
+	};
+
+	//--------------------------------------------------------------------------------------
+	///	つながりを使った攻撃ステート
+	//--------------------------------------------------------------------------------------
+	class ChainAttackState : public ObjState<Player>
+	{
+		ChainAttackState() {}
+	public:
+		//ステートのインスタンス取得
+		DECLARE_SINGLETON_INSTANCE(ChainAttackState)
+		virtual void Enter(const shared_ptr<Player>& Obj)override;
+		virtual void Execute(const shared_ptr<Player>& Obj)override;
+		virtual void Exit(const shared_ptr<Player>& Obj)override;
 	};
 
 	//--------------------------------------------------------------------------------------
