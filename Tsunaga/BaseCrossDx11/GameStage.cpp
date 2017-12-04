@@ -118,8 +118,8 @@ namespace basecross {
 			float x = (float)(i + 1);
 			AddGameObject<ShootEnemy>(
 				Par,
-				L"DEFAULT_SPHERE",
-				L"Checker_TX",
+				L"GUN_MESH",
+				L"GUN_TX",
 				Vec3(0.25f, 0.25f, 0.25f),
 				Quat(),
 				Vec3((float)rand() / 32767 * 20.0f - 10.0f, 0.125f, 80.0f - (float)rand() / 32767 * 20.0f),
@@ -159,8 +159,8 @@ namespace basecross {
 			float x = (float)(i + 1);
 			AddGameObject<AngelEnemy>(
 				Par,
-				L"DEFAULT_SPHERE",
-				L"Brown_TX",
+				L"ANGEL_MESH",
+				L"ANGEL_TX",
 				Vec3(0.25f, 0.25f, 0.25f),
 				Quat(),
 				Vec3((float)rand() / 32767 * 20.0f - 10.0f, 0.125f, 80.0f - (float)rand() / 32767 * 20.0f),

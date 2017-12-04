@@ -141,6 +141,12 @@ namespace basecross {
 		strTexture = DataDir + L"E_Needle.UV2.png";
 		App::GetApp()->RegisterTexture(L"NEEDLE_TX", strTexture);
 
+		strTexture = DataDir + L"E_Rocket2.png";
+		App::GetApp()->RegisterTexture(L"GUN_TX", strTexture);
+
+		strTexture = DataDir + L"E_Angel.UV.png";
+		App::GetApp()->RegisterTexture(L"ANGEL_TX", strTexture);
+
 		strTexture = DataDir + L"Brown.png";
 		App::GetApp()->RegisterTexture(L"Brown_TX", strTexture);
 
@@ -155,6 +161,12 @@ namespace basecross {
 		ModelMesh = MeshResource::CreateBoneModelMesh(DataDir, L"E_Needle.bmf");
 		App::GetApp()->RegisterResource(L"NEEDLE_MESH", ModelMesh);
 
+		ModelMesh = MeshResource::CreateBoneModelMesh(DataDir, L"E_Gun.bmf");
+		App::GetApp()->RegisterResource(L"GUN_MESH", ModelMesh);
+
+		//ModelMesh = MeshResource::CreateBoneModelMesh(DataDir, L"E_Angel.bmf");
+		//App::GetApp()->RegisterResource(L"ANGEL_MESH", ModelMesh);
+
 		//ボーンモデルのタンジェント付きリソース
 		ModelMesh = MeshResource::CreateBoneModelMeshWithTangent(DataDir, L"Chara_R.bmf");
 		App::GetApp()->RegisterResource(L"Chara_R_MESH_WITH_TAN", ModelMesh);
@@ -165,6 +177,9 @@ namespace basecross {
 		//スタティックモデルのリソースとして読み込み
 		auto StaticModelMesh = MeshResource::CreateStaticModelMesh(DataDir, L"Character_01.bmf");
 		App::GetApp()->RegisterResource(L"MODEL_MESH", StaticModelMesh);
+
+		StaticModelMesh = MeshResource::CreateStaticModelMesh(DataDir, L"E_Angel.bmf");
+		App::GetApp()->RegisterResource(L"ANGEL_MESH", StaticModelMesh);
 
 		//スタティックモデルのタンジェント付きリソースとして読み込み
 		StaticModelMesh = MeshResource::CreateStaticModelMeshWithTangent(DataDir, L"Character_01.bmf");
