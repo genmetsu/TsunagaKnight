@@ -86,7 +86,7 @@ namespace basecross {
 		body.m_Quat = Quat();
 		body.m_Pos = m_Posision;
 		body.m_CollType = CollType::typeCAPSULE;
-		body.m_IsDrawActive = true;
+		//body.m_IsDrawActive = true;
 		body.m_IsFixed = true;
 		body.SetToBefore();
 
@@ -275,7 +275,7 @@ namespace basecross {
 		Step();
 
 		if (m_isStep == false) {
-			//UŒ‚‚ÌÕ“Ë”»’è
+			//“G‚Æ‚Ì“–‚½‚è”»’è
 			vector<shared_ptr<GameObject>> EnemyVec;
 			GetStage<GameStage>()->FindTagGameObjectVec(L"EnemyObject", EnemyVec);
 			for (auto enemy : EnemyVec) {
