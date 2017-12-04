@@ -684,7 +684,7 @@ namespace basecross {
 
 	void Cannon::OnCreate() {
 		//ƒ^ƒO‚Ì’Ç‰Á
-		AddTag(L"Cannon");
+		//AddTag(L"Cannon");
 
 		//Rigidbody‚Ì‰Šú‰»
 		auto PtrGameStage = GetStage<GameStage>();
