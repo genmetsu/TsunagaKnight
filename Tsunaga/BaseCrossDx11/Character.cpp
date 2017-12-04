@@ -1295,14 +1295,21 @@ namespace basecross {
 				for (auto v : ShootVec) {
 					if (v) {
 						auto Ptr = dynamic_pointer_cast<BulletObject>(v);
-						Ptr->SetPosition(ToPosVec*0.25f + m_Rigidbody->m_Pos);
-						Ptr->Wakeup(Vec3(0.f, 0.f, 0.f),ToPosVec.normalize());
+						bool nowShooting = Ptr->GetIsShoot();
+						if (nowShooting == false)
+						{
+							Ptr->SetPosition(ToPosVec*0.25f + m_Rigidbody->m_Pos);
+							Ptr->Wakeup(Vec3(0.f, 0.f, 0.f), ToPosVec.normalize());
+
+							m_Tackle = false;
+							m_FrameCount = 0.0f;
+							m_TargetPos = Vec3(0.0f, 0.0f, 0.0f);
+							return;
+						}						
 					}
 				}
 				//	MessageBox(NULL, L"〇〇飛ばしたい", L" ", MB_YESNO);
-				m_Tackle = false;
-				m_FrameCount = 0.0f;
-				m_TargetPos = Vec3(0.0f, 0.0f, 0.0f);
+				
 			}
 			// 止まりはじめ
 			else if (m_FrameCount > m_StopTime * 60.0f && m_Tackle == false)
@@ -1330,7 +1337,7 @@ namespace basecross {
 			{
 				if (m_FrameCount >= 1.0f)
 				{
-					m_Rigidbody->m_Velocity = Vec3(0, 0, 0);
+					m_Rigidbody->m_Velocity = Vec3(0, 0, 0) * 2.0f;
 					m_FrameCount++;
 				}
 				// プレイヤーとエネミーの距離が近くなった時の処理
@@ -1377,12 +1384,13 @@ namespace basecross {
 		m_LerpToParent(0.2f),
 		m_LerpToChild(0.2f),
 		m_Attack1ToRot(0),
-		m_ShootSpeed(5.0f)
+		m_ShootSpeed(5.0f),
+		IsShoot(false)
 	{
 
 	}
 	BulletObject::~BulletObject()
-	{
+	{														
 	}
 	void BulletObject::OnCreate()
 	{
@@ -1484,9 +1492,9 @@ namespace basecross {
 
 	void BulletObject::Wakeup(const Vec3 & Position, const Vec3 & Velocity)
 	{
-		m_Rigidbody->m_Velocity = Velocity;
+		m_Rigidbody->m_Velocity = Velocity * m_ShootSpeed;
 
-		m_Pos *= m_ShootSpeed;
+		IsShoot = true;
 	}
 
 

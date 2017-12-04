@@ -1051,6 +1051,8 @@ namespace basecross {
 		float m_LerpToChild;
 		//Attack1‚Ìê‡‚Ì–Ú•W‚Æ‚È‚é‰ñ“]
 		float m_Attack1ToRot;
+		// ’e‚ªŒ‚‚½‚ê‚Ä‚¢‚é‚©‚Ç‚¤‚©
+		bool IsShoot;
 
 	public:
 		//--------------------------------------------------------------------------------------
@@ -1120,6 +1122,13 @@ namespace basecross {
 		 void SetPosition(Vec3 pos);
 
 		 void Wakeup(const Vec3& Position, const Vec3& Velocity);
+
+		 bool GetIsShoot()
+		 {
+			 return IsShoot;
+		 }
+
+		 
 
 
 	};
