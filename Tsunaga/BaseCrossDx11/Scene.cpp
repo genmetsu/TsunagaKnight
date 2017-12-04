@@ -141,6 +141,9 @@ namespace basecross {
 		strTexture = DataDir + L"E_Needle.UV2.png";
 		App::GetApp()->RegisterTexture(L"NEEDLE_TX", strTexture);
 
+		strTexture = DataDir + L"Brown.png";
+		App::GetApp()->RegisterTexture(L"Brown_TX", strTexture);
+
 
 		//ボーンモデルのリソース
 		auto ModelMesh = MeshResource::CreateBoneModelMesh(DataDir, L"Chara_R.bmf");

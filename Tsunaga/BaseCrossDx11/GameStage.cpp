@@ -155,6 +155,18 @@ namespace basecross {
 			}
 		}
 
+		for (int i = 0; i < 1; i++) {
+			float x = (float)(i + 1);
+			AddGameObject<AngelEnemy>(
+				Par,
+				L"DEFAULT_SPHERE",
+				L"Brown_TX",
+				Vec3(0.25f, 0.25f, 0.25f),
+				Quat(),
+				Vec3((float)rand() / 32767 * 20.0f - 10.0f, 0.125f, 80.0f - (float)rand() / 32767 * 20.0f),
+				false);
+		}
+
 		//スパークエフェクト
 		AddGameObject<MultiSpark>();
 		//ファイアエフェクト

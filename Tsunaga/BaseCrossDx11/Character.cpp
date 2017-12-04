@@ -1255,6 +1255,7 @@ namespace basecross {
 		const Vec3 & Pos, bool OwnShadowActive):
 		EnemyObject(StagePtr, ParentPtr, MeshResName,TextureResName, Scale, Qt, Pos, OwnShadowActive)
 	{
+		m_Speed = 5.0f;
 	}
 
 	ShootEnemy::~ShootEnemy()
@@ -1337,7 +1338,7 @@ namespace basecross {
 			{
 				if (m_FrameCount >= 1.0f)
 				{
-					m_Rigidbody->m_Velocity = Vec3(0, 0, 0) * 2.0f;
+					m_Rigidbody->m_Velocity = Vec3(0, 0, 0);
 					m_FrameCount++;
 				}
 				// プレイヤーとエネミーの距離が近くなった時の処理
@@ -1611,6 +1612,18 @@ namespace basecross {
 				}
 			}
 		}
+	}
+
+	AngelEnemy::AngelEnemy(const shared_ptr<Stage>& StagePtr, 
+		const shared_ptr<GameObject>& ParentPtr, const wstring & MeshResName, 
+		const wstring & TextureResName, const Vec3 & Scale, const Quat & Qt,
+		const Vec3 & Pos, bool OwnShadowActive) :
+		EnemyObject(StagePtr, ParentPtr, MeshResName, TextureResName, Scale, Qt, Pos, OwnShadowActive)
+	{
+	}
+
+	AngelEnemy::~AngelEnemy()
+	{
 	}
 
 }
