@@ -1244,6 +1244,92 @@ namespace basecross {
 	{
 	}
 
+	void NeedleEnemy::UpdateBehavior() {
+		//前回のターンからの経過時間を求める
+		float ElapsedTime = App::GetApp()->GetElapsedTime();
+		auto shptr = m_ParentPtr.lock();
+		//親のワールド行列を取得する変数
+		Mat4x4 ParMat;
+		if (shptr) {
+			ParentFlg flg = ParentFlg::NoParent;
+			//行列取得用のインターフェイスを持ってるかどうか
+			auto matintptr = dynamic_pointer_cast<MatrixInterface>(shptr);
+			if (matintptr) {
+				matintptr->GetWorldMatrix(ParMat);
+				if (shptr->FindTag(L"Player")) {
+					flg = ParentFlg::Player;
+				}
+				else if (shptr->FindTag(L"EnemyObject")) {
+					flg = ParentFlg::Child;
+				}
+			}
+			Mat4x4 World;
+			World.identity();
+			float LerpNum = 0.2f;
+			switch (flg) {
+			case ParentFlg::Player:
+				//行列の定義
+				World = m_PlayerLocalMatrix;
+				LerpNum = m_LerpToParent;
+				break;
+			case ParentFlg::Child:
+				//行列の定義
+				World = m_ChildLocalMatrix;
+				LerpNum = m_LerpToChild;
+				break;
+			default:
+				break;
+			}
+			if (flg != ParentFlg::NoParent) {
+				//スケーリングを1.0にした行列に変換
+				ParMat.scaleIdentity();
+				//行列の反映
+				World *= ParMat;
+				//この時点でWorldは目標となる位置
+				Vec3 toPos = World.transInMatrix();
+				//補間処理で移動位置を決定
+				auto CalcPos = Lerp::CalculateLerp(m_Rigidbody->m_BeforePos, toPos, 0, 1.0f, LerpNum, Lerp::rate::Linear);
+				Vec3 DammiPos;
+				World.decompose(m_Rigidbody->m_Scale, m_Rigidbody->m_Quat, DammiPos);
+				Vec3 Velo = CalcPos - m_Rigidbody->m_BeforePos;
+				Velo /= ElapsedTime;
+				m_Rigidbody->m_Velocity = Velo;
+			}
+		}
+
+
+		//敵との当たり判定
+		vector<shared_ptr<GameObject>> EnemyVec;
+		GetStage<GameStage>()->FindTagGameObjectVec(L"EnemyObject", EnemyVec);
+		for (auto enemy : EnemyVec) {
+			if (enemy) {
+				auto PtrEnemy = dynamic_pointer_cast<EnemyObject>(enemy);
+
+				Vec3 EnemyPos = PtrEnemy->GetPosition();
+				float length = (EnemyPos - m_Rigidbody->m_Pos).length();
+
+				float EnemyRadius = PtrEnemy->GetScale() / 2.0f;
+				float PlayerRadius = m_Rigidbody->m_Scale.x;
+
+				if (length <= EnemyRadius + PlayerRadius) {
+					if (PtrEnemy->GetHP() > 0) {
+						Vec3 Emitter = m_Rigidbody->m_Pos;
+						Emitter.y -= 0.125f;
+						//Sparkの送出
+						auto SparkPtr = GetStage<GameStage>()->FindTagGameObject<MultiSpark>(L"MultiSpark");
+						SparkPtr->InsertSpark(Emitter);
+						//敵を異次元に飛ばす（仮倒し処理）
+						PtrEnemy->SetPosition(Vec3(100, 100, 100));
+						return;
+					}
+				}
+			}
+		}
+
+
+	}
+	
+
 	//--------------------------------------------------------------------------------------
 	///	銃をうつエネミー（遠距離）
 	//--------------------------------------------------------------------------------------
