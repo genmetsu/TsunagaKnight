@@ -201,6 +201,9 @@ namespace basecross {
 		strTexture = DataDir + L"step.png";
 		App::GetApp()->RegisterTexture(L"STEP_TX", strTexture);
 
+		// BGM
+		wstring strMusic = DataDir + L"nanika .wav";
+		App::GetApp()->RegisterWav(L"Nanika", strMusic);
 
 	}
 
@@ -231,6 +234,7 @@ namespace basecross {
 		}
 	}
 
+	
 
 }
 //end basecross

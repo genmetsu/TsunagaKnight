@@ -21,6 +21,8 @@ namespace basecross {
 		shared_ptr<StringDrawObject> m_StringDrawObject;
 		//複数使用する球体の登録（リソース登録する）
 		void RegisterDefaultSphere();
+
+		shared_ptr<MultiAudioObject> m_AudioObjectPtr;
 	public:
 		//--------------------------------------------------------------------------------------
 		/*!
