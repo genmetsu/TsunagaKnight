@@ -977,7 +977,7 @@ namespace basecross {
 		Child
 	};
 
-	void EnemyObject::UpdateBehavior() {
+	void EnemyObject::FriendsBehavior() {
 		//前回のターンからの経過時間を求める
 		float ElapsedTime = App::GetApp()->GetElapsedTime();
 		auto shptr = m_ParentPtr.lock();
@@ -1029,6 +1029,10 @@ namespace basecross {
 				m_Rigidbody->m_Velocity = Velo;
 			}
 		}
+	}
+
+	void EnemyObject::UpdateBehavior() {
+		FriendsBehavior();
 	}
 
 	void EnemyObject::OppositionBehavior() {
@@ -1137,12 +1141,14 @@ namespace basecross {
 		m_PlayerLocalMatrix.affineTransformation(
 			m_Rigidbody->m_Scale,
 			Vec3(0, 0, 0),
+			//Quat(Vec3(0, 1.0f, 0), XM_PIDIV2),
 			Quat(),
 			Vec3(0, 0, -0.25f)
 		);
 		m_ChildLocalMatrix.affineTransformation(
 			m_Rigidbody->m_Scale,
 			Vec3(0, 0, 0),
+			//Quat(Vec3(0, 1.0f, 0), XM_PIDIV2),
 			Quat(),
 			Vec3(0, 0, -0.25f)
 		);
@@ -1269,59 +1275,7 @@ namespace basecross {
 	}
 
 	void NeedleEnemy::UpdateBehavior() {
-		//前回のターンからの経過時間を求める
-		float ElapsedTime = App::GetApp()->GetElapsedTime();
-		auto shptr = m_ParentPtr.lock();
-		//親のワールド行列を取得する変数
-		Mat4x4 ParMat;
-		if (shptr) {
-			ParentFlg flg = ParentFlg::NoParent;
-			//行列取得用のインターフェイスを持ってるかどうか
-			auto matintptr = dynamic_pointer_cast<MatrixInterface>(shptr);
-			if (matintptr) {
-				matintptr->GetWorldMatrix(ParMat);
-				if (shptr->FindTag(L"Player")) {
-					flg = ParentFlg::Player;
-				}
-				else if (shptr->FindTag(L"EnemyObject")) {
-					flg = ParentFlg::Child;
-				}
-			}
-			Mat4x4 World;
-			World.identity();
-			float LerpNum = 0.2f;
-			switch (flg) {
-			case ParentFlg::Player:
-				//行列の定義
-				World = m_PlayerLocalMatrix;
-				LerpNum = m_LerpToParent;
-				break;
-			case ParentFlg::Child:
-				//行列の定義
-				World = m_ChildLocalMatrix;
-				LerpNum = m_LerpToChild;
-				break;
-			default:
-				break;
-			}
-			if (flg != ParentFlg::NoParent) {
-				//スケーリングを1.0にした行列に変換
-				ParMat.scaleIdentity();
-				//行列の反映
-				World *= ParMat;
-				//この時点でWorldは目標となる位置
-				Vec3 toPos = World.transInMatrix();
-				//補間処理で移動位置を決定
-				auto CalcPos = Lerp::CalculateLerp(m_Rigidbody->m_BeforePos, toPos, 0, 1.0f, LerpNum, Lerp::rate::Linear);
-				Vec3 DammiPos;
-				World.decompose(m_Rigidbody->m_Scale, m_Rigidbody->m_Quat, DammiPos);
-				Vec3 Velo = CalcPos - m_Rigidbody->m_BeforePos;
-				Velo /= ElapsedTime;
-				m_Rigidbody->m_Velocity = Velo;
-			}
-		}
-
-
+		FriendsBehavior();
 		//敵との当たり判定
 		vector<shared_ptr<GameObject>> EnemyVec;
 		GetStage<GameStage>()->FindTagGameObjectVec(L"EnemyObject", EnemyVec);
@@ -1349,8 +1303,6 @@ namespace basecross {
 				}
 			}
 		}
-
-
 	}
 	
 
@@ -1472,6 +1424,68 @@ namespace basecross {
 				}
 			}
 		}
+	}
+
+	void ShootEnemy::UpdateBehavior() {
+		FriendsBehavior();
+
+		float ElapsedTime = App::GetApp()->GetElapsedTime();
+		auto shptr = m_ParentPtr.lock();
+		//親のワールド行列を取得する変数
+		Mat4x4 ParMat;
+		if (shptr) {
+			//行列取得用のインターフェイスを持ってるかどうか
+			auto matintptr = dynamic_pointer_cast<MatrixInterface>(shptr);
+			if (matintptr) {
+				matintptr->GetWorldMatrix(ParMat);
+			}
+
+			Mat4x4 World;
+			World.identity();
+			//行列の定義
+			World = m_PlayerLocalMatrix;
+			//スケーリングを1.0にした行列に変換
+			ParMat.scaleIdentity();
+			//行列の反映
+			World *= ParMat;
+			//この時点でWorldは目標となる位置
+			Vec3 toPos = World.transInMatrix();
+			Vec3 toPos2 = toPos;
+
+			toPos.y = 1.0f;
+			toPos2.y = -1.0f;
+
+			Vec3 force1 = toPos - m_Rigidbody->m_Pos;
+			Vec3 force2 = toPos2 - m_Rigidbody->m_Pos;
+
+			Vec3 force = cross(force1, force2);
+			force.y = 0;
+			force.normalize();
+			if (force.z < 0)
+			{
+				force.z *= -1.0f;
+				force.x *= -1.0f;
+			}
+
+			if (m_FrameCount > 180.0f) {
+				vector<shared_ptr<GameObject>> ShootVec;
+				GetStage<GameStage>()->FindTagGameObjectVec(L"Bullet", ShootVec);
+				for (auto v : ShootVec) {
+					if (v) {
+						auto Ptr = dynamic_pointer_cast<BulletObject>(v);
+						bool nowShooting = Ptr->GetIsShoot();
+						if (nowShooting == false)
+						{
+							Ptr->SetPosition(force * 0.25f + m_Rigidbody->m_Pos);
+							Ptr->Wakeup(Vec3(0.0f, 0.0f, 0.0f), force);
+							m_FrameCount = 0.0f;
+							return;
+						}
+					}
+				}
+			}
+		}
+		m_FrameCount++;
 	}
 
 	//--------------------------------------------------------------------------------------
