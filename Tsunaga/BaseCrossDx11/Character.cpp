@@ -671,20 +671,21 @@ namespace basecross {
 
 	Cannon::Cannon(const shared_ptr<Stage>& StagePtr,
 		const wstring& TextureResName, const Vec3& Scale, const Quat& Qt, const Vec3& Pos,
-		bool OwnShadowActive) :
+		int CannonClass, bool OwnShadowActive) :
 		GameObject(StagePtr),
 		m_TextureResName(TextureResName),
 		m_Scale(Scale),
 		m_Qt(Qt),
 		m_Pos(Pos),
 		m_OwnShadowActive(OwnShadowActive),
+		myClass(CannonClass),
 		m_HP(100.0f)
 	{}
 	Cannon::~Cannon() {}
 
 	void Cannon::OnCreate() {
 		//É^ÉOÇÃí«â¡
-		//AddTag(L"Cannon");
+		AddTag(L"Cannon");
 
 		//RigidbodyÇÃèâä˙âª
 		auto PtrGameStage = GetStage<GameStage>();
