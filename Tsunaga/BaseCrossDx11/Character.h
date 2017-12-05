@@ -562,6 +562,9 @@ namespace basecross {
 	protected:
 		//テクスチャリソース名
 		wstring m_TextureResName;
+		//大砲判別用
+		int myClass;
+
 		//スケーリング
 		Vec3 m_Scale;
 		//回転
@@ -600,7 +603,7 @@ namespace basecross {
 		//--------------------------------------------------------------------------------------
 		Cannon(const shared_ptr<Stage>& StagePtr,
 			const wstring& TextureResName, const Vec3& Scale, const Quat& Qt, const Vec3& Pos,
-			bool OwnShadowActive);
+			int CannonClass,bool OwnShadowActive);
 		//--------------------------------------------------------------------------------------
 		/*!
 		@brief デストラクタ
@@ -665,6 +668,9 @@ namespace basecross {
 		}
 		float GetScale() {
 			return m_Scale.x;
+		}
+		int GetCannonClass() {
+			return myClass;
 		}
 	};
 

@@ -307,6 +307,30 @@ namespace basecross {
 				}
 			}
 		}
+		//‘å–C‚Æ‚ÌÕ“Ë”»’è
+		vector<shared_ptr<GameObject>> CannonVec;
+		GetStage<GameStage>()->FindTagGameObjectVec(L"Cannon", CannonVec);
+		for (auto cannon : CannonVec) {
+			if (cannon) {
+				auto PtrCannon = dynamic_pointer_cast<Cannon>(cannon);
+
+				Vec3 CannonPos = PtrCannon->GetPosition();
+				float length = (CannonPos - m_Rigidbody->m_Pos).length();
+
+				float CannonRadius = PtrCannon->GetScale() / 2.0f;
+				float PlayerRadius = m_Rigidbody->m_Scale.x / 2.0f;
+
+				if (length < CannonRadius + PlayerRadius) {
+					if (PtrCannon->GetCannonClass() == 0) {
+						Vec3 Emitter = m_Rigidbody->m_Pos;
+						Emitter.y -= 0.125f;
+						//Spark‚Ì‘—o
+						auto SparkPtr = GetStage<GameStage>()->FindTagGameObject<MultiSpark>(L"MultiSpark");
+						SparkPtr->InsertSpark(Emitter);
+					}
+				}
+			}
+		}
 	}
 
 	void Player::DamagedBehaviour() {
@@ -595,7 +619,7 @@ namespace basecross {
 						m_friends_num = m_friends.size();
 						auto GM = GameManager::getInstance();
 						GM->SetFriendsNum(m_friends_num);
-						
+
 						if (m_friends_num >= 2) {
 							PtrEnemy->SetParent(m_friends[m_friends_num - 2]);
 						}

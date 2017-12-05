@@ -94,19 +94,16 @@ namespace basecross {
 
 		for (int i = 0; i < 3; i++) {
 			float x = (float)(i);
-			wstring texture, tag;
+			wstring texture;
 			switch (i) {
 			case 0 :
 				texture = L"ANGEL_TX";
-				tag = L"GREEN_CANNON";
 				break;
 			case 1 :
 				texture = L"NEEDLE_TX";
-				tag = L"RED_CANNON";
 				break;
 			case 2:
 				texture = L"GUN_TX";
-				tag = L"BLUE_CANNON";
 				break;
 			}
 			auto ptr = AddGameObject<Cannon>(
@@ -114,8 +111,7 @@ namespace basecross {
 				Vec3(2.0f, 2.0f, 2.0f),
 				Quat(),
 				Vec3(x * 4.0f - 4.0f, 0.125f, -3.0f),
-				false);
-			ptr->AddTag(tag);
+				i, false);
 		}
 
 		for (int i = 0; i < 50; i++) {
