@@ -890,6 +890,17 @@ namespace basecross {
 
 		//HPの確認
 		CheckHealth();
+
+		//回転の更新
+		//Velocityの値で、回転を変更する
+		Vec3 Temp = m_Rigidbody->m_Velocity;
+		Temp.normalize();
+		float ToAngle = atan2(Temp.x, Temp.z);
+		Quat Qt;
+		Qt.rotationRollPitchYawFromVector(Vec3(0, ToAngle, 0));
+		Qt.normalize();
+		//現在と目標を補間
+		m_Rigidbody->m_Quat = XMQuaternionSlerp(m_Rigidbody->m_Quat, Qt, 0.1f);
 	}
 
 	void EnemyObject::OnDrawShadowmap() {
@@ -1080,7 +1091,7 @@ namespace basecross {
 			{
 				if (m_FrameCount >= 1.0f)
 				{
-					m_Rigidbody->m_Velocity = Vec3(0, 0, 0);
+					m_Rigidbody->m_Velocity *= 0.7f;
 					m_FrameCount++;
 				}
 				// プレイヤーとエネミーの距離が近くなった時の処理
@@ -1345,7 +1356,6 @@ namespace basecross {
 	//--------------------------------------------------------------------------------------
 	///	銃をうつエネミー（遠距離）
 	//--------------------------------------------------------------------------------------
-
 	ShootEnemy::ShootEnemy(const shared_ptr<Stage>& StagePtr, const shared_ptr<GameObject>& ParentPtr, 
 		const wstring& MeshResName,
 		const wstring & TextureResName,
@@ -1353,7 +1363,7 @@ namespace basecross {
 		const Vec3 & Pos, bool OwnShadowActive):
 		EnemyObject(StagePtr, ParentPtr, MeshResName,TextureResName, Scale, Qt, Pos, OwnShadowActive)
 	{
-		m_Speed = 5.0f;
+		m_Speed = 1.0f;
 	}
 
 	ShootEnemy::~ShootEnemy()
@@ -1436,7 +1446,7 @@ namespace basecross {
 			{
 				if (m_FrameCount >= 1.0f)
 				{
-					m_Rigidbody->m_Velocity = Vec3(0, 0, 0);
+					m_Rigidbody->m_Velocity *= 0.7f;
 					m_FrameCount++;
 				}
 				// プレイヤーとエネミーの距離が近くなった時の処理
@@ -1684,7 +1694,7 @@ namespace basecross {
 			{
 				if (m_FrameCount >= 1.0f)
 				{
-					m_Rigidbody->m_Velocity = Vec3(0, 0, 0);
+					m_Rigidbody->m_Velocity *= 0.7f;
 					m_FrameCount++;
 				}
 				// プレイヤーとエネミーの距離が近くなった時の処理
