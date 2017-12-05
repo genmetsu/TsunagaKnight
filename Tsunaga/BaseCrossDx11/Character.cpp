@@ -1699,7 +1699,9 @@ namespace basecross {
 			}
 		}
 	}
-
+	//--------------------------------------------------------------------------------------
+	/// エンジェルエネミー
+	//--------------------------------------------------------------------------------------
 	AngelEnemy::AngelEnemy(const shared_ptr<Stage>& StagePtr, 
 		const shared_ptr<GameObject>& ParentPtr, const wstring & MeshResName, 
 		const wstring & TextureResName, const Vec3 & Scale, const Quat & Qt,
@@ -1709,6 +1711,34 @@ namespace basecross {
 	}
 
 	AngelEnemy::~AngelEnemy()
+	{
+	}
+	//--------------------------------------------------------------------------------------
+	/// 中ボスエネミー近距離
+	//--------------------------------------------------------------------------------------
+	CR_BossEnemy::CR_BossEnemy(const shared_ptr<Stage>& StagePtr, 
+		const shared_ptr<GameObject>& ParentPtr, const wstring & MeshResName, 
+		const wstring & TextureResName, const Vec3 & Scale, const Quat & Qt,
+		const Vec3 & Pos, bool OwnShadowActive) :
+		EnemyObject(StagePtr, ParentPtr, MeshResName, TextureResName, Scale, Qt, Pos, OwnShadowActive)
+	{
+	}
+
+	CR_BossEnemy::~CR_BossEnemy()
+	{
+	}
+	//--------------------------------------------------------------------------------------
+	/// 中ボスエネミー遠距離
+	//--------------------------------------------------------------------------------------
+	LD_BossEnemy::LD_BossEnemy(const shared_ptr<Stage>& StagePtr, 
+		const shared_ptr<GameObject>& ParentPtr, const wstring & MeshResName, 
+		const wstring & TextureResName, const Vec3 & Scale, const Quat & Qt, 
+		const Vec3 & Pos, bool OwnShadowActive) :
+		EnemyObject(StagePtr, ParentPtr, MeshResName, TextureResName, Scale, Qt, Pos, OwnShadowActive)
+	{
+	}
+
+	LD_BossEnemy::~LD_BossEnemy()
 	{
 	}
 

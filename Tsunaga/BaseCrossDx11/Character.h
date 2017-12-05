@@ -1220,5 +1220,85 @@ namespace basecross {
 		virtual ~AngelEnemy();
 	};
 
+	//--------------------------------------------------------------------------------------
+	/// 中ボスキャラ　近距離 
+	/// CR = Close Range
+	//--------------------------------------------------------------------------------------
+
+	class CR_BossEnemy : public EnemyObject
+	{
+	public:
+		//--------------------------------------------------------------------------------------
+		/*!
+		@brief コンストラクタ
+		@param[in]	StagePtr	ステージのポインタ
+		@param[in]	ParentPtr	親のポインタ
+		@param[in]	TextureResName	テクスチャリソース名
+		@param[in]	Scale	スケーリング
+		@param[in]	Qt	初期回転
+		@param[in]	Pos	位置
+		@param[in]	OwnShadowActive	影描画するかどうか
+		*/
+		//--------------------------------------------------------------------------------------
+		CR_BossEnemy(const shared_ptr<Stage>& StagePtr,
+			const shared_ptr<GameObject>& ParentPtr, const wstring& MeshResName,
+			const wstring& TextureResName, const Vec3& Scale, const Quat& Qt, const Vec3& Pos,
+			bool OwnShadowActive);
+		//--------------------------------------------------------------------------------------
+		/*!
+		@brief デストラクタ
+		*/
+		//--------------------------------------------------------------------------------------
+		virtual ~CR_BossEnemy();
+		//--------------------------------------------------------------------------------------
+		/*!
+		@brief 敵対中の処理
+		@return	なし
+		*/
+		//--------------------------------------------------------------------------------------
+		//virtual void OppositionBehavior() override;
+
+	};
+
+	//--------------------------------------------------------------------------------------
+	/// 中ボスキャラ　遠距離
+	/// LD = Long Distance
+	//--------------------------------------------------------------------------------------
+
+	class LD_BossEnemy : public EnemyObject
+	{
+	public:
+		//--------------------------------------------------------------------------------------
+		/*!
+		@brief コンストラクタ
+		@param[in]	StagePtr	ステージのポインタ
+		@param[in]	ParentPtr	親のポインタ
+		@param[in]	TextureResName	テクスチャリソース名
+		@param[in]	Scale	スケーリング
+		@param[in]	Qt	初期回転
+		@param[in]	Pos	位置
+		@param[in]	OwnShadowActive	影描画するかどうか
+		*/
+		//--------------------------------------------------------------------------------------
+		LD_BossEnemy(const shared_ptr<Stage>& StagePtr,
+			const shared_ptr<GameObject>& ParentPtr, const wstring& MeshResName,
+			const wstring& TextureResName, const Vec3& Scale, const Quat& Qt, const Vec3& Pos,
+			bool OwnShadowActive);
+		//--------------------------------------------------------------------------------------
+		/*!
+		@brief デストラクタ
+		*/
+		//--------------------------------------------------------------------------------------
+		virtual ~LD_BossEnemy();
+		//--------------------------------------------------------------------------------------
+		/*!
+		@brief 敵対中の処理
+		@return	なし
+		*/
+		//--------------------------------------------------------------------------------------
+		//virtual void OppositionBehavior() override;
+
+	};
+
 }
 //end basecross

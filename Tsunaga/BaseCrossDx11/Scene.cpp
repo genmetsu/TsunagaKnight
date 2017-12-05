@@ -150,6 +150,12 @@ namespace basecross {
 		strTexture = DataDir + L"Brown.png";
 		App::GetApp()->RegisterTexture(L"Brown_TX", strTexture);
 
+		strTexture = DataDir + L"Brown2.png";
+		App::GetApp()->RegisterTexture(L"Brown2_TX", strTexture);
+
+		strTexture = DataDir + L"Blue.png";
+		App::GetApp()->RegisterTexture(L"Blue_TX", strTexture);
+
 
 		//ボーンモデルのリソース
 		auto ModelMesh = MeshResource::CreateBoneModelMesh(DataDir, L"Chara_R.bmf");

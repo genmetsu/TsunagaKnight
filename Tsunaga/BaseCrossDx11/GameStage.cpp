@@ -171,13 +171,37 @@ namespace basecross {
 			}
 		}
 
-		for (int i = 0; i < 1; i++) {
+		for (int i = 0; i < 20; i++) {
 			float x = (float)(i + 1);
 			AddGameObject<AngelEnemy>(
 				Par,
 				L"ANGEL_MESH",
 				L"ANGEL_TX",
 				Vec3(0.25f, 0.25f, 0.25f),
+				Quat(),
+				Vec3((float)rand() / 32767 * 20.0f - 10.0f, 0.125f, 80.0f - (float)rand() / 32767 * 20.0f),
+				false);
+		}
+
+		for (int i = 0; i < 1; i++) {
+			float x = (float)(i + 1);
+			AddGameObject<CR_BossEnemy>(
+				Par,
+				L"DEFAULT_SPHERE",
+				L"Brown2_TX",
+				Vec3(1.0f, 1.0f, 1.0f),
+				Quat(),
+				Vec3((float)rand() / 32767 * 20.0f - 10.0f, 0.125f, 80.0f - (float)rand() / 32767 * 20.0f),
+				false);
+		}
+
+		for (int i = 0; i < 1; i++) {
+			float x = (float)(i + 1);
+			AddGameObject<LD_BossEnemy>(
+				Par,
+				L"DEFAULT_SPHERE",
+				L"Blue_TX",
+				Vec3(1.0f, 1.0f, 1.0f),
 				Quat(),
 				Vec3((float)rand() / 32767 * 20.0f - 10.0f, 0.125f, 80.0f - (float)rand() / 32767 * 20.0f),
 				false);
