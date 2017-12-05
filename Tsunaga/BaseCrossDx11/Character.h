@@ -704,7 +704,7 @@ namespace basecross {
 		//突撃する際に止まる時間
 		float m_StopTime;
 		//どれぐらい近づいたら突撃するかの距離
-		float m_TackleDis;
+		float m_SearchDis;
 		//突撃のスピード
 		float m_TackleSpeed;
 		float m_HP;
@@ -1039,7 +1039,7 @@ namespace basecross {
 		//突撃する際に止まる時間
 		float m_StopTime;
 		//どれぐらい近づいたら突撃するかの距離
-		float m_TackleDis;
+		float m_SearchDis;
 		//突進のスピード
 		float m_TackleSpeed;
 		//弾のスピード

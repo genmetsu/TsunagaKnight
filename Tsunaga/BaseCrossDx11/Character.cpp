@@ -816,7 +816,7 @@ namespace basecross {
 		m_Speed(1.0f),
 		m_Tackle(false),
 		m_StopTime(1.5f),
-		m_TackleDis(1.0f),
+		m_SearchDis(1.0f),
 		m_TackleSpeed(5.0f),
 		m_TackleStart(Vec3(0.0f, 0.0f, 0.0f)),
 		m_OwnShadowActive(OwnShadowActive),
@@ -1096,7 +1096,7 @@ namespace basecross {
 					m_FrameCount++;
 				}
 				// プレイヤーとエネミーの距離が近くなった時の処理
-				else if (dis <= m_TackleDis)
+				else if (dis <= m_SearchDis)
 				{
 					m_FrameCount++;
 					//fireの送出
@@ -1365,6 +1365,7 @@ namespace basecross {
 		EnemyObject(StagePtr, ParentPtr, MeshResName,TextureResName, Scale, Qt, Pos, OwnShadowActive)
 	{
 		m_Speed = 1.0f;
+		m_SearchDis = 5.0;
 	}
 
 	ShootEnemy::~ShootEnemy()
@@ -1451,7 +1452,7 @@ namespace basecross {
 					m_FrameCount++;
 				}
 				// プレイヤーとエネミーの距離が近くなった時の処理
-				else if (dis <= m_TackleDis)
+				else if (dis <= m_SearchDis)
 				{
 					m_FrameCount++;
 					//fireの送出
@@ -1712,7 +1713,7 @@ namespace basecross {
 					m_FrameCount++;
 				}
 				// プレイヤーとエネミーの距離が近くなった時の処理
-				else if (dis <= m_TackleDis)
+				else if (dis <= m_SearchDis)
 				{
 					m_FrameCount++;
 					//fireの送出
