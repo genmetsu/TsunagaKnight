@@ -118,7 +118,7 @@ namespace basecross {
 			ptr->AddTag(tag);
 		}
 
-		for (int i = 0; i < 50; i++) {
+		/*for (int i = 0; i < 50; i++) {
 			float x = (float)(i + 1);
 			AddGameObject<NeedleEnemy>(
 				Par,
@@ -128,9 +128,9 @@ namespace basecross {
 				Quat(),
 				Vec3((float)rand()/ 32767 * 20.0f - 10.0f, 0.125f, 80.0f - (float)rand() / 32767 * 20.0f),
 				false);
-		}
+		}*/
 
-		for (int i = 0; i < 50; i++) {
+		for (int i = 0; i < 1; i++) {
 			float x = (float)(i + 1);
 			AddGameObject<ShootEnemy>(
 				Par,
@@ -171,7 +171,7 @@ namespace basecross {
 			}
 		}
 
-		for (int i = 0; i < 20; i++) {
+		/*for (int i = 0; i < 20; i++) {
 			float x = (float)(i + 1);
 			AddGameObject<AngelEnemy>(
 				Par,
@@ -205,7 +205,7 @@ namespace basecross {
 				Quat(),
 				Vec3((float)rand() / 32767 * 20.0f - 10.0f, 0.125f, 80.0f - (float)rand() / 32767 * 20.0f),
 				false);
-		}
+		}*/
 
 		//スパークエフェクト
 		AddGameObject<MultiSpark>();

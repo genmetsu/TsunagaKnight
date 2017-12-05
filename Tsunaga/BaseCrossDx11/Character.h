@@ -1072,6 +1072,8 @@ namespace basecross {
 		float m_Attack1ToRot;
 		// ’e‚ªŒ‚‚½‚ê‚Ä‚¢‚é‚©‚Ç‚¤‚©
 		bool IsShoot;
+		// ’e‚Ì‘¶İ
+		float m_BulletTime;
 
 	public:
 		//--------------------------------------------------------------------------------------

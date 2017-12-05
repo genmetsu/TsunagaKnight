@@ -1494,9 +1494,11 @@ namespace basecross {
 		m_LerpToChild(0.2f),
 		m_Attack1ToRot(0),
 		m_ShootSpeed(5.0f),
+		m_FrameCount(0.0f),
+		m_BulletTime(10.0f),
 		IsShoot(false)
 	{
-
+		
 	}
 	BulletObject::~BulletObject()
 	{														
@@ -1554,6 +1556,17 @@ namespace basecross {
 	}
 	void BulletObject::OnUpdate()
 	{
+		float ElapsedTime = App::GetApp()->GetElapsedTime();
+		if (m_FrameCount > m_BulletTime)
+		{   
+			m_FrameCount = 0.0f;
+			IsShoot = false;
+		}
+		if(IsShoot == true)
+		{ 
+		m_FrameCount += ElapsedTime;
+        }
+		
 	}
 	void BulletObject::OnDrawShadowmap()
 	{
