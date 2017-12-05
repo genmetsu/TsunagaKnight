@@ -677,6 +677,8 @@ namespace basecross {
 		wstring m_MeshResName;
 		//テクスチャリソース名
 		wstring m_TextureResName;
+		//メッシュとの差分計算用
+		Mat4x4 m_MeshToTransformMatrix;
 		//スケーリング
 		Vec3 m_Scale;
 		//回転

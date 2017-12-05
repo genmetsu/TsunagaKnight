@@ -921,6 +921,18 @@ namespace basecross {
 			m_Rigidbody->m_Quat,
 			m_Rigidbody->m_Pos
 		);
+
+		//メッシュとトランスフォームの差分の設定
+		m_MeshToTransformMatrix.affineTransformation(
+			Vec3(1.0f, 1.0f, 1.0f),
+			Vec3(0.0f, 0.0f, 0.0f),
+			Vec3(0.0f, XM_PI, 0.0f),
+			Vec3(0.0f, 0.0f, 0.0f)
+		);
+
+		//差分を計算
+		World = m_MeshToTransformMatrix * World;
+
 		m_PtrObj->m_WorldMatrix = World;
 		m_PtrObj->m_Camera = GetStage<Stage>()->GetCamera();
 		auto shptr = m_Renderer.lock();
