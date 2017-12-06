@@ -144,6 +144,13 @@ namespace basecross {
 					Vec3(0.0f, -10.0f, 0.0f),
 					false,
 					L"Bullet");
+				AddGameObject<BulletObject>(
+					L"SPARK_TX",
+					Vec3(0.125f, 0.125f, 0.125f),
+					Quat(),
+					Vec3(0.0f, -10.0f, 0.0f),
+					false,
+					L"PlayerBullet");
 			}
 		}
 		for (int i = 0; i < 1; i++) {

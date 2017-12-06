@@ -869,6 +869,13 @@ namespace basecross {
 		virtual void OppositionBehavior();
 		//--------------------------------------------------------------------------------------
 		/*!
+		@brief プレイヤーの弾との衝突判定
+		@return	なし
+		*/
+		//--------------------------------------------------------------------------------------
+		void CollisionBullet();
+		//--------------------------------------------------------------------------------------
+		/*!
 		@brief 自分のHPの状態チェック
 		@return	なし
 		*/
@@ -1110,7 +1117,7 @@ namespace basecross {
 		//--------------------------------------------------------------------------------------
 		BulletObject(const shared_ptr<Stage>& StagePtr,
 			const wstring& TextureResName, const Vec3& Scale, const Quat& Qt, const Vec3& Pos,
-			bool OwnShadowActive,const wstring& Tag);
+			bool OwnShadowActive, const wstring& Tag);
 		//--------------------------------------------------------------------------------------
 		/*!
 		@brief デストラクタ
@@ -1160,16 +1167,20 @@ namespace basecross {
 		virtual void GetWorldMatrix(Mat4x4& m) const override;
 
 		virtual Vec3 GetPosition() override;
-		 void SetPosition(Vec3 pos);
+		void SetPosition(Vec3 pos);
 
-		 void Wakeup(const Vec3& Position, const Vec3& Velocity);
+		float GetScale(){
+			return m_Scale.x;
+		}
 
-		 bool GetIsShoot()
-		 {
-			 return IsShoot;
-		 }
+		void Wakeup(const Vec3& Position, const Vec3& Velocity);
 
-		 
+		bool GetIsShoot()
+		{
+			return IsShoot;
+		}
+
+
 
 
 	};
