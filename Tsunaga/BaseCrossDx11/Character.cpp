@@ -1351,6 +1351,14 @@ namespace basecross {
 	{
 		m_Speed = 1.0f;
 		m_SearchDis = 5.0;
+
+		//メッシュとトランスフォームの差分の設定
+		m_MeshToTransformMatrix.affineTransformation(
+			Vec3(1.0f, 1.0f, 1.0f),
+			Vec3(0.0f, 0.0f, 0.0f),
+			Vec3(0.0f, XM_PI, 0.0f),
+			Vec3(0.0f, 0.0f, 0.0f)
+		);
 	}
 
 	ShootEnemy::~ShootEnemy()
@@ -1460,8 +1468,17 @@ namespace basecross {
 		}
 	}
 
+	void ShootEnemy::OnUpdate() {
+		
+
+		EnemyObject::OnUpdate();
+	}
+
 	void ShootEnemy::UpdateBehavior() {
+
 		FriendsBehavior();
+
+		
 
 		float ElapsedTime = App::GetApp()->GetElapsedTime();
 		auto shptr = m_ParentPtr.lock();
@@ -1495,11 +1512,24 @@ namespace basecross {
 			Vec3 force = cross(force1, force2);
 			force.y = 0;
 			force.normalize();
+
+			float angle = -XM_PIDIV2;
+
 			if (force.z < 0)
 			{
 				force.z *= -1.0f;
 				force.x *= -1.0f;
-			}
+				angle *= -1.0f;
+			}			
+
+			//メッシュとトランスフォームの差分の設定
+			m_MeshToTransformMatrix.affineTransformation(
+				Vec3(1.0f, 1.0f, 1.0f),
+				Vec3(0.0f, 0.0f, 0.0f),
+				Vec3(0.0f, angle, 0.0f),
+				Vec3(0.0f, 0.0f, 0.0f)
+			);
+
 
 			if (m_FrameCount > 60.0f) {
 				vector<shared_ptr<GameObject>> ShootVec;
@@ -1520,6 +1550,29 @@ namespace basecross {
 			}
 		}
 		m_FrameCount++;
+	}
+
+	void ShootEnemy::OnDraw() {
+		//行列の定義
+		Mat4x4 World;
+		World.affineTransformation(
+			m_Rigidbody->m_Scale,
+			Vec3(0, 0, 0),
+			m_Rigidbody->m_Quat,
+			m_Rigidbody->m_Pos
+		);
+
+		//差分を計算
+		World = m_MeshToTransformMatrix * World;
+
+		m_PtrObj->m_WorldMatrix = World;
+		m_PtrObj->m_Camera = GetStage<Stage>()->GetCamera();
+		auto shptr = m_Renderer.lock();
+		if (!shptr) {
+			shptr = GetStage<Stage>()->FindTagGameObject<SimplePNTStaticRenderer2>(L"SimplePNTStaticRenderer2");
+			m_Renderer = shptr;
+		}
+		shptr->AddDrawObject(m_PtrObj);
 	}
 
 	//--------------------------------------------------------------------------------------
