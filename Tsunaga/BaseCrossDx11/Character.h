@@ -709,6 +709,7 @@ namespace basecross {
 		float m_TackleSpeed;
 		float m_HP;
 		float m_AttackPoint;
+		Vec3 m_CannonPos;
 
 		//Ž€‚ñ‚¾‚©‚Ç‚¤‚©
 		bool m_isDead;

@@ -883,6 +883,17 @@ namespace basecross {
 		//ステート初期値設定
 		m_StateMachine->ChangeState(EnemyOppositionState::Instance());
 
+		vector<shared_ptr<GameObject>> CannonVec;
+		GetStage<GameStage>()->FindTagGameObjectVec(L"Cannon", CannonVec);
+		for (auto cannon : CannonVec)
+		{
+			if (cannon)
+			{
+				auto Ptrcannon = dynamic_pointer_cast<Cannon>(cannon);
+				m_CannonPos = Ptrcannon->GetPosition();
+				return;
+			}
+		}
 	}
 
 	void EnemyObject::CollisionBullet() {
@@ -1089,7 +1100,8 @@ namespace basecross {
 			//行列の反映
 			World *= ParMat;
 			//この時点でWorldは目標となる位置
-			Vec3 toPos = World.transInMatrix();
+			//Vec3 toPos = World.transInMatrix();
+			Vec3 toPos = m_CannonPos;
 			Vec3 ToPosVec = toPos - m_Rigidbody->m_Pos;
 			//距離を求める
 			float dis = ToPosVec.length();
