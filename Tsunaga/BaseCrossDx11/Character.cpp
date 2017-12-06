@@ -885,6 +885,38 @@ namespace basecross {
 
 	}
 
+	void EnemyObject::CollisionBullet() {
+		//弾との衝突判定
+		vector<shared_ptr<GameObject>> BulletVec;
+		GetStage<GameStage>()->FindTagGameObjectVec(L"PlayerBullet", BulletVec);
+		for (auto bullet : BulletVec) {
+			if (bullet) {
+				auto PtrBullet = dynamic_pointer_cast<BulletObject>(bullet);
+
+				Vec3 BulletPos = PtrBullet->GetPosition();
+				float length = (BulletPos - m_Rigidbody->m_Pos).length();
+
+				float Radius = PtrBullet->GetScale() / 2.0f;
+				float PlayerRadius = m_Rigidbody->m_Scale.x / 2.0f;
+
+				if (length < Radius + PlayerRadius) {
+
+					Vec3 Emitter = m_Rigidbody->m_Pos;
+					Emitter.y -= 0.125f;
+					//Sparkの送出
+					auto SparkPtr = GetStage<GameStage>()->FindTagGameObject<MultiSpark>(L"MultiSpark");
+					SparkPtr->InsertSpark(Emitter);
+					//弾を異次元に飛ばす
+					PtrBullet->SetPosition(Vec3(0.0f, -10.0f, 0.0f));
+					//敵を異次元に飛ばす（仮倒し処理）
+					SetPosition(Vec3(100, 100, 100));
+					
+					return;
+				}
+			}
+		}
+	}
+
 	void EnemyObject::OnUpdate() {
 		//ステートマシン更新
 		m_StateMachine->Update();
@@ -1143,14 +1175,14 @@ namespace basecross {
 			Vec3(0, 0, 0),
 			//Quat(Vec3(0, 1.0f, 0), XM_PIDIV2),
 			Quat(),
-			Vec3(0, 0, -0.25f)
+			Vec3(0, 0, -0.4f)
 		);
 		m_ChildLocalMatrix.affineTransformation(
 			m_Rigidbody->m_Scale,
 			Vec3(0, 0, 0),
 			//Quat(Vec3(0, 1.0f, 0), XM_PIDIV2),
 			Quat(),
-			Vec3(0, 0, -0.25f)
+			Vec3(0, 0, -0.4f)
 		);
 		m_LerpToParent = m_LerpToChild = 0.2f;
 	}
@@ -1163,13 +1195,13 @@ namespace basecross {
 			m_Rigidbody->m_Scale,
 			Vec3(0, 0, 0),
 			Quat(Vec3(1.0, 0, 0), m_Attack1ToRot),
-			Vec3(0, 0.5f, 0.0f)
+			Vec3(0, 0.4f, 0.0f)
 		);
 		m_ChildLocalMatrix.affineTransformation(
 			m_Rigidbody->m_Scale,
 			Vec3(0, 0, 0),
 			Quat(),
-			Vec3(0, 0.5f, -0.5f)
+			Vec3(0, 0.4f, -0.5f)
 		);
 		m_LerpToParent = m_LerpToChild = 0.5f;
 
@@ -1202,6 +1234,7 @@ namespace basecross {
 
 	void EnemyOppositionState::Execute(const shared_ptr<EnemyObject>& Obj) {
 		Obj->OppositionBehavior();
+		Obj->CollisionBullet();
 	}
 
 	void EnemyOppositionState::Exit(const shared_ptr<EnemyObject>& Obj) {
@@ -1468,9 +1501,9 @@ namespace basecross {
 				force.x *= -1.0f;
 			}
 
-			if (m_FrameCount > 180.0f) {
+			if (m_FrameCount > 60.0f) {
 				vector<shared_ptr<GameObject>> ShootVec;
-				GetStage<GameStage>()->FindTagGameObjectVec(L"Bullet", ShootVec);
+				GetStage<GameStage>()->FindTagGameObjectVec(L"PlayerBullet", ShootVec);
 				for (auto v : ShootVec) {
 					if (v) {
 						auto Ptr = dynamic_pointer_cast<BulletObject>(v);

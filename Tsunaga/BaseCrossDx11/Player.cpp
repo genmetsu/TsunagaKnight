@@ -331,6 +331,36 @@ namespace basecross {
 				}
 			}
 		}
+		//弾との衝突判定
+		vector<shared_ptr<GameObject>> BulletVec;
+		GetStage<GameStage>()->FindTagGameObjectVec(L"Bullet", BulletVec);
+		for (auto bullet : BulletVec) {
+			if (bullet) {
+				auto PtrBullet = dynamic_pointer_cast<BulletObject>(bullet);
+
+				Vec3 BulletPos = PtrBullet->GetPosition();
+				float length = (BulletPos - m_Rigidbody->m_Pos).length();
+
+				float Radius = PtrBullet->GetScale() / 2.0f;
+				float PlayerRadius = m_Rigidbody->m_Scale.x / 2.0f;
+
+				if (length < Radius + PlayerRadius) {
+
+					Vec3 Emitter = m_Rigidbody->m_Pos;
+					Emitter.y -= 0.125f;
+					//Sparkの送出
+					auto SparkPtr = GetStage<GameStage>()->FindTagGameObject<MultiSpark>(L"MultiSpark");
+					SparkPtr->InsertSpark(Emitter);
+					//ノックバック方向の設定
+					m_KnockBackVec = m_Rigidbody->m_Pos - BulletPos;
+					m_KnockBackVec.y = 0.0f;
+					m_KnockBackVec.normalize();
+					//ダメージステートに変更
+					m_StateMachine->ChangeState(DamagedState::Instance());
+					return;
+				}
+			}
+		}
 	}
 
 	void Player::DamagedBehaviour() {
