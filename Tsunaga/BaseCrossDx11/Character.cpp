@@ -1348,7 +1348,31 @@ namespace basecross {
 				}
 			}
 		}
+
+
 	}
+
+	void NeedleEnemy::OnUpdate() {
+
+
+		EnemyObject::OnUpdate();
+
+		auto MyPos = m_Rigidbody->m_Pos;
+		auto PlayerPtr = GetStage<GameStage>()->GetPlayerPtr();
+		if (PlayerPtr) {
+			auto PlayertPos = PlayerPtr->GetPosition();
+			auto force = PlayertPos - MyPos;
+			if (length(force) <= 5.0f) {
+				force.y = 0;
+				force.normalize();
+				force *= 5.0f;
+				m_Rigidbody->m_Velocity = force;
+//				m_Rigidbody->m_Force = force;
+			}
+		}
+
+	}
+
 	
 
 	//--------------------------------------------------------------------------------------

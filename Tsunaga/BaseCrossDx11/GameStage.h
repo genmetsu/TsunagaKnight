@@ -21,7 +21,7 @@ namespace basecross {
 		shared_ptr<StringDrawObject> m_StringDrawObject;
 		//複数使用する球体の登録（リソース登録する）
 		void RegisterDefaultSphere();
-
+		weak_ptr<Player> m_PtrPlayer;
 		shared_ptr<MultiAudioObject> m_AudioObjectPtr;
 	public:
 		//--------------------------------------------------------------------------------------
@@ -71,6 +71,18 @@ namespace basecross {
 		*/
 		//--------------------------------------------------------------------------------------
 		virtual void OnDraw()override;
+
+		shared_ptr<Player> GetPlayerPtr()const {
+			auto shptr = m_PtrPlayer.lock();
+			if (shptr) {
+				return shptr;
+			}
+			return nullptr;
+		}
+		void SetPlayerPtr(const shared_ptr<Player> ptr) {
+			m_PtrPlayer = ptr;
+		}
+
 	};
 
 
@@ -123,6 +135,7 @@ namespace basecross {
 		//--------------------------------------------------------------------------------------
 		virtual void OnDraw()override;
 	};
+
 
 
 

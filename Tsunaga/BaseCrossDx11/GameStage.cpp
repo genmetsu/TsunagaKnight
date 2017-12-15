@@ -64,12 +64,14 @@ namespace basecross {
 			);
 
 		//ÉvÉåÉCÉÑÅ[ÇÃçÏê¨
-		shared_ptr<GameObject> Par = 
+		//shared_ptr<GameObject> 
+		auto Par = 
 			AddGameObject<Player>(
 			L"KUREHA_TX",
 			true,
 			Vec3(0.0f, 0.5f, 0.0f)
 			);
+		SetPlayerPtr(Par);
 
 		//åïÇÃçÏê¨
 		AddGameObject<Sword>(
@@ -114,7 +116,7 @@ namespace basecross {
 				i, false);
 		}
 
-		for (int i = 0; i < 50; i++) {
+		for (int i = 0; i < 10; i++) {
 			float x = (float)(i + 1);
 			AddGameObject<NeedleEnemy>(
 				Par,
@@ -126,7 +128,7 @@ namespace basecross {
 				false);
 		}
 
-		for (int i = 0; i < 50; i++) {
+		for (int i = 0; i < 10; i++) {
 			float x = (float)(i + 1);
 			AddGameObject<ShootEnemy>(
 				Par,
@@ -174,7 +176,7 @@ namespace basecross {
 			}
 		}
 
-		for (int i = 0; i < 20; i++) {
+		for (int i = 0; i < 10; i++) {
 			float x = (float)(i + 1);
 			AddGameObject<AngelEnemy>(
 				Par,
@@ -460,6 +462,8 @@ namespace basecross {
 	void EmptyStage::OnDraw() {
 		//âΩÇ‡ÇµÇ»Ç¢
 	}
+
+
 
 
 }

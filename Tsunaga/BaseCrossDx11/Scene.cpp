@@ -204,15 +204,17 @@ namespace basecross {
 		// BGM
 		wstring strMusic = DataDir + L"nanika .wav";
 		App::GetApp()->RegisterWav(L"Nanika", strMusic);
-
+		// SE
+		wstring panWav = DataDir + L"pan.wav";
+		App::GetApp()->RegisterWav(L"pan", panWav);
 	}
 
 
 	void Scene::OnCreate() {
 		CreateResources();
 		//自分自身にイベントを送る
-		//これにより各ステージやオブジェクトがCreate時にシーンにアクセスできる
-		PostEvent(0.0f, GetThis<ObjectInterface>(), GetThis<Scene>(), L"ToGameStage");
+		//これにより各ステージやオブジェクトがCreate時にシーンにアクセスできる]
+		PostEvent(0.0f, GetThis<ObjectInterface>(), GetThis<Scene>(), L"ToTitle");
 	}
 
 	void Scene::OnUpdate() {
@@ -224,6 +226,10 @@ namespace basecross {
 	}
 
 	void Scene::OnEvent(const shared_ptr<Event>& event) {
+		if (event->m_MsgStr == L"ToTitle") {
+			//アクティブステージをGameStageに設定
+			ResetActiveStage<TitleScene>();
+		}
 		if (event->m_MsgStr == L"ToGameStage") {
 			//アクティブステージをGameStageに設定
 			ResetActiveStage<GameStage>();
@@ -233,8 +239,5 @@ namespace basecross {
 			ResetActiveStage<EmptyStage>();
 		}
 	}
-
-	
-
 }
 //end basecross
