@@ -427,6 +427,13 @@ namespace basecross {
 		void SetFriends(weak_ptr<GameObject> gameObject) {
 			m_friends.push_back(gameObject);
 		}
+		//--------------------------------------------------------------------------------------
+		/*!
+		@brief “G‚ð‘å–C‚ÉƒZƒbƒg‚·‚é
+		@return	‚È‚µ
+		*/
+		//--------------------------------------------------------------------------------------
+		void SetEnemyToCannon(wstring tag_name);
 
 		float GetScale() {
 			return m_Scale.x;

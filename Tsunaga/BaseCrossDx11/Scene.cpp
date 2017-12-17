@@ -109,7 +109,7 @@ namespace basecross {
 		App::GetApp()->GetAssetsDirectory(DataDir);
 		//各ゲームは以下のようにデータディレクトリを取得すべき
 		//App::GetApp()->GetDataDirectory(DataDir);
-		wstring strTexture = DataDir + L"space.jpg";
+		wstring strTexture = DataDir + L"space3.jpeg";
 		App::GetApp()->RegisterTexture(L"SKY_TX", strTexture);
 		strTexture = DataDir + L"trace.png";
 		App::GetApp()->RegisterTexture(L"TRACE_TX", strTexture);

@@ -957,17 +957,6 @@ namespace basecross {
 
 		//HPの確認
 		//CheckHealth();
-
-		//回転の更新
-		//Velocityの値で、回転を変更する
-		Vec3 Temp = m_Rigidbody->m_Velocity;
-		Temp.normalize();
-		float ToAngle = atan2(Temp.x, Temp.z);
-		Quat Qt;
-		Qt.rotationRollPitchYawFromVector(Vec3(0, ToAngle, 0));
-		Qt.normalize();
-		//現在と目標を補間
-		m_Rigidbody->m_Quat = XMQuaternionSlerp(m_Rigidbody->m_Quat, Qt, 0.1f);
 	}
 
 	void EnemyObject::OnDrawShadowmap() {
@@ -1187,6 +1176,14 @@ namespace basecross {
 				}
 			}
 		}
+		Vec3 Temp = m_Rigidbody->m_Velocity;
+		Temp.normalize();
+		float ToAngle = atan2(Temp.x, Temp.z);
+		Quat Qt;
+		Qt.rotationRollPitchYawFromVector(Vec3(0, ToAngle, 0));
+		Qt.normalize();
+		//現在と目標を補間
+		m_Rigidbody->m_Quat = XMQuaternionSlerp(m_Rigidbody->m_Quat, Qt, 0.1f);
 	}
 
 	void EnemyObject::CheckHealth() {
@@ -1202,6 +1199,11 @@ namespace basecross {
 		}
 	}
 
+	void EnemyObject::CheckParent() {
+		//auto GM = GameManager::getInstance();
+		//int num = GM->GetFriendsNum();
+
+	}
 
 	void EnemyObject::ComplianceStartBehavior() {
 		//ローカル行列の定義
@@ -1336,7 +1338,9 @@ namespace basecross {
 		const wstring & TextureResName, const Vec3 & Scale, 
 		const Quat & Qt, const Vec3 & Pos, bool OwnShadowActive) :
 		EnemyObject(StagePtr, ParentPtr,MeshResName ,TextureResName, Scale,Qt,Pos, OwnShadowActive)
-	{}
+	{
+		AddTag(L"Red");
+	}
 
 	NeedleEnemy::~NeedleEnemy()
 	{
@@ -1349,24 +1353,26 @@ namespace basecross {
 		GetStage<GameStage>()->FindTagGameObjectVec(L"EnemyObject", EnemyVec);
 		for (auto enemy : EnemyVec) {
 			if (enemy) {
-				auto PtrEnemy = dynamic_pointer_cast<EnemyObject>(enemy);
+				if (!enemy->FindTag(L"LongBoss")) {
+					auto PtrEnemy = dynamic_pointer_cast<EnemyObject>(enemy);
 
-				Vec3 EnemyPos = PtrEnemy->GetPosition();
-				float length = (EnemyPos - m_Rigidbody->m_Pos).length();
+					Vec3 EnemyPos = PtrEnemy->GetPosition();
+					float length = (EnemyPos - m_Rigidbody->m_Pos).length();
 
-				float EnemyRadius = PtrEnemy->GetScale() / 2.0f;
-				float PlayerRadius = m_Rigidbody->m_Scale.x;
+					float EnemyRadius = PtrEnemy->GetScale() / 2.0f;
+					float PlayerRadius = m_Rigidbody->m_Scale.x;
 
-				if (length <= EnemyRadius + PlayerRadius) {
-					if (PtrEnemy->GetHP() > 0) {
-						Vec3 Emitter = m_Rigidbody->m_Pos;
-						Emitter.y -= 0.125f;
-						//Sparkの送出
-						auto SparkPtr = GetStage<GameStage>()->FindTagGameObject<MultiSpark>(L"MultiSpark");
-						SparkPtr->InsertSpark(Emitter);
-						//敵を異次元に飛ばす（仮倒し処理）
-						PtrEnemy->SetPosition(Vec3(100, 100, 100));
-						return;
+					if (length <= EnemyRadius + PlayerRadius) {
+						if (PtrEnemy->GetHP() > 0) {
+							Vec3 Emitter = m_Rigidbody->m_Pos;
+							Emitter.y -= 0.125f;
+							//Sparkの送出
+							auto SparkPtr = GetStage<GameStage>()->FindTagGameObject<MultiSpark>(L"MultiSpark");
+							SparkPtr->InsertSpark(Emitter);
+							//敵を異次元に飛ばす（仮倒し処理）
+							PtrEnemy->SetPosition(Vec3(100, 100, 100));
+							return;
+						}
 					}
 				}
 			}
@@ -1410,6 +1416,7 @@ namespace basecross {
 	{
 		m_Speed = 1.0f;
 		m_SearchDis = 5.0;
+		AddTag(L"Blue");
 
 		//メッシュとトランスフォームの差分の設定
 		m_MeshToTransformMatrix.affineTransformation(
@@ -1525,6 +1532,14 @@ namespace basecross {
 				}
 			}
 		}
+		Vec3 Temp = m_Rigidbody->m_Velocity;
+		Temp.normalize();
+		float ToAngle = atan2(Temp.x, Temp.z);
+		Quat Qt;
+		Qt.rotationRollPitchYawFromVector(Vec3(0, ToAngle, 0));
+		Qt.normalize();
+		//現在と目標を補間
+		m_Rigidbody->m_Quat = XMQuaternionSlerp(m_Rigidbody->m_Quat, Qt, 0.1f);
 	}
 
 	void ShootEnemy::OnUpdate() {
@@ -1792,7 +1807,9 @@ namespace basecross {
 		const Quat & Qt, const Vec3 & Pos, bool OwnShadowActive):
 	EnemyObject(StagePtr, ParentPtr, MeshResName,TextureResName, Scale, Qt, Pos, OwnShadowActive)
 	{
+		m_HP = 10.0f;
 		m_Speed = 0.3f;
+		AddTag(L"BossEnemy");
 	}
 
 	BossEnemy::~BossEnemy()
@@ -1801,6 +1818,9 @@ namespace basecross {
 
 	void BossEnemy::OppositionBehavior()
 	{
+		if (m_HP < 0.0f) {
+			SetPosition(Vec3(100, 100, 100));
+		}
 		float ElapsedTime = App::GetApp()->GetElapsedTime();
 		auto shptr = m_ParentPtr.lock();
 		//親のワールド行列を取得する変数
@@ -1895,6 +1915,14 @@ namespace basecross {
 				}
 			}
 		}
+		Vec3 Temp = m_Rigidbody->m_Velocity;
+		Temp.normalize();
+		float ToAngle = atan2(Temp.x, Temp.z);
+		Quat Qt;
+		Qt.rotationRollPitchYawFromVector(Vec3(0, ToAngle, 0));
+		Qt.normalize();
+		//現在と目標を補間
+		m_Rigidbody->m_Quat = XMQuaternionSlerp(m_Rigidbody->m_Quat, Qt, 0.1f);
 	}
 	//--------------------------------------------------------------------------------------
 	/// エンジェルエネミー
@@ -1906,6 +1934,7 @@ namespace basecross {
 		EnemyObject(StagePtr, ParentPtr, MeshResName, TextureResName, Scale, Qt, Pos, OwnShadowActive)
 	{
 		m_Speed = 0.8f;
+		AddTag(L"Green");
 	}
 
 	AngelEnemy::~AngelEnemy()
@@ -1921,6 +1950,8 @@ namespace basecross {
 		EnemyObject(StagePtr, ParentPtr, MeshResName, TextureResName, Scale, Qt, Pos, OwnShadowActive)
 	{
 		m_Speed = 0.5f;
+		m_HP = 15.0f;
+		AddTag(L"CloseBoss");
 	}
 
 	CR_BossEnemy::~CR_BossEnemy()
@@ -1936,7 +1967,8 @@ namespace basecross {
 		EnemyObject(StagePtr, ParentPtr, MeshResName, TextureResName, Scale, Qt, Pos, OwnShadowActive)
 	{
 		m_Speed = 0.5f;
-		m_HP = 10.0f;
+		m_HP = 5.0f;
+		AddTag(L"LongBoss");
 	}
 
 	LD_BossEnemy::~LD_BossEnemy()

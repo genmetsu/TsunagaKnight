@@ -328,12 +328,24 @@ namespace basecross {
 				float PlayerRadius = m_Rigidbody->m_Scale.x / 2.0f;
 
 				if (length < CannonRadius + PlayerRadius) {
+
+					Vec3 Emitter = m_Rigidbody->m_Pos;
+					Emitter.y -= 0.125f;
+					//Sparkの送出
+					auto SparkPtr = GetStage<GameStage>()->FindTagGameObject<MultiSpark>(L"MultiSpark");
+					SparkPtr->InsertSpark(Emitter);
+
 					if (PtrCannon->GetCannonClass() == 0) {
-						Vec3 Emitter = m_Rigidbody->m_Pos;
-						Emitter.y -= 0.125f;
-						//Sparkの送出
-						auto SparkPtr = GetStage<GameStage>()->FindTagGameObject<MultiSpark>(L"MultiSpark");
-						SparkPtr->InsertSpark(Emitter);
+						auto s = GetStage()->FindTagGameObject<Sword>(L"Sword");
+						s->SetEnemyToCannon(L"Green");
+					}
+					if (PtrCannon->GetCannonClass() == 1) {
+						auto s = GetStage()->FindTagGameObject<Sword>(L"Sword");
+						s->SetEnemyToCannon(L"Red");
+					}
+					if (PtrCannon->GetCannonClass() == 2) {
+						auto s = GetStage()->FindTagGameObject<Sword>(L"Sword");
+						s->SetEnemyToCannon(L"Blue");
 					}
 				}
 			}
@@ -499,7 +511,7 @@ namespace basecross {
 	}
 
 	void Sword::OnUpdate2() {
-		/*auto fps = App::GetApp()->GetStepTimer().GetFramesPerSecond();
+		auto fps = App::GetApp()->GetStepTimer().GetFramesPerSecond();
 		wstring FPS(L"FPS: ");
 		FPS += Util::UintToWStr(fps);
 		FPS += L"\nElapsedTime: ";
@@ -512,7 +524,7 @@ namespace basecross {
 		if (!m_StringDrawObject) {
 			m_StringDrawObject = GetStage<GameStage>()->FindTagGameObject<StringDrawObject>(L"StringDrawObject");
 		}
-		m_StringDrawObject->SetText(FPS);*/
+		m_StringDrawObject->SetText(FPS);
 	}
 
 
@@ -624,6 +636,34 @@ namespace basecross {
 				m_Rigidbody->m_Velocity = Velo;
 			}
 		}
+
+		//コントローラの取得
+		auto CntlVec = App::GetApp()->GetInputDevice().GetControlerVec();
+		if (CntlVec[0].bConnected) {
+			//Xボタン
+			if (CntlVec[0].wPressedButtons & XINPUT_GAMEPAD_Y) {
+
+				//二番目が死んだとしたら
+				/*auto dead_friend = dynamic_pointer_cast<EnemyObject>(m_friends[1].lock());
+				dead_friend->GetStateMachine()->ChangeState(EnemyOppositionState::Instance());
+				dead_friend->SetPosition(Vec3(100, 100, 100));
+				m_friends.erase(m_friends.begin() + 1);
+				m_friends_num = m_friends.size();*/
+
+				/*for (auto f : m_friends) {
+					auto f_pointer = dynamic_pointer_cast<EnemyObject>(f.lock());
+					if (f_pointer->FindTag(L"Red")) {
+						f_pointer->GetStateMachine()->ChangeState(EnemyOppositionState::Instance());
+						f_pointer->SetPosition(Vec3(0, 0, 0));
+					};
+				}*/
+
+				/*vector<int> erase_num;
+				int j = 0;*/
+
+				
+			}
+		}
 	}
 
 	void Sword::AttackBehavior() {
@@ -642,27 +682,65 @@ namespace basecross {
 
 				if (length < EnemyRadius + SwordRadius) {
 					if (PtrEnemy->GetHP() > 0) {
-						Vec3 Emitter = m_Rigidbody->m_Pos;
-						Emitter.y -= 0.125f;
-						//Sparkの送出
-						auto SparkPtr = GetStage<GameStage>()->FindTagGameObject<MultiSpark>(L"MultiSpark");
-						SparkPtr->InsertSpark(Emitter);
+						
+						if (!(PtrEnemy->FindTag(L"LongBoss") || PtrEnemy->FindTag(L"CloseBoss"))){
+							Vec3 Emitter = m_Rigidbody->m_Pos;
+							Emitter.y -= 0.125f;
+							//Sparkの送出
+							auto SparkPtr = GetStage<GameStage>()->FindTagGameObject<MultiSpark>(L"MultiSpark");
+							SparkPtr->InsertSpark(Emitter);
 
-						//ダメージ処理
-						PtrEnemy->SetHP(0.0f);
-						//配列に敵をセットする
-						SetFriends(PtrEnemy);
-						//配列の長さを取って2番目以降なら自分の前の敵を親にする
-						m_friends_num = m_friends.size();
-						auto GM = GameManager::getInstance();
-						GM->SetFriendsNum(m_friends_num);
+							//ダメージ処理
+							PtrEnemy->SetHP(0.0f);
+							//配列に敵をセットする
+							SetFriends(PtrEnemy);
+							//配列の長さを取って2番目以降なら自分の前の敵を親にする
+							m_friends_num = m_friends.size();
 
-						if (m_friends_num >= 2) {
-							PtrEnemy->SetParent(m_friends[m_friends_num - 2]);
-						}
-						break;
+							auto GM = GameManager::getInstance();
+							GM->SetFriendsNum(m_friends_num);
+
+							if (m_friends_num >= 2) {
+								PtrEnemy->SetParent(m_friends[m_friends_num - 2]);
+							}
+							PtrEnemy->CheckHealth();
+							break;
+						}	
 					}
 				}
+			}
+		}
+	}
+
+	void Sword::SetEnemyToCannon(wstring tag_name) {
+
+		for (int i = 0; i < m_friends_num; i++) {
+			auto f_pointer = dynamic_pointer_cast<EnemyObject>(m_friends[i].lock());
+			if (f_pointer->FindTag(tag_name)) {
+				auto boss = GetStage()->FindTagGameObject<BossEnemy>(L"BossEnemy");
+				boss->Damage();
+
+				f_pointer->GetStateMachine()->ChangeState(EnemyOppositionState::Instance());
+				f_pointer->SetPosition(Vec3(100, 100, 100));
+				m_friends.erase(m_friends.begin() + i);
+				m_friends_num = m_friends.size();
+			}
+		}
+		/*for (int i = 0; i < erase_num.size(); i++) {
+		m_friends.erase(m_friends.begin() + erase_num[i]);
+		}*/
+
+		auto GM = GameManager::getInstance();
+		GM->SetFriendsNum(m_friends_num);
+
+		//再整列
+		for (int i = 0; i < m_friends_num; i++) {
+			auto this_friend = dynamic_pointer_cast<EnemyObject>(m_friends[i].lock());
+			if (i == 0) {
+				this_friend->SetParent(m_ParentPtr);
+			}
+			else {
+				this_friend->SetParent(m_friends[i - 1]);
 			}
 		}
 	}
