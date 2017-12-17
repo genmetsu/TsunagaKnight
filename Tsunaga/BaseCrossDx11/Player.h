@@ -40,7 +40,7 @@ namespace basecross {
 		///描画データ
 		shared_ptr<BcDrawObject> m_PtrObj;
 		//描画オブジェクト(weak_ptr)
-		weak_ptr<BcPNTStaticRenderer> m_Renderer;
+		weak_ptr<BcPNTBoneModelRenderer> m_Renderer;
 		///シャドウマップ用描画データ
 		shared_ptr<ShadowmapObject> m_PtrShadowmapObj;
 		//シャドウマップ描画オブジェクト(weak_ptr)

@@ -231,7 +231,7 @@ int APIENTRY _tWinMain(_In_ HINSTANCE hInstance,
 
 	//ウインドウの幅と高さ
 	int iClientWidth = 1280;
-	int iClientHeight = 800;
+	int iClientHeight = 720;
 	// フルスクリーンにするかどうかの判定
 	// コマンドラインに/fが設定されていたらフルスクリーンにする
 	bool isFullScreen = false;

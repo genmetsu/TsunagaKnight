@@ -116,6 +116,10 @@ namespace basecross {
 		m_PtrObj->m_BlendState = BlendState::AlphaBlend;
 		m_PtrObj->m_RasterizerState = RasterizerState::DoubleDraw;
 
+		m_PtrObj->BoneInit();
+		m_PtrObj->AddAnimation(L"Default", 30, 60, true, 20.0f);
+		m_PtrObj->ChangeCurrentAnimation(L"Default");
+
 		//シャドウマップ描画データの構築
 		m_PtrShadowmapObj = make_shared<ShadowmapObject>();
 		m_PtrShadowmapObj->m_MeshRes = m_PtrObj->m_MeshRes;
@@ -129,6 +133,8 @@ namespace basecross {
 
 
 	void Player::OnUpdate() {
+		float ElapsedTime = App::GetApp()->GetElapsedTime();
+		m_PtrObj->UpdateAnimation(ElapsedTime);
 		m_StateMachine->Update();
 		
 	}
@@ -207,9 +213,10 @@ namespace basecross {
 		auto shptr = m_Renderer.lock();
 		if (!shptr) {
 			auto PtrGameStage = GetStage<GameStage>();
-			shptr = PtrGameStage->FindTagGameObject<BcPNTStaticRenderer>(L"BcPNTStaticRenderer");
+			shptr = PtrGameStage->FindTagGameObject<BcPNTBoneModelRenderer>(L"BcPNTBoneModelRenderer");
 			m_Renderer = shptr;
 		}
+
 		shptr->AddDrawObject(m_PtrObj);
 	}
 
@@ -492,7 +499,7 @@ namespace basecross {
 	}
 
 	void Sword::OnUpdate2() {
-		auto fps = App::GetApp()->GetStepTimer().GetFramesPerSecond();
+		/*auto fps = App::GetApp()->GetStepTimer().GetFramesPerSecond();
 		wstring FPS(L"FPS: ");
 		FPS += Util::UintToWStr(fps);
 		FPS += L"\nElapsedTime: ";
@@ -505,7 +512,7 @@ namespace basecross {
 		if (!m_StringDrawObject) {
 			m_StringDrawObject = GetStage<GameStage>()->FindTagGameObject<StringDrawObject>(L"StringDrawObject");
 		}
-		m_StringDrawObject->SetText(FPS);
+		m_StringDrawObject->SetText(FPS);*/
 	}
 
 
