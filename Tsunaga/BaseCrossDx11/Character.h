@@ -578,6 +578,9 @@ namespace basecross {
 		//Rigidbodyのshared_ptr
 		shared_ptr<Rigidbody> m_Rigidbody;
 
+
+		//メッシュとの差分計算用
+		Mat4x4 m_MeshToTransformMatrix;
 		//描画データ
 		shared_ptr<SimpleDrawObject> m_PtrObj;
 		//描画オブジェクト(weak_ptr)

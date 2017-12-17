@@ -703,11 +703,14 @@ namespace basecross {
 
 		//メッシュの取得
 
-		vector<VertexPositionNormalTexture> vertices;
-		vector<uint16_t> indices;
-		MeshUtill::CreateSphere(1.0f, 18, vertices, indices);
-		//メッシュの作成（変更できない）
-		auto MeshPtr = MeshResource::CreateMeshResource(vertices, indices, false);
+		//vector<VertexPositionNormalTexture> vertices;
+		//vector<uint16_t> indices;
+		//MeshUtill::CreateSphere(1.0f, 18, vertices, indices);
+		////メッシュの作成（変更できない）
+		//auto MeshPtr = MeshResource::CreateMeshResource(vertices, indices, false);
+
+		auto MeshPtr = App::GetApp()->GetResource<MeshResource>(L"CANNON_MESH");
+
 
 		//行列の定義
 		Mat4x4 World;
@@ -770,6 +773,19 @@ namespace basecross {
 			m_Rigidbody->m_Quat,
 			m_Rigidbody->m_Pos
 		);
+
+
+		//メッシュとトランスフォームの差分の設定
+		m_MeshToTransformMatrix.affineTransformation(
+			Vec3(1.5f, 1.5f, 1.5f),
+			Vec3(0.0f, 0.0f, 0.3f),
+			Vec3(0.0f, XM_PI, 0.0f),
+			Vec3(0.0f, 0.0f, 0.0f)
+		);
+
+		//差分を計算
+		World = m_MeshToTransformMatrix * World;
+
 		m_PtrObj->m_WorldMatrix = World;
 		m_PtrObj->m_Camera = GetStage<Stage>()->GetCamera();
 		auto shptr = m_Renderer.lock();
@@ -823,7 +839,7 @@ namespace basecross {
 		m_LerpToParent(0.2f),
 		m_LerpToChild(0.2f),
 		m_Attack1ToRot(0),
-		m_HP(100.0f),
+		m_HP(1.0f),
 		m_AttackPoint(100.0f)
 	{}
 	EnemyObject::~EnemyObject() {}
@@ -919,8 +935,15 @@ namespace basecross {
 					SparkPtr->InsertSpark(Emitter);
 					//弾を異次元に飛ばす
 					PtrBullet->SetPosition(Vec3(0.0f, -10.0f, 0.0f));
-					//敵を異次元に飛ばす（仮倒し処理）
-					SetPosition(Vec3(100, 100, 100));
+
+					//体力を削る
+					m_HP--;
+
+					if (m_HP <= 0.0f) {
+						
+						//敵を異次元に飛ばす（仮倒し処理）
+						SetPosition(Vec3(100, 100, 100));
+					}
 					
 					return;
 				}
@@ -933,7 +956,7 @@ namespace basecross {
 		m_StateMachine->Update();
 
 		//HPの確認
-		CheckHealth();
+		//CheckHealth();
 
 		//回転の更新
 		//Velocityの値で、回転を変更する
@@ -1357,19 +1380,19 @@ namespace basecross {
 
 		EnemyObject::OnUpdate();
 
-		auto MyPos = m_Rigidbody->m_Pos;
-		auto PlayerPtr = GetStage<GameStage>()->GetPlayerPtr();
-		if (PlayerPtr) {
-			auto PlayertPos = PlayerPtr->GetPosition();
-			auto force = PlayertPos - MyPos;
-			if (length(force) <= 5.0f) {
-				force.y = 0;
-				force.normalize();
-				force *= 5.0f;
-				m_Rigidbody->m_Velocity = force;
-//				m_Rigidbody->m_Force = force;
-			}
-		}
+		//auto MyPos = m_Rigidbody->m_Pos;
+		//auto PlayerPtr = GetStage<GameStage>()->GetPlayerPtr();
+		//if (PlayerPtr) {
+		//	auto PlayertPos = PlayerPtr->GetPosition();
+		//	auto force = PlayertPos - MyPos;
+		//	if (length(force) <= 5.0f) {
+		//		force.y = 0;
+		//		force.normalize();
+		//		force *= 5.0f;
+		//		m_Rigidbody->m_Velocity = force;
+		//		//				m_Rigidbody->m_Force = force;
+		//	}
+		//}
 
 	}
 
@@ -1769,6 +1792,7 @@ namespace basecross {
 		const Quat & Qt, const Vec3 & Pos, bool OwnShadowActive):
 	EnemyObject(StagePtr, ParentPtr, MeshResName,TextureResName, Scale, Qt, Pos, OwnShadowActive)
 	{
+		m_Speed = 0.3f;
 	}
 
 	BossEnemy::~BossEnemy()
@@ -1881,6 +1905,7 @@ namespace basecross {
 		const Vec3 & Pos, bool OwnShadowActive) :
 		EnemyObject(StagePtr, ParentPtr, MeshResName, TextureResName, Scale, Qt, Pos, OwnShadowActive)
 	{
+		m_Speed = 0.8f;
 	}
 
 	AngelEnemy::~AngelEnemy()
@@ -1895,6 +1920,7 @@ namespace basecross {
 		const Vec3 & Pos, bool OwnShadowActive) :
 		EnemyObject(StagePtr, ParentPtr, MeshResName, TextureResName, Scale, Qt, Pos, OwnShadowActive)
 	{
+		m_Speed = 0.5f;
 	}
 
 	CR_BossEnemy::~CR_BossEnemy()
@@ -1909,6 +1935,8 @@ namespace basecross {
 		const Vec3 & Pos, bool OwnShadowActive) :
 		EnemyObject(StagePtr, ParentPtr, MeshResName, TextureResName, Scale, Qt, Pos, OwnShadowActive)
 	{
+		m_Speed = 0.5f;
+		m_HP = 10.0f;
 	}
 
 	LD_BossEnemy::~LD_BossEnemy()

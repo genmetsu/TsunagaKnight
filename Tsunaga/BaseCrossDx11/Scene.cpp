@@ -156,6 +156,14 @@ namespace basecross {
 		strTexture = DataDir + L"Blue.png";
 		App::GetApp()->RegisterTexture(L"Blue_TX", strTexture);
 
+		strTexture = DataDir + L"Large_Cannon_UV_2.png";
+		App::GetApp()->RegisterTexture(L"BLUE_CANNON_TX", strTexture);
+
+		strTexture = DataDir + L"Large_Cannon_UV_R.png";
+		App::GetApp()->RegisterTexture(L"RED_CANNON_TX", strTexture);
+
+		strTexture = DataDir + L"Large_Cannon_UV_G.png";
+		App::GetApp()->RegisterTexture(L"GREEN_CANNON_TX", strTexture);
 
 		//ボーンモデルのリソース
 		auto ModelMesh = MeshResource::CreateBoneModelMesh(DataDir, L"Chara_R.bmf");
@@ -169,6 +177,9 @@ namespace basecross {
 
 		ModelMesh = MeshResource::CreateBoneModelMesh(DataDir, L"E_Gun.bmf");
 		App::GetApp()->RegisterResource(L"GUN_MESH", ModelMesh);
+
+		ModelMesh = MeshResource::CreateBoneModelMesh(DataDir, L"Large_Cannon_Blue_Blast.bmf");
+		App::GetApp()->RegisterResource(L"CANNON_MESH", ModelMesh);
 
 		//ModelMesh = MeshResource::CreateBoneModelMesh(DataDir, L"E_Angel.bmf");
 		//App::GetApp()->RegisterResource(L"ANGEL_MESH", ModelMesh);

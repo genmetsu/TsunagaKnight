@@ -69,7 +69,7 @@ namespace basecross {
 			AddGameObject<Player>(
 			L"KUREHA_TX",
 			true,
-			Vec3(0.0f, 0.5f, 0.0f)
+			Vec3(0.0f, 0.5f, 3.0f)
 			);
 		SetPlayerPtr(Par);
 
@@ -99,18 +99,18 @@ namespace basecross {
 			wstring texture;
 			switch (i) {
 			case 0 :
-				texture = L"ANGEL_TX";
+				texture = L"GREEN_CANNON_TX";
 				break;
 			case 1 :
-				texture = L"NEEDLE_TX";
+				texture = L"RED_CANNON_TX";
 				break;
 			case 2:
-				texture = L"GUN_TX";
+				texture = L"BLUE_CANNON_TX";
 				break;
 			}
 			auto ptr = AddGameObject<Cannon>(
 				texture,
-				Vec3(2.0f, 2.0f, 2.0f),
+				Vec3(4.0f, 4.0f, 4.0f),
 				Quat(),
 				Vec3(x * 4.0f - 4.0f, 0.125f, -3.0f),
 				i, false);
@@ -194,7 +194,7 @@ namespace basecross {
 				Par,
 				L"DEFAULT_SPHERE",
 				L"Brown2_TX",
-				Vec3(1.0f, 1.0f, 1.0f),
+				Vec3(2.0f, 2.0f, 2.0f),
 				Quat(),
 				Vec3((float)rand() / 32767 * 20.0f - 10.0f, 0.125f, 80.0f - (float)rand() / 32767 * 20.0f),
 				false);
@@ -206,7 +206,7 @@ namespace basecross {
 				Par,
 				L"DEFAULT_SPHERE",
 				L"Blue_TX",
-				Vec3(1.0f, 1.0f, 1.0f),
+				Vec3(2.0f, 2.0f, 2.0f),
 				Quat(),
 				Vec3((float)rand() / 32767 * 20.0f - 10.0f, 0.125f, 80.0f - (float)rand() / 32767 * 20.0f),
 				false);
