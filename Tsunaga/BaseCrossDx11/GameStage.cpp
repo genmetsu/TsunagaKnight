@@ -35,7 +35,7 @@ namespace basecross {
 		Dev->GetShadowMapRenderTarget(2048.0f);
 
 		//背景スプライトの作成
-		AddGameObject<SkySprite>(
+		AddGameObject<MultiSprite>(
 			L"SKY_TX",
 			Vec2(1280, 800),
 			0.0f,
@@ -188,28 +188,32 @@ namespace basecross {
 				false);
 		}
 
-		for (int i = 0; i < 1; i++) {
-			float x = (float)(i + 1);
-			AddGameObject<CR_BossEnemy>(
-				Par,
-				L"DEFAULT_SPHERE",
-				L"Brown2_TX",
-				Vec3(2.0f, 2.0f, 2.0f),
-				Quat(),
-				Vec3((float)rand() / 32767 * 20.0f - 10.0f, 0.125f, 80.0f - (float)rand() / 32767 * 20.0f),
-				false);
+		int r = rand();
+		if (r % 2 == 0) {
+			for (int i = 0; i < 1; i++) {
+				float x = (float)(i + 1);
+				AddGameObject<CR_BossEnemy>(
+					Par,
+					L"DEFAULT_SPHERE",
+					L"Brown2_TX",
+					Vec3(2.0f, 2.0f, 2.0f),
+					Quat(),
+					Vec3((float)rand() / 32767 * 20.0f - 10.0f, 0.125f, 80.0f - (float)rand() / 32767 * 20.0f),
+					false);
+			}
 		}
-
-		for (int i = 0; i < 1; i++) {
-			float x = (float)(i + 1);
-			AddGameObject<LD_BossEnemy>(
-				Par,
-				L"DEFAULT_SPHERE",
-				L"Blue_TX",
-				Vec3(2.0f, 2.0f, 2.0f),
-				Quat(),
-				Vec3((float)rand() / 32767 * 20.0f - 10.0f, 0.125f, 80.0f - (float)rand() / 32767 * 20.0f),
-				false);
+		else {
+			for (int i = 0; i < 1; i++) {
+				float x = (float)(i + 1);
+				AddGameObject<LD_BossEnemy>(
+					Par,
+					L"DEFAULT_SPHERE",
+					L"Blue_TX",
+					Vec3(2.0f, 2.0f, 2.0f),
+					Quat(),
+					Vec3((float)rand() / 32767 * 20.0f - 10.0f, 0.125f, 80.0f - (float)rand() / 32767 * 20.0f),
+					false);
+			}
 		}
 
 		//スパークエフェクト
@@ -247,7 +251,7 @@ namespace basecross {
 
 		m_AudioObjectPtr = ObjectFactory::Create<MultiAudioObject>();
 		m_AudioObjectPtr->AddAudioResource(L"Nanika");
-		m_AudioObjectPtr->Start(L"Nanika", XAUDIO2_LOOP_INFINITE, 0.0f);
+		m_AudioObjectPtr->Start(L"Nanika", XAUDIO2_LOOP_INFINITE, 0.1f);
 
 	}
 

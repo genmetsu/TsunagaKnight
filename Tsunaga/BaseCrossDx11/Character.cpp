@@ -552,7 +552,7 @@ namespace basecross {
 	//--------------------------------------------------------------------------------------
 	///	”wŒiƒXƒvƒ‰ƒCƒg
 	//--------------------------------------------------------------------------------------
-	SkySprite::SkySprite(const shared_ptr<Stage>& StagePtr,
+	MultiSprite::MultiSprite(const shared_ptr<Stage>& StagePtr,
 		const wstring& TextureResName,
 		const Vec2& StartScale,
 		float StartRot,
@@ -564,11 +564,11 @@ namespace basecross {
 		SetBlendState(BlendState::Trace);
 	}
 
-	void SkySprite::AdjustVertex() {
+	void MultiSprite::AdjustVertex() {
 		
 	}
 
-	void SkySprite::UpdateVertex(float ElapsedTime, VertexPositionColorTexture* vertices) {
+	void MultiSprite::UpdateVertex(float ElapsedTime, VertexPositionColorTexture* vertices) {
 		
 		Col4 UpdateCol(1.0f, 1.0f, 1.0f, 1.0f);
 		for (size_t i = 0; i < m_SquareMesh->GetNumVertices(); i++) {
@@ -942,7 +942,8 @@ namespace basecross {
 					if (m_HP <= 0.0f) {
 						
 						//“G‚ðˆÙŽŸŒ³‚É”ò‚Î‚·i‰¼“|‚µˆ—j
-						SetPosition(Vec3(100, 100, 100));
+						SetPosition(Vec3(0, 0, 70));
+						m_HP = 2.0f;
 					}
 					
 					return;
@@ -1370,7 +1371,7 @@ namespace basecross {
 							auto SparkPtr = GetStage<GameStage>()->FindTagGameObject<MultiSpark>(L"MultiSpark");
 							SparkPtr->InsertSpark(Emitter);
 							//“G‚ðˆÙŽŸŒ³‚É”ò‚Î‚·i‰¼“|‚µˆ—j
-							PtrEnemy->SetPosition(Vec3(100, 100, 100));
+							PtrEnemy->SetPosition(Vec3(0, 0, 70));
 							return;
 						}
 					}
@@ -1949,7 +1950,7 @@ namespace basecross {
 		const Vec3 & Pos, bool OwnShadowActive) :
 		EnemyObject(StagePtr, ParentPtr, MeshResName, TextureResName, Scale, Qt, Pos, OwnShadowActive)
 	{
-		m_Speed = 0.5f;
+		m_Speed = 1.5f;
 		m_HP = 15.0f;
 		AddTag(L"CloseBoss");
 	}
@@ -1966,7 +1967,7 @@ namespace basecross {
 		const Vec3 & Pos, bool OwnShadowActive) :
 		EnemyObject(StagePtr, ParentPtr, MeshResName, TextureResName, Scale, Qt, Pos, OwnShadowActive)
 	{
-		m_Speed = 0.5f;
+		m_Speed = 1.5f;
 		m_HP = 5.0f;
 		AddTag(L"LongBoss");
 	}

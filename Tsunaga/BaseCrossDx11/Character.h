@@ -428,7 +428,7 @@ namespace basecross {
 	//--------------------------------------------------------------------------------------
 	///	背景スプライト
 	//--------------------------------------------------------------------------------------
-	class SkySprite : public SpriteBase {
+	class MultiSprite : public SpriteBase {
 		float m_TotalTime;	//頂点変更に使用するタイム
 	public:
 		//--------------------------------------------------------------------------------------
@@ -459,7 +459,7 @@ namespace basecross {
 		@param[in]	YWrap	Y方向のラップ数
 		*/
 		//--------------------------------------------------------------------------------------
-		SkySprite(const shared_ptr<Stage>& StagePtr,
+		MultiSprite(const shared_ptr<Stage>& StagePtr,
 			const wstring& TextureResName,
 			const Vec2& StartScale,
 			float StartRot,
@@ -470,7 +470,7 @@ namespace basecross {
 		@brief デストラクタ
 		*/
 		//--------------------------------------------------------------------------------------
-		virtual ~SkySprite() {}
+		virtual ~MultiSprite() {}
 	};
 
 	//--------------------------------------------------------------------------------------
