@@ -135,7 +135,7 @@ namespace basecross {
 		strTexture = DataDir + L"normal2.png";
 		App::GetApp()->RegisterTexture(L"NORMAL2_TX", strTexture);
 
-		strTexture = DataDir + L"Kureha_Body_Tex.tga";
+		strTexture = DataDir + L"Kureha_ALL_Tex.tga";
 		App::GetApp()->RegisterTexture(L"KUREHA_TX", strTexture);
 
 		strTexture = DataDir + L"E_Needle.UV2.png";
@@ -169,7 +169,7 @@ namespace basecross {
 		auto ModelMesh = MeshResource::CreateBoneModelMesh(DataDir, L"Chara_R.bmf");
 		App::GetApp()->RegisterResource(L"Chara_R_MESH", ModelMesh);
 
-		ModelMesh = MeshResource::CreateBoneModelMesh(DataDir, L"Kureha_fbx_test_1.bmf");
+		ModelMesh = MeshResource::CreateBoneModelMesh(DataDir, L"Kureha_fbx_v2.bmf");
 		App::GetApp()->RegisterResource(L"KUREHA_MESH", ModelMesh);
 
 		ModelMesh = MeshResource::CreateBoneModelMesh(DataDir, L"E_Needle.bmf");
@@ -213,7 +213,7 @@ namespace basecross {
 		App::GetApp()->RegisterTexture(L"STEP_TX", strTexture);
 
 		// BGM
-		wstring strMusic = DataDir + L"nanika .wav";
+		wstring strMusic = DataDir + L"Venom.wav";
 		App::GetApp()->RegisterWav(L"Nanika", strMusic);
 		// SE
 		wstring panWav = DataDir + L"pan.wav";

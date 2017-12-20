@@ -117,7 +117,9 @@ namespace basecross {
 		m_PtrObj->m_RasterizerState = RasterizerState::DoubleDraw;
 
 		m_PtrObj->BoneInit();
-		m_PtrObj->AddAnimation(L"Default", 30, 60, true, 20.0f);
+		m_PtrObj->AddAnimation(L"Default", 0, 30, true, 40.0f);
+		//m_PtrObj->AddAnimation(L"Default", 0, 30, true, 40.0f);
+
 		m_PtrObj->ChangeCurrentAnimation(L"Default");
 
 		//シャドウマップ描画データの構築
