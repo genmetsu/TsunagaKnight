@@ -138,13 +138,25 @@ namespace basecross {
 		strTexture = DataDir + L"Kureha_ALL_Tex.tga";
 		App::GetApp()->RegisterTexture(L"KUREHA_TX", strTexture);
 
+		strTexture = DataDir + L"Ymato_TX.tga";
+		App::GetApp()->RegisterTexture(L"YAMATO_TX", strTexture);
+
+		strTexture = DataDir + L"E_Needle_UV2.png";
+		App::GetApp()->RegisterTexture(L"THOR_BOSS_TX", strTexture);
+
+		strTexture = DataDir + L"Hand_Main_UV.png";
+		App::GetApp()->RegisterTexture(L"HAND_BOSS_TX", strTexture);
+
+		strTexture = DataDir + L"Hand_Sub_UV.png";
+		App::GetApp()->RegisterTexture(L"HAND_TX", strTexture);
+
 		strTexture = DataDir + L"E_Needle.UV2.png";
 		App::GetApp()->RegisterTexture(L"NEEDLE_TX", strTexture);
 
 		strTexture = DataDir + L"E_Rocket2.png";
 		App::GetApp()->RegisterTexture(L"GUN_TX", strTexture);
 
-		strTexture = DataDir + L"E_Angel.UV.png";
+		strTexture = DataDir + L"E_Angel_UV.png";
 		App::GetApp()->RegisterTexture(L"ANGEL_TX", strTexture);
 
 		strTexture = DataDir + L"Brown.png";
@@ -166,10 +178,7 @@ namespace basecross {
 		App::GetApp()->RegisterTexture(L"GREEN_CANNON_TX", strTexture);
 
 		//ボーンモデルのリソース
-		auto ModelMesh = MeshResource::CreateBoneModelMesh(DataDir, L"Chara_R.bmf");
-		App::GetApp()->RegisterResource(L"Chara_R_MESH", ModelMesh);
-
-		ModelMesh = MeshResource::CreateBoneModelMesh(DataDir, L"Kureha_fbx_v2.bmf");
+		auto ModelMesh = MeshResource::CreateBoneModelMesh(DataDir, L"Kureha_fbx_v2.bmf");
 		App::GetApp()->RegisterResource(L"KUREHA_MESH", ModelMesh);
 
 		ModelMesh = MeshResource::CreateBoneModelMesh(DataDir, L"E_Needle.bmf");
@@ -178,32 +187,29 @@ namespace basecross {
 		ModelMesh = MeshResource::CreateBoneModelMesh(DataDir, L"E_Gun.bmf");
 		App::GetApp()->RegisterResource(L"GUN_MESH", ModelMesh);
 
+		ModelMesh = MeshResource::CreateBoneModelMesh(DataDir, L"E_Angel.bmf");
+		App::GetApp()->RegisterResource(L"ANGEL_MESH", ModelMesh);
+
 		ModelMesh = MeshResource::CreateBoneModelMesh(DataDir, L"Large_Cannon_Blue_Blast.bmf");
 		App::GetApp()->RegisterResource(L"CANNON_MESH", ModelMesh);
 
-		//ModelMesh = MeshResource::CreateBoneModelMesh(DataDir, L"E_Angel.bmf");
-		//App::GetApp()->RegisterResource(L"ANGEL_MESH", ModelMesh);
+		ModelMesh = MeshResource::CreateBoneModelMesh(DataDir, L"Medium_Boss_Thor_Move.bmf");
+		App::GetApp()->RegisterResource(L"THOR_BOSS_MESH", ModelMesh);
 
-		//ボーンモデルのタンジェント付きリソース
-		ModelMesh = MeshResource::CreateBoneModelMeshWithTangent(DataDir, L"Chara_R.bmf");
-		App::GetApp()->RegisterResource(L"Chara_R_MESH_WITH_TAN", ModelMesh);
-		//法線マップ
-		strTexture = DataDir + L"Chara_R_narmal.png";
-		App::GetApp()->RegisterTexture(L"Chara_R_NORMAL_TX", strTexture);
+		ModelMesh = MeshResource::CreateBoneModelMesh(DataDir, L"Yamato_Fbx_v01.bmf");
+		App::GetApp()->RegisterResource(L"YAMATO_MESH", ModelMesh);
+
 
 		//スタティックモデルのリソースとして読み込み
-		auto StaticModelMesh = MeshResource::CreateStaticModelMesh(DataDir, L"Character_01.bmf");
-		App::GetApp()->RegisterResource(L"MODEL_MESH", StaticModelMesh);
+		auto StaticModelMesh = MeshResource::CreateStaticModelMesh(DataDir, L"Medium_Boss_Hand_Left.bmf");
+		App::GetApp()->RegisterResource(L"LEFT_HAND_MESH", StaticModelMesh);
 
-		StaticModelMesh = MeshResource::CreateStaticModelMesh(DataDir, L"E_Angel.bmf");
-		App::GetApp()->RegisterResource(L"ANGEL_MESH", StaticModelMesh);
+		StaticModelMesh = MeshResource::CreateStaticModelMesh(DataDir, L"Medium_Boss_Hand_Right.bmf");
+		App::GetApp()->RegisterResource(L"RIGHT_HAND_MESH", StaticModelMesh);
 
-		//スタティックモデルのタンジェント付きリソースとして読み込み
-		StaticModelMesh = MeshResource::CreateStaticModelMeshWithTangent(DataDir, L"Character_01.bmf");
-		App::GetApp()->RegisterResource(L"MODEL_MESH_WITH_TAN", StaticModelMesh);
-		//法線マップ
-		strTexture = DataDir + L"Character_2_normal.png";
-		App::GetApp()->RegisterTexture(L"MODEL_NORMAL_TX", strTexture);
+		StaticModelMesh = MeshResource::CreateStaticModelMesh(DataDir, L"Medium_Boss_Hand_Main.bmf");
+		App::GetApp()->RegisterResource(L"HAND_BOSS_MESH", StaticModelMesh);
+
 		//エフェクト
 		strTexture = DataDir + L"spark.png";
 		App::GetApp()->RegisterTexture(L"SPARK_TX", strTexture);
