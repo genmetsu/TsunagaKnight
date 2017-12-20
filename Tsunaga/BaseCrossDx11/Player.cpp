@@ -118,9 +118,13 @@ namespace basecross {
 
 		m_PtrObj->BoneInit();
 		m_PtrObj->AddAnimation(L"Default", 0, 30, true, 40.0f);
-		//m_PtrObj->AddAnimation(L"Default", 0, 30, true, 40.0f);
+		m_PtrObj->AddAnimation(L"RunStart", 30, 20, true, 60.0f);
+		m_PtrObj->AddAnimation(L"Running", 50, 60, true, 60.0f);
+		m_PtrObj->AddAnimation(L"RunEnd", 110, 170, true, 60.0f);
+		m_PtrObj->AddAnimation(L"Attack", 110, 60, true, 90.0f);
+		m_PtrObj->AddAnimation(L"Step", 200, 30, true, 60.0f);
 
-		m_PtrObj->ChangeCurrentAnimation(L"Default");
+		m_PtrObj->ChangeCurrentAnimation(L"Step");
 
 		//シャドウマップ描画データの構築
 		m_PtrShadowmapObj = make_shared<ShadowmapObject>();
@@ -259,7 +263,7 @@ namespace basecross {
 			}
 			if (m_isStep == true) {
 				m_Rigidbody->m_Velocity += m_StepVec * 1.3f;
-				m_FrameCount++;
+				m_FrameCount += ElapsedTime;
 			}
 			else {
 				m_Rigidbody->m_Velocity += Direction * 0.5f;
@@ -269,7 +273,7 @@ namespace basecross {
 				m_Rigidbody->m_Velocity.z = TempVelo.y;
 			}
 		}
-		if (m_FrameCount >= 10.0f) {
+		if (m_FrameCount >= 0.16f) {
 			m_isStep = false;
 			m_FrameCount = 0.0f;
 		}

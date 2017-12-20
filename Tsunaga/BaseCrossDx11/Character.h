@@ -686,6 +686,8 @@ namespace basecross {
 		wstring m_MeshResName;
 		//テクスチャリソース名
 		wstring m_TextureResName;
+		//デフォルトのアニメーション
+		wstring m_DefaultAnimation;
 		//メッシュとの差分計算用
 		Mat4x4 m_MeshToTransformMatrix;
 		//スケーリング
@@ -726,9 +728,9 @@ namespace basecross {
 		shared_ptr<Rigidbody> m_Rigidbody;
 
 		//描画データ
-		shared_ptr<SimpleDrawObject> m_PtrObj;
+		shared_ptr<BcDrawObject> m_PtrObj;
 		//描画オブジェクト(weak_ptr)
-		weak_ptr<SimplePNTStaticRenderer2> m_Renderer;
+		weak_ptr<BcPNTBoneModelRenderer> m_Renderer;
 		//シャドウマップ用描画データ
 		shared_ptr<ShadowmapObject> m_PtrShadowmapObj;
 		//シャドウマップ描画オブジェクト(weak_ptr)
@@ -761,7 +763,7 @@ namespace basecross {
 		//--------------------------------------------------------------------------------------
 		EnemyObject(const shared_ptr<Stage>& StagePtr,
 			const shared_ptr<GameObject>& ParentPtr, const wstring& MeshResName,
-			const wstring& TextureResName, const Vec3& Scale, const Quat& Qt, const Vec3& Pos,
+			const wstring& TextureResName, const wstring& DefaultAnimation, const Vec3& Scale, const Quat& Qt, const Vec3& Pos,
 			bool OwnShadowActive);
 		//--------------------------------------------------------------------------------------
 		/*!
@@ -987,7 +989,7 @@ namespace basecross {
 		//--------------------------------------------------------------------------------------
 		NeedleEnemy(const shared_ptr<Stage>& StagePtr,
 			const shared_ptr<GameObject>& ParentPtr, const wstring& MeshResName,
-			const wstring& TextureResName, const Vec3& Scale, const Quat& Qt, const Vec3& Pos,
+			const wstring& TextureResName, const wstring& DefaultAnimation, const Vec3& Scale, const Quat& Qt, const Vec3& Pos,
 			bool OwnShadowActive);
 		//--------------------------------------------------------------------------------------
 		/*!
@@ -1029,7 +1031,7 @@ namespace basecross {
 		//--------------------------------------------------------------------------------------
 		ShootEnemy(const shared_ptr<Stage>& StagePtr,
 			const shared_ptr<GameObject>& ParentPtr, const wstring& MeshResName,
-			const wstring& TextureResName, const Vec3& Scale, const Quat& Qt, const Vec3& Pos,
+			const wstring& TextureResName, const wstring& DefaultAnimation, const Vec3& Scale, const Quat& Qt, const Vec3& Pos,
 			bool OwnShadowActive);
 		//--------------------------------------------------------------------------------------
 		/*!
@@ -1236,7 +1238,7 @@ namespace basecross {
 		//--------------------------------------------------------------------------------------
 		BossEnemy(const shared_ptr<Stage>& StagePtr,
 			const shared_ptr<GameObject>& ParentPtr, const wstring& MeshResName,
-			const wstring& TextureResName, const Vec3& Scale, const Quat& Qt, const Vec3& Pos,
+			const wstring& TextureResName, const wstring& DefaultAnimation, const Vec3& Scale, const Quat& Qt, const Vec3& Pos,
 			bool OwnShadowActive);
 		//--------------------------------------------------------------------------------------
 		/*!
@@ -1282,7 +1284,7 @@ namespace basecross {
 		//--------------------------------------------------------------------------------------
 		AngelEnemy(const shared_ptr<Stage>& StagePtr,
 			const shared_ptr<GameObject>& ParentPtr, const wstring& MeshResName,
-			const wstring& TextureResName, const Vec3& Scale, const Quat& Qt, const Vec3& Pos,
+			const wstring& TextureResName, const wstring& DefaultAnimation, const Vec3& Scale, const Quat& Qt, const Vec3& Pos,
 			bool OwnShadowActive);
 		//--------------------------------------------------------------------------------------
 		/*!
@@ -1314,7 +1316,7 @@ namespace basecross {
 		//--------------------------------------------------------------------------------------
 		CR_BossEnemy(const shared_ptr<Stage>& StagePtr,
 			const shared_ptr<GameObject>& ParentPtr, const wstring& MeshResName,
-			const wstring& TextureResName, const Vec3& Scale, const Quat& Qt, const Vec3& Pos,
+			const wstring& TextureResName, const wstring& DefaultAnimation, const Vec3& Scale, const Quat& Qt, const Vec3& Pos,
 			bool OwnShadowActive);
 		//--------------------------------------------------------------------------------------
 		/*!
@@ -1354,7 +1356,7 @@ namespace basecross {
 		//--------------------------------------------------------------------------------------
 		LD_BossEnemy(const shared_ptr<Stage>& StagePtr,
 			const shared_ptr<GameObject>& ParentPtr, const wstring& MeshResName,
-			const wstring& TextureResName, const Vec3& Scale, const Quat& Qt, const Vec3& Pos,
+			const wstring& TextureResName, const wstring& DefaultAnimation, const Vec3& Scale, const Quat& Qt, const Vec3& Pos,
 			bool OwnShadowActive);
 		//--------------------------------------------------------------------------------------
 		/*!

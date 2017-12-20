@@ -818,12 +818,13 @@ namespace basecross {
 
 	EnemyObject::EnemyObject(const shared_ptr<Stage>& StagePtr,
 		const shared_ptr<GameObject>& ParentPtr, const wstring& MeshResName,
-		const wstring& TextureResName, const Vec3& Scale, const Quat& Qt, const Vec3& Pos,
+		const wstring& TextureResName, const wstring& DefaultAnimation, const Vec3& Scale, const Quat& Qt, const Vec3& Pos,
 		bool OwnShadowActive) :
 		GameObject(StagePtr),
 		m_ParentPtr(ParentPtr),
 		m_MeshResName(MeshResName),
 		m_TextureResName(TextureResName),
+		m_DefaultAnimation(DefaultAnimation),
 		m_Scale(Scale),
 		m_Qt(Qt),
 		m_Pos(Pos),
@@ -880,13 +881,21 @@ namespace basecross {
 
 		auto TexPtr = App::GetApp()->GetResource<TextureResource>(m_TextureResName);
 		//描画データの構築
-		m_PtrObj = make_shared<SimpleDrawObject>();
+		m_PtrObj = make_shared<BcDrawObject>();
 		m_PtrObj->m_MeshRes = MeshPtr;
 		m_PtrObj->m_TextureRes = TexPtr;
 		m_PtrObj->m_WorldMatrix = World;
 		m_PtrObj->m_Camera = GetStage<Stage>()->GetCamera();
 		m_PtrObj->m_OwnShadowmapActive = m_OwnShadowActive;
 		m_PtrObj->m_ShadowmapUse = true;
+		//m_PtrObj->m_BlendState = BlendState::AlphaBlend;
+		//m_PtrObj->m_RasterizerState = RasterizerState::DoubleDraw;
+
+		m_PtrObj->BoneInit();
+		m_PtrObj->AddAnimation(L"30frame", 0, 30, true, 30.0f);
+		m_PtrObj->AddAnimation(L"NonMove", 0, 1, true, 30.0f);
+		m_PtrObj->AddAnimation(L"Attack", 8, 20, false, 45.0f);
+		m_PtrObj->ChangeCurrentAnimation(m_DefaultAnimation);
 
 		//シャドウマップ描画データの構築
 		m_PtrShadowmapObj = make_shared<ShadowmapObject>();
@@ -953,6 +962,8 @@ namespace basecross {
 	}
 
 	void EnemyObject::OnUpdate() {
+		float ElapsedTime = App::GetApp()->GetElapsedTime();
+		m_PtrObj->UpdateAnimation(ElapsedTime);
 		//ステートマシン更新
 		m_StateMachine->Update();
 
@@ -1005,7 +1016,7 @@ namespace basecross {
 		m_PtrObj->m_Camera = GetStage<Stage>()->GetCamera();
 		auto shptr = m_Renderer.lock();
 		if (!shptr) {
-			shptr = GetStage<Stage>()->FindTagGameObject<SimplePNTStaticRenderer2>(L"SimplePNTStaticRenderer2");
+			shptr = GetStage<Stage>()->FindTagGameObject<BcPNTBoneModelRenderer>(L"BcPNTBoneModelRenderer");
 			m_Renderer = shptr;
 		}
 		shptr->AddDrawObject(m_PtrObj);
@@ -1120,14 +1131,14 @@ namespace basecross {
 			float dis = ToPosVec.length();
 
 			// 突進して1.5秒たったら・・・・
-			if (m_FrameCount > m_StopTime * 1.5f * 60.0f)
+			if (m_FrameCount > m_StopTime * 1.5f)
 			{
 				m_Tackle = false;
 				m_FrameCount = 0.0f;
 				m_TargetPos = Vec3(0.0f, 0.0f, 0.0f);
 			}
 			// 止まりはじめ
-			else if (m_FrameCount > m_StopTime * 60.0f && m_Tackle == false)
+			else if (m_FrameCount > m_StopTime && m_Tackle == false)
 			{
 				m_Tackle = true;
 				if (m_TargetPos == Vec3(0.0f, 0.0f, 0.0f)) {
@@ -1144,7 +1155,7 @@ namespace basecross {
 				Tag *= m_TackleSpeed;
 				m_Rigidbody->m_Pos.y = m_Scale.y / 2.0f;
 				m_Rigidbody->m_Velocity = Tag;
-				m_FrameCount++;
+				m_FrameCount += ElapsedTime;
 				return;
 			}
 
@@ -1154,12 +1165,12 @@ namespace basecross {
 				if (m_FrameCount >= 1.0f)
 				{
 					m_Rigidbody->m_Velocity *= 0.7f;
-					m_FrameCount++;
+					m_FrameCount += ElapsedTime;
 				}
 				// プレイヤーとエネミーの距離が近くなった時の処理
 				else if (dis <= m_SearchDis)
 				{
-					m_FrameCount++;
+					m_FrameCount += ElapsedTime;
 					//fireの送出
 					auto FirePtr = GetStage<GameStage>()->FindTagGameObject<AttackSigns>(L"AttackSigns");
 					Vec3 Emitter = m_Rigidbody->m_Pos;
@@ -1180,6 +1191,7 @@ namespace basecross {
 		Vec3 Temp = m_Rigidbody->m_Velocity;
 		Temp.normalize();
 		float ToAngle = atan2(Temp.x, Temp.z);
+
 		Quat Qt;
 		Qt.rotationRollPitchYawFromVector(Vec3(0, ToAngle, 0));
 		Qt.normalize();
@@ -1336,9 +1348,9 @@ namespace basecross {
 
 	NeedleEnemy::NeedleEnemy(const shared_ptr<Stage>& StagePtr, const shared_ptr<GameObject>& ParentPtr, 
 		const wstring& MeshResName,
-		const wstring & TextureResName, const Vec3 & Scale, 
+		const wstring & TextureResName, const wstring& DefaultAnimation, const Vec3 & Scale,
 		const Quat & Qt, const Vec3 & Pos, bool OwnShadowActive) :
-		EnemyObject(StagePtr, ParentPtr,MeshResName ,TextureResName, Scale,Qt,Pos, OwnShadowActive)
+		EnemyObject(StagePtr, ParentPtr,MeshResName ,TextureResName, DefaultAnimation, Scale,Qt,Pos, OwnShadowActive)
 	{
 		AddTag(L"Red");
 	}
@@ -1410,10 +1422,10 @@ namespace basecross {
 	//--------------------------------------------------------------------------------------
 	ShootEnemy::ShootEnemy(const shared_ptr<Stage>& StagePtr, const shared_ptr<GameObject>& ParentPtr, 
 		const wstring& MeshResName,
-		const wstring & TextureResName,
+		const wstring & TextureResName, const wstring& DefaultAnimation,
 		const Vec3 & Scale, const Quat & Qt, 
 		const Vec3 & Pos, bool OwnShadowActive):
-		EnemyObject(StagePtr, ParentPtr, MeshResName,TextureResName, Scale, Qt, Pos, OwnShadowActive)
+		EnemyObject(StagePtr, ParentPtr, MeshResName,TextureResName, DefaultAnimation, Scale, Qt, Pos, OwnShadowActive)
 	{
 		m_Speed = 1.0f;
 		m_SearchDis = 5.0;
@@ -1435,7 +1447,7 @@ namespace basecross {
 	void ShootEnemy::OppositionBehavior() {
 		float ElapsedTime = App::GetApp()->GetElapsedTime();
 		auto shptr = m_ParentPtr.lock();
-		//親のワールド行列を取得する変数
+
 		Mat4x4 ParMat;
 		if (shptr) {
 			//行列取得用のインターフェイスを持ってるかどうか
@@ -1458,9 +1470,15 @@ namespace basecross {
 			//距離を求める
 			float dis = ToPosVec.length();
 
-			// 突進して1.5秒たったら・・・・
-			if (m_FrameCount > m_StopTime * 1.5f * 60.0f)
-			{
+			//移動する処理
+			ToPosVec.normalize();
+			ToPosVec *= m_Speed;
+			m_Rigidbody->m_Velocity = ToPosVec;
+			m_Rigidbody->m_Pos.y = m_Scale.y / 2.0f;
+
+
+			if (m_StopTime < m_FrameCount) {
+				//球を飛ばす処理
 				vector<shared_ptr<GameObject>> ShootVec;
 				GetStage<GameStage>()->FindTagGameObjectVec(L"Bullet", ShootVec);
 				for (auto v : ShootVec) {
@@ -1469,78 +1487,41 @@ namespace basecross {
 						bool nowShooting = Ptr->GetIsShoot();
 						if (nowShooting == false)
 						{
-							Ptr->SetPosition(ToPosVec*0.25f + m_Rigidbody->m_Pos);
-							Ptr->Wakeup(Vec3(0.f, 0.f, 0.f), ToPosVec.normalize());
-
-							m_Tackle = false;
+							m_PtrObj->ChangeCurrentAnimation(L"Attack");
+							Ptr->Wakeup(ToPosVec * 0.1f + m_Rigidbody->m_Pos, ToPosVec.normalize());
 							m_FrameCount = 0.0f;
-							m_TargetPos = Vec3(0.0f, 0.0f, 0.0f);
 							return;
-						}						
+						}
 					}
 				}
-				//	MessageBox(NULL, L"〇〇飛ばしたい", L" ", MB_YESNO);
-				
 			}
-			// 止まりはじめ
-			else if (m_FrameCount > m_StopTime * 60.0f && m_Tackle == false)
+
+			//遅くする
+			if (m_FrameCount > 0.0f) {
+				m_FrameCount += ElapsedTime;
+				m_Rigidbody->m_Velocity *= 0.01f;
+			}
+			// プレイヤーとエネミーの距離が近くなった時の処理
+			else if (dis <= m_SearchDis)
 			{
-				m_Tackle = true;
-				if (m_TargetPos == Vec3(0.0f, 0.0f, 0.0f)) {
-					m_TargetPos = toPos;
-					m_TackleStart = m_Rigidbody->m_Pos;
-				}
+				m_FrameCount += ElapsedTime;
+				//サインの送出
+				auto FirePtr = GetStage<GameStage>()->FindTagGameObject<AttackSigns>(L"AttackSigns");
+				Vec3 Emitter = m_Rigidbody->m_Pos;
+				Emitter.y -= 0.125f;
+				FirePtr->InsertSigns(Emitter);
 			}
 
-			// 突進の処理
-			if (m_Tackle == true)
-			{
-				Vec3 Tag = m_TargetPos - m_TackleStart;
-				Tag.normalize();
-				Tag = Vec3(0.0f, 0.0f, 0.0f);
-				m_Rigidbody->m_Velocity = Tag;
-				m_FrameCount++;
-				return;
-			}
-
-			// エネミー移動処理
-			if (m_Tackle == false)
-			{
-				if (m_FrameCount >= 1.0f)
-				{
-					m_Rigidbody->m_Velocity *= 0.7f;
-					m_FrameCount++;
-				}
-				// プレイヤーとエネミーの距離が近くなった時の処理
-				else if (dis <= m_SearchDis)
-				{
-					m_FrameCount++;
-					//fireの送出
-					auto FirePtr = GetStage<GameStage>()->FindTagGameObject<AttackSigns>(L"AttackSigns");
-					Vec3 Emitter = m_Rigidbody->m_Pos;
-					Emitter.y -= 0.125f;
-					FirePtr->InsertSigns(Emitter);
-				}
-
-				// プレイヤーに向かう処理
-				else
-				{
-					ToPosVec.normalize();
-					ToPosVec *= m_Speed;
-					m_Rigidbody->m_Velocity = ToPosVec;
-					m_Rigidbody->m_Pos.y = m_Scale.y / 2.0f;
-
-				}
-			}
+			//回転の処理
+			Vec3 Temp = m_Rigidbody->m_Velocity;
+			Temp.normalize();
+			float ToAngle = atan2(Temp.x, Temp.z);
+			Quat Qt;
+			Qt.rotationRollPitchYawFromVector(Vec3(0, ToAngle, 0));
+			Qt.normalize();
+			//現在と目標を補間
+			m_Rigidbody->m_Quat = XMQuaternionSlerp(m_Rigidbody->m_Quat, Qt, 0.1f);
 		}
-		Vec3 Temp = m_Rigidbody->m_Velocity;
-		Temp.normalize();
-		float ToAngle = atan2(Temp.x, Temp.z);
-		Quat Qt;
-		Qt.rotationRollPitchYawFromVector(Vec3(0, ToAngle, 0));
-		Qt.normalize();
-		//現在と目標を補間
-		m_Rigidbody->m_Quat = XMQuaternionSlerp(m_Rigidbody->m_Quat, Qt, 0.1f);
 	}
 
 	void ShootEnemy::OnUpdate() {
@@ -1552,8 +1533,6 @@ namespace basecross {
 	void ShootEnemy::UpdateBehavior() {
 
 		FriendsBehavior();
-
-		
 
 		float ElapsedTime = App::GetApp()->GetElapsedTime();
 		auto shptr = m_ParentPtr.lock();
@@ -1606,7 +1585,7 @@ namespace basecross {
 			);
 
 
-			if (m_FrameCount > 60.0f) {
+			if (m_FrameCount > 1.0f) {
 				vector<shared_ptr<GameObject>> ShootVec;
 				GetStage<GameStage>()->FindTagGameObjectVec(L"PlayerBullet", ShootVec);
 				for (auto v : ShootVec) {
@@ -1615,8 +1594,7 @@ namespace basecross {
 						bool nowShooting = Ptr->GetIsShoot();
 						if (nowShooting == false)
 						{
-							Ptr->SetPosition(force * 0.25f + m_Rigidbody->m_Pos);
-							Ptr->Wakeup(Vec3(0.0f, 0.0f, 0.0f), force);
+							Ptr->Wakeup(force * 0.1f + m_Rigidbody->m_Pos, force);
 							m_FrameCount = 0.0f;
 							return;
 						}
@@ -1624,7 +1602,7 @@ namespace basecross {
 				}
 			}
 		}
-		m_FrameCount++;
+		m_FrameCount += ElapsedTime;
 	}
 
 	void ShootEnemy::OnDraw() {
@@ -1644,7 +1622,7 @@ namespace basecross {
 		m_PtrObj->m_Camera = GetStage<Stage>()->GetCamera();
 		auto shptr = m_Renderer.lock();
 		if (!shptr) {
-			shptr = GetStage<Stage>()->FindTagGameObject<SimplePNTStaticRenderer2>(L"SimplePNTStaticRenderer2");
+			shptr = GetStage<Stage>()->FindTagGameObject<BcPNTBoneModelRenderer>(L"BcPNTBoneModelRenderer");
 			m_Renderer = shptr;
 		}
 		shptr->AddDrawObject(m_PtrObj);
@@ -1791,8 +1769,8 @@ namespace basecross {
 
 	void BulletObject::Wakeup(const Vec3 & Position, const Vec3 & Velocity)
 	{
+		SetPosition(Position);
 		m_Rigidbody->m_Velocity = Velocity * m_ShootSpeed;
-
 		IsShoot = true;
 	}
 
@@ -1804,9 +1782,9 @@ namespace basecross {
 	BossEnemy::BossEnemy(const shared_ptr<Stage>& StagePtr, 
 		const shared_ptr<GameObject>& ParentPtr,
 		const wstring& MeshResName,
-		const wstring & TextureResName, const Vec3 & Scale,
+		const wstring & TextureResName, const wstring& DefaultAnimation, const Vec3 & Scale,
 		const Quat & Qt, const Vec3 & Pos, bool OwnShadowActive):
-	EnemyObject(StagePtr, ParentPtr, MeshResName,TextureResName, Scale, Qt, Pos, OwnShadowActive)
+	EnemyObject(StagePtr, ParentPtr, MeshResName,TextureResName, DefaultAnimation, Scale, Qt, Pos, OwnShadowActive)
 	{
 		m_HP = 10.0f;
 		m_Speed = 0.3f;
@@ -1848,7 +1826,7 @@ namespace basecross {
 			float dis = ToPosVec.length();
 
 			// 突進して1.5秒たったら・・・・
-			if (m_FrameCount > m_StopTime * 1.5f * 60.0f)
+			if (m_FrameCount > m_StopTime * 1.5f)
 			{
 				vector<shared_ptr<GameObject>> BossVec;
 				GetStage<GameStage>()->FindTagGameObjectVec(L"BossBullet", BossVec);
@@ -1864,7 +1842,7 @@ namespace basecross {
 				m_TargetPos = Vec3(0.0f, 0.0f, 0.0f);
 			}
 			// 止まりはじめ
-			else if (m_FrameCount > m_StopTime * 60.0f && m_Tackle == false)
+			else if (m_FrameCount > m_StopTime && m_Tackle == false)
 			{
 				m_Tackle = true;
 				if (m_TargetPos == Vec3(0.0f, 0.0f, 0.0f)) {
@@ -1881,22 +1859,22 @@ namespace basecross {
 				Tag = Vec3(0.0f, 0.0f, 0.0f);
 				m_Rigidbody->m_Pos.y = m_Scale.y / 2.0f + 3.0f;
 				m_Rigidbody->m_Velocity = Tag;
-				m_FrameCount++;
+				m_FrameCount += ElapsedTime;
 				return;
 			}
 
 			// エネミー移動処理
 			if (m_Tackle == false)
 			{
-				if (m_FrameCount >= 1.0f)
+				if (m_FrameCount > 0.0f)
 				{
 					m_Rigidbody->m_Velocity *= 0.7f;
-					m_FrameCount++;
+					m_FrameCount += ElapsedTime;
 				}
 				// プレイヤーとエネミーの距離が近くなった時の処理
 				else if (dis <= m_SearchDis)
 				{
-					m_FrameCount++;
+					m_FrameCount += ElapsedTime;
 					//fireの送出
 					auto FirePtr = GetStage<GameStage>()->FindTagGameObject<AttackSigns>(L"AttackSigns");
 					Vec3 Emitter = m_Rigidbody->m_Pos;
@@ -1930,9 +1908,9 @@ namespace basecross {
 	//--------------------------------------------------------------------------------------
 	AngelEnemy::AngelEnemy(const shared_ptr<Stage>& StagePtr, 
 		const shared_ptr<GameObject>& ParentPtr, const wstring & MeshResName, 
-		const wstring & TextureResName, const Vec3 & Scale, const Quat & Qt,
+		const wstring & TextureResName, const wstring& DefaultAnimation, const Vec3 & Scale, const Quat & Qt,
 		const Vec3 & Pos, bool OwnShadowActive) :
-		EnemyObject(StagePtr, ParentPtr, MeshResName, TextureResName, Scale, Qt, Pos, OwnShadowActive)
+		EnemyObject(StagePtr, ParentPtr, MeshResName, TextureResName, DefaultAnimation, Scale, Qt, Pos, OwnShadowActive)
 	{
 		m_Speed = 0.8f;
 		AddTag(L"Green");
@@ -1946,9 +1924,9 @@ namespace basecross {
 	//--------------------------------------------------------------------------------------
 	CR_BossEnemy::CR_BossEnemy(const shared_ptr<Stage>& StagePtr, 
 		const shared_ptr<GameObject>& ParentPtr, const wstring & MeshResName, 
-		const wstring & TextureResName, const Vec3 & Scale, const Quat & Qt,
+		const wstring & TextureResName, const wstring& DefaultAnimation, const Vec3 & Scale, const Quat & Qt,
 		const Vec3 & Pos, bool OwnShadowActive) :
-		EnemyObject(StagePtr, ParentPtr, MeshResName, TextureResName, Scale, Qt, Pos, OwnShadowActive)
+		EnemyObject(StagePtr, ParentPtr, MeshResName, TextureResName, DefaultAnimation, Scale, Qt, Pos, OwnShadowActive)
 	{
 		m_Speed = 1.5f;
 		m_HP = 15.0f;
@@ -1963,9 +1941,9 @@ namespace basecross {
 	//--------------------------------------------------------------------------------------
 	LD_BossEnemy::LD_BossEnemy(const shared_ptr<Stage>& StagePtr, 
 		const shared_ptr<GameObject>& ParentPtr, const wstring & MeshResName, 
-		const wstring & TextureResName, const Vec3 & Scale, const Quat & Qt, 
+		const wstring & TextureResName, const wstring& DefaultAnimation, const Vec3 & Scale, const Quat & Qt,
 		const Vec3 & Pos, bool OwnShadowActive) :
-		EnemyObject(StagePtr, ParentPtr, MeshResName, TextureResName, Scale, Qt, Pos, OwnShadowActive)
+		EnemyObject(StagePtr, ParentPtr, MeshResName, TextureResName,DefaultAnimation, Scale, Qt, Pos, OwnShadowActive)
 	{
 		m_Speed = 1.5f;
 		m_HP = 5.0f;

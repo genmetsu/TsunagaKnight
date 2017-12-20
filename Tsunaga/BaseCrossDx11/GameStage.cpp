@@ -122,7 +122,8 @@ namespace basecross {
 				Par,
 				L"NEEDLE_MESH",
 				L"NEEDLE_TX",
-				Vec3(0.25f, 0.25f, 0.25f),
+				L"30frame",
+				Vec3(0.3f, 0.3f, 0.3f),
 				Quat(),
 				Vec3((float)rand()/ 32767 * 20.0f - 10.0f, 0.125f, 80.0f - (float)rand() / 32767 * 20.0f),
 				false);
@@ -134,6 +135,7 @@ namespace basecross {
 				Par,
 				L"GUN_MESH",
 				L"GUN_TX",
+				L"NonMove",
 				Vec3(0.25f, 0.25f, 0.25f),
 				Quat(),
 				Vec3((float)rand() / 32767 * 20.0f - 10.0f, 0.125f, 80.0f - (float)rand() / 32767 * 20.0f),
@@ -161,6 +163,7 @@ namespace basecross {
 				Par,
 				L"NEEDLE_MESH",
 				L"NEEDLE_TX",
+				L"30frame",
 				Vec3(3.0f, 3.0f, 3.0f),
 				Quat(),
 				Vec3(0.0f, 3.0f, 80.0f),
@@ -182,6 +185,7 @@ namespace basecross {
 				Par,
 				L"ANGEL_MESH",
 				L"ANGEL_TX",
+				L"30frame",
 				Vec3(0.25f, 0.25f, 0.25f),
 				Quat(),
 				Vec3((float)rand() / 32767 * 20.0f - 10.0f, 0.125f, 80.0f - (float)rand() / 32767 * 20.0f),
@@ -196,6 +200,7 @@ namespace basecross {
 					Par,
 					L"DEFAULT_SPHERE",
 					L"Brown2_TX",
+					L"30frame",
 					Vec3(2.0f, 2.0f, 2.0f),
 					Quat(),
 					Vec3((float)rand() / 32767 * 20.0f - 10.0f, 0.125f, 80.0f - (float)rand() / 32767 * 20.0f),
@@ -209,6 +214,7 @@ namespace basecross {
 					Par,
 					L"DEFAULT_SPHERE",
 					L"Blue_TX",
+					L"30frame",
 					Vec3(2.0f, 2.0f, 2.0f),
 					Quat(),
 					Vec3((float)rand() / 32767 * 20.0f - 10.0f, 0.125f, 80.0f - (float)rand() / 32767 * 20.0f),
@@ -251,7 +257,7 @@ namespace basecross {
 
 		m_AudioObjectPtr = ObjectFactory::Create<MultiAudioObject>();
 		m_AudioObjectPtr->AddAudioResource(L"Nanika");
-		m_AudioObjectPtr->Start(L"Nanika", XAUDIO2_LOOP_INFINITE, 0.5f);
+		m_AudioObjectPtr->Start(L"Nanika", XAUDIO2_LOOP_INFINITE, 0.1f);
 
 	}
 
