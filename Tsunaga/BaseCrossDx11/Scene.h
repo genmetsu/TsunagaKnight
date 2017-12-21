@@ -124,7 +124,7 @@ namespace basecross {
 	//	マルチライト
 	//--------------------------------------------------------------------------------------
 	struct MultiLights {
-		Vec3 m_Directional[1];	//ライトの向き
+		Vec3 m_Directional[3];	//ライトの向き
 		Col4 m_DiffuseColor[3];	//ディフィーズ色
 		Col4 m_SpecularColor[3];	//スペキュラー色
 		Col4 m_AmbientLightColor;			//アンビエント色
@@ -132,7 +132,7 @@ namespace basecross {
 		MultiLights()
 		{
 			SetDefaultLighting();
-			m_MainColorIndex = 1;
+			m_MainColorIndex = 2;
 		}
 		~MultiLights() {}
 		//--------------------------------------------------------------------------------------
@@ -142,11 +142,11 @@ namespace basecross {
 		*/
 		//--------------------------------------------------------------------------------------
 		void SetDefaultLighting() {
-			static const Vec3 defaultDirections[1] =
+			static const Vec3 defaultDirections[3] =
 			{
 				{ -0.5265408f, -0.5735765f, -0.6275069f },
-				/*{ 0.7198464f,  0.3420201f,  0.6040227f },
-				{ 0.4545195f, -0.7660444f,  0.4545195f },*/
+				{ 0.7198464f,  0.3420201f,  0.6040227f },
+				{ 0.4545195f, -0.7660444f,  0.4545195f },
 			};
 			static const Col4 defaultDiffuse[3] =
 			{
@@ -164,10 +164,9 @@ namespace basecross {
 
 
 			m_AmbientLightColor = Col4(0.05333332f, 0.09882354f, 0.1819608f, 0.0f);
-			m_Directional[0] = defaultDirections[0];
-			m_Directional[0].normalize();
 			for (size_t i = 0; i < 3; i++) {
-				
+				m_Directional[i] = defaultDirections[i];
+				m_Directional[i].normalize();
 				m_DiffuseColor[i] = defaultDiffuse[i];
 				m_SpecularColor[i] = defaultSpecular[i];
 			}

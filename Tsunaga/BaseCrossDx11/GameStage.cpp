@@ -140,7 +140,7 @@ namespace basecross {
 				Quat(),
 				Vec3((float)rand() / 32767 * 20.0f - 10.0f, 0.125f, 80.0f - (float)rand() / 32767 * 20.0f),
 				false);
-			for (int j = 0;j < 3;j++) {
+			for (int j = 0;j < 2;j++) {
 				AddGameObject<BulletObject>(
 					L"SPARK_TX",
 					Vec3(0.125f, 0.125f, 0.125f),

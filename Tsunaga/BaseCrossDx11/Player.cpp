@@ -119,12 +119,13 @@ namespace basecross {
 		m_PtrObj->BoneInit();
 		m_PtrObj->AddAnimation(L"Default", 0, 30, true, 40.0f);
 		m_PtrObj->AddAnimation(L"RunStart", 30, 20, true, 60.0f);
-		m_PtrObj->AddAnimation(L"Running", 50, 60, true, 60.0f);
-		m_PtrObj->AddAnimation(L"RunEnd", 110, 170, true, 60.0f);
+		m_PtrObj->AddAnimation(L"Running", 50, 40, true, 60.0f);
+		m_PtrObj->AddAnimation(L"RunEnd", 90, 20, true, 60.0f);
 		m_PtrObj->AddAnimation(L"Attack", 110, 60, true, 90.0f);
+		m_PtrObj->AddAnimation(L"Damage", 170, 30, true, 60.0f);
 		m_PtrObj->AddAnimation(L"Step", 200, 30, true, 60.0f);
 
-		m_PtrObj->ChangeCurrentAnimation(L"Step");
+		m_PtrObj->ChangeCurrentAnimation(L"Running");
 
 		//シャドウマップ描画データの構築
 		m_PtrShadowmapObj = make_shared<ShadowmapObject>();

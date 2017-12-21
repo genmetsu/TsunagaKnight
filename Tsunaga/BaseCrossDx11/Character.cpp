@@ -702,15 +702,15 @@ namespace basecross {
 		m_Rigidbody = PtrGameStage->AddRigidbody(body);
 
 		//メッシュの取得
-
-		//vector<VertexPositionNormalTexture> vertices;
-		//vector<uint16_t> indices;
-		//MeshUtill::CreateSphere(1.0f, 18, vertices, indices);
-		////メッシュの作成（変更できない）
-		//auto MeshPtr = MeshResource::CreateMeshResource(vertices, indices, false);
-
 		auto MeshPtr = App::GetApp()->GetResource<MeshResource>(L"CANNON_MESH");
 
+		//メッシュとトランスフォームの差分の設定
+		m_MeshToTransformMatrix.affineTransformation(
+			Vec3(1.5f, 1.5f, 1.5f),
+			Vec3(0.0f, 0.0f, 0.3f),
+			Vec3(0.0f, XM_PI, 0.0f),
+			Vec3(0.0f, 0.0f, 0.0f)
+		);
 
 		//行列の定義
 		Mat4x4 World;
@@ -753,6 +753,8 @@ namespace basecross {
 			m_Rigidbody->m_Quat,
 			m_Rigidbody->m_Pos
 		);
+		//差分を計算
+		World = m_MeshToTransformMatrix * World;
 		//描画データの行列をコピー
 		m_PtrShadowmapObj->m_WorldMatrix = World;
 		m_PtrShadowmapObj->m_Camera = GetStage<Stage>()->GetCamera();
@@ -772,15 +774,6 @@ namespace basecross {
 			Vec3(0, 0, 0),
 			m_Rigidbody->m_Quat,
 			m_Rigidbody->m_Pos
-		);
-
-
-		//メッシュとトランスフォームの差分の設定
-		m_MeshToTransformMatrix.affineTransformation(
-			Vec3(1.5f, 1.5f, 1.5f),
-			Vec3(0.0f, 0.0f, 0.3f),
-			Vec3(0.0f, XM_PI, 0.0f),
-			Vec3(0.0f, 0.0f, 0.0f)
 		);
 
 		//差分を計算
@@ -878,6 +871,14 @@ namespace basecross {
 		);
 		//ターゲット座標の初期化
 		m_TargetPos = Vec3(0.0f, 0.0f, 0.0f);
+
+		//メッシュとトランスフォームの差分の設定
+		m_MeshToTransformMatrix.affineTransformation(
+			Vec3(1.0f, 1.0f, 1.0f),
+			Vec3(0.0f, 0.0f, 0.0f),
+			Vec3(0.0f, XM_PI, 0.0f),
+			Vec3(0.0f, 0.0f, 0.0f)
+		);
 
 		auto TexPtr = App::GetApp()->GetResource<TextureResource>(m_TextureResName);
 		//描画データの構築
@@ -999,14 +1000,6 @@ namespace basecross {
 			Vec3(0, 0, 0),
 			m_Rigidbody->m_Quat,
 			m_Rigidbody->m_Pos
-		);
-
-		//メッシュとトランスフォームの差分の設定
-		m_MeshToTransformMatrix.affineTransformation(
-			Vec3(1.0f, 1.0f, 1.0f),
-			Vec3(0.0f, 0.0f, 0.0f),
-			Vec3(0.0f, XM_PI, 0.0f),
-			Vec3(0.0f, 0.0f, 0.0f)
 		);
 
 		//差分を計算
@@ -1201,8 +1194,6 @@ namespace basecross {
 
 	void EnemyObject::CheckHealth() {
 		if (m_HP <= 0.0f) {
-			/*auto TexPtr = App::GetApp()->GetResource<TextureResource>(L"TRACE_TX");
-			m_PtrObj->m_TextureRes = TexPtr;*/
 			if (m_isDead == false) {
 				m_isDead = true;
 				m_Rigidbody->m_IsCollisionActive = false;
@@ -1213,9 +1204,7 @@ namespace basecross {
 	}
 
 	void EnemyObject::CheckParent() {
-		//auto GM = GameManager::getInstance();
-		//int num = GM->GetFriendsNum();
-
+		
 	}
 
 	void EnemyObject::ComplianceStartBehavior() {
@@ -1223,14 +1212,12 @@ namespace basecross {
 		m_PlayerLocalMatrix.affineTransformation(
 			m_Rigidbody->m_Scale,
 			Vec3(0, 0, 0),
-			//Quat(Vec3(0, 1.0f, 0), XM_PIDIV2),
 			Quat(),
 			Vec3(0, 0, -0.4f)
 		);
 		m_ChildLocalMatrix.affineTransformation(
 			m_Rigidbody->m_Scale,
 			Vec3(0, 0, 0),
-			//Quat(Vec3(0, 1.0f, 0), XM_PIDIV2),
 			Quat(),
 			Vec3(0, 0, -0.4f)
 		);
@@ -1430,14 +1417,6 @@ namespace basecross {
 		m_Speed = 1.0f;
 		m_SearchDis = 5.0;
 		AddTag(L"Blue");
-
-		//メッシュとトランスフォームの差分の設定
-		m_MeshToTransformMatrix.affineTransformation(
-			Vec3(1.0f, 1.0f, 1.0f),
-			Vec3(0.0f, 0.0f, 0.0f),
-			Vec3(0.0f, XM_PI, 0.0f),
-			Vec3(0.0f, 0.0f, 0.0f)
-		);
 	}
 
 	ShootEnemy::~ShootEnemy()
