@@ -103,6 +103,129 @@ namespace basecross {
 	}
 
 	//--------------------------------------------------------------------------------------
+	///　ステージの大和オブジェクト
+	//--------------------------------------------------------------------------------------
+
+	YamatoStage::YamatoStage(const shared_ptr<Stage>& StagePtr,
+		const wstring& TextureResName, const Vec3& Scale, const Quat& Qt, const Vec3& Pos,
+		bool OwnShadowActive) :
+		GameObject(StagePtr),
+		m_TextureResName(TextureResName),
+		m_Scale(Scale),
+		m_Qt(Qt),
+		m_Pos(Pos),
+		m_OwnShadowActive(OwnShadowActive)
+	{}
+	YamatoStage::~YamatoStage() {}
+
+	void YamatoStage::OnCreate() {
+		//Rigidbodyの初期化
+		auto PtrGameStage = GetStage<GameStage>();
+		Rigidbody body;
+		body.m_Owner = GetThis<GameObject>();
+		body.m_Mass = 1.0f;
+		body.m_Scale = m_Scale;
+		body.m_Quat = m_Qt;
+		body.m_Pos = m_Pos;
+		body.m_CollType = CollType::typeSPHERE;
+		body.m_IsFixed = true;
+		//		body.m_IsDrawActive = true;
+		body.SetToBefore();
+		m_Rigidbody = PtrGameStage->AddRigidbody(body);
+
+		//メッシュの取得
+		auto MeshPtr = App::GetApp()->GetResource<MeshResource>(L"YAMATO_MESH");
+
+		//メッシュとトランスフォームの差分の設定
+		m_MeshToTransformMatrix.affineTransformation(
+			Vec3(1.0f, 1.0f, 1.0f),
+			Vec3(0.0f, 0.0f, 0.0f),
+			Vec3(0.0f, -XM_PIDIV2, 0.0f),
+			Vec3(0.0f, 0.0f, 0.0f)
+		);
+
+		//行列の定義
+		Mat4x4 World;
+		World.affineTransformation(
+			m_Scale,
+			Vec3(0, 0, 0),
+			m_Qt,
+			m_Pos
+		);
+
+		auto TexPtr = App::GetApp()->GetResource<TextureResource>(m_TextureResName);
+		//描画データの構築
+		m_PtrObj = make_shared<BcDrawObject>();
+		m_PtrObj->m_MeshRes = MeshPtr;
+		m_PtrObj->m_TextureRes = TexPtr;
+		m_PtrObj->m_WorldMatrix = World;
+		m_PtrObj->m_Camera = GetStage<Stage>()->GetCamera();
+		m_PtrObj->m_OwnShadowmapActive = m_OwnShadowActive;
+		m_PtrObj->m_ShadowmapUse = true;
+
+		//シャドウマップ描画データの構築
+		m_PtrShadowmapObj = make_shared<ShadowmapObject>();
+		m_PtrShadowmapObj->m_MeshRes = MeshPtr;
+		//描画データの行列をコピー
+		m_PtrShadowmapObj->m_WorldMatrix = World;
+		m_PtrShadowmapObj->m_Camera = GetStage<Stage>()->GetCamera();
+
+	}
+
+	void YamatoStage::OnUpdate() {
+
+	}
+
+	void YamatoStage::OnDrawShadowmap() {
+		//行列の定義
+		Mat4x4 World;
+		World.affineTransformation(
+			m_Rigidbody->m_Scale,
+			Vec3(0, 0, 0),
+			m_Rigidbody->m_Quat,
+			m_Rigidbody->m_Pos
+		);
+		//差分を計算
+		World = m_MeshToTransformMatrix * World;
+		//描画データの行列をコピー
+		m_PtrShadowmapObj->m_WorldMatrix = World;
+		m_PtrShadowmapObj->m_Camera = GetStage<Stage>()->GetCamera();
+		auto shptr = m_ShadowmapRenderer.lock();
+		if (!shptr) {
+			shptr = GetStage<Stage>()->FindTagGameObject<ShadowmapRenderer>(L"ShadowmapRenderer");
+			m_ShadowmapRenderer = shptr;
+		}
+		shptr->AddDrawObject(m_PtrShadowmapObj);
+	}
+
+	void YamatoStage::OnDraw() {
+		//行列の定義
+		Mat4x4 World;
+		World.affineTransformation(
+			m_Rigidbody->m_Scale,
+			Vec3(0, 0, 0),
+			m_Rigidbody->m_Quat,
+			m_Rigidbody->m_Pos
+		);
+
+		//差分を計算
+		World = m_MeshToTransformMatrix * World;
+
+		m_PtrObj->m_WorldMatrix = World;
+		m_PtrObj->m_Camera = GetStage<Stage>()->GetCamera();
+		auto shptr = m_Renderer.lock();
+		if (!shptr) {
+			shptr = GetStage<Stage>()->FindTagGameObject<BcPNTStaticRenderer>(L"BcPNTStaticRenderer");
+			m_Renderer = shptr;
+		}
+		shptr->AddDrawObject(m_PtrObj);
+	}
+
+	Vec3 YamatoStage::GetPosition() {
+		return m_Rigidbody->m_Pos;
+	}
+
+	//--------------------------------------------------------------------------------------
 	//class MultiSpark : public MultiParticle;
 	//用途: 複数のスパーククラス
 	//--------------------------------------------------------------------------------------
