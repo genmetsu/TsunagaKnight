@@ -55,13 +55,20 @@ namespace basecross {
 		//ïΩñ ÇÃçÏê¨
 		Quat Qt;
 		Qt.rotationX(XM_PIDIV2);
-		AddGameObject<SquareObject>(
+		/*AddGameObject<SquareObject>(
 			L"WALL_TX",
 			L"WALL_NORMAL_TX",
 			Vec3(20.0f, 100.0f, 1.0f),
 			Qt,
 			Vec3(0.0f, 0.0f, 40.0f)
-			);
+			);*/
+
+		AddGameObject<YamatoStage>(
+			L"YAMATO_TX",
+			Vec3(4.0f, 4.0f, 4.0f),
+			Quat(),
+			Vec3(0.0f, -12.8f, -20.0f),
+			true);
 
 		//ÉvÉåÉCÉÑÅ[ÇÃçÏê¨
 		//shared_ptr<GameObject> 
