@@ -36,7 +36,6 @@ namespace basecross {
 		float m_FrameCount;
 		//Rigidbodyのshared_ptr
 		shared_ptr<Rigidbody> m_Rigidbody;
-		
 		///描画データ
 		shared_ptr<BcDrawObject> m_PtrObj;
 		//描画オブジェクト(weak_ptr)
@@ -124,11 +123,11 @@ namespace basecross {
 
 		//--------------------------------------------------------------------------------------
 		/*!
-		@brief 回避行動
+		@brief 入力関連の関数
 		@return	なし
 		*/
 		//--------------------------------------------------------------------------------------
-		void Step();
+		void MoveControll();
 
 		//--------------------------------------------------------------------------------------
 		/*!
@@ -145,7 +144,23 @@ namespace basecross {
 		*/
 		//--------------------------------------------------------------------------------------
 		void DefaultBehaviour();
+
+		//--------------------------------------------------------------------------------------
+		/*!
+		@brief ステップのエフェクト
+		@return	なし
+		*/
+		//--------------------------------------------------------------------------------------
+		void PlayerStepEffect();
 		
+		//--------------------------------------------------------------------------------------
+		/*!
+		@brief ステップ中のふるまい
+		@return	なし
+		*/
+		//--------------------------------------------------------------------------------------
+		void StepBehaviour();
+
 		//--------------------------------------------------------------------------------------
 		/*!
 		@brief 攻撃中のふるまい
@@ -180,6 +195,14 @@ namespace basecross {
 
 		//--------------------------------------------------------------------------------------
 		/*!
+		@brief アニメーションの変更
+		@return	なし
+		*/
+		//--------------------------------------------------------------------------------------
+		void ChangeAnimation(wstring animation_key);
+
+		//--------------------------------------------------------------------------------------
+		/*!
 		@brief	ステートマシンを得る
 		@return	ステートマシン
 		*/
@@ -198,6 +221,20 @@ namespace basecross {
 	public:
 		//ステートのインスタンス取得
 		DECLARE_SINGLETON_INSTANCE(DefaultState)
+		virtual void Enter(const shared_ptr<Player>& Obj)override;
+		virtual void Execute(const shared_ptr<Player>& Obj)override;
+		virtual void Exit(const shared_ptr<Player>& Obj)override;
+	};
+
+	//--------------------------------------------------------------------------------------
+	///	攻撃ステート
+	//--------------------------------------------------------------------------------------
+	class PlayerAttackState : public ObjState<Player>
+	{
+		PlayerAttackState() {}
+	public:
+		//ステートのインスタンス取得
+		DECLARE_SINGLETON_INSTANCE(PlayerAttackState)
 		virtual void Enter(const shared_ptr<Player>& Obj)override;
 		virtual void Execute(const shared_ptr<Player>& Obj)override;
 		virtual void Exit(const shared_ptr<Player>& Obj)override;
@@ -228,21 +265,6 @@ namespace basecross {
 	public:
 		//ステートのインスタンス取得
 		DECLARE_SINGLETON_INSTANCE(DamagedState)
-		virtual void Enter(const shared_ptr<Player>& Obj)override;
-		virtual void Execute(const shared_ptr<Player>& Obj)override;
-		virtual void Exit(const shared_ptr<Player>& Obj)override;
-	};
-
-
-	//--------------------------------------------------------------------------------------
-	///	攻撃ステート
-	//--------------------------------------------------------------------------------------
-	class AttackState : public ObjState<Player>
-	{
-		AttackState() {}
-	public:
-		//ステートのインスタンス取得
-		DECLARE_SINGLETON_INSTANCE(AttackState)
 		virtual void Enter(const shared_ptr<Player>& Obj)override;
 		virtual void Execute(const shared_ptr<Player>& Obj)override;
 		virtual void Exit(const shared_ptr<Player>& Obj)override;

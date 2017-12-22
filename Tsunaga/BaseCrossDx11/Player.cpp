@@ -118,14 +118,12 @@ namespace basecross {
 
 		m_PtrObj->BoneInit();
 		m_PtrObj->AddAnimation(L"Default", 0, 30, true, 40.0f);
-		m_PtrObj->AddAnimation(L"RunStart", 30, 20, true, 60.0f);
+		m_PtrObj->AddAnimation(L"RunStart", 30, 20, false, 60.0f);
 		m_PtrObj->AddAnimation(L"Running", 50, 40, true, 60.0f);
-		m_PtrObj->AddAnimation(L"RunEnd", 90, 20, true, 60.0f);
-		m_PtrObj->AddAnimation(L"Attack", 110, 60, true, 90.0f);
-		m_PtrObj->AddAnimation(L"Damage", 170, 30, true, 60.0f);
-		m_PtrObj->AddAnimation(L"Step", 200, 30, true, 60.0f);
-
-		m_PtrObj->ChangeCurrentAnimation(L"Running");
+		m_PtrObj->AddAnimation(L"RunEnd", 90, 20, false, 60.0f);
+		m_PtrObj->AddAnimation(L"Attack", 110, 60, false, 90.0f);
+		m_PtrObj->AddAnimation(L"Damage", 170, 30, false, 60.0f);
+		m_PtrObj->AddAnimation(L"Step", 200, 30, false, 90.0f);
 
 		//シャドウマップ描画データの構築
 		m_PtrShadowmapObj = make_shared<ShadowmapObject>();
@@ -240,31 +238,20 @@ namespace basecross {
 
 	}
 
-	void Player::Step() {
+	void Player::MoveControll() {
 		//前回のターンからの経過時間を求める
 		float ElapsedTime = App::GetApp()->GetElapsedTime();
 		//コントローラの取得
 		auto CntlVec = App::GetApp()->GetInputDevice().GetControlerVec();
 		if (CntlVec[0].bConnected) {
-			//Aボタン
-			if (CntlVec[0].wPressedButtons & XINPUT_GAMEPAD_A && m_isStep == false) {
-				m_isStep = true;
-				m_StepVec = GetMoveVector();
-				m_StepVec.normalize();
-				//エフェクトの再生
-				auto FirePtr = GetStage<GameStage>()->FindTagGameObject<StepEffect>(L"StepEffect");
-				Vec3 Emitter = m_Rigidbody->m_Pos;
-				Emitter.y -= m_Rigidbody->m_Scale.y / 2.0f;;
-				FirePtr->InsertEffect(Emitter);
-			}
 			Vec3 Direction = GetMoveVector();
-			if (length(Direction) < 0.1f) {
+			//Aボタン
+			if (CntlVec[0].wPressedButtons & XINPUT_GAMEPAD_A) {
+				m_StateMachine->ChangeState(StepState::Instance());
+			}
+			else if (length(Direction) < 0.1f) {
 				m_Rigidbody->m_Velocity.x *= 0.8f;
 				m_Rigidbody->m_Velocity.z *= 0.8f;
-			}
-			if (m_isStep == true) {
-				m_Rigidbody->m_Velocity += m_StepVec * 1.3f;
-				m_FrameCount += ElapsedTime;
 			}
 			else {
 				m_Rigidbody->m_Velocity += Direction * 0.5f;
@@ -273,50 +260,49 @@ namespace basecross {
 				m_Rigidbody->m_Velocity.x = TempVelo.x;
 				m_Rigidbody->m_Velocity.z = TempVelo.y;
 			}
+			m_Rigidbody->m_Force += m_Rigidbody->m_Gravity * m_Rigidbody->m_Mass;
 		}
-		if (m_FrameCount >= 0.16f) {
-			m_isStep = false;
-			m_FrameCount = 0.0f;
-		}
-		m_Rigidbody->m_Force += m_Rigidbody->m_Gravity * m_Rigidbody->m_Mass;
 	}
 
 	void Player::Damage(Vec3 EnemyPos) {
 		
 	}
 
+	void Player::ChangeAnimation(wstring animation_key) {
+		m_PtrObj->ChangeCurrentAnimation(animation_key);
+	}
+
 	void Player::DefaultBehaviour() {
-		Step();
 
-		if (m_isStep == false) {
-			//敵との当たり判定
-			vector<shared_ptr<GameObject>> EnemyVec;
-			GetStage<GameStage>()->FindTagGameObjectVec(L"EnemyObject", EnemyVec);
-			for (auto enemy : EnemyVec) {
-				if (enemy) {
-					auto PtrEnemy = dynamic_pointer_cast<EnemyObject>(enemy);
+		MoveControll();
 
-					Vec3 EnemyPos = PtrEnemy->GetPosition();
-					float length = (EnemyPos - m_Rigidbody->m_Pos).length();
+		//敵との当たり判定
+		vector<shared_ptr<GameObject>> EnemyVec;
+		GetStage<GameStage>()->FindTagGameObjectVec(L"EnemyObject", EnemyVec);
+		for (auto enemy : EnemyVec) {
+			if (enemy) {
+				auto PtrEnemy = dynamic_pointer_cast<EnemyObject>(enemy);
 
-					float EnemyRadius = PtrEnemy->GetScale() / 2.0f;
-					float PlayerRadius = m_Rigidbody->m_Scale.x;
+				Vec3 EnemyPos = PtrEnemy->GetPosition();
+				float length = (EnemyPos - m_Rigidbody->m_Pos).length();
 
-					if (length <= EnemyRadius + PlayerRadius) {
-						if (PtrEnemy->GetHP() > 0) {
-							Vec3 Emitter = m_Rigidbody->m_Pos;
-							Emitter.y -= 0.125f;
-							//Sparkの送出
-							auto SparkPtr = GetStage<GameStage>()->FindTagGameObject<MultiSpark>(L"MultiSpark");
-							SparkPtr->InsertSpark(Emitter);
-							//ノックバック方向の設定
-							m_KnockBackVec = m_Rigidbody->m_Pos - EnemyPos;
-							m_KnockBackVec.y = 0.0f;
-							m_KnockBackVec.normalize();
-							//ダメージステートに変更
-							m_StateMachine->ChangeState(DamagedState::Instance());
-							return;
-						}
+				float EnemyRadius = PtrEnemy->GetScale() / 2.0f;
+				float PlayerRadius = m_Rigidbody->m_Scale.x;
+
+				if (length <= EnemyRadius + PlayerRadius) {
+					if (PtrEnemy->GetHP() > 0) {
+						Vec3 Emitter = m_Rigidbody->m_Pos;
+						Emitter.y -= 0.125f;
+						//Sparkの送出
+						auto SparkPtr = GetStage<GameStage>()->FindTagGameObject<MultiSpark>(L"MultiSpark");
+						SparkPtr->InsertSpark(Emitter);
+						//ノックバック方向の設定
+						m_KnockBackVec = m_Rigidbody->m_Pos - EnemyPos;
+						m_KnockBackVec.y = 0.0f;
+						m_KnockBackVec.normalize();
+						//ダメージステートに変更
+						m_StateMachine->ChangeState(DamagedState::Instance());
+						return;
 					}
 				}
 			}
@@ -393,13 +379,39 @@ namespace basecross {
 		m_Rigidbody->m_Velocity += m_KnockBackVec * 0.7f;
 	}
 
+	void Player::PlayerStepEffect() {
+		//エフェクトの再生
+		auto FirePtr = GetStage<GameStage>()->FindTagGameObject<StepEffect>(L"StepEffect");
+		Vec3 Emitter = m_Rigidbody->m_Pos;
+		Emitter.y -= m_Rigidbody->m_Scale.y / 2.0f;;
+		FirePtr->InsertEffect(Emitter);
+	}
+
+	void Player::StepBehaviour() {
+		//前回のターンからの経過時間を求める
+		float ElapsedTime = App::GetApp()->GetElapsedTime();
+
+		m_StepVec = GetMoveVector();
+		m_StepVec.normalize();
+
+		m_Rigidbody->m_Velocity += m_StepVec * 1.3f;
+		m_FrameCount += ElapsedTime;
+
+
+		if (m_FrameCount >= 0.2f) {
+			m_StateMachine->ChangeState(DefaultState::Instance());
+			m_FrameCount = 0.0f;
+		}
+		m_Rigidbody->m_Force += m_Rigidbody->m_Gravity * m_Rigidbody->m_Mass;
+	}
+
 	//--------------------------------------------------------------------------------------
 	///	通常のステート
 	//--------------------------------------------------------------------------------------
 	IMPLEMENT_SINGLETON_INSTANCE(DefaultState)
 
 	void DefaultState::Enter(const shared_ptr<Player>& Obj) {
-		
+		Obj->ChangeAnimation(L"Default");
 	}
 
 	void DefaultState::Execute(const shared_ptr<Player>& Obj) {
@@ -407,6 +419,41 @@ namespace basecross {
 	}
 
 	void DefaultState::Exit(const shared_ptr<Player>& Obj) {
+
+	}
+
+	//--------------------------------------------------------------------------------------
+	///	攻撃中のステート
+	//--------------------------------------------------------------------------------------
+	IMPLEMENT_SINGLETON_INSTANCE(PlayerAttackState)
+
+	void PlayerAttackState::Enter(const shared_ptr<Player>& Obj) {
+
+	}
+
+	void PlayerAttackState::Execute(const shared_ptr<Player>& Obj) {
+		
+	}
+
+	void PlayerAttackState::Exit(const shared_ptr<Player>& Obj) {
+
+	}
+
+	//--------------------------------------------------------------------------------------
+	///	ステップ中のステート
+	//--------------------------------------------------------------------------------------
+	IMPLEMENT_SINGLETON_INSTANCE(StepState)
+
+	void StepState::Enter(const shared_ptr<Player>& Obj) {
+		Obj->ChangeAnimation(L"Step");
+		Obj->PlayerStepEffect();
+	}
+
+	void StepState::Execute(const shared_ptr<Player>& Obj) {
+		Obj->StepBehaviour();
+	}
+
+	void StepState::Exit(const shared_ptr<Player>& Obj) {
 
 	}
 
@@ -471,7 +518,7 @@ namespace basecross {
 		body.m_CollType = CollType::typeSPHERE;
 		body.m_IsCollisionActive = false;
 		body.m_IsFixed = false;
-		//		body.m_IsDrawActive = true;
+				body.m_IsDrawActive = true;
 		body.SetToBefore();
 		m_Rigidbody = PtrGameStage->AddRigidbody(body);
 
@@ -494,10 +541,10 @@ namespace basecross {
 		m_PtrObj->m_WorldMatrix = World;
 		m_PtrObj->m_Camera = GetStage<Stage>()->GetCamera();
 		m_PtrObj->m_OwnShadowmapActive = m_OwnShadowActive;
-		m_PtrObj->m_ShadowmapUse = true;
+		m_PtrObj->m_ShadowmapUse = false;
 		m_PtrObj->m_BlendState = BlendState::AlphaBlend;
-		//m_PtrObj->m_RasterizerState = RasterizerState::DoubleDraw;
-		m_PtrObj->m_Alpha = 0.0f;
+		m_PtrObj->m_RasterizerState = RasterizerState::DoubleDraw;
+		//m_PtrObj->m_Alpha = 0.0f;
 
 		//シャドウマップ描画データの構築
 		m_PtrShadowmapObj = make_shared<ShadowmapObject>();
@@ -536,30 +583,13 @@ namespace basecross {
 
 
 	void Sword::OnDrawShadowmap() {
-		//行列の定義
-		Mat4x4 World;
-		World.affineTransformation(
-			m_Rigidbody->m_Scale,
-			Vec3(0, 0, 0),
-			m_Rigidbody->m_Quat,
-			m_Rigidbody->m_Pos
-		);
-		//描画データの行列をコピー
-		m_PtrShadowmapObj->m_WorldMatrix = World;
-		m_PtrShadowmapObj->m_Camera = GetStage<Stage>()->GetCamera();
-		auto shptr = m_ShadowmapRenderer.lock();
-		if (!shptr) {
-			shptr = GetStage<Stage>()->FindTagGameObject<ShadowmapRenderer>(L"ShadowmapRenderer");
-			m_ShadowmapRenderer = shptr;
-		}
-		shptr->AddDrawObject(m_PtrShadowmapObj);
 	}
 
 	void Sword::OnDraw() {
 		//行列の定義
 		Mat4x4 World;
 		World.affineTransformation(
-			m_Rigidbody->m_Scale,
+			Vec3(0, 0, 0),
 			Vec3(0, 0, 0),
 			m_Rigidbody->m_Quat,
 			m_Rigidbody->m_Pos
@@ -641,34 +671,6 @@ namespace basecross {
 				Vec3 Velo = toPos - m_Rigidbody->m_Pos;
 				Velo /= ElapsedTime;
 				m_Rigidbody->m_Velocity = Velo;
-			}
-		}
-
-		//コントローラの取得
-		auto CntlVec = App::GetApp()->GetInputDevice().GetControlerVec();
-		if (CntlVec[0].bConnected) {
-			//Xボタン
-			if (CntlVec[0].wPressedButtons & XINPUT_GAMEPAD_Y) {
-
-				//二番目が死んだとしたら
-				/*auto dead_friend = dynamic_pointer_cast<EnemyObject>(m_friends[1].lock());
-				dead_friend->GetStateMachine()->ChangeState(EnemyOppositionState::Instance());
-				dead_friend->SetPosition(Vec3(100, 100, 100));
-				m_friends.erase(m_friends.begin() + 1);
-				m_friends_num = m_friends.size();*/
-
-				/*for (auto f : m_friends) {
-					auto f_pointer = dynamic_pointer_cast<EnemyObject>(f.lock());
-					if (f_pointer->FindTag(L"Red")) {
-						f_pointer->GetStateMachine()->ChangeState(EnemyOppositionState::Instance());
-						f_pointer->SetPosition(Vec3(0, 0, 0));
-					};
-				}*/
-
-				/*vector<int> erase_num;
-				int j = 0;*/
-
-				
 			}
 		}
 	}
@@ -810,7 +812,7 @@ namespace basecross {
 	//--------------------------------------------------------------------------------------
 	IMPLEMENT_SINGLETON_INSTANCE(NonAttackState)
 
-		void NonAttackState::Enter(const shared_ptr<Sword>& Obj) {
+	void NonAttackState::Enter(const shared_ptr<Sword>& Obj) {
 		Obj->ComplianceStartBehavior();
 		//何もしない
 	}
@@ -838,7 +840,7 @@ namespace basecross {
 	//--------------------------------------------------------------------------------------
 	IMPLEMENT_SINGLETON_INSTANCE(Attack1State)
 
-		void Attack1State::Enter(const shared_ptr<Sword>& Obj) {
+	void Attack1State::Enter(const shared_ptr<Sword>& Obj) {
 
 		Obj->Attack1StartBehavior();
 	
