@@ -92,6 +92,7 @@ namespace basecross {
 
 		m_StepVec = Vec3(0.0f);
 		m_KnockBackVec = Vec3(0.0f);
+		m_RunAnimationFrameCount = 0.0f;
 
 		m_Rigidbody = PtrGameStage->AddRigidbody(body);
 
@@ -121,7 +122,7 @@ namespace basecross {
 		m_PtrObj->AddAnimation(L"RunStart", 30, 20, false, 60.0f);
 		m_PtrObj->AddAnimation(L"Running", 50, 40, true, 60.0f);
 		m_PtrObj->AddAnimation(L"RunEnd", 90, 20, false, 60.0f);
-		m_PtrObj->AddAnimation(L"Attack", 110, 60, false, 90.0f);
+		m_PtrObj->AddAnimation(L"Attack", 120, 50, false, 90.0f);
 		m_PtrObj->AddAnimation(L"Damage", 170, 30, false, 60.0f);
 		m_PtrObj->AddAnimation(L"Step", 200, 30, false, 90.0f);
 
@@ -141,7 +142,6 @@ namespace basecross {
 		float ElapsedTime = App::GetApp()->GetElapsedTime();
 		m_PtrObj->UpdateAnimation(ElapsedTime);
 		m_StateMachine->Update();
-		
 	}
 
 	void Player::OnUpdate2() {
@@ -167,7 +167,10 @@ namespace basecross {
 		Qt.rotationRollPitchYawFromVector(Vec3(0, ToAngle, 0));
 		Qt.normalize();
 		//現在と目標を補間
-		m_Rigidbody->m_Quat = XMQuaternionSlerp(m_Rigidbody->m_Quat, Qt, 0.1f);
+		//移動しないときは回転しない
+		if (m_Rigidbody->m_Velocity.length() > 0.01f) {
+			m_Rigidbody->m_Quat = XMQuaternionSlerp(m_Rigidbody->m_Quat, Qt, 0.1f);
+		}
 	}
 
 	void Player::OnDrawShadowmap() {
@@ -249,9 +252,13 @@ namespace basecross {
 			if (CntlVec[0].wPressedButtons & XINPUT_GAMEPAD_A) {
 				m_StateMachine->ChangeState(StepState::Instance());
 			}
+			else if (CntlVec[0].wPressedButtons & XINPUT_GAMEPAD_X) {
+				m_StateMachine->ChangeState(PlayerAttackState::Instance());
+			}
 			else if (length(Direction) < 0.1f) {
 				m_Rigidbody->m_Velocity.x *= 0.8f;
 				m_Rigidbody->m_Velocity.z *= 0.8f;
+				
 			}
 			else {
 				m_Rigidbody->m_Velocity += Direction * 0.5f;
@@ -259,6 +266,7 @@ namespace basecross {
 				TempVelo = XMVector2ClampLength(TempVelo, 0, 5.0f);
 				m_Rigidbody->m_Velocity.x = TempVelo.x;
 				m_Rigidbody->m_Velocity.z = TempVelo.y;
+				
 			}
 			m_Rigidbody->m_Force += m_Rigidbody->m_Gravity * m_Rigidbody->m_Mass;
 		}
@@ -272,9 +280,41 @@ namespace basecross {
 		m_PtrObj->ChangeCurrentAnimation(animation_key);
 	}
 
+	void Player::RunningAnimation() {
+		Vec3 Direction = GetMoveVector();
+		//前回のターンからの経過時間を求める
+		float ElapsedTime = App::GetApp()->GetElapsedTime();
+		if (Direction.length() < 0.1f) {
+			if (isRunning != RunEnd) {
+				isRunning = RunEnd;
+				ChangeAnimation(L"RunEnd");
+			}
+		}
+		else if (m_RunAnimationFrameCount > 0.333f) {
+			ChangeAnimation(L"Running");
+			isRunning = Running;
+			m_RunAnimationFrameCount = 0.0f;
+		}
+		else {
+			if (isRunning == RunEnd) {
+				isRunning = RunStart;
+				ChangeAnimation(L"RunStart");
+				m_RunAnimationFrameCount = 0.0f;
+			}
+		}
+		if (isRunning == RunStart) {
+			m_RunAnimationFrameCount += ElapsedTime;
+		}
+	}
+
+	void Player::ChangeDefaultState() {
+		m_StateMachine->ChangeState(DefaultState::Instance());
+	}
+
 	void Player::DefaultBehaviour() {
 
 		MoveControll();
+		RunningAnimation();
 
 		//敵との当たり判定
 		vector<shared_ptr<GameObject>> EnemyVec;
@@ -387,22 +427,31 @@ namespace basecross {
 		FirePtr->InsertEffect(Emitter);
 	}
 
+	void Player::InitVelocity() {
+		m_Rigidbody->m_Velocity.x *= 0.01f;
+		m_Rigidbody->m_Velocity.z *= 0.01f;
+	}
+
 	void Player::StepBehaviour() {
 		//前回のターンからの経過時間を求める
 		float ElapsedTime = App::GetApp()->GetElapsedTime();
 
-		m_StepVec = GetMoveVector();
-		m_StepVec.normalize();
-
-		m_Rigidbody->m_Velocity += m_StepVec * 1.3f;
+		m_Rigidbody->m_Velocity += m_StepVec * (1.0f - m_FrameCount);
 		m_FrameCount += ElapsedTime;
 
-
-		if (m_FrameCount >= 0.2f) {
+		if (m_FrameCount >= 0.3f) {
 			m_StateMachine->ChangeState(DefaultState::Instance());
 			m_FrameCount = 0.0f;
 		}
 		m_Rigidbody->m_Force += m_Rigidbody->m_Gravity * m_Rigidbody->m_Mass;
+	}
+
+	void Player::AttackBehaviour() {
+		auto sword = GetStage()->FindTagGameObject<Sword>(L"Sword");
+		sword->SetState(L"Attack");
+		//攻撃中の処理にある程度移動の完成やら補正がほしい
+		m_Rigidbody->m_Velocity.x *= 0.5f;
+		m_Rigidbody->m_Velocity.z *= 0.5f;
 	}
 
 	//--------------------------------------------------------------------------------------
@@ -428,11 +477,19 @@ namespace basecross {
 	IMPLEMENT_SINGLETON_INSTANCE(PlayerAttackState)
 
 	void PlayerAttackState::Enter(const shared_ptr<Player>& Obj) {
-
+		Obj->ChangeAnimation(L"Attack");
+		Obj->AttackBehaviour();
 	}
 
 	void PlayerAttackState::Execute(const shared_ptr<Player>& Obj) {
-		
+		//コントローラの取得
+		auto CntlVec = App::GetApp()->GetInputDevice().GetControlerVec();
+		if (CntlVec[0].bConnected) {
+			//Xボタン
+			if (CntlVec[0].wPressedButtons & XINPUT_GAMEPAD_A) {
+				Obj->GetStateMachine()->ChangeState(StepState::Instance());
+			}
+		}
 	}
 
 	void PlayerAttackState::Exit(const shared_ptr<Player>& Obj) {
@@ -447,6 +504,10 @@ namespace basecross {
 	void StepState::Enter(const shared_ptr<Player>& Obj) {
 		Obj->ChangeAnimation(L"Step");
 		Obj->PlayerStepEffect();
+		Obj->InitVelocity();
+		Obj->SetStepVec(Obj->GetMoveVector());
+		auto sword = Obj->GetStage()->FindTagGameObject<Sword>(L"Sword");
+		sword->SetState(L"Default");
 	}
 
 	void StepState::Execute(const shared_ptr<Player>& Obj) {
@@ -518,7 +579,7 @@ namespace basecross {
 		body.m_CollType = CollType::typeSPHERE;
 		body.m_IsCollisionActive = false;
 		body.m_IsFixed = false;
-				body.m_IsDrawActive = true;
+		//		body.m_IsDrawActive = true;
 		body.SetToBefore();
 		m_Rigidbody = PtrGameStage->AddRigidbody(body);
 
@@ -788,8 +849,8 @@ namespace basecross {
 	}
 
 	bool Sword::Attack1ExcuteBehavior() {
-		m_Attack1ToRot += 0.2f;
-		if (m_Attack1ToRot >= (XM_PI + 0.5f)) {
+		m_Attack1ToRot += 0.15f;
+		if (m_Attack1ToRot >= (XM_PI + 2.0f)) {
 			m_Attack1ToRot = 0.0f;
 			return true;
 		}
@@ -804,7 +865,14 @@ namespace basecross {
 		return false;
 	}
 
-
+	void Sword::SetState(wstring state_name) {
+		if (state_name == L"Attack") {
+			m_StateMachine->ChangeState(Attack1State::Instance());
+		}
+		else if (state_name == L"Default") {
+			m_StateMachine->ChangeState(NonAttackState::Instance());
+		}
+	}
 
 
 	//--------------------------------------------------------------------------------------
@@ -820,14 +888,14 @@ namespace basecross {
 	void NonAttackState::Execute(const shared_ptr<Sword>& Obj) {
 		Obj->UpdateBehavior();
 
-		//コントローラの取得
-		auto CntlVec = App::GetApp()->GetInputDevice().GetControlerVec();
-		if (CntlVec[0].bConnected) {
-			//Xボタン
-			if (CntlVec[0].wPressedButtons & XINPUT_GAMEPAD_X) {
-				Obj->GetStateMachine()->ChangeState(Attack1State::Instance());
-			}
-		}
+		////コントローラの取得
+		//auto CntlVec = App::GetApp()->GetInputDevice().GetControlerVec();
+		//if (CntlVec[0].bConnected) {
+		//	//Xボタン
+		//	if (CntlVec[0].wPressedButtons & XINPUT_GAMEPAD_X) {
+		//		Obj->GetStateMachine()->ChangeState(Attack1State::Instance());
+		//	}
+		//}
 
 	}
 
@@ -849,6 +917,8 @@ namespace basecross {
 	void Attack1State::Execute(const shared_ptr<Sword>& Obj) {
 		if (Obj->Attack1ExcuteBehavior()) {
 			Obj->GetStateMachine()->ChangeState(NonAttackState::Instance());
+			auto PlayerPtr = Obj->GetStage()->FindTagGameObject<Player>(L"Player");
+			PlayerPtr->ChangeDefaultState();
 			return;
 		}
 		Obj->UpdateBehavior();

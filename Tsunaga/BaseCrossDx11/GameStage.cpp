@@ -84,7 +84,7 @@ namespace basecross {
 		AddGameObject<Sword>(
 			Par,
 			L"SPARK_TX",
-			Vec3(0.4f, 0.4f, 0.4f),
+			Vec3(0.5f, 0.5f, 0.7f),
 			Quat(),
 			Vec3(0.0f, 0.5f, 0.0f),
 			true);
