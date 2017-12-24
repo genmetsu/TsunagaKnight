@@ -180,22 +180,16 @@ namespace basecross {
 		//ボーンモデルのリソース
 		auto ModelMesh = MeshResource::CreateBoneModelMesh(DataDir, L"Kureha_fbx_v2.bmf");
 		App::GetApp()->RegisterResource(L"KUREHA_MESH", ModelMesh);
-
 		ModelMesh = MeshResource::CreateBoneModelMesh(DataDir, L"E_Needle.bmf");
 		App::GetApp()->RegisterResource(L"NEEDLE_MESH", ModelMesh);
-
 		ModelMesh = MeshResource::CreateBoneModelMesh(DataDir, L"E_Gun.bmf");
 		App::GetApp()->RegisterResource(L"GUN_MESH", ModelMesh);
-
 		ModelMesh = MeshResource::CreateBoneModelMesh(DataDir, L"E_Angel.bmf");
 		App::GetApp()->RegisterResource(L"ANGEL_MESH", ModelMesh);
-
 		ModelMesh = MeshResource::CreateBoneModelMesh(DataDir, L"Large_Cannon_Blue_Blast.bmf");
 		App::GetApp()->RegisterResource(L"CANNON_MESH", ModelMesh);
-
 		ModelMesh = MeshResource::CreateBoneModelMesh(DataDir, L"Medium_Boss_Thor_Move.bmf");
 		App::GetApp()->RegisterResource(L"THOR_BOSS_MESH", ModelMesh);
-
 		ModelMesh = MeshResource::CreateBoneModelMesh(DataDir, L"Yamato_Fbx_v01.bmf");
 		App::GetApp()->RegisterResource(L"YAMATO_MESH", ModelMesh);
 
@@ -203,10 +197,8 @@ namespace basecross {
 		//スタティックモデルのリソースとして読み込み
 		auto StaticModelMesh = MeshResource::CreateStaticModelMesh(DataDir, L"Medium_Boss_Hand_Left.bmf");
 		App::GetApp()->RegisterResource(L"LEFT_HAND_MESH", StaticModelMesh);
-
 		StaticModelMesh = MeshResource::CreateStaticModelMesh(DataDir, L"Medium_Boss_Hand_Right.bmf");
 		App::GetApp()->RegisterResource(L"RIGHT_HAND_MESH", StaticModelMesh);
-
 		StaticModelMesh = MeshResource::CreateStaticModelMesh(DataDir, L"Medium_Boss_Hand_Main.bmf");
 		App::GetApp()->RegisterResource(L"HAND_BOSS_MESH", StaticModelMesh);
 

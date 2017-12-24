@@ -120,9 +120,6 @@ namespace basecross {
 		//位置
 		Vec3 m_Pos;
 
-		//Rigidbodyのshared_ptr
-		shared_ptr<Rigidbody> m_Rigidbody;
-
 		//メッシュとの差分計算用
 		Mat4x4 m_MeshToTransformMatrix;
 		//描画データ
@@ -192,13 +189,6 @@ namespace basecross {
 		*/
 		//--------------------------------------------------------------------------------------
 		virtual Vec3 GetPosition() override;
-		//--------------------------------------------------------------------------------------
-		/*!
-		@brief ワールド行列の取得
-		@return	ワールド行列
-		*/
-		//--------------------------------------------------------------------------------------
-		//virtual void GetWorldMatrix(Mat4x4& m) const override;
 	};
 
 
@@ -586,7 +576,7 @@ namespace basecross {
 		//描画データ
 		shared_ptr<SimpleDrawObject> m_PtrObj;
 		//描画オブジェクト(weak_ptr)
-		weak_ptr<SimplePNTStaticRenderer2> m_Renderer;
+		weak_ptr<SimplePNTStaticRenderer> m_Renderer;
 		//シャドウマップ用描画データ
 		shared_ptr<ShadowmapObject> m_PtrShadowmapObj;
 		//シャドウマップ描画オブジェクト(weak_ptr)
@@ -1175,28 +1165,14 @@ namespace basecross {
 		Quat m_Qt;
 		//位置
 		Vec3 m_Pos;
-		//ひとつ前の位置
-		Vec3 m_BeforePos;
 		// 突進の位置座標
 		Vec3 m_TargetPos;
 		//追いかけるスピード
 		float m_Speed;
 		//フレームカウント
 		float m_FrameCount;
-		//突撃するかどうか
-		bool m_Tackle;
-		//突撃する際に止まる時間
-		float m_StopTime;
-		//どれぐらい近づいたら突撃するかの距離
-		float m_SearchDis;
-		//突進のスピード
-		float m_TackleSpeed;
 		//弾のスピード
 		float m_ShootSpeed;
-		float m_HP;
-		float m_AttackPoint;
-
-		Vec3 m_TackleStart;
 
 		wstring m_my_Tag;
 
@@ -1215,16 +1191,7 @@ namespace basecross {
 		//シャドウマップ描画オブジェクト(weak_ptr)
 		weak_ptr<ShadowmapRenderer> m_ShadowmapRenderer;
 		bool m_OwnShadowActive;
-		//このオブジェクトのプレイヤーから見たローカル行列
-		Mat4x4 m_PlayerLocalMatrix;
-		//プレイヤーの直後（先頭）の場合の補間係数
-		float m_LerpToParent;
-		//このオブジェクトのチャイルドオブジェクトから見たローカル行列
-		Mat4x4 m_ChildLocalMatrix;
-		//チャイルド後の場合の補間係数
-		float m_LerpToChild;
-		//Attack1の場合の目標となる回転
-		float m_Attack1ToRot;
+		
 		// 弾が撃たれているかどうか
 		bool IsShoot;
 		// 弾の存在
@@ -1282,12 +1249,6 @@ namespace basecross {
 		virtual void OnDraw()override;
 		//--------------------------------------------------------------------------------------
 		/*!
-		@brief	ステートマシンを得る
-		@return	ステートマシン
-		*/
-		//--------------------------------------------------------------------------------------
-		//--------------------------------------------------------------------------------------
-		/*!
 		@brief ワールド行列の取得
 		@return	ワールド行列
 		*/
@@ -1295,22 +1256,25 @@ namespace basecross {
 		virtual void GetWorldMatrix(Mat4x4& m) const override;
 
 		virtual Vec3 GetPosition() override;
+
 		void SetPosition(Vec3 pos);
 
 		float GetScale(){
 			return m_Scale.x;
 		}
 
+		//--------------------------------------------------------------------------------------
+		/*!
+		@brief	弾を打ち出す処理
+		@return	
+		*/
+		//--------------------------------------------------------------------------------------
 		void Wakeup(const Vec3& Position, const Vec3& Velocity);
 
 		bool GetIsShoot()
 		{
 			return IsShoot;
 		}
-
-
-
-
 	};
 
 	//--------------------------------------------------------------------------------------

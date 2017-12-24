@@ -119,20 +119,6 @@ namespace basecross {
 	YamatoStage::~YamatoStage() {}
 
 	void YamatoStage::OnCreate() {
-		//Rigidbodyの初期化
-		auto PtrGameStage = GetStage<GameStage>();
-		Rigidbody body;
-		body.m_Owner = GetThis<GameObject>();
-		body.m_Mass = 1.0f;
-		body.m_Scale = m_Scale;
-		body.m_Quat = m_Qt;
-		body.m_Pos = m_Pos;
-		body.m_CollType = CollType::typeSPHERE;
-		body.m_IsFixed = true;
-		//		body.m_IsDrawActive = true;
-		body.SetToBefore();
-		m_Rigidbody = PtrGameStage->AddRigidbody(body);
-
 		//メッシュの取得
 		auto MeshPtr = App::GetApp()->GetResource<MeshResource>(L"YAMATO_MESH");
 
@@ -180,10 +166,10 @@ namespace basecross {
 		//行列の定義
 		Mat4x4 World;
 		World.affineTransformation(
-			m_Rigidbody->m_Scale,
+			m_Scale,
 			Vec3(0, 0, 0),
-			m_Rigidbody->m_Quat,
-			m_Rigidbody->m_Pos
+			m_Qt,
+			m_Pos
 		);
 		//差分を計算
 		World = m_MeshToTransformMatrix * World;
@@ -202,10 +188,10 @@ namespace basecross {
 		//行列の定義
 		Mat4x4 World;
 		World.affineTransformation(
-			m_Rigidbody->m_Scale,
+			m_Scale,
 			Vec3(0, 0, 0),
-			m_Rigidbody->m_Quat,
-			m_Rigidbody->m_Pos
+			m_Qt,
+			m_Pos
 		);
 
 		//差分を計算
@@ -222,7 +208,7 @@ namespace basecross {
 	}
 
 	Vec3 YamatoStage::GetPosition() {
-		return m_Rigidbody->m_Pos;
+		return m_Pos;
 	}
 
 	//--------------------------------------------------------------------------------------
@@ -242,7 +228,6 @@ namespace basecross {
 		//タグの追加
 		AddTag(L"MultiSpark");
 	}
-
 
 	void MultiSpark::InsertSpark(const Vec3& Pos) {
 		auto ParticlePtr = InsertParticle(64);
@@ -749,8 +734,8 @@ namespace basecross {
 		m_PtrObj->m_TextureRes = TexPtr;
 		m_PtrObj->m_WorldMatrix = World;
 		m_PtrObj->m_Camera = GetStage<Stage>()->GetCamera();
-		m_PtrObj->m_OwnShadowmapActive = m_OwnShadowActive;
-		m_PtrObj->m_ShadowmapUse = true;
+		m_PtrObj->m_OwnShadowmapActive = false;
+		m_PtrObj->m_ShadowmapUse = false;
 
 		//シャドウマップ描画データの構築
 		m_PtrShadowmapObj = make_shared<ShadowmapObject>();
@@ -782,7 +767,7 @@ namespace basecross {
 		m_PtrObj->m_Camera = GetStage<Stage>()->GetCamera();
 		auto shptr = m_Renderer.lock();
 		if (!shptr) {
-			shptr = GetStage<Stage>()->FindTagGameObject<SimplePNTStaticRenderer2>(L"SimplePNTStaticRenderer2");
+			shptr = GetStage<Stage>()->FindTagGameObject<SimplePNTStaticRenderer>(L"SimplePNTStaticRenderer");
 			m_Renderer = shptr;
 		}
 		shptr->AddDrawObject(m_PtrObj);
@@ -948,7 +933,7 @@ namespace basecross {
 		m_FrameCount(0.0f),
 		m_Speed(1.0f),
 		m_Tackle(false),
-		m_StopTime(1.5f),
+		m_StopTime(1.0f),
 		m_SearchDis(1.0f),
 		m_TackleSpeed(5.0f),
 		m_TackleStart(Vec3(0.0f, 0.0f, 0.0f)),
@@ -958,7 +943,15 @@ namespace basecross {
 		m_Attack1ToRot(0),
 		m_HP(1.0f),
 		m_AttackPoint(100.0f)
-	{}
+	{
+		//メッシュとトランスフォームの差分の設定
+		m_MeshToTransformMatrix.affineTransformation(
+			Vec3(1.0f, 1.0f, 1.0f),
+			Vec3(0.0f, 0.0f, 0.0f),
+			Vec3(0.0f, XM_PI, 0.0f),
+			Vec3(0.0f, 0.0f, 0.0f)
+		);
+	}
 	EnemyObject::~EnemyObject() {}
 
 	void EnemyObject::OnCreate() {
@@ -975,7 +968,7 @@ namespace basecross {
 		body.m_Pos = m_Pos;
 		body.m_CollType = CollType::typeSPHERE;
 		body.m_IsCollisionActive = true;
-		//		body.m_IsDrawActive = true;
+				body.m_IsDrawActive = true;
 		body.SetToBefore();
 		m_Rigidbody = PtrGameStage->AddRigidbody(body);
 
@@ -994,14 +987,6 @@ namespace basecross {
 		);
 		//ターゲット座標の初期化
 		m_TargetPos = Vec3(0.0f, 0.0f, 0.0f);
-
-		//メッシュとトランスフォームの差分の設定
-		m_MeshToTransformMatrix.affineTransformation(
-			Vec3(1.0f, 1.0f, 1.0f),
-			Vec3(0.0f, 0.0f, 0.0f),
-			Vec3(0.0f, XM_PI, 0.0f),
-			Vec3(0.0f, 0.0f, 0.0f)
-		);
 
 		auto TexPtr = App::GetApp()->GetResource<TextureResource>(m_TextureResName);
 		//描画データの構築
@@ -1175,7 +1160,7 @@ namespace basecross {
 				if (shptr->FindTag(L"Player")) {
 					flg = ParentFlg::Player;
 				}
-				else if (shptr->FindTag(L"EnemyObject")) {
+				else if (shptr->FindTag(L"Chain")) {
 					flg = ParentFlg::Child;
 				}
 			}
@@ -1409,7 +1394,8 @@ namespace basecross {
 
 		void EnemyComplianceState::Enter(const shared_ptr<EnemyObject>& Obj) {
 		Obj->ComplianceStartBehavior();
-		//何もしない
+		Obj->RemoveTag(L"EnemyObject");
+		Obj->AddTag(L"Chain");
 	}
 
 	void EnemyComplianceState::Execute(const shared_ptr<EnemyObject>& Obj) {
@@ -1463,6 +1449,13 @@ namespace basecross {
 		EnemyObject(StagePtr, ParentPtr,MeshResName ,TextureResName, DefaultAnimation, Scale,Qt,Pos, OwnShadowActive)
 	{
 		AddTag(L"Red");
+		//メッシュとトランスフォームの差分の設定
+		m_MeshToTransformMatrix.affineTransformation(
+			Vec3(1.0f, 1.0f, 1.0f),
+			Vec3(0.0f, 0.0f, 0.0f),
+			Vec3(0.0f, XM_PI, 0.0f),
+			Vec3(0.0f, 0.0f, 0.0f)
+		);
 	}
 
 	NeedleEnemy::~NeedleEnemy()
@@ -1540,6 +1533,13 @@ namespace basecross {
 		m_Speed = 1.0f;
 		m_SearchDis = 5.0;
 		AddTag(L"Blue");
+		//メッシュとトランスフォームの差分の設定
+		m_MeshToTransformMatrix.affineTransformation(
+			Vec3(1.0f, 1.0f, 1.0f),
+			Vec3(0.0f, 0.0f, 0.0f),
+			Vec3(0.0f, XM_PI, 0.0f),
+			Vec3(0.0f, 0.0f, 0.0f)
+		);
 	}
 
 	ShootEnemy::~ShootEnemy()
@@ -1549,25 +1549,8 @@ namespace basecross {
 	void ShootEnemy::OppositionBehavior() {
 		float ElapsedTime = App::GetApp()->GetElapsedTime();
 		auto shptr = m_ParentPtr.lock();
-
-		Mat4x4 ParMat;
 		if (shptr) {
-			//行列取得用のインターフェイスを持ってるかどうか
-			auto matintptr = dynamic_pointer_cast<MatrixInterface>(shptr);
-			if (matintptr) {
-				matintptr->GetWorldMatrix(ParMat);
-			}
-
-			Mat4x4 World;
-			World.identity();
-			//行列の定義
-			World = m_PlayerLocalMatrix;
-			//スケーリングを1.0にした行列に変換
-			ParMat.scaleIdentity();
-			//行列の反映
-			World *= ParMat;
-			//この時点でWorldは目標となる位置
-			Vec3 toPos = World.transInMatrix();
+			Vec3 toPos = shptr->GetPosition();
 			Vec3 ToPosVec = toPos - m_Rigidbody->m_Pos;
 			//距離を求める
 			float dis = ToPosVec.length();
@@ -1577,7 +1560,6 @@ namespace basecross {
 			ToPosVec *= m_Speed;
 			m_Rigidbody->m_Velocity = ToPosVec;
 			m_Rigidbody->m_Pos.y = m_Scale.y / 2.0f;
-
 
 			if (m_StopTime < m_FrameCount) {
 				//球を飛ばす処理
@@ -1597,7 +1579,6 @@ namespace basecross {
 					}
 				}
 			}
-
 			//遅くする
 			if (m_FrameCount > 0.0f) {
 				m_FrameCount += ElapsedTime;
@@ -1747,10 +1728,7 @@ namespace basecross {
 		m_Pos(Pos),
 		m_OwnShadowActive(OwnShadowActive),
 		m_my_Tag(Tag),
-		m_LerpToParent(0.2f),
-		m_LerpToChild(0.2f),
-		m_Attack1ToRot(0),
-		m_ShootSpeed(5.0f),
+		m_ShootSpeed(3.0f),
 		m_FrameCount(0.0f),
 		m_BulletTime(10.0f),
 		IsShoot(false)
@@ -1803,6 +1781,10 @@ namespace basecross {
 		m_PtrObj->m_Camera = GetStage<Stage>()->GetCamera();
 		m_PtrObj->m_OwnShadowmapActive = m_OwnShadowActive;
 		m_PtrObj->m_ShadowmapUse = true;
+		if (m_my_Tag == L"Bullet") {
+			m_PtrObj->m_Diffuse = Col4(0.2f, 0.2f, 0.2f, 1.0f);
+			m_PtrObj->m_Emissive = Col4(0.2f, 0.2f, 0.2f, 1.0f);
+		}
 
 		//シャドウマップ描画データの構築
 		m_PtrShadowmapObj = make_shared<ShadowmapObject>();
@@ -1827,6 +1809,23 @@ namespace basecross {
 	}
 	void BulletObject::OnDrawShadowmap()
 	{
+		//行列の定義
+		Mat4x4 World;
+		World.affineTransformation(
+			m_Rigidbody->m_Scale,
+			Vec3(0, 0, 0),
+			m_Rigidbody->m_Quat,
+			m_Rigidbody->m_Pos
+		);
+		//描画データの行列をコピー
+		m_PtrShadowmapObj->m_WorldMatrix = World;
+		m_PtrShadowmapObj->m_Camera = GetStage<Stage>()->GetCamera();
+		auto shptr = m_ShadowmapRenderer.lock();
+		if (!shptr) {
+			shptr = GetStage<Stage>()->FindTagGameObject<ShadowmapRenderer>(L"ShadowmapRenderer");
+			m_ShadowmapRenderer = shptr;
+		}
+		shptr->AddDrawObject(m_PtrShadowmapObj);
 	}
 	void BulletObject::OnDraw()
 	{
@@ -1891,6 +1890,13 @@ namespace basecross {
 		m_HP = 10.0f;
 		m_Speed = 0.3f;
 		AddTag(L"BossEnemy");
+		//メッシュとトランスフォームの差分の設定
+		m_MeshToTransformMatrix.affineTransformation(
+			Vec3(1.0f, 1.0f, 1.0f),
+			Vec3(0.0f, 0.0f, 0.0f),
+			Vec3(0.0f, XM_PI, 0.0f),
+			Vec3(0.0f, 0.0f, 0.0f)
+		);
 	}
 
 	BossEnemy::~BossEnemy()
@@ -2016,6 +2022,13 @@ namespace basecross {
 	{
 		m_Speed = 0.8f;
 		AddTag(L"Green");
+		//メッシュとトランスフォームの差分の設定
+		m_MeshToTransformMatrix.affineTransformation(
+			Vec3(1.0f, 1.0f, 1.0f),
+			Vec3(0.0f, 0.0f, 0.0f),
+			Vec3(0.0f, XM_PI, 0.0f),
+			Vec3(0.0f, 0.0f, 0.0f)
+		);
 	}
 
 	AngelEnemy::~AngelEnemy()
@@ -2033,6 +2046,13 @@ namespace basecross {
 		m_Speed = 1.5f;
 		m_HP = 15.0f;
 		AddTag(L"CloseBoss");
+		//メッシュとトランスフォームの差分の設定
+		m_MeshToTransformMatrix.affineTransformation(
+			Vec3(1.0f, 1.0f, 1.0f),
+			Vec3(0.0f, 0.0f, 0.0f),
+			Vec3(0.0f, XM_PI, 0.0f),
+			Vec3(0.0f, 0.0f, 0.0f)
+		);
 	}
 
 	CR_BossEnemy::~CR_BossEnemy()
@@ -2047,9 +2067,16 @@ namespace basecross {
 		const Vec3 & Pos, bool OwnShadowActive) :
 		EnemyObject(StagePtr, ParentPtr, MeshResName, TextureResName,DefaultAnimation, Scale, Qt, Pos, OwnShadowActive)
 	{
-		m_Speed = 1.5f;
+		m_Speed = 1.0f;
 		m_HP = 5.0f;
 		AddTag(L"LongBoss");
+		//メッシュとトランスフォームの差分の設定
+		m_MeshToTransformMatrix.affineTransformation(
+			Vec3(0.8f, 3.0f, 0.8f),
+			Vec3(0.0f, 0.0f, 0.0f),
+			Vec3(0.0f, XM_PI, 0.0f),
+			Vec3(0.0f, -0.5f, 0.0f)
+		);
 	}
 
 	LD_BossEnemy::~LD_BossEnemy()
