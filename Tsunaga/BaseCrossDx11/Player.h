@@ -40,6 +40,10 @@ namespace basecross {
 		Vec3 m_KnockBackVec;
 		/// フレームカウント用変数
 		float m_FrameCount;
+		//攻撃するときにほせいをかける距離
+		float m_AttackDis;
+		//攻撃するときに補正をかける角度
+		float m_FOV;
 		//移動アニメーション用フレームカウント
 		float m_RunAnimationFrameCount;
 		//Rigidbodyのshared_ptr
@@ -242,6 +246,16 @@ namespace basecross {
 		*/
 		//--------------------------------------------------------------------------------------
 		void ChangeDefaultState();
+		//--------------------------------------------------------------------------------------
+		/*!
+		@brief 走るアニメーションをリセットする
+		@return	なし
+		*/
+		//--------------------------------------------------------------------------------------
+		void InitRunFrameCount() {
+			m_RunAnimationFrameCount = 0.0f;
+			isRunning = RunEnd;
+		}
 
 		//--------------------------------------------------------------------------------------
 		/*!

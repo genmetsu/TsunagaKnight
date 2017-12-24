@@ -11,7 +11,7 @@ namespace basecross {
 	GameManager;
 
 	//--------------------------------------------------------------------------------------
-	///	球体のプレイヤー実体
+	///	プレイヤー実体
 	//--------------------------------------------------------------------------------------
 	Player::Player(const shared_ptr<Stage>& StagePtr,
 		const wstring& TextureResName, bool Trace, const Vec3& Pos) :
@@ -22,6 +22,8 @@ namespace basecross {
 		m_Posision(Pos),
 		m_FrameCount(0.0f),
 		m_isStep(false),
+		m_AttackDis(2.0f),
+		m_FOV(0.707f),
 		m_JumpLock(false)
 	{}
 	Player::~Player() {}
@@ -87,7 +89,7 @@ namespace basecross {
 		body.m_Pos = m_Posision;
 		body.m_CollType = CollType::typeCAPSULE;
 		//body.m_IsDrawActive = true;
-		body.m_IsFixed = true;
+		body.m_IsFixed = false;
 		body.SetToBefore();
 
 		m_StepVec = Vec3(0.0f);
@@ -251,9 +253,11 @@ namespace basecross {
 			//Aボタン
 			if (CntlVec[0].wPressedButtons & XINPUT_GAMEPAD_A) {
 				m_StateMachine->ChangeState(StepState::Instance());
+				return;
 			}
 			else if (CntlVec[0].wPressedButtons & XINPUT_GAMEPAD_X) {
 				m_StateMachine->ChangeState(PlayerAttackState::Instance());
+				return;
 			}
 			else if (length(Direction) < 0.1f) {
 				m_Rigidbody->m_Velocity.x *= 0.8f;
@@ -313,8 +317,9 @@ namespace basecross {
 
 	void Player::DefaultBehaviour() {
 
-		MoveControll();
 		RunningAnimation();
+		MoveControll();
+		
 
 		//敵との当たり判定
 		vector<shared_ptr<GameObject>> EnemyVec;
@@ -449,9 +454,50 @@ namespace basecross {
 	void Player::AttackBehaviour() {
 		auto sword = GetStage()->FindTagGameObject<Sword>(L"Sword");
 		sword->SetState(L"Attack");
-		//攻撃中の処理にある程度移動の完成やら補正がほしい
-		m_Rigidbody->m_Velocity.x *= 0.5f;
-		m_Rigidbody->m_Velocity.z *= 0.5f;
+
+		//攻撃中の移動の補正
+		vector<shared_ptr<GameObject>> EnemyVec;
+		GetStage<GameStage>()->FindTagGameObjectVec(L"EnemyObject", EnemyVec);
+		//最短距離と方向
+		float ShortDis = 0.0f;
+		Vec3 MoveVec = Vec3(0,0,0);
+		//自分の向き
+		Vec3 MyVec = m_Rigidbody->m_Velocity;
+		MyVec.normalize();
+		//敵のポジションを取り、視野内にいる最短距離を求める
+		for (auto enemy : EnemyVec) {
+			if (enemy) {
+				auto PtrEnemy = dynamic_pointer_cast<EnemyObject>(enemy);
+				Vec3 EnemyPos = PtrEnemy->GetPosition();
+				Vec3 ToVec = EnemyPos - m_Rigidbody->m_Pos;
+				float length = ToVec.length();
+				ToVec.normalize();
+
+				if (ShortDis == 0.0f) {
+					ShortDis = length;
+				}
+
+				//自分の視野に敵がいて、その距離が最短だった場合ShortDisを上書きする
+				float angle = dot(MyVec, ToVec);
+				if (angle > m_FOV) {
+					if (ShortDis > length) {
+						ShortDis = length;
+						MoveVec = ToVec;
+					}
+				}
+			}
+		}
+		
+		//敵が近ければ補正をかける
+		if (ShortDis < m_AttackDis) {
+			//自分のベクトルを最短の敵に向かわせる
+			m_Rigidbody->m_Velocity.x = MoveVec.x * ShortDis * 1.5f;
+			m_Rigidbody->m_Velocity.z = MoveVec.z * ShortDis * 1.5f;
+		}
+		else {
+			m_Rigidbody->m_Velocity.x *= 0.1f;
+			m_Rigidbody->m_Velocity.z *= 0.1f;
+		}
 	}
 
 	//--------------------------------------------------------------------------------------
@@ -461,6 +507,7 @@ namespace basecross {
 
 	void DefaultState::Enter(const shared_ptr<Player>& Obj) {
 		Obj->ChangeAnimation(L"Default");
+		Obj->InitRunFrameCount();
 	}
 
 	void DefaultState::Execute(const shared_ptr<Player>& Obj) {
