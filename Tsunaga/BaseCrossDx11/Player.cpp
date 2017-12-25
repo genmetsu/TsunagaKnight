@@ -89,7 +89,7 @@ namespace basecross {
 		body.m_Pos = m_Posision;
 		body.m_CollType = CollType::typeCAPSULE;
 		//body.m_IsDrawActive = true;
-		body.m_IsFixed = false;
+		body.m_IsFixed = true;
 		body.SetToBefore();
 
 		m_StepVec = Vec3(0.0f);
@@ -457,24 +457,28 @@ namespace basecross {
 
 		//UŒ‚’†‚ÌˆÚ“®‚Ì•â³
 		vector<shared_ptr<GameObject>> EnemyVec;
-		GetStage<GameStage>()->FindTagGameObjectVec(L"EnemyObject", EnemyVec);
+		GetStage<GameStage>()->FindTagGameObjectVec(L"Zako", EnemyVec);
+
 		//Å’Z‹——£‚Æ•ûŒü
 		float ShortDis = 0.0f;
 		Vec3 MoveVec = Vec3(0,0,0);
+
 		//©•ª‚ÌŒü‚«
 		Vec3 MyVec = m_Rigidbody->m_Velocity;
 		MyVec.normalize();
+
 		//“G‚Ìƒ|ƒWƒVƒ‡ƒ“‚ğæ‚èA‹–ì“à‚É‚¢‚éÅ’Z‹——£‚ğ‹‚ß‚é
 		for (auto enemy : EnemyVec) {
 			if (enemy) {
 				auto PtrEnemy = dynamic_pointer_cast<EnemyObject>(enemy);
 				Vec3 EnemyPos = PtrEnemy->GetPosition();
 				Vec3 ToVec = EnemyPos - m_Rigidbody->m_Pos;
-				float length = ToVec.length();
 				ToVec.normalize();
+				float length = (EnemyPos - m_Rigidbody->m_Pos).length();
 
 				if (ShortDis == 0.0f) {
 					ShortDis = length;
+					MoveVec = ToVec;
 				}
 
 				//©•ª‚Ì‹–ì‚É“G‚ª‚¢‚ÄA‚»‚Ì‹——£‚ªÅ’Z‚¾‚Á‚½ê‡ShortDis‚ğã‘‚«‚·‚é

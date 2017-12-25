@@ -1394,7 +1394,7 @@ namespace basecross {
 
 		void EnemyComplianceState::Enter(const shared_ptr<EnemyObject>& Obj) {
 		Obj->ComplianceStartBehavior();
-		Obj->RemoveTag(L"EnemyObject");
+		Obj->RemoveTag(L"Zako");
 		Obj->AddTag(L"Chain");
 	}
 
@@ -1449,6 +1449,7 @@ namespace basecross {
 		EnemyObject(StagePtr, ParentPtr,MeshResName ,TextureResName, DefaultAnimation, Scale,Qt,Pos, OwnShadowActive)
 	{
 		AddTag(L"Red");
+		AddTag(L"Zako");
 		//メッシュとトランスフォームの差分の設定
 		m_MeshToTransformMatrix.affineTransformation(
 			Vec3(1.0f, 1.0f, 1.0f),
@@ -1533,6 +1534,7 @@ namespace basecross {
 		m_Speed = 1.0f;
 		m_SearchDis = 5.0;
 		AddTag(L"Blue");
+		AddTag(L"Zako");
 		//メッシュとトランスフォームの差分の設定
 		m_MeshToTransformMatrix.affineTransformation(
 			Vec3(1.0f, 1.0f, 1.0f),
@@ -2022,6 +2024,7 @@ namespace basecross {
 	{
 		m_Speed = 0.8f;
 		AddTag(L"Green");
+		AddTag(L"Zako");
 		//メッシュとトランスフォームの差分の設定
 		m_MeshToTransformMatrix.affineTransformation(
 			Vec3(1.0f, 1.0f, 1.0f),
