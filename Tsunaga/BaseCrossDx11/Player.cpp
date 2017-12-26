@@ -25,7 +25,15 @@ namespace basecross {
 		m_AttackDis(2.0f),
 		m_FOV(0.707f),
 		m_JumpLock(false)
-	{}
+	{
+		//メッシュとトランスフォームの差分の設定
+		m_MeshToTransformMatrix.affineTransformation(
+			Vec3(1.0f, 1.0f, 1.0f),
+			Vec3(0.0f, 0.0f, 0.0f),
+			Vec3(0.0f, XM_PI, 0.0f),
+			Vec3(0.0f, -1.0f, 0.0f)
+		);
+	}
 	Player::~Player() {}
 
 	Vec3 Player::GetMoveVector() {
@@ -184,10 +192,12 @@ namespace basecross {
 			m_Rigidbody->m_Quat,
 			m_Rigidbody->m_Pos
 		);
+		//差分を計算
+		World = m_MeshToTransformMatrix * World;
 		//描画データの行列をコピー
 		m_PtrShadowmapObj->m_WorldMatrix = World;
+		m_PtrShadowmapObj->m_pLocalBoneVec = &m_PtrObj->m_LocalBonesMatrix;
 		m_PtrShadowmapObj->m_Camera = GetStage<Stage>()->GetCamera();
-
 		auto shptr = m_ShadowmapRenderer.lock();
 		if (!shptr) {
 			shptr = GetStage<Stage>()->FindTagGameObject<ShadowmapRenderer>(L"ShadowmapRenderer");
@@ -205,14 +215,6 @@ namespace basecross {
 			Vec3(0, 0, 0),
 			m_Rigidbody->m_Quat,
 			m_Rigidbody->m_Pos
-		);
-
-		//メッシュとトランスフォームの差分の設定
-		m_MeshToTransformMatrix.affineTransformation(
-			Vec3(1.0f, 1.0f, 1.0f),
-			Vec3(0.0f, 0.0f, 0.0f),
-			Vec3(0.0f, XM_PI, 0.0f),
-			Vec3(0.0f, -1.0f, 0.0f)
 		);
 
 		//差分を計算

@@ -103,11 +103,11 @@ namespace basecross {
 				texture = L"BLUE_CANNON_TX";
 				break;
 			}
-			auto ptr = AddGameObject<Cannon>(
+			AddGameObject<Cannon>(
 				texture,
 				Vec3(4.0f, 4.0f, 4.0f),
 				Quat(),
-				Vec3(x * 4.0f - 4.0f, 0.125f, -3.0f),
+				Vec3(x * 6.0f - 6.0f, 0.0f, -3.0f),
 				i, false);
 		}
 
@@ -190,7 +190,7 @@ namespace basecross {
 
 		for (int i = 0; i < 1; i++) {
 			float x = (float)(i + 1);
-			AddGameObject<CR_BossEnemy>(
+			auto ptr = AddGameObject<CR_BossEnemy>(
 				Par,
 				L"HAND_BOSS_MESH",
 				L"HAND_BOSS_TX",
@@ -199,6 +199,22 @@ namespace basecross {
 				Quat(),
 				Vec3((float)rand() / 32767 * 20.0f - 10.0f, 0.125f, 60.0f - (float)rand() / 32767 * 20.0f),
 				false);
+			AddGameObject<BossHand>(
+				ptr,
+				L"HAND_TX",
+				L"LEFT_HAND",
+				Vec3(1.0f, 1.0f, 1.0f),
+				Quat(),
+				Vec3(0.0f, 0.5f, 0.0f),
+				true);
+			AddGameObject<BossHand>(
+				ptr,
+				L"HAND_TX",
+				L"RIGHT_HAND",
+				Vec3(1.0f, 1.0f, 1.0f),
+				Quat(),
+				Vec3(0.0f, 0.5f, 0.0f),
+				true);
 		}
 
 
@@ -251,7 +267,7 @@ namespace basecross {
 
 		m_AudioObjectPtr = ObjectFactory::Create<MultiAudioObject>();
 		m_AudioObjectPtr->AddAudioResource(L"Nanika");
-		m_AudioObjectPtr->Start(L"Nanika", XAUDIO2_LOOP_INFINITE, 0.1f);
+		m_AudioObjectPtr->Start(L"Nanika", XAUDIO2_LOOP_INFINITE, 0.0f);
 
 	}
 
