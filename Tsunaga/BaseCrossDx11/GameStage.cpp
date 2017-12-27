@@ -35,19 +35,19 @@ namespace basecross {
 		Dev->GetShadowMapRenderTarget(2048.0f);
 
 		//背景スプライトの作成
-		AddGameObject<MultiSprite>(
+		/*AddGameObject<MultiSprite>(
 			L"SKY_TX",
 			Vec2(1280, 800),
 			0.0f,
 			Vec2(0, 0),
 			1, 1
-			);
-		/*AddGameObject<SkyBox>(
+			);*/
+		AddGameObject<SkyBox>(
 			L"SKY_TX",
-			Vec3(200.0f, 200.0f, 200.0f),
+			Vec3(2000.0f, 2000.0f, 2000.0f),
 			Quat(),
 			Vec3(0.0f),
-			false);*/
+			false);
 
 		//複数使用する球体の登録（リソース登録する）
 		RegisterDefaultSphere();
@@ -72,54 +72,42 @@ namespace basecross {
 
 		//プレイヤーの作成
 		//shared_ptr<GameObject> 
-		auto Par = 
+		auto Par =
 			AddGameObject<Player>(
-			L"KUREHA_TX",
-			true,
-			Vec3(0.0f, 0.5f, 3.0f)
-			);
-		SetPlayerPtr(Par);
+				L"KUREHA_TX",
+				true,
+				Vec3(0.0f, 0.5f, 10.0f)
+				);
+		//SetPlayerPtr(Par);
 
 		//剣の作成
 		AddGameObject<Sword>(
 			Par,
 			L"SPARK_TX",
-			Vec3(0.4f, 0.4f, 0.4f),
+			Vec3(0.5f, 0.5f, 0.8f),
 			Quat(),
 			Vec3(0.0f, 0.5f, 0.0f),
 			true);
-
-		//エネミーの作成
-		/*for (int i = 0; i < 5; i++) {
-			float x = (float)(i + 1);
-			AddGameObject<EnemyObject>(
-				Par,
-				L"SKY_TX",
-				Vec3(0.25f, 0.25f, 0.25f),
-				Quat(),
-				Vec3(x + 2.0f, 0.125f, 0.0f),
-				false);
-		}*/
 
 		for (int i = 0; i < 3; i++) {
 			float x = (float)(i);
 			wstring texture;
 			switch (i) {
-			case 0 :
+			case 0:
 				texture = L"GREEN_CANNON_TX";
 				break;
-			case 1 :
+			case 1:
 				texture = L"RED_CANNON_TX";
 				break;
 			case 2:
 				texture = L"BLUE_CANNON_TX";
 				break;
 			}
-			auto ptr = AddGameObject<Cannon>(
+			AddGameObject<Cannon>(
 				texture,
 				Vec3(4.0f, 4.0f, 4.0f),
 				Quat(),
-				Vec3(x * 4.0f - 4.0f, 0.125f, -3.0f),
+				Vec3(x * 6.0f - 6.0f, 0.0f, -3.0f),
 				i, false);
 		}
 
@@ -132,7 +120,7 @@ namespace basecross {
 				L"30frame",
 				Vec3(0.3f, 0.3f, 0.3f),
 				Quat(),
-				Vec3((float)rand()/ 32767 * 20.0f - 10.0f, 0.125f, 80.0f - (float)rand() / 32767 * 20.0f),
+				Vec3((float)rand() / 32767 * 20.0f - 10.0f, 0.125f, 60.0f - (float)rand() / 32767 * 15.0f),
 				false);
 		}
 
@@ -145,9 +133,9 @@ namespace basecross {
 				L"NonMove",
 				Vec3(0.25f, 0.25f, 0.25f),
 				Quat(),
-				Vec3((float)rand() / 32767 * 20.0f - 10.0f, 0.125f, 80.0f - (float)rand() / 32767 * 20.0f),
+				Vec3((float)rand() / 32767 * 20.0f - 10.0f, 0.125f, 60.0f - (float)rand() / 32767 * 20.0f),
 				false);
-			for (int j = 0;j < 2;j++) {
+			for (int j = 0; j < 2; j++) {
 				AddGameObject<BulletObject>(
 					L"SPARK_TX",
 					Vec3(0.125f, 0.125f, 0.125f),
@@ -171,7 +159,7 @@ namespace basecross {
 				L"NEEDLE_MESH",
 				L"NEEDLE_TX",
 				L"30frame",
-				Vec3(3.0f, 3.0f, 3.0f),
+				Vec3(10.0f, 10.0f, 10.0f),
 				Quat(),
 				Vec3(0.0f, 3.0f, 80.0f),
 				false);
@@ -195,39 +183,54 @@ namespace basecross {
 				L"30frame",
 				Vec3(0.25f, 0.25f, 0.25f),
 				Quat(),
-				Vec3((float)rand() / 32767 * 20.0f - 10.0f, 0.125f, 80.0f - (float)rand() / 32767 * 20.0f),
+				Vec3((float)rand() / 32767 * 20.0f - 10.0f, 0.125f, 60.0f - (float)rand() / 32767 * 20.0f),
 				false);
 		}
 
-		int r = rand();
-		if (r % 2 == 0) {
-			for (int i = 0; i < 1; i++) {
-				float x = (float)(i + 1);
-				AddGameObject<CR_BossEnemy>(
-					Par,
-					L"DEFAULT_SPHERE",
-					L"Brown2_TX",
-					L"30frame",
-					Vec3(2.0f, 2.0f, 2.0f),
-					Quat(),
-					Vec3((float)rand() / 32767 * 20.0f - 10.0f, 0.125f, 80.0f - (float)rand() / 32767 * 20.0f),
-					false);
-			}
+
+		for (int i = 0; i < 1; i++) {
+			float x = (float)(i + 1);
+			auto ptr = AddGameObject<CR_BossEnemy>(
+				Par,
+				L"HAND_BOSS_MESH",
+				L"HAND_BOSS_TX",
+				L"30frame",
+				Vec3(1.8f, 1.8f, 1.8f),
+				Quat(),
+				Vec3((float)rand() / 32767 * 20.0f - 10.0f, 0.125f, 60.0f - (float)rand() / 32767 * 20.0f),
+				false);
+			AddGameObject<BossHand>(
+				ptr,
+				L"HAND_TX",
+				L"LEFT_HAND",
+				Vec3(0.5f, 1.0f, 0.5f),
+				Quat(),
+				Vec3(0.0f, 0.5f, 0.0f),
+				true);
+			AddGameObject<BossHand>(
+				ptr,
+				L"HAND_TX",
+				L"RIGHT_HAND",
+				Vec3(0.5f, 1.0f, 0.5f),
+				Quat(),
+				Vec3(0.0f, 0.5f, 0.0f),
+				true);
 		}
-		else {
-			for (int i = 0; i < 1; i++) {
-				float x = (float)(i + 1);
-				AddGameObject<LD_BossEnemy>(
-					Par,
-					L"DEFAULT_SPHERE",
-					L"Blue_TX",
-					L"30frame",
-					Vec3(2.0f, 2.0f, 2.0f),
-					Quat(),
-					Vec3((float)rand() / 32767 * 20.0f - 10.0f, 0.125f, 80.0f - (float)rand() / 32767 * 20.0f),
-					false);
-			}
+
+
+		for (int i = 0; i < 1; i++) {
+			float x = (float)(i + 1);
+			AddGameObject<LD_BossEnemy>(
+				Par,
+				L"THOR_BOSS_MESH",
+				L"THOR_BOSS_TX",
+				L"30frame",
+				Vec3(3.0f, 0.8f, 3.0f),
+				Quat(),
+				Vec3((float)rand() / 32767 * 20.0f - 10.0f, 0.125f, 60.0f - (float)rand() / 32767 * 20.0f),
+				false);
 		}
+
 
 		//スパークエフェクト
 		AddGameObject<MultiSpark>();
@@ -250,21 +253,21 @@ namespace basecross {
 			);*/
 
 
-		//メッセージを表示するスプライトの作成
-		/*AddGameObject<MessageSprite>(
-			L"MESSAGE_TX",
-			Vec2(256, 64),
-			0.0f,
-			Vec2(480, 260),
-			1, 1
-			);*/
+			//メッセージを表示するスプライトの作成
+			/*AddGameObject<MessageSprite>(
+				L"MESSAGE_TX",
+				Vec2(256, 64),
+				0.0f,
+				Vec2(480, 260),
+				1, 1
+				);*/
 
-		//文字列描画オブジェクトの作成
+				//文字列描画オブジェクトの作成
 		AddGameObject<StringDrawObject>();
 
 		m_AudioObjectPtr = ObjectFactory::Create<MultiAudioObject>();
 		m_AudioObjectPtr->AddAudioResource(L"Nanika");
-		m_AudioObjectPtr->Start(L"Nanika", XAUDIO2_LOOP_INFINITE, 0.1f);
+		m_AudioObjectPtr->Start(L"Nanika", XAUDIO2_LOOP_INFINITE, 0.0f);
 
 	}
 
@@ -344,7 +347,7 @@ namespace basecross {
 			//Dパッド下
 			if (CntlVec[0].wButtons & XINPUT_GAMEPAD_DPAD_DOWN) {
 				//カメラ位置を引く
-				camera.m_CameraArmLen += 0.1f;
+				camera.m_CameraArmLen += 0.3f;
 				if (GetCamera().m_CameraArmLen >= 50.0f) {
 					GetCamera().m_CameraArmLen = 50.0f;
 				}
@@ -352,7 +355,7 @@ namespace basecross {
 			//Dパッド上
 			if (CntlVec[0].wButtons & XINPUT_GAMEPAD_DPAD_UP) {
 				//カメラ位置を寄る
-				camera.m_CameraArmLen -= 0.1f;
+				camera.m_CameraArmLen -= 0.3f;
 				if (GetCamera().m_CameraArmLen <= 2.0f) {
 					camera.m_CameraArmLen = 2.0f;
 				}

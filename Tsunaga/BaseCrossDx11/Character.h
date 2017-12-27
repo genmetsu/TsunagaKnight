@@ -120,9 +120,6 @@ namespace basecross {
 		//位置
 		Vec3 m_Pos;
 
-		//Rigidbodyのshared_ptr
-		shared_ptr<Rigidbody> m_Rigidbody;
-
 		//メッシュとの差分計算用
 		Mat4x4 m_MeshToTransformMatrix;
 		//描画データ
@@ -192,13 +189,6 @@ namespace basecross {
 		*/
 		//--------------------------------------------------------------------------------------
 		virtual Vec3 GetPosition() override;
-		//--------------------------------------------------------------------------------------
-		/*!
-		@brief ワールド行列の取得
-		@return	ワールド行列
-		*/
-		//--------------------------------------------------------------------------------------
-		//virtual void GetWorldMatrix(Mat4x4& m) const override;
 	};
 
 
@@ -586,7 +576,7 @@ namespace basecross {
 		//描画データ
 		shared_ptr<SimpleDrawObject> m_PtrObj;
 		//描画オブジェクト(weak_ptr)
-		weak_ptr<SimplePNTStaticRenderer2> m_Renderer;
+		weak_ptr<SimplePNTStaticRenderer> m_Renderer;
 		//シャドウマップ用描画データ
 		shared_ptr<ShadowmapObject> m_PtrShadowmapObj;
 		//シャドウマップ描画オブジェクト(weak_ptr)
@@ -810,6 +800,9 @@ namespace basecross {
 		float m_TackleSpeed;
 		float m_HP;
 		float m_AttackPoint;
+		//自分を固定するY軸の高さ
+		float m_BaseY;
+
 		Vec3 m_CannonPos;
 
 		//死んだかどうか
@@ -1175,28 +1168,14 @@ namespace basecross {
 		Quat m_Qt;
 		//位置
 		Vec3 m_Pos;
-		//ひとつ前の位置
-		Vec3 m_BeforePos;
 		// 突進の位置座標
 		Vec3 m_TargetPos;
 		//追いかけるスピード
 		float m_Speed;
 		//フレームカウント
 		float m_FrameCount;
-		//突撃するかどうか
-		bool m_Tackle;
-		//突撃する際に止まる時間
-		float m_StopTime;
-		//どれぐらい近づいたら突撃するかの距離
-		float m_SearchDis;
-		//突進のスピード
-		float m_TackleSpeed;
 		//弾のスピード
 		float m_ShootSpeed;
-		float m_HP;
-		float m_AttackPoint;
-
-		Vec3 m_TackleStart;
 
 		wstring m_my_Tag;
 
@@ -1215,16 +1194,7 @@ namespace basecross {
 		//シャドウマップ描画オブジェクト(weak_ptr)
 		weak_ptr<ShadowmapRenderer> m_ShadowmapRenderer;
 		bool m_OwnShadowActive;
-		//このオブジェクトのプレイヤーから見たローカル行列
-		Mat4x4 m_PlayerLocalMatrix;
-		//プレイヤーの直後（先頭）の場合の補間係数
-		float m_LerpToParent;
-		//このオブジェクトのチャイルドオブジェクトから見たローカル行列
-		Mat4x4 m_ChildLocalMatrix;
-		//チャイルド後の場合の補間係数
-		float m_LerpToChild;
-		//Attack1の場合の目標となる回転
-		float m_Attack1ToRot;
+		
 		// 弾が撃たれているかどうか
 		bool IsShoot;
 		// 弾の存在
@@ -1282,12 +1252,6 @@ namespace basecross {
 		virtual void OnDraw()override;
 		//--------------------------------------------------------------------------------------
 		/*!
-		@brief	ステートマシンを得る
-		@return	ステートマシン
-		*/
-		//--------------------------------------------------------------------------------------
-		//--------------------------------------------------------------------------------------
-		/*!
 		@brief ワールド行列の取得
 		@return	ワールド行列
 		*/
@@ -1295,22 +1259,25 @@ namespace basecross {
 		virtual void GetWorldMatrix(Mat4x4& m) const override;
 
 		virtual Vec3 GetPosition() override;
+
 		void SetPosition(Vec3 pos);
 
 		float GetScale(){
 			return m_Scale.x;
 		}
 
+		//--------------------------------------------------------------------------------------
+		/*!
+		@brief	弾を打ち出す処理
+		@return	
+		*/
+		//--------------------------------------------------------------------------------------
 		void Wakeup(const Vec3& Position, const Vec3& Velocity);
 
 		bool GetIsShoot()
 		{
 			return IsShoot;
 		}
-
-
-
-
 	};
 
 	//--------------------------------------------------------------------------------------
@@ -1397,6 +1364,10 @@ namespace basecross {
 
 	class CR_BossEnemy : public EnemyObject
 	{
+		//描画データ
+		shared_ptr<BcDrawObject> m_SimpleObj;
+		//描画オブジェクト(weak_ptr)
+		weak_ptr<BcPNTStaticRenderer> m_StaticRenderer;
 	public:
 		//--------------------------------------------------------------------------------------
 		/*!
@@ -1427,9 +1398,221 @@ namespace basecross {
 		*/
 		//--------------------------------------------------------------------------------------
 		//virtual void OppositionBehavior() override;
-
+		//--------------------------------------------------------------------------------------
+		/*!
+		@brief 更新
+		@return	なし
+		*/
+		//--------------------------------------------------------------------------------------
+		virtual void OnUpdate()override;
+		//--------------------------------------------------------------------------------------
+		/*!
+		@brief 初期化
+		@return	なし
+		*/
+		//--------------------------------------------------------------------------------------
+		virtual void OnCreate() override;
+		//--------------------------------------------------------------------------------------
+		/*!
+		@brief 描画
+		@return	なし
+		*/
+		//--------------------------------------------------------------------------------------
+		virtual void OnDraw() override;
 	};
 
+	//--------------------------------------------------------------------------------------
+	/// 中ボスキャラ　近距離 の 手
+	//--------------------------------------------------------------------------------------
+	class BossHand : public GameObject, public MatrixInterface {
+		//テクスチャリソース名
+		wstring m_TextureResName;
+		//スケーリング
+		Vec3 m_Scale;
+		//回転
+		Quat m_Qt;
+		//位置
+		Vec3 m_Pos;
+		//親オブジェクト
+		weak_ptr<GameObject> m_ParentPtr;
+		//Rigidbodyのshared_ptr
+		shared_ptr<Rigidbody> m_Rigidbody;
+		//文字列描画オブジェクト
+		shared_ptr<StringDrawObject> m_StringDrawObject;
+		//メッシュとの差分計算用
+		Mat4x4 m_MeshToTransformMatrix;
+		///描画データ
+		shared_ptr<BcDrawObject> m_PtrObj;
+		//描画オブジェクト(weak_ptr)
+		weak_ptr<BcPNTStaticRenderer> m_Renderer;
+		//シャドウマップ用描画データ
+		shared_ptr<ShadowmapObject> m_PtrShadowmapObj;
+		//シャドウマップ描画オブジェクト(weak_ptr)
+		weak_ptr<ShadowmapRenderer> m_ShadowmapRenderer;
+		bool m_OwnShadowActive;
+		//このオブジェクトのプレイヤーから見たローカル行列
+		Mat4x4 m_PlayerLocalMatrix;
+		//プレイヤーの直後（先頭）の場合の補間係数
+		float m_LerpToParent;
+		//このオブジェクトのチャイルドオブジェクトから見たローカル行列
+		Mat4x4 m_ChildLocalMatrix;
+		//チャイルド後の場合の補間係数
+		float m_LerpToChild;
+		//Attack1の場合の目標となる回転
+		float m_Attack1ToRot;
+		//ステートマシーン
+		unique_ptr<StateMachine<BossHand>>  m_StateMachine;
+	public:
+		//--------------------------------------------------------------------------------------
+		/*!
+		@brief コンストラクタ
+		@param[in]	StagePtr	ステージのポインタ
+		@param[in]	ParentPtr	親のポインタ
+		@param[in]	TextureResName	テクスチャリソース名
+		@param[in]	Scale	スケーリング
+		@param[in]	Qt	初期回転
+		@param[in]	Pos	位置
+		@param[in]	OwnShadowActive	影描画するかどうか
+		*/
+		//--------------------------------------------------------------------------------------
+		BossHand(const shared_ptr<Stage>& StagePtr,
+			const shared_ptr<GameObject>& ParentPtr,
+			const wstring& TextureResName, const wstring& TagName,
+			const Vec3& Scale, const Quat& Qt, const Vec3& Pos,
+			bool OwnShadowActive);
+		//--------------------------------------------------------------------------------------
+		/*!
+		@brief デストラクタ
+		*/
+		//--------------------------------------------------------------------------------------
+		virtual ~BossHand();
+		//--------------------------------------------------------------------------------------
+		/*!
+		@brief 初期化
+		@return	なし
+		*/
+		//--------------------------------------------------------------------------------------
+		virtual void OnCreate() override;
+		//--------------------------------------------------------------------------------------
+		/*!
+		@brief 更新
+		@return	なし
+		*/
+		//--------------------------------------------------------------------------------------
+		virtual void OnUpdate()override;
+		//--------------------------------------------------------------------------------------
+		/*!
+		@brief 更新
+		@return	なし
+		*/
+		//--------------------------------------------------------------------------------------
+		virtual void OnUpdate2()override;
+		//--------------------------------------------------------------------------------------
+		/*!
+		@brief	シャドウマップの描画処理(仮想関数)
+		@return	なし
+		*/
+		//--------------------------------------------------------------------------------------
+		virtual void OnDrawShadowmap() override;
+		//--------------------------------------------------------------------------------------
+		/*!
+		@brief 描画
+		@return	なし
+		*/
+		//--------------------------------------------------------------------------------------
+		virtual void OnDraw()override;
+		//--------------------------------------------------------------------------------------
+		/*!
+		@brief	ステートマシンを得る
+		@return	ステートマシン
+		*/
+		//--------------------------------------------------------------------------------------
+		unique_ptr< StateMachine<BossHand> >& GetStateMachine() {
+			return m_StateMachine;
+		}
+		//--------------------------------------------------------------------------------------
+		/*!
+		@brief ワールド行列の取得
+		@return	ワールド行列
+		*/
+		//--------------------------------------------------------------------------------------
+		virtual void GetWorldMatrix(Mat4x4& m) const override;
+		//--------------------------------------------------------------------------------------
+		/*!
+		@brief 追従する行動の開始
+		@return	なし
+		*/
+		//--------------------------------------------------------------------------------------
+		void ComplianceStartBehavior();
+		//--------------------------------------------------------------------------------------
+		/*!
+		@brief 攻撃１行動の開始
+		@return	なし
+		*/
+		//--------------------------------------------------------------------------------------
+		void Attack1StartBehavior();
+		//--------------------------------------------------------------------------------------
+		/*!
+		@brief 攻撃１行動の継続
+		@return	行動が終了したらtrue
+		*/
+		//--------------------------------------------------------------------------------------
+		bool Attack1ExcuteBehavior();
+		//--------------------------------------------------------------------------------------
+		/*!
+		@brief ステート共通処理
+		@return	なし
+		*/
+		//--------------------------------------------------------------------------------------
+		void UpdateBehavior();
+		//--------------------------------------------------------------------------------------
+		/*!
+		@brief 攻撃処理
+		@return	なし
+		*/
+		//--------------------------------------------------------------------------------------
+		void AttackBehavior();
+		//--------------------------------------------------------------------------------------
+		/*!
+		@brief ステートを変更する
+		@return	なし
+		*/
+		//--------------------------------------------------------------------------------------
+		void SetState(wstring state_name);
+
+		float GetScale() {
+			return m_Scale.x;
+		}
+	};
+
+	//--------------------------------------------------------------------------------------
+	///	攻撃しないステート（BossHand）
+	//--------------------------------------------------------------------------------------
+	class HandDefaultState : public ObjState<BossHand>
+	{
+		HandDefaultState() {}
+	public:
+		//ステートのインスタンス取得
+		DECLARE_SINGLETON_INSTANCE(HandDefaultState)
+		virtual void Enter(const shared_ptr<BossHand>& Obj)override;
+		virtual void Execute(const shared_ptr<BossHand>& Obj)override;
+		virtual void Exit(const shared_ptr<BossHand>& Obj)override;
+	};
+
+
+	//--------------------------------------------------------------------------------------
+	///	攻撃ステート（BossHand）
+	//--------------------------------------------------------------------------------------
+	class HandAttackState : public ObjState<BossHand>
+	{
+		HandAttackState() {}
+	public:
+		//ステートのインスタンス取得
+		DECLARE_SINGLETON_INSTANCE(HandAttackState)
+		virtual void Enter(const shared_ptr<BossHand>& Obj)override;
+		virtual void Execute(const shared_ptr<BossHand>& Obj)override;
+		virtual void Exit(const shared_ptr<BossHand>& Obj)override;
+	};
 	//--------------------------------------------------------------------------------------
 	/// 中ボスキャラ　遠距離
 	/// LD = Long Distance

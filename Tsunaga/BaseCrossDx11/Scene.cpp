@@ -115,65 +115,46 @@ namespace basecross {
 		App::GetApp()->RegisterTexture(L"TRACE_TX", strTexture);
 		strTexture = DataDir + L"StageMessage.png";
 		App::GetApp()->RegisterTexture(L"MESSAGE_TX", strTexture);
-
 		strTexture = DataDir + L"Red.png";
 		App::GetApp()->RegisterTexture(L"RED_TX", strTexture);
-
 		strTexture = DataDir + L"Balloon0.png";
 		App::GetApp()->RegisterTexture(L"Balloon0_TX", strTexture);
-
 		strTexture = DataDir + L"Checker.png";
 		App::GetApp()->RegisterTexture(L"Checker_TX", strTexture);
-
 		strTexture = DataDir + L"gray2.png";
 		App::GetApp()->RegisterTexture(L"WALL_TX", strTexture);
 		strTexture = DataDir + L"wall_normal.png";
 		App::GetApp()->RegisterTexture(L"WALL_NORMAL_TX", strTexture);
-
 		strTexture = DataDir + L"Brown.png";
 		App::GetApp()->RegisterTexture(L"BROWN_TX", strTexture);
 		strTexture = DataDir + L"normal2.png";
 		App::GetApp()->RegisterTexture(L"NORMAL2_TX", strTexture);
-
 		strTexture = DataDir + L"Kureha_ALL_Tex.tga";
 		App::GetApp()->RegisterTexture(L"KUREHA_TX", strTexture);
-
 		strTexture = DataDir + L"Ymato_TX.tga";
 		App::GetApp()->RegisterTexture(L"YAMATO_TX", strTexture);
-
 		strTexture = DataDir + L"E_Needle_UV2.png";
 		App::GetApp()->RegisterTexture(L"THOR_BOSS_TX", strTexture);
-
 		strTexture = DataDir + L"Hand_Main_UV.png";
 		App::GetApp()->RegisterTexture(L"HAND_BOSS_TX", strTexture);
-
 		strTexture = DataDir + L"Hand_Sub_UV.png";
 		App::GetApp()->RegisterTexture(L"HAND_TX", strTexture);
-
 		strTexture = DataDir + L"E_Needle.UV2.png";
 		App::GetApp()->RegisterTexture(L"NEEDLE_TX", strTexture);
-
 		strTexture = DataDir + L"E_Rocket2.png";
 		App::GetApp()->RegisterTexture(L"GUN_TX", strTexture);
-
 		strTexture = DataDir + L"E_Angel_UV.png";
 		App::GetApp()->RegisterTexture(L"ANGEL_TX", strTexture);
-
 		strTexture = DataDir + L"Brown.png";
 		App::GetApp()->RegisterTexture(L"Brown_TX", strTexture);
-
 		strTexture = DataDir + L"Brown2.png";
 		App::GetApp()->RegisterTexture(L"Brown2_TX", strTexture);
-
 		strTexture = DataDir + L"Blue.png";
 		App::GetApp()->RegisterTexture(L"Blue_TX", strTexture);
-
 		strTexture = DataDir + L"Large_Cannon_UV_2.png";
 		App::GetApp()->RegisterTexture(L"BLUE_CANNON_TX", strTexture);
-
 		strTexture = DataDir + L"Large_Cannon_UV_R.png";
 		App::GetApp()->RegisterTexture(L"RED_CANNON_TX", strTexture);
-
 		strTexture = DataDir + L"Large_Cannon_UV_G.png";
 		App::GetApp()->RegisterTexture(L"GREEN_CANNON_TX", strTexture);
 
@@ -185,22 +166,16 @@ namespace basecross {
 		//ボーンモデルのリソース
 		auto ModelMesh = MeshResource::CreateBoneModelMesh(DataDir, L"Kureha_fbx_v2.bmf");
 		App::GetApp()->RegisterResource(L"KUREHA_MESH", ModelMesh);
-
 		ModelMesh = MeshResource::CreateBoneModelMesh(DataDir, L"E_Needle.bmf");
 		App::GetApp()->RegisterResource(L"NEEDLE_MESH", ModelMesh);
-
 		ModelMesh = MeshResource::CreateBoneModelMesh(DataDir, L"E_Gun.bmf");
 		App::GetApp()->RegisterResource(L"GUN_MESH", ModelMesh);
-
 		ModelMesh = MeshResource::CreateBoneModelMesh(DataDir, L"E_Angel.bmf");
 		App::GetApp()->RegisterResource(L"ANGEL_MESH", ModelMesh);
-
 		ModelMesh = MeshResource::CreateBoneModelMesh(DataDir, L"Large_Cannon_Blue_Blast.bmf");
 		App::GetApp()->RegisterResource(L"CANNON_MESH", ModelMesh);
-
 		ModelMesh = MeshResource::CreateBoneModelMesh(DataDir, L"Medium_Boss_Thor_Move.bmf");
 		App::GetApp()->RegisterResource(L"THOR_BOSS_MESH", ModelMesh);
-
 		ModelMesh = MeshResource::CreateBoneModelMesh(DataDir, L"Yamato_Fbx_v01.bmf");
 		App::GetApp()->RegisterResource(L"YAMATO_MESH", ModelMesh);
 
@@ -208,10 +183,8 @@ namespace basecross {
 		//スタティックモデルのリソースとして読み込み
 		auto StaticModelMesh = MeshResource::CreateStaticModelMesh(DataDir, L"Medium_Boss_Hand_Left.bmf");
 		App::GetApp()->RegisterResource(L"LEFT_HAND_MESH", StaticModelMesh);
-
 		StaticModelMesh = MeshResource::CreateStaticModelMesh(DataDir, L"Medium_Boss_Hand_Right.bmf");
 		App::GetApp()->RegisterResource(L"RIGHT_HAND_MESH", StaticModelMesh);
-
 		StaticModelMesh = MeshResource::CreateStaticModelMesh(DataDir, L"Medium_Boss_Hand_Main.bmf");
 		App::GetApp()->RegisterResource(L"HAND_BOSS_MESH", StaticModelMesh);
 
