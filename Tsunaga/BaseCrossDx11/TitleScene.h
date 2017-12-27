@@ -10,6 +10,8 @@ namespace basecross {
 		//ƒrƒ…[‚Ìì¬
 		void CreateViewLight();
 		void CreateBackGround();
+
+
 	public:
 		//\’z‚Æ”jŠü
 		TitleScene() :Stage() {}
@@ -23,6 +25,7 @@ namespace basecross {
 
 
 		virtual void OnDrawStage()override;
+
 	};
 
 

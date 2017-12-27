@@ -25,20 +25,22 @@ void TitleScene::OnCreate() {
 
 	//背景スプライトの作成
 	AddGameObject<MultiSprite>(
-		L"SKY_TX",
+		L"TsunagaKnight_TX",
 		Vec2(1280, 800),
 		0.0f,
 		Vec2(0, 0),
 		1, 1
 		);
+
 	//背景スプライトの作成
 	AddGameObject<MultiSprite>(
-		L"KUREHA_TX",
-		Vec2(500, 500),
+		L"PRESS ANY BUTTON_TX",
+		Vec2(640, 200),
 		0.0f,
-		Vec2(0, 0),
+		Vec2(0, -300),
 		1, 1
 		);
+	
 
 }
 void TitleScene::OnDraw() {
@@ -75,6 +77,8 @@ void TitleScene::OnDrawStage() {
 
 void TitleScene::OnUpdate() 
 {
+
+
 	auto CntlVec = App::GetApp()->GetInputDevice().GetControlerVec();
 	if (CntlVec[0].bConnected)
 	{

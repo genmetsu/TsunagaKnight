@@ -177,6 +177,11 @@ namespace basecross {
 		strTexture = DataDir + L"Large_Cannon_UV_G.png";
 		App::GetApp()->RegisterTexture(L"GREEN_CANNON_TX", strTexture);
 
+		strTexture = DataDir + L"TsunagaKnight.png";
+		App::GetApp()->RegisterTexture(L"TsunagaKnight_TX", strTexture);
+		strTexture = DataDir + L"PRESS ANY BUTTON.png";
+		App::GetApp()->RegisterTexture(L"PRESS ANY BUTTON_TX", strTexture);
+
 		//ボーンモデルのリソース
 		auto ModelMesh = MeshResource::CreateBoneModelMesh(DataDir, L"Kureha_fbx_v2.bmf");
 		App::GetApp()->RegisterResource(L"KUREHA_MESH", ModelMesh);
