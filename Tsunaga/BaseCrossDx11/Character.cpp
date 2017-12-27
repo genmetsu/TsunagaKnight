@@ -931,9 +931,9 @@ namespace basecross {
 		m_Pos(Pos),
 		m_BeforePos(Pos),
 		m_FrameCount(0.0f),
-		m_Speed(1.0f),
+		m_Speed(0.5f),
 		m_Tackle(false),
-		m_StopTime(1.0f),
+		m_StopTime(1.5f),
 		m_SearchDis(1.0f),
 		m_TackleSpeed(5.0f),
 		m_TackleStart(Vec3(0.0f, 0.0f, 0.0f)),
@@ -951,6 +951,7 @@ namespace basecross {
 			Vec3(0.0f, XM_PI, 0.0f),
 			Vec3(0.0f, 0.0f, 0.0f)
 		);
+		m_BaseY = m_Scale.y / 2.0f;
 	}
 	EnemyObject::~EnemyObject() {}
 
@@ -1254,7 +1255,7 @@ namespace basecross {
 				Vec3 Tag = m_TargetPos - m_TackleStart;
 				Tag.normalize();
 				Tag *= m_TackleSpeed;
-				m_Rigidbody->m_Pos.y = m_Scale.y / 2.0f;
+				m_Rigidbody->m_Pos.y = m_BaseY;
 				m_Rigidbody->m_Velocity = Tag;
 				m_FrameCount += ElapsedTime;
 				return;
@@ -1285,7 +1286,7 @@ namespace basecross {
 					ToPosVec.normalize();
 					ToPosVec *= m_Speed;
 					m_Rigidbody->m_Velocity = ToPosVec;
-					m_Rigidbody->m_Pos.y = m_Scale.y / 2.0f;
+					m_Rigidbody->m_Pos.y = m_BaseY;
 				}
 			}
 		}
@@ -1531,7 +1532,7 @@ namespace basecross {
 		const Vec3 & Pos, bool OwnShadowActive):
 		EnemyObject(StagePtr, ParentPtr, MeshResName,TextureResName, DefaultAnimation, Scale, Qt, Pos, OwnShadowActive)
 	{
-		m_Speed = 1.0f;
+		m_Speed = 0.3f;
 		m_SearchDis = 5.0;
 		AddTag(L"Blue");
 		AddTag(L"Zako");
@@ -1730,7 +1731,7 @@ namespace basecross {
 		m_Pos(Pos),
 		m_OwnShadowActive(OwnShadowActive),
 		m_my_Tag(Tag),
-		m_ShootSpeed(3.0f),
+		m_ShootSpeed(2.0f),
 		m_FrameCount(0.0f),
 		m_BulletTime(10.0f),
 		IsShoot(false)
@@ -2046,8 +2047,9 @@ namespace basecross {
 		const Vec3 & Pos, bool OwnShadowActive) :
 		EnemyObject(StagePtr, ParentPtr, MeshResName, TextureResName, DefaultAnimation, Scale, Qt, Pos, OwnShadowActive)
 	{
-		m_Speed = 1.5f;
+		m_Speed = 0.5f;
 		m_HP = 15.0f;
+		
 		AddTag(L"CloseBoss");
 		//メッシュとトランスフォームの差分の設定
 		m_MeshToTransformMatrix.affineTransformation(
@@ -2095,6 +2097,8 @@ namespace basecross {
 		);
 		//ターゲット座標の初期化
 		m_TargetPos = Vec3(0.0f, 0.0f, 0.0f);
+
+		m_BaseY = m_Rigidbody->m_Scale.y / 2.0f + 1.0f;
 
 		auto TexPtr = App::GetApp()->GetResource<TextureResource>(m_TextureResName);
 
@@ -2184,10 +2188,10 @@ namespace basecross {
 		AddTag(TagName);
 		//メッシュとトランスフォームの差分の設定
 		m_MeshToTransformMatrix.affineTransformation(
-			Vec3(1.0f, 1.0f, 1.0f),
+			Vec3(3.0f, 1.5f, 3.0f),
 			Vec3(0.0f, 0.0f, 0.0f),
 			Vec3(0.0f, XM_PI, 0.0f),
-			Vec3(0.0f, 0.0f, 0.0f)
+			Vec3(0.0f, -0.5f, 0.0f)
 		);
 	}
 	BossHand::~BossHand() {}
@@ -2348,7 +2352,7 @@ namespace basecross {
 				m_Rigidbody->m_Scale,
 				Vec3(0, 0, 0),
 				Quat(),
-				Vec3(-1.5f, -0.5f, 1.0f)
+				Vec3(-1.1f, -0.5f, 1.0f)
 			);
 		}
 		else {
@@ -2356,7 +2360,7 @@ namespace basecross {
 				m_Rigidbody->m_Scale,
 				Vec3(0, 0, 0),
 				Quat(),
-				Vec3(1.5f, -0.5f, 1.0f)
+				Vec3(1.1f, -0.5f, 1.0f)
 			);
 		}
 		//このステートではチャイルドの場合も同じ
@@ -2465,7 +2469,7 @@ namespace basecross {
 		const Vec3 & Pos, bool OwnShadowActive) :
 		EnemyObject(StagePtr, ParentPtr, MeshResName, TextureResName,DefaultAnimation, Scale, Qt, Pos, OwnShadowActive)
 	{
-		m_Speed = 1.0f;
+		m_Speed = 0.5f;
 		m_HP = 5.0f;
 		AddTag(L"LongBoss");
 		//メッシュとトランスフォームの差分の設定

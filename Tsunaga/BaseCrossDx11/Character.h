@@ -800,6 +800,9 @@ namespace basecross {
 		float m_TackleSpeed;
 		float m_HP;
 		float m_AttackPoint;
+		//©•ª‚ğŒÅ’è‚·‚éY²‚Ì‚‚³
+		float m_BaseY;
+
 		Vec3 m_CannonPos;
 
 		//€‚ñ‚¾‚©‚Ç‚¤‚©

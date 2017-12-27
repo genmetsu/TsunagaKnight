@@ -76,7 +76,7 @@ namespace basecross {
 			AddGameObject<Player>(
 				L"KUREHA_TX",
 				true,
-				Vec3(0.0f, 0.5f, 3.0f)
+				Vec3(0.0f, 0.5f, 10.0f)
 				);
 		//SetPlayerPtr(Par);
 
@@ -159,7 +159,7 @@ namespace basecross {
 				L"NEEDLE_MESH",
 				L"NEEDLE_TX",
 				L"30frame",
-				Vec3(3.0f, 3.0f, 3.0f),
+				Vec3(10.0f, 10.0f, 10.0f),
 				Quat(),
 				Vec3(0.0f, 3.0f, 80.0f),
 				false);
@@ -195,7 +195,7 @@ namespace basecross {
 				L"HAND_BOSS_MESH",
 				L"HAND_BOSS_TX",
 				L"30frame",
-				Vec3(2.0f, 2.0f, 2.0f),
+				Vec3(1.8f, 1.8f, 1.8f),
 				Quat(),
 				Vec3((float)rand() / 32767 * 20.0f - 10.0f, 0.125f, 60.0f - (float)rand() / 32767 * 20.0f),
 				false);
@@ -203,7 +203,7 @@ namespace basecross {
 				ptr,
 				L"HAND_TX",
 				L"LEFT_HAND",
-				Vec3(1.0f, 1.0f, 1.0f),
+				Vec3(0.5f, 1.0f, 0.5f),
 				Quat(),
 				Vec3(0.0f, 0.5f, 0.0f),
 				true);
@@ -211,7 +211,7 @@ namespace basecross {
 				ptr,
 				L"HAND_TX",
 				L"RIGHT_HAND",
-				Vec3(1.0f, 1.0f, 1.0f),
+				Vec3(0.5f, 1.0f, 0.5f),
 				Quat(),
 				Vec3(0.0f, 0.5f, 0.0f),
 				true);
@@ -347,7 +347,7 @@ namespace basecross {
 			//Dパッド下
 			if (CntlVec[0].wButtons & XINPUT_GAMEPAD_DPAD_DOWN) {
 				//カメラ位置を引く
-				camera.m_CameraArmLen += 0.1f;
+				camera.m_CameraArmLen += 0.3f;
 				if (GetCamera().m_CameraArmLen >= 50.0f) {
 					GetCamera().m_CameraArmLen = 50.0f;
 				}
@@ -355,7 +355,7 @@ namespace basecross {
 			//Dパッド上
 			if (CntlVec[0].wButtons & XINPUT_GAMEPAD_DPAD_UP) {
 				//カメラ位置を寄る
-				camera.m_CameraArmLen -= 0.1f;
+				camera.m_CameraArmLen -= 0.3f;
 				if (GetCamera().m_CameraArmLen <= 2.0f) {
 					camera.m_CameraArmLen = 2.0f;
 				}

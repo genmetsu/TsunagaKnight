@@ -132,7 +132,7 @@ namespace basecross {
 		MultiLights()
 		{
 			SetDefaultLighting();
-			m_MainColorIndex = 2;
+			m_MainColorIndex = 0;
 		}
 		~MultiLights() {}
 		//--------------------------------------------------------------------------------------
