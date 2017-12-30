@@ -70,6 +70,13 @@ namespace basecross {
 			Vec3(0.0f, -12.8f, -20.0f),
 			true);
 
+		AddGameObject<Boss>(
+			L"BOSS_TX",
+			Vec3(2.5f, 2.5f, 2.5f),
+			Quat(),
+			Vec3(0.0f, 2.0f, 50.0f),
+			true);
+
 		//プレイヤーの作成
 		//shared_ptr<GameObject> 
 		auto Par =
@@ -152,7 +159,9 @@ namespace basecross {
 					L"PlayerBullet");
 			}
 		}
-		for (int i = 0; i < 1; i++) {
+
+
+		/*for (int i = 0; i < 1; i++) {
 			float x = (float)(i + 1);
 			AddGameObject<BossEnemy>(
 				Par,
@@ -172,7 +181,7 @@ namespace basecross {
 					false,
 					L"BossBullet");
 			}
-		}
+		}*/
 
 		for (int i = 0; i < 10; i++) {
 			float x = (float)(i + 1);
@@ -344,23 +353,6 @@ namespace basecross {
 		auto CntlVec = App::GetApp()->GetInputDevice().GetControlerVec();
 		if (CntlVec[0].bConnected) {
 
-			//Dパッド下
-			if (CntlVec[0].wButtons & XINPUT_GAMEPAD_DPAD_DOWN) {
-				//カメラ位置を引く
-				camera.m_CameraArmLen += 0.3f;
-				if (GetCamera().m_CameraArmLen >= 50.0f) {
-					GetCamera().m_CameraArmLen = 50.0f;
-				}
-			}
-			//Dパッド上
-			if (CntlVec[0].wButtons & XINPUT_GAMEPAD_DPAD_UP) {
-				//カメラ位置を寄る
-				camera.m_CameraArmLen -= 0.3f;
-				if (GetCamera().m_CameraArmLen <= 2.0f) {
-					camera.m_CameraArmLen = 2.0f;
-				}
-			}
-
 			if (CntlVec[0].fThumbRX != 0) {
 				camera.m_CameraXZRad -= CntlVec[0].fThumbRX * 0.05f;
 				if (abs(camera.m_CameraXZRad) >= XM_2PI) {
@@ -370,13 +362,29 @@ namespace basecross {
 
 			if (CntlVec[0].fThumbRY != 0) {
 				camera.m_CameraYRad += CntlVec[0].fThumbRY * 0.05f;
-				if (camera.m_CameraYRad >= XM_PIDIV2 - 0.05f) {
-					camera.m_CameraYRad = XM_PIDIV2 - 0.05f;
+				if (camera.m_CameraYRad >= 2.0f) {
+					camera.m_CameraYRad = 2.0f;
 				}
 				else if (camera.m_CameraYRad <= 0.5f) {
 					camera.m_CameraYRad = 0.5f;
 				}
+				if (camera.m_CameraYRad >= XM_PIDIV2 - 0.3f) {
+					if (CntlVec[0].fThumbRY > 0) {
+						camera.m_CameraArmLen -= CntlVec[0].fThumbRY * 0.1f;
+						if (GetCamera().m_CameraArmLen <= 1.5f) {
+							camera.m_CameraArmLen = 1.5f;
+						}
+					}
+					else if (CntlVec[0].fThumbRY < 0) {
+						camera.m_CameraArmLen -= CntlVec[0].fThumbRY * 0.1f;
+						if (GetCamera().m_CameraArmLen >= 50.0f) {
+							GetCamera().m_CameraArmLen = 50.0f;
+						}
+					}
+				}
 			}
+			auto GM = GameManager::getInstance();
+			GM->m_camera_length = camera.m_CameraYRad;
 
 			/*auto GM = GameManager::getInstance();
 			int now_friends_num = GM->GetFriendsNum();
