@@ -1680,6 +1680,7 @@ namespace basecross {
 						bool nowShooting = Ptr->GetIsShoot();
 						if (nowShooting == false)
 						{
+							m_PtrObj->ChangeCurrentAnimation(L"Attack");
 							Ptr->Wakeup(force * 0.1f + m_Rigidbody->m_Pos, force);
 							m_FrameCount = 0.0f;
 							return;

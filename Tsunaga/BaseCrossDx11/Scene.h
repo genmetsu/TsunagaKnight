@@ -124,9 +124,9 @@ namespace basecross {
 	//	マルチライト
 	//--------------------------------------------------------------------------------------
 	struct MultiLights {
-		Vec3 m_Directional[3];	//ライトの向き
-		Col4 m_DiffuseColor[3];	//ディフィーズ色
-		Col4 m_SpecularColor[3];	//スペキュラー色
+		Vec3 m_Directional[5];	//ライトの向き
+		Col4 m_DiffuseColor[5];	//ディフィーズ色
+		Col4 m_SpecularColor[5];	//スペキュラー色
 		Col4 m_AmbientLightColor;			//アンビエント色
 		size_t m_MainColorIndex;
 		MultiLights()
@@ -142,29 +142,35 @@ namespace basecross {
 		*/
 		//--------------------------------------------------------------------------------------
 		void SetDefaultLighting() {
-			static const Vec3 defaultDirections[3] =
+			static const Vec3 defaultDirections[5] =
 			{
-				{ -0.5265408f, -0.5735765f, -0.6275069f },
+				{ 0.0f, -0.5735765f, 0.6275069f },
+				{ 0.0f, 0.7660444f,  -0.4545195f },
 				{ 0.7198464f,  0.3420201f,  0.6040227f },
 				{ 0.4545195f, -0.7660444f,  0.4545195f },
+				{ 0.0f, -0.7f, -0.7f },
 			};
-			static const Col4 defaultDiffuse[3] =
+			static const Col4 defaultDiffuse[5] =
 			{
-				{ 1.0000000f, 0.9607844f, 0.8078432f,0.0f },
-				{ 0.9647059f, 0.7607844f, 0.4078432f,0.0f },
+				{ 0.8000000f, 0.807844f, 0.8078432f,0.0f },
+				{ 0.8000000f, 0.807844f, 0.8078432f,0.0f },
+				{ 0.9647059f, 0.7607844f, 0.8078432f,0.0f },
 				{ 0.3231373f, 0.3607844f, 0.3937255f,0.0f },
+				{ 0.8000000f, 0.807844f, 0.8078432f,0.0f },
 			};
 
-			static const Col4 defaultSpecular[3] =
+			static const Col4 defaultSpecular[5] =
 			{
-				{ 1.0000000f, 0.9607844f, 0.8078432f,0.0f },
+				{ 0.8000000f, 0.8607844f, 0.8078432f,0.0f },
+				{ 0.8000000f, 0.8607844f, 0.8078432f,0.0f },
 				{ 0.0000000f, 0.0000000f, 0.0000000f,0.0f },
 				{ 0.3231373f, 0.3607844f, 0.3937255f,0.0f },
+				{ 0.8000000f, 0.8607844f, 0.8078432f,0.0f },
 			};
 
 
 			m_AmbientLightColor = Col4(0.05333332f, 0.09882354f, 0.1819608f, 0.0f);
-			for (size_t i = 0; i < 3; i++) {
+			for (size_t i = 0; i < 5; i++) {
 				m_Directional[i] = defaultDirections[i];
 				m_Directional[i].normalize();
 				m_DiffuseColor[i] = defaultDiffuse[i];
