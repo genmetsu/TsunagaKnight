@@ -133,6 +133,8 @@ namespace basecross {
 		App::GetApp()->RegisterTexture(L"KUREHA_TX", strTexture);
 		strTexture = DataDir + L"Ymato_TX.tga";
 		App::GetApp()->RegisterTexture(L"YAMATO_TX", strTexture);
+		strTexture = DataDir + L"Boss_1_tx.tga";
+		App::GetApp()->RegisterTexture(L"BOSS_TX", strTexture);
 		strTexture = DataDir + L"E_Needle_UV2.png";
 		App::GetApp()->RegisterTexture(L"THOR_BOSS_TX", strTexture);
 		strTexture = DataDir + L"Hand_Main_UV.png";
@@ -178,6 +180,8 @@ namespace basecross {
 		App::GetApp()->RegisterResource(L"THOR_BOSS_MESH", ModelMesh);
 		ModelMesh = MeshResource::CreateBoneModelMesh(DataDir, L"Yamato_Fbx_v01.bmf");
 		App::GetApp()->RegisterResource(L"YAMATO_MESH", ModelMesh);
+		ModelMesh = MeshResource::CreateBoneModelMesh(DataDir, L"Boss_fbx_01.bmf");
+		App::GetApp()->RegisterResource(L"BOSS_MESH", ModelMesh);
 
 
 		//スタティックモデルのリソースとして読み込み
