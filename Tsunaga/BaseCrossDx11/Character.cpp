@@ -212,6 +212,115 @@ namespace basecross {
 	}
 
 	//--------------------------------------------------------------------------------------
+	/// 敵のボス
+	//--------------------------------------------------------------------------------------
+
+	Boss::Boss(const shared_ptr<Stage>& StagePtr,
+		const wstring& TextureResName, const Vec3& Scale, const Quat& Qt, const Vec3& Pos,
+		bool OwnShadowActive) :
+		GameObject(StagePtr),
+		m_TextureResName(TextureResName),
+		m_Scale(Scale),
+		m_Qt(Qt),
+		m_Pos(Pos),
+		m_OwnShadowActive(OwnShadowActive)
+	{}
+	Boss::~Boss() {}
+
+	void Boss::OnCreate() {
+		//メッシュの取得
+		auto MeshPtr = App::GetApp()->GetResource<MeshResource>(L"BOSS_MESH");
+
+		//メッシュとトランスフォームの差分の設定
+		m_MeshToTransformMatrix.affineTransformation(
+			Vec3(1.0f, 1.0f, 1.0f),
+			Vec3(0.0f, 0.0f, 0.0f),
+			Vec3(0.0f, 0.0f, 0.0f),
+			Vec3(0.0f, 0.0f, 0.0f)
+		);
+
+		//行列の定義
+		Mat4x4 World;
+		World.affineTransformation(
+			m_Scale,
+			Vec3(0, 0, 0),
+			m_Qt,
+			m_Pos
+		);
+
+		auto TexPtr = App::GetApp()->GetResource<TextureResource>(m_TextureResName);
+		//描画データの構築
+		m_PtrObj = make_shared<BcDrawObject>();
+		m_PtrObj->m_MeshRes = MeshPtr;
+		m_PtrObj->m_TextureRes = TexPtr;
+		m_PtrObj->m_WorldMatrix = World;
+		m_PtrObj->m_Camera = GetStage<Stage>()->GetCamera();
+		m_PtrObj->m_OwnShadowmapActive = m_OwnShadowActive;
+		m_PtrObj->m_ShadowmapUse = true;
+
+		//シャドウマップ描画データの構築
+		m_PtrShadowmapObj = make_shared<ShadowmapObject>();
+		m_PtrShadowmapObj->m_MeshRes = MeshPtr;
+		//描画データの行列をコピー
+		m_PtrShadowmapObj->m_WorldMatrix = World;
+		m_PtrShadowmapObj->m_Camera = GetStage<Stage>()->GetCamera();
+
+	}
+
+	void Boss::OnUpdate() {
+
+	}
+
+	void Boss::OnDrawShadowmap() {
+		//行列の定義
+		Mat4x4 World;
+		World.affineTransformation(
+			m_Scale,
+			Vec3(0, 0, 0),
+			m_Qt,
+			m_Pos
+		);
+		//差分を計算
+		World = m_MeshToTransformMatrix * World;
+		//描画データの行列をコピー
+		m_PtrShadowmapObj->m_WorldMatrix = World;
+		m_PtrShadowmapObj->m_Camera = GetStage<Stage>()->GetCamera();
+		auto shptr = m_ShadowmapRenderer.lock();
+		if (!shptr) {
+			shptr = GetStage<Stage>()->FindTagGameObject<ShadowmapRenderer>(L"ShadowmapRenderer");
+			m_ShadowmapRenderer = shptr;
+		}
+		shptr->AddDrawObject(m_PtrShadowmapObj);
+	}
+
+	void Boss::OnDraw() {
+		//行列の定義
+		Mat4x4 World;
+		World.affineTransformation(
+			m_Scale,
+			Vec3(0, 0, 0),
+			m_Qt,
+			m_Pos
+		);
+
+		//差分を計算
+		World = m_MeshToTransformMatrix * World;
+
+		m_PtrObj->m_WorldMatrix = World;
+		m_PtrObj->m_Camera = GetStage<Stage>()->GetCamera();
+		auto shptr = m_Renderer.lock();
+		if (!shptr) {
+			shptr = GetStage<Stage>()->FindTagGameObject<BcPNTStaticRenderer>(L"BcPNTStaticRenderer");
+			m_Renderer = shptr;
+		}
+		shptr->AddDrawObject(m_PtrObj);
+	}
+
+	Vec3 Boss::GetPosition() {
+		return m_Pos;
+	}
+
+	//--------------------------------------------------------------------------------------
 	//class MultiSpark : public MultiParticle;
 	//用途: 複数のスパーククラス
 	//--------------------------------------------------------------------------------------
@@ -616,10 +725,7 @@ namespace basecross {
 				UV
 			);
 		}
-
-
 	}
-
 
 	//--------------------------------------------------------------------------------------
 	///	メッセージを表示するスプライト
@@ -2015,6 +2121,7 @@ namespace basecross {
 		//現在と目標を補間
 		m_Rigidbody->m_Quat = XMQuaternionSlerp(m_Rigidbody->m_Quat, Qt, 0.1f);
 	}
+
 	//--------------------------------------------------------------------------------------
 	/// エンジェルエネミー
 	//--------------------------------------------------------------------------------------

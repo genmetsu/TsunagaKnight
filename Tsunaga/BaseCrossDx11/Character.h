@@ -27,6 +27,7 @@ namespace basecross {
 		int m_friends_num;
 		
 	public:
+		float m_camera_length;
 		static GameManager* getInstance();
 		void SetFriendsNum(int value) {
 			m_friends_num = value;
@@ -191,6 +192,91 @@ namespace basecross {
 		virtual Vec3 GetPosition() override;
 	};
 
+	//--------------------------------------------------------------------------------------
+	/// 敵のボス船
+	//--------------------------------------------------------------------------------------
+	class Boss : public GameObject {
+	protected:
+		//テクスチャリソース名
+		wstring m_TextureResName;
+
+		//スケーリング
+		Vec3 m_Scale;
+		//回転
+		Quat m_Qt;
+		//位置
+		Vec3 m_Pos;
+
+		//メッシュとの差分計算用
+		Mat4x4 m_MeshToTransformMatrix;
+		//描画データ
+		shared_ptr<BcDrawObject> m_PtrObj;
+		//描画オブジェクト(weak_ptr)
+		weak_ptr<BcPNTStaticRenderer> m_Renderer;
+		//シャドウマップ用描画データ
+		shared_ptr<ShadowmapObject> m_PtrShadowmapObj;
+		//シャドウマップ描画オブジェクト(weak_ptr)
+		weak_ptr<ShadowmapRenderer> m_ShadowmapRenderer;
+		bool m_OwnShadowActive;
+
+	public:
+		//--------------------------------------------------------------------------------------
+		/*!
+		@brief コンストラクタ
+		@param[in]	StagePtr	ステージのポインタ
+		@param[in]	ParentPtr	親のポインタ
+		@param[in]	TextureResName	テクスチャリソース名
+		@param[in]	Scale	スケーリング
+		@param[in]	Qt	初期回転
+		@param[in]	Pos	位置
+		@param[in]	OwnShadowActive	影描画するかどうか
+		*/
+		//--------------------------------------------------------------------------------------
+		Boss(const shared_ptr<Stage>& StagePtr,
+			const wstring& TextureResName, const Vec3& Scale, const Quat& Qt, const Vec3& Pos
+			, bool OwnShadowActive);
+		//--------------------------------------------------------------------------------------
+		/*!
+		@brief デストラクタ
+		*/
+		//--------------------------------------------------------------------------------------
+		virtual ~Boss();
+		//--------------------------------------------------------------------------------------
+		/*!
+		@brief 初期化
+		@return	なし
+		*/
+		//--------------------------------------------------------------------------------------
+		virtual void OnCreate() override;
+		//--------------------------------------------------------------------------------------
+		/*!
+		@brief 更新
+		@return	なし
+		*/
+		//--------------------------------------------------------------------------------------
+		virtual void OnUpdate()override;
+		//--------------------------------------------------------------------------------------
+		/*!
+		@brief	シャドウマップの描画処理(仮想関数)
+		@return	なし
+		*/
+		//--------------------------------------------------------------------------------------
+		virtual void OnDrawShadowmap() override;
+		//--------------------------------------------------------------------------------------
+		/*!
+		@brief 描画
+		@return	なし
+		*/
+		//--------------------------------------------------------------------------------------
+		virtual void OnDraw()override;
+		//--------------------------------------------------------------------------------------
+		/*!
+		@brief
+		@return	ワールド行列
+		*/
+		//--------------------------------------------------------------------------------------
+		virtual Vec3 GetPosition() override;
+	};
 
 	//--------------------------------------------------------------------------------------
 	//class MultiSpark : public MultiParticle;
