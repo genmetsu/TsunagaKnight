@@ -689,6 +689,10 @@ namespace basecross {
 		FPS += L"‚¤‚µ‚ë‚ÌƒtƒŒƒ“ƒY: ";
 		FPS += Util::IntToWStr(m_friends_num);
 		FPS += L"\n";
+		FPS += L"Camera: ";
+		auto GM = GameManager::getInstance();
+		FPS += Util::FloatToWStr(GM->m_camera_length);
+		FPS += L"\n";
 		if (!m_StringDrawObject) {
 			m_StringDrawObject = GetStage<GameStage>()->FindTagGameObject<StringDrawObject>(L"StringDrawObject");
 		}
