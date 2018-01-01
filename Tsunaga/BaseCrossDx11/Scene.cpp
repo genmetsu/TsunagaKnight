@@ -131,7 +131,7 @@ namespace basecross {
 		App::GetApp()->RegisterTexture(L"NORMAL2_TX", strTexture);
 		strTexture = DataDir + L"Kureha_ALL_Tex.tga";
 		App::GetApp()->RegisterTexture(L"KUREHA_TX", strTexture);
-		strTexture = DataDir + L"Ymato_TX.tga";
+		strTexture = DataDir + L"Ymato_TX_02.tga";
 		App::GetApp()->RegisterTexture(L"YAMATO_TX", strTexture);
 		strTexture = DataDir + L"Boss_1_tx.tga";
 		App::GetApp()->RegisterTexture(L"BOSS_TX", strTexture);
@@ -159,6 +159,12 @@ namespace basecross {
 		App::GetApp()->RegisterTexture(L"RED_CANNON_TX", strTexture);
 		strTexture = DataDir + L"Large_Cannon_UV_G.png";
 		App::GetApp()->RegisterTexture(L"GREEN_CANNON_TX", strTexture);
+		strTexture = DataDir + L"Angel_Icon.png";
+		App::GetApp()->RegisterTexture(L"ANGEL_ICON_TX", strTexture);
+		strTexture = DataDir + L"Gun_Icon.png";
+		App::GetApp()->RegisterTexture(L"GUN_ICON_TX", strTexture);
+		strTexture = DataDir + L"Needle_Icon.png";
+		App::GetApp()->RegisterTexture(L"NEEDLE_ICON_TX", strTexture);
 
 		strTexture = DataDir + L"TsunagaKnight.png";
 		App::GetApp()->RegisterTexture(L"TsunagaKnight_TX", strTexture);
@@ -195,8 +201,6 @@ namespace basecross {
 		App::GetApp()->RegisterResource(L"CANNON_MESH", ModelMesh);
 		ModelMesh = MeshResource::CreateBoneModelMesh(DataDir, L"Medium_Boss_Thor_Move.bmf");
 		App::GetApp()->RegisterResource(L"THOR_BOSS_MESH", ModelMesh);
-		ModelMesh = MeshResource::CreateBoneModelMesh(DataDir, L"Yamato_Fbx_v01.bmf");
-		App::GetApp()->RegisterResource(L"YAMATO_MESH", ModelMesh);
 		ModelMesh = MeshResource::CreateBoneModelMesh(DataDir, L"Boss_fbx_01.bmf");
 		App::GetApp()->RegisterResource(L"BOSS_MESH", ModelMesh);
 
@@ -208,6 +212,8 @@ namespace basecross {
 		App::GetApp()->RegisterResource(L"RIGHT_HAND_MESH", StaticModelMesh);
 		StaticModelMesh = MeshResource::CreateStaticModelMesh(DataDir, L"Medium_Boss_Hand_Main.bmf");
 		App::GetApp()->RegisterResource(L"HAND_BOSS_MESH", StaticModelMesh);
+		StaticModelMesh = MeshResource::CreateStaticModelMesh(DataDir, L"Yamato_Fbx_v03.bmf");
+		App::GetApp()->RegisterResource(L"YAMATO_MESH", StaticModelMesh);
 
 		//エフェクト
 		strTexture = DataDir + L"spark.png";

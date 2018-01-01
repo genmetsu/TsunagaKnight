@@ -844,7 +844,7 @@ namespace basecross {
 		for (int i = 0; i < m_friends_num; i++) {
 			auto f_pointer = dynamic_pointer_cast<EnemyObject>(m_friends[i].lock());
 			if (f_pointer->FindTag(tag_name)) {
-				auto boss = GetStage()->FindTagGameObject<BossEnemy>(L"BossEnemy");
+				auto boss = GetStage()->FindTagGameObject<Boss>(L"BossEnemy");
 				boss->Damage();
 
 				f_pointer->GetStateMachine()->ChangeState(EnemyOppositionState::Instance());

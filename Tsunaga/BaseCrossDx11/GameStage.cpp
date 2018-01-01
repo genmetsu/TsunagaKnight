@@ -80,9 +80,9 @@ namespace basecross {
 
 		AddGameObject<Boss>(
 			L"BOSS_TX",
-			Vec3(2.5f, 2.5f, 2.5f),
+			Vec3(4.0f, 4.0f, 4.0f),
 			Quat(),
-			Vec3(0.0f, 2.0f, 50.0f),
+			Vec3(0.0f, 4.0f, 60.0f),
 			true);
 
 		//プレイヤーの作成
@@ -350,7 +350,7 @@ namespace basecross {
 
 		AddGameObject<MultiSprite>(
 			L"BOSS_BAR_TX",
-			Vec2(1200, 50),
+			Vec2(1000, 50),
 			0.0f,
 			Vec2(0, -330),
 			1, 1
@@ -358,7 +358,7 @@ namespace basecross {
 		
 		AddGameObject<MultiSprite>(
 			L"BOSS_FRAME_TX",
-			Vec2(1200, 50),
+			Vec2(1000, 50),
 			0.0f,
 			Vec2(0, -330),
 			1, 1
@@ -367,14 +367,14 @@ namespace basecross {
 			L"CANNON_BAR_TX",
 			Vec2(300, 40),
 			0.0f,
-			Vec2(-390, 330),
+			Vec2(-410, 330),
 			1, 1
 			);
 		AddGameObject<MultiSprite>(
 			L"CANNON_FRAME_TX",
 			Vec2(300, 40),
 			0.0f,
-			Vec2(-390, 330),
+			Vec2(-410, 330),
 			1, 1
 			);
 
@@ -383,31 +383,46 @@ namespace basecross {
 			L"BOSS_ICON_TX",
 			Vec2(128.0f * 0.8f, 128.0f * 0.8f),
 			0.0f,
-			Vec2(-570, -290),
+			Vec2(-530, -320),
 			1, 1
 			);
 		AddGameObject<MultiSprite>(
 			L"CANNON_ICON_TX",
 			Vec2(64.0f * 0.8f, 64.0f * 0.8f),
 			0.0f,
-			Vec2(-580, 330),
+			Vec2(-590, 330),
 			1, 1
 			);
 
-		/*AddGameObject<MultiSprite>(
-			L"PLAYER_BAR_TX",
-			Vec2(300, 30),
-			0.0f,
-			Vec2(0, -40),
-			1, 1
-			);
-		AddGameObject<MultiSprite>(
-			L"PLAYER_FRAME_TX",
-			Vec2(300, 30),
-			0.0f,
-			Vec2(0, -40),
-			1, 1
-			);*/
+		for (int i = 0; i < 20; i++) {
+			if (i % 3 == 0) {
+				AddGameObject<MultiSprite>(
+					L"ANGEL_ICON_TX",
+					Vec2(30, 30),
+					0.0f,
+					Vec2(-590, 280 - i * 30),
+					1, 1
+					);
+			}
+			else if (i % 3 == 1) {
+				AddGameObject<MultiSprite>(
+					L"GUN_ICON_TX",
+					Vec2(30, 30),
+					0.0f,
+					Vec2(-590, 280 - i * 30),
+					1, 1
+					);
+			}
+			else if (i % 3 == 2) {
+				AddGameObject<MultiSprite>(
+					L"NEEDLE_ICON_TX",
+					Vec2(30, 30),
+					0.0f,
+					Vec2(-590, 280 - i * 30),
+					1, 1
+					);
+			}
+		}
 	}
 
 	//描画オブジェクトの追加

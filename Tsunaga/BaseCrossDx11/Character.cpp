@@ -248,6 +248,23 @@ namespace basecross {
 			m_Pos
 		);
 
+		m_HP = 10.0f;
+		AddTag(L"BossEnemy");
+
+		//Rigidbodyの初期化
+		auto PtrGameStage = GetStage<GameStage>();
+		Rigidbody body;
+		body.m_Owner = GetThis<GameObject>();
+		body.m_Mass = 1.0f;
+		body.m_Scale = m_Scale;
+		body.m_Quat = m_Qt;
+		body.m_Pos = m_Pos;
+		body.m_CollType = CollType::typeSPHERE;
+		body.m_IsCollisionActive = true;
+		//		body.m_IsDrawActive = true;
+		body.SetToBefore();
+		m_Rigidbody = PtrGameStage->AddRigidbody(body);
+
 		auto TexPtr = App::GetApp()->GetResource<TextureResource>(m_TextureResName);
 		//描画データの構築
 		m_PtrObj = make_shared<BcDrawObject>();
@@ -268,17 +285,19 @@ namespace basecross {
 	}
 
 	void Boss::OnUpdate() {
-
+		if (m_HP < 0.0f) {
+			SetPosition(Vec3(100, 100, 100));
+		}
 	}
 
 	void Boss::OnDrawShadowmap() {
 		//行列の定義
 		Mat4x4 World;
 		World.affineTransformation(
-			m_Scale,
+			m_Rigidbody->m_Scale,
 			Vec3(0, 0, 0),
-			m_Qt,
-			m_Pos
+			m_Rigidbody->m_Quat,
+			m_Rigidbody->m_Pos
 		);
 		//差分を計算
 		World = m_MeshToTransformMatrix * World;
@@ -297,10 +316,10 @@ namespace basecross {
 		//行列の定義
 		Mat4x4 World;
 		World.affineTransformation(
-			m_Scale,
+			m_Rigidbody->m_Scale,
 			Vec3(0, 0, 0),
-			m_Qt,
-			m_Pos
+			m_Rigidbody->m_Quat,
+			m_Rigidbody->m_Pos
 		);
 
 		//差分を計算
