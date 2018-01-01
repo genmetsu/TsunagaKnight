@@ -165,6 +165,23 @@ namespace basecross {
 		strTexture = DataDir + L"PRESS ANY BUTTON.png";
 		App::GetApp()->RegisterTexture(L"PRESS ANY BUTTON_TX", strTexture);
 
+		strTexture = DataDir + L"Boss_HP_Icon.png";
+		App::GetApp()->RegisterTexture(L"BOSS_ICON_TX", strTexture);
+		strTexture = DataDir + L"Cannon_HP_Icon.png";
+		App::GetApp()->RegisterTexture(L"CANNON_ICON_TX", strTexture);
+		strTexture = DataDir + L"Boss_HP_Bar.png";
+		App::GetApp()->RegisterTexture(L"BOSS_BAR_TX", strTexture);
+		strTexture = DataDir + L"Boss_HP_Frame.png";
+		App::GetApp()->RegisterTexture(L"BOSS_FRAME_TX", strTexture);
+		strTexture = DataDir + L"Cannon_HP_Bar.png";
+		App::GetApp()->RegisterTexture(L"CANNON_BAR_TX", strTexture);
+		strTexture = DataDir + L"Cannon_HP_Frame.png";
+		App::GetApp()->RegisterTexture(L"CANNON_FRAME_TX", strTexture);
+		strTexture = DataDir + L"Player_HP_Bar.png";
+		App::GetApp()->RegisterTexture(L"PLAYER_BAR_TX", strTexture);
+		strTexture = DataDir + L"Player_HP_Frame.png";
+		App::GetApp()->RegisterTexture(L"PLAYER_FRAME_TX", strTexture);
+
 		//ボーンモデルのリソース
 		auto ModelMesh = MeshResource::CreateBoneModelMesh(DataDir, L"Kureha_fbx_v2.bmf");
 		App::GetApp()->RegisterResource(L"KUREHA_MESH", ModelMesh);

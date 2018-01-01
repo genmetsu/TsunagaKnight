@@ -49,6 +49,14 @@ namespace basecross {
 			Vec3(0.0f),
 			false);
 
+		AddGameObject<MultiSprite>(
+			L"BOSS_ICON_TX",
+			Vec2(256, 256),
+			0.0f,
+			Vec2(0, 0),
+			1, 1
+			);
+
 		//複数使用する球体の登録（リソース登録する）
 		RegisterDefaultSphere();
 
@@ -240,6 +248,8 @@ namespace basecross {
 				false);
 		}
 
+		
+
 
 		//スパークエフェクト
 		AddGameObject<MultiSpark>();
@@ -277,7 +287,127 @@ namespace basecross {
 		m_AudioObjectPtr = ObjectFactory::Create<MultiAudioObject>();
 		m_AudioObjectPtr->AddAudioResource(L"Nanika");
 		m_AudioObjectPtr->Start(L"Nanika", XAUDIO2_LOOP_INFINITE, 0.0f);
+		
 
+		/*AddGameObject<MultiSprite>(
+			L"BOSS_BAR_TX",
+			Vec2(1200, 80),
+			0.0f,
+			Vec2(0, -330),
+			1, 1
+			);
+		AddGameObject<MultiSprite>(
+			L"CANNON_BAR_TX",
+			Vec2(1200, 80),
+			0.0f,
+			Vec2(0, 330),
+			1, 1
+			);
+		AddGameObject<MultiSprite>(
+			L"BOSS_FRAME_TX",
+			Vec2(1200, 80),
+			0.0f,
+			Vec2(0, -330),
+			1, 1
+			);
+		AddGameObject<MultiSprite>(
+			L"CANNON_FRAME_TX",
+			Vec2(1200, 80),
+			0.0f,
+			Vec2(0, 330),
+			1, 1
+			);
+
+		AddGameObject<MultiSprite>(
+			L"BOSS_ICON_TX",
+			Vec2(128.0f * 0.8f, 128.0f * 0.8f),
+			0.0f,
+			Vec2(0, -300),
+			1, 1
+			);
+		AddGameObject<MultiSprite>(
+			L"CANNON_ICON_TX",
+			Vec2(64.0f * 0.8f, 64.0f * 0.8f),
+			0.0f,
+			Vec2(0, 310),
+			1, 1
+			);
+
+		AddGameObject<MultiSprite>(
+			L"PLAYER_BAR_TX",
+			Vec2(300, 30),
+			0.0f,
+			Vec2(0, -40),
+			1, 1
+			);
+		AddGameObject<MultiSprite>(
+			L"PLAYER_FRAME_TX",
+			Vec2(300, 30),
+			0.0f,
+			Vec2(0, -40),
+			1, 1
+			);*/
+
+		AddGameObject<MultiSprite>(
+			L"BOSS_BAR_TX",
+			Vec2(1200, 50),
+			0.0f,
+			Vec2(0, -330),
+			1, 1
+			);
+		
+		AddGameObject<MultiSprite>(
+			L"BOSS_FRAME_TX",
+			Vec2(1200, 50),
+			0.0f,
+			Vec2(0, -330),
+			1, 1
+			);
+		AddGameObject<MultiSprite>(
+			L"CANNON_BAR_TX",
+			Vec2(300, 40),
+			0.0f,
+			Vec2(-390, 330),
+			1, 1
+			);
+		AddGameObject<MultiSprite>(
+			L"CANNON_FRAME_TX",
+			Vec2(300, 40),
+			0.0f,
+			Vec2(-390, 330),
+			1, 1
+			);
+
+
+		AddGameObject<MultiSprite>(
+			L"BOSS_ICON_TX",
+			Vec2(128.0f * 0.8f, 128.0f * 0.8f),
+			0.0f,
+			Vec2(-570, -290),
+			1, 1
+			);
+		AddGameObject<MultiSprite>(
+			L"CANNON_ICON_TX",
+			Vec2(64.0f * 0.8f, 64.0f * 0.8f),
+			0.0f,
+			Vec2(-580, 330),
+			1, 1
+			);
+
+		/*AddGameObject<MultiSprite>(
+			L"PLAYER_BAR_TX",
+			Vec2(300, 30),
+			0.0f,
+			Vec2(0, -40),
+			1, 1
+			);
+		AddGameObject<MultiSprite>(
+			L"PLAYER_FRAME_TX",
+			Vec2(300, 30),
+			0.0f,
+			Vec2(0, -40),
+			1, 1
+			);*/
 	}
 
 	//描画オブジェクトの追加
