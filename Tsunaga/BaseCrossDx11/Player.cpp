@@ -850,9 +850,10 @@ namespace basecross {
 			if (f_pointer->FindTag(tag_name)) {
 				auto boss = GetStage()->FindTagGameObject<Boss>(L"BossEnemy");
 				boss->Damage();
-
+				//‚Â‚È‚ª‚èÁ‚·
 				f_pointer->GetStateMachine()->ChangeState(EnemyOppositionState::Instance());
 				f_pointer->SetPosition(Vec3(100, 100, 100));
+				//”z—ñ‚ğÁ‚µA‚Â‚È‚ª‚è‚Ì”‚ğÄŒvZ
 				m_friends.erase(m_friends.begin() + i);
 				m_friends_num = m_friends.size();
 			}

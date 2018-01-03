@@ -127,7 +127,7 @@ namespace basecross {
 				tag,
 				Vec3(4.0f, 4.0f, 4.0f),
 				Quat(),
-				Vec3(x * 7.0f - 7.0f, 0.0f, -3.0f),
+				Vec3(x * 9.0f - 9.0f, 0.0f, -3.0f),
 				i, false);
 		}
 
@@ -383,7 +383,6 @@ namespace basecross {
 			1, 1
 			);
 
-
 		AddGameObject<MultiSprite>(
 			L"BOSS_ICON_TX",
 			Vec2(128.0f * 0.8f, 128.0f * 0.8f),
@@ -452,7 +451,6 @@ namespace basecross {
 		AddGameObject<SimplePNTBoneModelRenderer>(L"SimplePNTBoneModelRenderer");
 		//SimplePNTBoneModelRenderer2描画オブジェクトの作成
 		AddGameObject<SimplePNTBoneModelRenderer2>(L"SimplePNTBoneModelRenderer2");
-
 
 		//BcPNTStaticDrawObject描画オブジェクトの作成
 		AddGameObject<BcPNTStaticRenderer>(L"BcPNTStaticRenderer");
@@ -545,7 +543,6 @@ namespace basecross {
 				}
 			}*/
 			
-
 			auto PlayerPtr = FindTagGameObject<Player>(L"Player");
 			int now_cannon = PlayerPtr->GetIsCannon();
 			if (now_cannon < 3) {
@@ -556,7 +553,7 @@ namespace basecross {
 					camera.m_CamerAt = boss_pos;
 					camera.m_CameraArmLen = 30;
 					camera.m_CamerEye = c->GetPosition();
-					camera.m_CamerEye.x -= 3.0f;
+					camera.m_CamerEye.x -= 4.0f;
 					camera.m_CamerEye.y += 2.0f;
 					camera.m_CamerEye.z -= 6.0f;
 				}
@@ -568,23 +565,20 @@ namespace basecross {
 					camera.m_CamerEye.x -= 3.0f;
 					camera.m_CamerEye.y += 2.0f;
 					camera.m_CamerEye.z -= 6.0f;
-					
 				}
 				if (now_cannon == 2) {
 					auto c = FindTagGameObject<Cannon>(L"BLUE_CANNON");
 					camera.m_CamerAt = boss_pos;
 					camera.m_CameraArmLen = 30;
 					camera.m_CamerEye = c->GetPosition();
-					camera.m_CamerEye.x -= 3.0f;
+					camera.m_CamerEye.x -= 2.0f;
 					camera.m_CamerEye.y += 2.0f;
 					camera.m_CamerEye.z -= 6.0f;
-					
 				}
 			}
 			else {
 				camera.m_CamerAt = PlayerPtr->GetPosition();
 				camera.m_CamerAt.y += 0.5f;
-
 
 				Vec3 CameraLocalEye =
 					Vec3(
