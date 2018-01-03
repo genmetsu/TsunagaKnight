@@ -28,6 +28,8 @@ namespace basecross {
 		bool m_JumpLock;
 		/// ステップ（回避行動）してるかどうか
 		bool m_isStep;
+		///砲撃した場合のbool
+		int m_NowCannonClass;
 
 		//移動しているかどうか
 		enum RunningMode {
@@ -256,7 +258,18 @@ namespace basecross {
 			m_RunAnimationFrameCount = 0.0f;
 			isRunning = RunEnd;
 		}
-
+		//--------------------------------------------------------------------------------------
+		/*!
+		@brief 砲撃してるかどうかのboolのゲッターセッター
+		@return	なし
+		*/
+		//--------------------------------------------------------------------------------------
+		void SetIsCannnon(int is_cannon) {
+			m_NowCannonClass = is_cannon;
+		}
+		int GetIsCannon() {
+			return m_NowCannonClass;
+		}
 		//--------------------------------------------------------------------------------------
 		/*!
 		@brief	ステートマシンを得る

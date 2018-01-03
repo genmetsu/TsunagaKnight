@@ -336,7 +336,7 @@ namespace basecross {
 	}
 
 	Vec3 Boss::GetPosition() {
-		return m_Pos;
+		return m_Rigidbody->m_Pos;
 	}
 
 	//--------------------------------------------------------------------------------------
@@ -903,7 +903,7 @@ namespace basecross {
 	//--------------------------------------------------------------------------------------
 
 	Cannon::Cannon(const shared_ptr<Stage>& StagePtr,
-		const wstring& TextureResName, const Vec3& Scale, const Quat& Qt, const Vec3& Pos,
+		const wstring& TextureResName, const wstring& TagName, const Vec3& Scale, const Quat& Qt, const Vec3& Pos,
 		int CannonClass, bool OwnShadowActive) :
 		GameObject(StagePtr),
 		m_TextureResName(TextureResName),
@@ -913,7 +913,9 @@ namespace basecross {
 		m_OwnShadowActive(OwnShadowActive),
 		myClass(CannonClass),
 		m_HP(100.0f)
-	{}
+	{
+		AddTag(TagName);
+	}
 	Cannon::~Cannon() {}
 
 	void Cannon::OnCreate() {
@@ -2002,143 +2004,6 @@ namespace basecross {
 		SetPosition(Position);
 		m_Rigidbody->m_Velocity = Velocity * m_ShootSpeed;
 		IsShoot = true;
-	}
-
-
-	//--------------------------------------------------------------------------------------
-	/// ボスエネミー
-	//--------------------------------------------------------------------------------------
-
-	BossEnemy::BossEnemy(const shared_ptr<Stage>& StagePtr, 
-		const shared_ptr<GameObject>& ParentPtr,
-		const wstring& MeshResName,
-		const wstring & TextureResName, const wstring& DefaultAnimation, const Vec3 & Scale,
-		const Quat & Qt, const Vec3 & Pos, bool OwnShadowActive):
-	EnemyObject(StagePtr, ParentPtr, MeshResName,TextureResName, DefaultAnimation, Scale, Qt, Pos, OwnShadowActive)
-	{
-		m_HP = 10.0f;
-		m_Speed = 0.3f;
-		AddTag(L"BossEnemy");
-		//メッシュとトランスフォームの差分の設定
-		m_MeshToTransformMatrix.affineTransformation(
-			Vec3(1.0f, 1.0f, 1.0f),
-			Vec3(0.0f, 0.0f, 0.0f),
-			Vec3(0.0f, XM_PI, 0.0f),
-			Vec3(0.0f, 0.0f, 0.0f)
-		);
-	}
-
-	BossEnemy::~BossEnemy()
-	{
-	}
-
-	void BossEnemy::OppositionBehavior()
-	{
-		if (m_HP < 0.0f) {
-			SetPosition(Vec3(100, 100, 100));
-		}
-		float ElapsedTime = App::GetApp()->GetElapsedTime();
-		auto shptr = m_ParentPtr.lock();
-		//親のワールド行列を取得する変数
-		Mat4x4 ParMat;
-		if (shptr) {
-			//行列取得用のインターフェイスを持ってるかどうか
-			auto matintptr = dynamic_pointer_cast<MatrixInterface>(shptr);
-			if (matintptr) {
-				matintptr->GetWorldMatrix(ParMat);
-			}
-
-			Mat4x4 World;
-			World.identity();
-			//行列の定義
-			World = m_PlayerLocalMatrix;
-			//スケーリングを1.0にした行列に変換
-			ParMat.scaleIdentity();
-			//行列の反映
-			World *= ParMat;
-			//この時点でWorldは目標となる位置
-			Vec3 toPos = World.transInMatrix();
-			Vec3 ToPosVec = toPos - m_Rigidbody->m_Pos;
-			//距離を求める
-			float dis = ToPosVec.length();
-
-			// 突進して1.5秒たったら・・・・
-			if (m_FrameCount > m_StopTime * 1.5f)
-			{
-				vector<shared_ptr<GameObject>> BossVec;
-				GetStage<GameStage>()->FindTagGameObjectVec(L"BossBullet", BossVec);
-				for (auto v : BossVec) {
-					if (v) {
-						auto Ptr = dynamic_pointer_cast<BulletObject>(v);
-						Ptr->SetPosition(ToPosVec*0.25f + m_Rigidbody->m_Pos);
-					}
-				}
-				//	MessageBox(NULL, L"〇〇飛ばしたい", L" ", MB_YESNO);
-				m_Tackle = false;
-				m_FrameCount = 0.0f;
-				m_TargetPos = Vec3(0.0f, 0.0f, 0.0f);
-			}
-			// 止まりはじめ
-			else if (m_FrameCount > m_StopTime && m_Tackle == false)
-			{
-				m_Tackle = true;
-				if (m_TargetPos == Vec3(0.0f, 0.0f, 0.0f)) {
-					m_TargetPos = toPos;
-					m_TackleStart = m_Rigidbody->m_Pos;
-				}
-			}
-
-			// 突進の処理
-			if (m_Tackle == true)
-			{
-				Vec3 Tag = m_TargetPos - m_TackleStart;
-				Tag.normalize();
-				Tag = Vec3(0.0f, 0.0f, 0.0f);
-				m_Rigidbody->m_Pos.y = m_Scale.y / 2.0f + 3.0f;
-				m_Rigidbody->m_Velocity = Tag;
-				m_FrameCount += ElapsedTime;
-				return;
-			}
-
-			// エネミー移動処理
-			if (m_Tackle == false)
-			{
-				if (m_FrameCount > 0.0f)
-				{
-					m_Rigidbody->m_Velocity *= 0.7f;
-					m_FrameCount += ElapsedTime;
-				}
-				// プレイヤーとエネミーの距離が近くなった時の処理
-				else if (dis <= m_SearchDis)
-				{
-					m_FrameCount += ElapsedTime;
-					//fireの送出
-					auto FirePtr = GetStage<GameStage>()->FindTagGameObject<AttackSigns>(L"AttackSigns");
-					Vec3 Emitter = m_Rigidbody->m_Pos;
-					Emitter.y -= 0.125f;
-					FirePtr->InsertSigns(Emitter);
-
-				}
-
-				// プレイヤーに向かう処理
-				else
-				{
-					ToPosVec.normalize();
-					ToPosVec *= m_Speed;
-					m_Rigidbody->m_Velocity = ToPosVec;
-					m_Rigidbody->m_Pos.y = m_Scale.y / 2.0f + 3.0f;
-
-				}
-			}
-		}
-		Vec3 Temp = m_Rigidbody->m_Velocity;
-		Temp.normalize();
-		float ToAngle = atan2(Temp.x, Temp.z);
-		Quat Qt;
-		Qt.rotationRollPitchYawFromVector(Vec3(0, ToAngle, 0));
-		Qt.normalize();
-		//現在と目標を補間
-		m_Rigidbody->m_Quat = XMQuaternionSlerp(m_Rigidbody->m_Quat, Qt, 0.1f);
 	}
 
 	//--------------------------------------------------------------------------------------

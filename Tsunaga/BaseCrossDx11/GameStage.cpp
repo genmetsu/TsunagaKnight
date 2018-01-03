@@ -107,22 +107,27 @@ namespace basecross {
 		for (int i = 0; i < 3; i++) {
 			float x = (float)(i);
 			wstring texture;
+			wstring tag;
 			switch (i) {
 			case 0:
 				texture = L"GREEN_CANNON_TX";
+				tag = L"GREEN_CANNON";
 				break;
 			case 1:
 				texture = L"RED_CANNON_TX";
+				tag = L"RED_CANNON";
 				break;
 			case 2:
 				texture = L"BLUE_CANNON_TX";
+				tag = L"BLUE_CANNON";
 				break;
 			}
 			AddGameObject<Cannon>(
 				texture,
+				tag,
 				Vec3(4.0f, 4.0f, 4.0f),
 				Quat(),
-				Vec3(x * 6.0f - 6.0f, 0.0f, -3.0f),
+				Vec3(x * 7.0f - 7.0f, 0.0f, -3.0f),
 				i, false);
 		}
 
@@ -539,16 +544,56 @@ namespace basecross {
 					GetCamera().m_CameraArmLen = 50.0f;
 				}
 			}*/
+			
 
-			camera.m_CamerAt = FindTagGameObject<GameObject>(L"Player")->GetPosition();
-			camera.m_CamerAt.y += 0.5f;
-			Vec3 CameraLocalEye =
-				Vec3(
-					sin(camera.m_CameraXZRad) * camera.m_CameraArmLen * sin(camera.m_CameraYRad),
-					cos(camera.m_CameraYRad) * camera.m_CameraArmLen,
-					-cos(camera.m_CameraXZRad) * camera.m_CameraArmLen * sin(camera.m_CameraYRad)
-				);
-			camera.m_CamerEye = camera.m_CamerAt + CameraLocalEye;
+			auto PlayerPtr = FindTagGameObject<Player>(L"Player");
+			int now_cannon = PlayerPtr->GetIsCannon();
+			if (now_cannon < 3) {
+				auto boss = FindTagGameObject<Boss>(L"BossEnemy");
+				Vec3 boss_pos = boss->GetPosition();
+				if (now_cannon == 0) {
+					auto c = FindTagGameObject<Cannon>(L"GREEN_CANNON");
+					camera.m_CamerAt = boss_pos;
+					camera.m_CameraArmLen = 30;
+					camera.m_CamerEye = c->GetPosition();
+					camera.m_CamerEye.x -= 3.0f;
+					camera.m_CamerEye.y += 2.0f;
+					camera.m_CamerEye.z -= 6.0f;
+				}
+				if (now_cannon == 1) {
+					auto c = FindTagGameObject<Cannon>(L"RED_CANNON");
+					camera.m_CamerAt = boss_pos;
+					camera.m_CameraArmLen = 30;
+					camera.m_CamerEye = c->GetPosition();
+					camera.m_CamerEye.x -= 3.0f;
+					camera.m_CamerEye.y += 2.0f;
+					camera.m_CamerEye.z -= 6.0f;
+					
+				}
+				if (now_cannon == 2) {
+					auto c = FindTagGameObject<Cannon>(L"BLUE_CANNON");
+					camera.m_CamerAt = boss_pos;
+					camera.m_CameraArmLen = 30;
+					camera.m_CamerEye = c->GetPosition();
+					camera.m_CamerEye.x -= 3.0f;
+					camera.m_CamerEye.y += 2.0f;
+					camera.m_CamerEye.z -= 6.0f;
+					
+				}
+			}
+			else {
+				camera.m_CamerAt = PlayerPtr->GetPosition();
+				camera.m_CamerAt.y += 0.5f;
+
+
+				Vec3 CameraLocalEye =
+					Vec3(
+						sin(camera.m_CameraXZRad) * camera.m_CameraArmLen * sin(camera.m_CameraYRad),
+						cos(camera.m_CameraYRad) * camera.m_CameraArmLen,
+						-cos(camera.m_CameraXZRad) * camera.m_CameraArmLen * sin(camera.m_CameraYRad)
+					);
+				camera.m_CamerEye = camera.m_CamerAt + CameraLocalEye;
+			}
 			//Bƒ{ƒ^ƒ“
 			if (CntlVec[0].wPressedButtons & XINPUT_GAMEPAD_B) {
 				PostEvent(0.0f, GetThis<ObjectInterface>(), App::GetApp()->GetScene<Scene>(), L"ToEmptyStage");

@@ -797,7 +797,7 @@ namespace basecross {
 		*/
 		//--------------------------------------------------------------------------------------
 		Cannon(const shared_ptr<Stage>& StagePtr,
-			const wstring& TextureResName, const Vec3& Scale, const Quat& Qt, const Vec3& Pos,
+			const wstring& TextureResName, const wstring& TagName,const Vec3& Scale, const Quat& Qt, const Vec3& Pos,
 			int CannonClass,bool OwnShadowActive);
 		//--------------------------------------------------------------------------------------
 		/*!
@@ -1384,52 +1384,6 @@ namespace basecross {
 		{
 			return IsShoot;
 		}
-	};
-
-	//--------------------------------------------------------------------------------------
-	/// ボスキャラ　でかい
-	//--------------------------------------------------------------------------------------
-
-	class BossEnemy : public EnemyObject
-	{
-	public:
-		//--------------------------------------------------------------------------------------
-		/*!
-		@brief コンストラクタ
-		@param[in]	StagePtr	ステージのポインタ
-		@param[in]	ParentPtr	親のポインタ
-		@param[in]	TextureResName	テクスチャリソース名
-		@param[in]	Scale	スケーリング
-		@param[in]	Qt	初期回転
-		@param[in]	Pos	位置
-		@param[in]	OwnShadowActive	影描画するかどうか
-		*/
-		//--------------------------------------------------------------------------------------
-		BossEnemy(const shared_ptr<Stage>& StagePtr,
-			const shared_ptr<GameObject>& ParentPtr, const wstring& MeshResName,
-			const wstring& TextureResName, const wstring& DefaultAnimation, const Vec3& Scale, const Quat& Qt, const Vec3& Pos,
-			bool OwnShadowActive);
-		//--------------------------------------------------------------------------------------
-		/*!
-		@brief デストラクタ
-		*/
-		//--------------------------------------------------------------------------------------
-		virtual ~BossEnemy();
-		//--------------------------------------------------------------------------------------
-		/*!
-		@brief 敵対中の処理
-		@return	なし
-		*/
-		//--------------------------------------------------------------------------------------
-		virtual void OppositionBehavior() override;
-		//--------------------------------------------------------------------------------------
-		/*!
-		@brief ダメージ処理
-		@return	なし
-		*/
-		//--------------------------------------------------------------------------------------
-		void Damage() { m_HP--; }
-		
 	};
 
 	//--------------------------------------------------------------------------------------

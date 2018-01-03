@@ -24,6 +24,7 @@ namespace basecross {
 		m_isStep(false),
 		m_AttackDis(2.0f),
 		m_FOV(0.707f),
+		m_NowCannonClass(3),
 		m_JumpLock(false)
 	{
 		//メッシュとトランスフォームの差分の設定
@@ -378,14 +379,17 @@ namespace basecross {
 					if (PtrCannon->GetCannonClass() == 0) {
 						auto s = GetStage()->FindTagGameObject<Sword>(L"Sword");
 						s->SetEnemyToCannon(L"Green");
+						m_NowCannonClass = 0;
 					}
 					if (PtrCannon->GetCannonClass() == 1) {
 						auto s = GetStage()->FindTagGameObject<Sword>(L"Sword");
 						s->SetEnemyToCannon(L"Red");
+						m_NowCannonClass = 1;
 					}
 					if (PtrCannon->GetCannonClass() == 2) {
 						auto s = GetStage()->FindTagGameObject<Sword>(L"Sword");
 						s->SetEnemyToCannon(L"Blue");
+						m_NowCannonClass = 2;
 					}
 				}
 			}
