@@ -49,14 +49,6 @@ namespace basecross {
 			Vec3(0.0f),
 			false);
 
-		AddGameObject<MultiSprite>(
-			L"BOSS_ICON_TX",
-			Vec2(256, 256),
-			0.0f,
-			Vec2(0, 0),
-			1, 1
-			);
-
 		//複数使用する球体の登録（リソース登録する）
 		RegisterDefaultSphere();
 
@@ -86,15 +78,13 @@ namespace basecross {
 			true);
 
 		//プレイヤーの作成
-		//shared_ptr<GameObject> 
 		auto Par =
 			AddGameObject<Player>(
 				L"KUREHA_TX",
 				true,
 				Vec3(0.0f, 0.5f, 10.0f)
 				);
-		//SetPlayerPtr(Par);
-
+		
 		//剣の作成
 		AddGameObject<Sword>(
 			Par,
@@ -172,29 +162,6 @@ namespace basecross {
 					L"PlayerBullet");
 			}
 		}
-
-
-		/*for (int i = 0; i < 1; i++) {
-			float x = (float)(i + 1);
-			AddGameObject<BossEnemy>(
-				Par,
-				L"NEEDLE_MESH",
-				L"NEEDLE_TX",
-				L"30frame",
-				Vec3(10.0f, 10.0f, 10.0f),
-				Quat(),
-				Vec3(0.0f, 3.0f, 80.0f),
-				false);
-			for (int j = 0; j < 3; j++) {
-				AddGameObject<BulletObject>(
-					L"RED_TX",
-					Vec3(0.5f, 0.5f, 0.5f),
-					Quat(),
-					Vec3(0.0f, -10.0f, 0.0f),
-					false,
-					L"BossBullet");
-			}
-		}*/
 
 		for (int i = 0; i < 10; i++) {
 			float x = (float)(i + 1);
@@ -545,7 +512,7 @@ namespace basecross {
 			
 			auto PlayerPtr = FindTagGameObject<Player>(L"Player");
 			int now_cannon = PlayerPtr->GetIsCannon();
-		/*	if (now_cannon < 3) {
+			if (now_cannon < 3) {
 				auto boss = FindTagGameObject<Boss>(L"BossEnemy");
 				Vec3 boss_pos = boss->GetPosition();
 				if (now_cannon == 0) {
@@ -575,8 +542,8 @@ namespace basecross {
 					camera.m_CamerEye.y += 2.0f;
 					camera.m_CamerEye.z -= 6.0f;
 				}
-			}*/
-			//else {
+			}
+			else {
 				camera.m_CamerAt = PlayerPtr->GetPosition();
 				camera.m_CamerAt.y += 0.5f;
 
@@ -587,7 +554,7 @@ namespace basecross {
 						-cos(camera.m_CameraXZRad) * camera.m_CameraArmLen * sin(camera.m_CameraYRad)
 					);
 				camera.m_CamerEye = camera.m_CamerAt + CameraLocalEye;
-			//}
+			}
 			//Bボタン
 			if (CntlVec[0].wPressedButtons & XINPUT_GAMEPAD_B) {
 				PostEvent(0.0f, GetThis<ObjectInterface>(), App::GetApp()->GetScene<Scene>(), L"ToEmptyStage");

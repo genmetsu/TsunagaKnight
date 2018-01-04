@@ -42,7 +42,7 @@ namespace basecross {
 			View = XMMatrixLookAtLH(m_CamerEye, m_CamerAt, m_CamerUp);
 			float w = static_cast<float>(App::GetApp()->GetGameWidth());
 			float h = static_cast<float>(App::GetApp()->GetGameHeight());
-			Proj = XMMatrixPerspectiveFovLH(XM_PIDIV4, w / h, 1.0f, 5000.0f);
+			Proj = XMMatrixPerspectiveFovLH(XM_PIDIV4, w / h, 1.0f, 2500.0f);
 		}
 		//--------------------------------------------------------------------------------------
 		/*!
