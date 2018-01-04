@@ -262,6 +262,14 @@ namespace basecross {
 				m_StateMachine->ChangeState(PlayerAttackState::Instance());
 				return;
 			}
+			else if (CntlVec[0].wPressedButtons & XINPUT_GAMEPAD_Y) {
+				auto s = GetStage()->FindTagGameObject<Sword>(L"Sword");
+				s->SetEnemyToCannon(L"Green");
+			}
+			/*else if (CntlVec[0].wPressedButtons & XINPUT_GA) {
+				auto s = GetStage()->FindTagGameObject<Sword>(L"Sword");
+				s->SetEnemyToCannon(L"Green");
+			}*/
 			else if (length(Direction) < 0.1f) {
 				m_Rigidbody->m_Velocity.x *= 0.8f;
 				m_Rigidbody->m_Velocity.z *= 0.8f;
@@ -845,22 +853,22 @@ namespace basecross {
 
 	void Sword::SetEnemyToCannon(wstring tag_name) {
 
-		for (int i = 0; i < m_friends_num; i++) {
+		int bullet_num = 0;
+		for (int i = 0; i < m_friends_num;) {
 			auto f_pointer = dynamic_pointer_cast<EnemyObject>(m_friends[i].lock());
 			if (f_pointer->FindTag(tag_name)) {
-				auto boss = GetStage()->FindTagGameObject<Boss>(L"BossEnemy");
-				boss->Damage();
 				//つながり消す
 				f_pointer->GetStateMachine()->ChangeState(EnemyOppositionState::Instance());
 				f_pointer->SetPosition(Vec3(100, 100, 100));
 				//配列を消し、つながりの数を再計算
 				m_friends.erase(m_friends.begin() + i);
 				m_friends_num = m_friends.size();
+				//いくつのチェインを発射するか
+				bullet_num++;
 			}
+			else
+				i++;
 		}
-		/*for (int i = 0; i < erase_num.size(); i++) {
-		m_friends.erase(m_friends.begin() + erase_num[i]);
-		}*/
 
 		auto GM = GameManager::getInstance();
 		GM->SetFriendsNum(m_friends_num);
