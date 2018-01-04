@@ -919,6 +919,8 @@ namespace basecross {
 
 		Vec3 m_TackleStart;
 
+		//プレイヤーのポインタ
+		weak_ptr<GameObject> m_PlayerPtr;
 		//親オブジェクト
 		weak_ptr<GameObject> m_ParentPtr;
 		//

@@ -147,6 +147,11 @@ namespace basecross {
 		m_PtrObj->m_OwnShadowmapActive = m_OwnShadowActive;
 		m_PtrObj->m_ShadowmapUse = true;
 
+		m_PtrObj->m_FogEnabled = true;
+		m_PtrObj->m_FogColor = Col4(0.07f, 0.0f, 0.09f, 1.0f);
+		m_PtrObj->m_FogStart = -3.0f;
+		m_PtrObj->m_FogEnd = -100.0f;
+
 		//シャドウマップ描画データの構築
 		m_PtrShadowmapObj = make_shared<ShadowmapObject>();
 		m_PtrShadowmapObj->m_MeshRes = MeshPtr;
@@ -1101,6 +1106,8 @@ namespace basecross {
 
 		m_isDead = false;
 
+		m_PlayerPtr = GetStage()->FindTagGameObject<Player>(L"Player");
+
 		//メッシュの取得
 		auto MeshPtr = App::GetApp()->GetResource<MeshResource>(m_MeshResName);
 
@@ -1126,6 +1133,10 @@ namespace basecross {
 		m_PtrObj->m_ShadowmapUse = true;
 		//m_PtrObj->m_BlendState = BlendState::AlphaBlend;
 		//m_PtrObj->m_RasterizerState = RasterizerState::DoubleDraw;
+		m_PtrObj->m_FogEnabled = true;
+		m_PtrObj->m_FogColor = Col4(0.07f, 0.0f, 0.09f, 1.0f);
+		m_PtrObj->m_FogStart = -10.0f;
+		m_PtrObj->m_FogEnd = -100.0f;
 
 		m_PtrObj->BoneInit();
 		m_PtrObj->AddAnimation(L"30frame", 0, 30, true, 30.0f);
@@ -1431,7 +1442,7 @@ namespace basecross {
 			if (m_isDead == false) {
 				m_isDead = true;
 				m_Rigidbody->m_IsCollisionActive = false;
-				GetStateMachine()->ChangeState(EnemyComplianceState::Instance());
+				m_StateMachine->ChangeState(EnemyComplianceState::Instance());
 				return;
 			}
 		}
@@ -1483,6 +1494,16 @@ namespace basecross {
 		m_isDead = false;
 		m_HP = 3.0f;
 		m_Rigidbody->m_IsCollisionActive = true;
+
+		if (FindTag(L"Blue")) {
+			//メッシュとトランスフォームの差分の設定
+			m_MeshToTransformMatrix.affineTransformation(
+				Vec3(1.0f, 1.0f, 1.0f),
+				Vec3(0.0f, 0.0f, 0.0f),
+				Vec3(0.0f, XM_PI, 0.0f),
+				Vec3(0.0f, 0.0f, 0.0f)
+			);
+		}
 	}
 
 	bool EnemyObject::Attack1ExcuteBehavior() {
@@ -1504,18 +1525,18 @@ namespace basecross {
 
 	void EnemyObject::BulletStartBehavior() {
 
-		if (FindTag(L"GREEN")) {
+		if (FindTag(L"Green")) {
 			auto PtrCannon = GetStage()->FindTagGameObject<Cannon>(L"GREEN_CANNON");
 			Vec3 new_pos = PtrCannon->GetPosition();
 
 			SetPosition(new_pos);
 		}
-		if (FindTag(L"RED")) {
+		if (FindTag(L"Red")) {
 			auto PtrCannon = GetStage()->FindTagGameObject<Cannon>(L"RED_CANNON");
 			Vec3 new_pos = PtrCannon->GetPosition();
 			SetPosition(new_pos);
 		}
-		if (FindTag(L"BLUE")) {
+		if (FindTag(L"Blue")) {
 			auto PtrCannon = GetStage()->FindTagGameObject<Cannon>(L"BLUE_CANNON");
 			Vec3 new_pos = PtrCannon->GetPosition();
 			SetPosition(new_pos);
@@ -1542,7 +1563,8 @@ namespace basecross {
 			SparkPtr->InsertFire(Emitter);
 			SetPosition(Vec3(100, 100, 100));
 
-			GetStateMachine()->ChangeState(EnemyOppositionState::Instance());
+			m_StateMachine->ChangeState(EnemyOppositionState::Instance());
+			return;
 		}
 	}
 
@@ -1712,7 +1734,7 @@ namespace basecross {
 
 	void ShootEnemy::OppositionBehavior() {
 		float ElapsedTime = App::GetApp()->GetElapsedTime();
-		auto shptr = m_ParentPtr.lock();
+		auto shptr = m_PlayerPtr.lock();
 		if (shptr) {
 			Vec3 toPos = shptr->GetPosition();
 			Vec3 ToPosVec = toPos - m_Rigidbody->m_Pos;
@@ -1960,15 +1982,15 @@ namespace basecross {
 	{
 		float ElapsedTime = App::GetApp()->GetElapsedTime();
 		if (m_FrameCount > m_BulletTime)
-		{   
+		{
 			m_FrameCount = 0.0f;
 			IsShoot = false;
 		}
-		if(IsShoot == true)
-		{ 
-		m_FrameCount += ElapsedTime;
-        }
-		
+		if (IsShoot == true)
+		{
+			m_FrameCount += ElapsedTime;
+		}
+
 	}
 	void BulletObject::OnDrawShadowmap()
 	{
@@ -2134,6 +2156,10 @@ namespace basecross {
 		m_SimpleObj->m_Camera = GetStage<Stage>()->GetCamera();
 		m_SimpleObj->m_OwnShadowmapActive = m_OwnShadowActive;
 		m_SimpleObj->m_ShadowmapUse = true;
+		m_SimpleObj->m_FogEnabled = true;
+		m_SimpleObj->m_FogColor = Col4(0.07f, 0.0f, 0.09f, 1.0f);
+		m_SimpleObj->m_FogStart = -10.0f;
+		m_SimpleObj->m_FogEnd = -100.0f;
 
 
 		//シャドウマップ描画データの構築
@@ -2268,6 +2294,10 @@ namespace basecross {
 		m_PtrObj->m_BlendState = BlendState::AlphaBlend;
 		m_PtrObj->m_RasterizerState = RasterizerState::DoubleDraw;
 		//m_PtrObj->m_Alpha = 0.0f;
+		m_PtrObj->m_FogEnabled = true;
+		m_PtrObj->m_FogColor = Col4(0.07f, 0.0f, 0.09f, 1.0f);
+		m_PtrObj->m_FogStart = -10.0f;
+		m_PtrObj->m_FogEnd = -100.0f;
 
 		//シャドウマップ描画データの構築
 		m_PtrShadowmapObj = make_shared<ShadowmapObject>();

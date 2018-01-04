@@ -686,7 +686,7 @@ namespace basecross {
 	}
 
 	void Sword::OnUpdate2() {
-		/*auto fps = App::GetApp()->GetStepTimer().GetFramesPerSecond();
+		auto fps = App::GetApp()->GetStepTimer().GetFramesPerSecond();
 		wstring FPS(L"FPS: ");
 		FPS += Util::UintToWStr(fps);
 		FPS += L"\nElapsedTime: ";
@@ -703,7 +703,7 @@ namespace basecross {
 		if (!m_StringDrawObject) {
 			m_StringDrawObject = GetStage<GameStage>()->FindTagGameObject<StringDrawObject>(L"StringDrawObject");
 		}
-		m_StringDrawObject->SetText(FPS);*/
+		m_StringDrawObject->SetText(FPS);
 	}
 
 
@@ -833,7 +833,10 @@ namespace basecross {
 
 							auto GM = GameManager::getInstance();
 							GM->SetFriendsNum(m_friends_num);
-
+							if (m_friends_num == 1) {
+								auto PlayerPtr = GetStage()->FindTagGameObject<Player>(L"Player");
+								PtrEnemy->SetParent(PlayerPtr);
+							}
 							if (m_friends_num >= 2) {
 								PtrEnemy->SetParent(m_friends[m_friends_num - 2]);
 							}
