@@ -59,7 +59,6 @@ namespace basecross {
 	void SquareObject::OnCreate() {
 
 		CreateBuffers(m_Scale.x, m_Scale.y);
-
 		//行列の定義
 		Mat4x4 World;
 		World.affineTransformation(
@@ -86,9 +85,8 @@ namespace basecross {
 		m_PtrObj->m_FogColor = Col4(0.3f, 0.3f, 0.3f, 1.0f);
 		m_PtrObj->m_FogStart = -10.0f;
 		m_PtrObj->m_FogEnd = -30.0f;
-
-
 	}
+
 	void SquareObject::OnUpdate() {
 	}
 
@@ -233,10 +231,10 @@ namespace basecross {
 
 		//メッシュとトランスフォームの差分の設定
 		m_MeshToTransformMatrix.affineTransformation(
-			Vec3(1.0f, 1.0f, 1.0f),
+			Vec3(0.3f, 0.3f, 0.3f),
 			Vec3(0.0f, 0.0f, 0.0f),
 			Vec3(0.0f, 0.0f, 0.0f),
-			Vec3(0.0f, 0.0f, 0.0f)
+			Vec3(0.0f, -0.7f, 0.0f)
 		);
 
 		//行列の定義
@@ -418,7 +416,7 @@ namespace basecross {
 		auto ParticlePtr = InsertParticle(16);
 		ParticlePtr->m_EmitterPos = Pos;
 		ParticlePtr->SetTextureResource(L"FIRE_TX");
-		ParticlePtr->m_MaxTime = 0.5f;
+		ParticlePtr->m_MaxTime = 1.0f;
 		vector<ParticleSprite>& pSpriteVec = ParticlePtr->GetParticleSpriteVec();
 		for (auto& rParticleSprite : ParticlePtr->GetParticleSpriteVec()) {
 			rParticleSprite.m_LocalPos.x = Util::RandZeroToOne() * 0.1f - 0.05f;
@@ -430,6 +428,7 @@ namespace basecross {
 				rParticleSprite.m_LocalPos.y * 5.0f,
 				rParticleSprite.m_LocalPos.z * 5.0f
 			);
+			rParticleSprite.m_LocalScale *= 5.0f;
 			//色の指定
 			rParticleSprite.m_Color = Col4(1.0f, 1.0f, 1.0f, 1.0f);
 		}
@@ -1191,7 +1190,6 @@ namespace basecross {
 						SetPosition(Vec3(0, 0, 70));
 						m_HP = 2.0f;
 					}
-					
 					return;
 				}
 			}
@@ -1480,6 +1478,13 @@ namespace basecross {
 
 	}
 
+	void EnemyObject::BulletEndBehaviour() {
+		AddTag(L"Zako");
+		m_isDead = false;
+		m_HP = 3.0f;
+		m_Rigidbody->m_IsCollisionActive = true;
+	}
+
 	bool EnemyObject::Attack1ExcuteBehavior() {
 		m_Attack1ToRot += 0.1f;
 		if (m_Attack1ToRot >= (XM_PI + 0.5f)) {
@@ -1496,6 +1501,51 @@ namespace basecross {
 		);
 		return false;
 	}
+
+	void EnemyObject::BulletStartBehavior() {
+
+		if (FindTag(L"GREEN")) {
+			auto PtrCannon = GetStage()->FindTagGameObject<Cannon>(L"GREEN_CANNON");
+			Vec3 new_pos = PtrCannon->GetPosition();
+
+			SetPosition(new_pos);
+		}
+		if (FindTag(L"RED")) {
+			auto PtrCannon = GetStage()->FindTagGameObject<Cannon>(L"RED_CANNON");
+			Vec3 new_pos = PtrCannon->GetPosition();
+			SetPosition(new_pos);
+		}
+		if (FindTag(L"BLUE")) {
+			auto PtrCannon = GetStage()->FindTagGameObject<Cannon>(L"BLUE_CANNON");
+			Vec3 new_pos = PtrCannon->GetPosition();
+			SetPosition(new_pos);
+		}
+
+		m_Rigidbody->m_Velocity = Vec3(0);
+
+		m_BossPos = GetStage()->FindTagGameObject<Boss>(L"BossEnemy")->GetPosition();
+		m_ToBossVec = m_BossPos - m_Rigidbody->m_Pos;
+		m_ToBossVec.normalize();
+	}
+
+	void EnemyObject::BulletExcuteBehavior() {
+
+		m_Rigidbody->m_Velocity = m_ToBossVec * 15.0f;
+
+		//ボスとの衝突判定
+		float length = (m_BossPos - m_Rigidbody->m_Pos).length();
+		if (length < 12.0f) {
+			Vec3 Emitter = m_Rigidbody->m_Pos;
+			Emitter.y -= 0.125f;
+			//Sparkの送出
+			auto SparkPtr = GetStage<GameStage>()->FindTagGameObject<MultiFire>(L"MultiFire");
+			SparkPtr->InsertFire(Emitter);
+			SetPosition(Vec3(100, 100, 100));
+
+			GetStateMachine()->ChangeState(EnemyOppositionState::Instance());
+		}
+	}
+
 	//--------------------------------------------------------------------------------------
 	///	敵対ステート（EnemyObject）
 	//--------------------------------------------------------------------------------------
@@ -1514,13 +1564,12 @@ namespace basecross {
 		//何もしない
 	}
 
-
 	//--------------------------------------------------------------------------------------
 	///	追従ステート（EnemyObject）
 	//--------------------------------------------------------------------------------------
 	IMPLEMENT_SINGLETON_INSTANCE(EnemyComplianceState)
 
-		void EnemyComplianceState::Enter(const shared_ptr<EnemyObject>& Obj) {
+	void EnemyComplianceState::Enter(const shared_ptr<EnemyObject>& Obj) {
 		Obj->ComplianceStartBehavior();
 		Obj->RemoveTag(L"Zako");
 		Obj->AddTag(L"Chain");
@@ -1528,30 +1577,36 @@ namespace basecross {
 
 	void EnemyComplianceState::Execute(const shared_ptr<EnemyObject>& Obj) {
 		Obj->UpdateBehavior();
-
-		//コントローラの取得
-		auto CntlVec = App::GetApp()->GetInputDevice().GetControlerVec();
-		if (CntlVec[0].bConnected) {
-			//Rボタン
-			if (CntlVec[0].wPressedButtons & XINPUT_GAMEPAD_RIGHT_SHOULDER) {
-				Obj->GetStateMachine()->ChangeState(EnemyAttack1State::Instance());
-			}
-		}
-
 	}
 
 	void EnemyComplianceState::Exit(const shared_ptr<EnemyObject>& Obj) {
-		//何もしない
+		
 	}
 
 	//--------------------------------------------------------------------------------------
-	///	攻撃ステート１（EnemyObject）
+	///	大砲で撃たれてる時のステート（EnemyObject）
+	//--------------------------------------------------------------------------------------
+	IMPLEMENT_SINGLETON_INSTANCE(EnemyBulletState)
+
+	void EnemyBulletState::Enter(const shared_ptr<EnemyObject>& Obj) {
+		Obj->BulletStartBehavior();
+	}
+
+	void EnemyBulletState::Execute(const shared_ptr<EnemyObject>& Obj) {
+		Obj->BulletExcuteBehavior();
+	}
+
+	void EnemyBulletState::Exit(const shared_ptr<EnemyObject>& Obj) {
+		Obj->BulletEndBehaviour();
+	}
+
+	//--------------------------------------------------------------------------------------
+	///	チェインをぶん回すステート（EnemyObject）
 	//--------------------------------------------------------------------------------------
 	IMPLEMENT_SINGLETON_INSTANCE(EnemyAttack1State)
 
-		void EnemyAttack1State::Enter(const shared_ptr<EnemyObject>& Obj) {
+	void EnemyAttack1State::Enter(const shared_ptr<EnemyObject>& Obj) {
 		Obj->Attack1StartBehavior();
-		//何もしない
 	}
 
 	void EnemyAttack1State::Execute(const shared_ptr<EnemyObject>& Obj) {
@@ -1622,32 +1677,11 @@ namespace basecross {
 				}
 			}
 		}
-
-
 	}
 
 	void NeedleEnemy::OnUpdate() {
-
-
 		EnemyObject::OnUpdate();
-
-		//auto MyPos = m_Rigidbody->m_Pos;
-		//auto PlayerPtr = GetStage<GameStage>()->GetPlayerPtr();
-		//if (PlayerPtr) {
-		//	auto PlayertPos = PlayerPtr->GetPosition();
-		//	auto force = PlayertPos - MyPos;
-		//	if (length(force) <= 5.0f) {
-		//		force.y = 0;
-		//		force.normalize();
-		//		force *= 5.0f;
-		//		m_Rigidbody->m_Velocity = force;
-		//		//				m_Rigidbody->m_Force = force;
-		//	}
-		//}
-
 	}
-
-	
 
 	//--------------------------------------------------------------------------------------
 	///	銃をうつエネミー（遠距離）
@@ -1797,7 +1831,6 @@ namespace basecross {
 				Vec3(0.0f, 0.0f, 0.0f)
 			);
 
-
 			if (m_FrameCount > 1.0f) {
 				vector<shared_ptr<GameObject>> ShootVec;
 				GetStage<GameStage>()->FindTagGameObjectVec(L"PlayerBullet", ShootVec);
@@ -1864,7 +1897,6 @@ namespace basecross {
 		m_BulletTime(10.0f),
 		IsShoot(false)
 	{
-		
 	}
 	BulletObject::~BulletObject()
 	{														
@@ -2223,6 +2255,7 @@ namespace basecross {
 			m_Qt,
 			m_Pos
 		);
+
 		auto TexPtr = App::GetApp()->GetResource<TextureResource>(m_TextureResName);
 		//描画データの構築
 		m_PtrObj = make_shared<BcDrawObject>();

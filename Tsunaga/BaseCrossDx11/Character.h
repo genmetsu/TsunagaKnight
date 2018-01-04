@@ -911,6 +911,9 @@ namespace basecross {
 
 		Vec3 m_CannonPos;
 
+		Vec3 m_BossPos;
+		Vec3 m_ToBossVec;
+
 		//死んだかどうか
 		bool m_isDead;
 
@@ -1049,6 +1052,27 @@ namespace basecross {
 		bool Attack1ExcuteBehavior();
 		//--------------------------------------------------------------------------------------
 		/*!
+		@brief 大砲に込められてボスに向かっていく最初に呼ばれる準備処理
+		@return	なし
+		*/
+		//--------------------------------------------------------------------------------------
+		void BulletStartBehavior();
+		//--------------------------------------------------------------------------------------
+		/*!
+		@brief 大砲に込められてボスに向かっていく処理
+		@return	なし
+		*/
+		//--------------------------------------------------------------------------------------
+		void BulletExcuteBehavior();
+		//--------------------------------------------------------------------------------------
+		/*!
+		@brief 追従する行動の終了処理
+		@return	なし
+		*/
+		//--------------------------------------------------------------------------------------
+		void BulletEndBehaviour();
+		//--------------------------------------------------------------------------------------
+		/*!
 		@brief ステート共通処理
 		@return	なし
 		*/
@@ -1142,6 +1166,20 @@ namespace basecross {
 	public:
 		//ステートのインスタンス取得
 		DECLARE_SINGLETON_INSTANCE(EnemyComplianceState)
+		virtual void Enter(const shared_ptr<EnemyObject>& Obj)override;
+		virtual void Execute(const shared_ptr<EnemyObject>& Obj)override;
+		virtual void Exit(const shared_ptr<EnemyObject>& Obj)override;
+	};
+
+	//--------------------------------------------------------------------------------------
+	///	大砲で撃たれてるときのステート
+	//--------------------------------------------------------------------------------------
+	class EnemyBulletState : public ObjState<EnemyObject>
+	{
+		EnemyBulletState() {}
+	public:
+		//ステートのインスタンス取得
+		DECLARE_SINGLETON_INSTANCE(EnemyBulletState)
 		virtual void Enter(const shared_ptr<EnemyObject>& Obj)override;
 		virtual void Execute(const shared_ptr<EnemyObject>& Obj)override;
 		virtual void Exit(const shared_ptr<EnemyObject>& Obj)override;

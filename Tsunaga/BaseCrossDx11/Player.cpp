@@ -266,10 +266,6 @@ namespace basecross {
 				auto s = GetStage()->FindTagGameObject<Sword>(L"Sword");
 				s->SetEnemyToCannon(L"Green");
 			}
-			/*else if (CntlVec[0].wPressedButtons & XINPUT_GA) {
-				auto s = GetStage()->FindTagGameObject<Sword>(L"Sword");
-				s->SetEnemyToCannon(L"Green");
-			}*/
 			else if (length(Direction) < 0.1f) {
 				m_Rigidbody->m_Velocity.x *= 0.8f;
 				m_Rigidbody->m_Velocity.z *= 0.8f;
@@ -331,7 +327,6 @@ namespace basecross {
 		RunningAnimation();
 		MoveControll();
 		
-
 		//“G‚Æ‚Ì“–‚½‚è”»’è
 		vector<shared_ptr<GameObject>> EnemyVec;
 		GetStage<GameStage>()->FindTagGameObjectVec(L"EnemyObject", EnemyVec);
@@ -851,15 +846,14 @@ namespace basecross {
 		}
 	}
 
-	void Sword::SetEnemyToCannon(wstring tag_name) {
+	int Sword::SetEnemyToCannon(wstring tag_name) {
 
 		int bullet_num = 0;
 		for (int i = 0; i < m_friends_num;) {
 			auto f_pointer = dynamic_pointer_cast<EnemyObject>(m_friends[i].lock());
 			if (f_pointer->FindTag(tag_name)) {
 				//‚Â‚È‚ª‚èÁ‚·
-				f_pointer->GetStateMachine()->ChangeState(EnemyOppositionState::Instance());
-				f_pointer->SetPosition(Vec3(100, 100, 100));
+				f_pointer->GetStateMachine()->ChangeState(EnemyBulletState::Instance());
 				//”z—ñ‚ðÁ‚µA‚Â‚È‚ª‚è‚Ì”‚ðÄŒvŽZ
 				m_friends.erase(m_friends.begin() + i);
 				m_friends_num = m_friends.size();
@@ -883,6 +877,8 @@ namespace basecross {
 				this_friend->SetParent(m_friends[i - 1]);
 			}
 		}
+
+		return bullet_num;
 	}
 
 	void Sword::ComplianceStartBehavior() {

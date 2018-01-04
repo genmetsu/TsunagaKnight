@@ -80,9 +80,9 @@ namespace basecross {
 
 		AddGameObject<Boss>(
 			L"BOSS_TX",
-			Vec3(4.0f, 4.0f, 4.0f),
+			Vec3(10.0f,10.0f, 10.0f),
 			Quat(),
-			Vec3(0.0f, 4.0f, 60.0f),
+			Vec3(0.0f, 12.0f, 60.0f),
 			true);
 
 		//プレイヤーの作成
@@ -545,7 +545,7 @@ namespace basecross {
 			
 			auto PlayerPtr = FindTagGameObject<Player>(L"Player");
 			int now_cannon = PlayerPtr->GetIsCannon();
-			if (now_cannon < 3) {
+		/*	if (now_cannon < 3) {
 				auto boss = FindTagGameObject<Boss>(L"BossEnemy");
 				Vec3 boss_pos = boss->GetPosition();
 				if (now_cannon == 0) {
@@ -575,8 +575,8 @@ namespace basecross {
 					camera.m_CamerEye.y += 2.0f;
 					camera.m_CamerEye.z -= 6.0f;
 				}
-			}
-			else {
+			}*/
+			//else {
 				camera.m_CamerAt = PlayerPtr->GetPosition();
 				camera.m_CamerAt.y += 0.5f;
 
@@ -587,7 +587,7 @@ namespace basecross {
 						-cos(camera.m_CameraXZRad) * camera.m_CameraArmLen * sin(camera.m_CameraYRad)
 					);
 				camera.m_CamerEye = camera.m_CamerAt + CameraLocalEye;
-			}
+			//}
 			//Bボタン
 			if (CntlVec[0].wPressedButtons & XINPUT_GAMEPAD_B) {
 				PostEvent(0.0f, GetThis<ObjectInterface>(), App::GetApp()->GetScene<Scene>(), L"ToEmptyStage");
