@@ -98,7 +98,7 @@ namespace basecross {
 		body.m_Pos = m_Posision;
 		body.m_CollType = CollType::typeCAPSULE;
 		//body.m_IsDrawActive = true;
-		body.m_IsFixed = true;
+		body.m_IsFixed = false;
 		body.SetToBefore();
 
 		m_StepVec = Vec3(0.0f);

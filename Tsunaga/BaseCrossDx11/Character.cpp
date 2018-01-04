@@ -215,6 +215,44 @@ namespace basecross {
 	}
 
 	//--------------------------------------------------------------------------------------
+	///	透明な壁
+	//--------------------------------------------------------------------------------------
+
+	TransparentWall::TransparentWall(const shared_ptr<Stage>& StagePtr,
+		const Vec3& Scale, const Quat& Qt, const Vec3& Pos) :
+		GameObject(StagePtr),
+		m_Scale(Scale),
+		m_Qt(Qt),
+		m_Pos(Pos) {}
+	TransparentWall::~TransparentWall() {}
+	//初期化
+	void TransparentWall::OnCreate() {
+
+		//Rigidbodyの初期化
+		auto PtrGameStage = GetStage<GameStage>();
+		Rigidbody body;
+		body.m_Owner = GetThis<GameObject>();
+		body.m_Mass = 1.0f;
+		body.m_Scale = m_Scale;
+		body.m_Quat = m_Qt;
+		body.m_Pos = m_Pos;
+		body.m_CollType = CollType::typeOBB;
+		body.m_IsFixed = true;
+		//body.m_IsDrawActive = true;
+		body.SetToBefore();
+		PtrGameStage->AddRigidbody(body);
+
+		//行列の定義
+		Mat4x4 World;
+		World.affineTransformation(
+			body.m_Scale,
+			Vec3(0, 0, 0),
+			body.m_Quat,
+			body.m_Pos
+		);
+	}
+
+	//--------------------------------------------------------------------------------------
 	/// 敵のボス
 	//--------------------------------------------------------------------------------------
 

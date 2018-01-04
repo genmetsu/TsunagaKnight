@@ -67,8 +67,62 @@ namespace basecross {
 			L"YAMATO_TX",
 			Vec3(4.0f, 4.0f, 4.0f),
 			Quat(),
-			Vec3(0.0f, -12.8f, -20.0f),
+			Vec3(0.0f, -12.772f, -20.0f),
 			true);
+
+		AddGameObject<TransparentWall>(
+			Vec3(0.5f, 0.5f, 60.0f),
+			Quat(Vec3(0, 1.0f, 0), - XM_PI / 180.0f * 4.18f),
+			Vec3(15.15f, 0.25f, 14.0f)
+			);
+
+		AddGameObject<TransparentWall>(
+			Vec3(0.5f, 0.5f, 60.0f),
+			Quat(Vec3(0, 1.0f, 0), XM_PI / 180.0f * 4.18f),
+			Vec3(-15.15f, 0.25f, 14.0f)
+			);
+
+		AddGameObject<TransparentWall>(
+			Vec3(0.5f, 0.5f, 40.0f),
+			Quat(Vec3(0, 1.0f, 0), -XM_PI / 180.0f * 16.0f),
+			Vec3(9.75f, 0.25f,54.0f)
+			);
+
+		AddGameObject<TransparentWall>(
+			Vec3(0.5f, 0.5f, 40.0f),
+			Quat(Vec3(0, 1.0f, 0), XM_PI / 180.0f * 16.0f),
+			Vec3(-9.75f, 0.25f, 54.0f)
+			);
+
+		AddGameObject<TransparentWall>(
+			Vec3(0.5f, 0.5f, 10.0f),
+			Quat(Vec3(0, 1.0f, 0), -XM_PI / 180.0f * 62.0f),
+			Vec3(3.0f, 0.25f, 72.9f)
+			);
+
+		AddGameObject<TransparentWall>(
+			Vec3(0.5f, 0.5f, 10.0f),
+			Quat(Vec3(0, 1.0f, 0), XM_PI / 180.0f * 62.0f),
+			Vec3(-3.0f, 0.25f, 72.9f)
+			);
+
+		AddGameObject<TransparentWall>(
+			Vec3(0.5f, 0.5f, 5.0f),
+			Quat(),
+			Vec3(-16.4f, 0.25f, -5.0f)
+			);
+
+		AddGameObject<TransparentWall>(
+			Vec3(0.5f, 0.5f, 5.0f),
+			Quat(),
+			Vec3(16.4f, 0.25f, -5.0f)
+			);
+
+		AddGameObject<TransparentWall>(
+			Vec3(50.0f, 0.5f, 0.5f),
+			Quat(),
+			Vec3(0.0f, 0.25f, -7.0f)
+			);
 
 		AddGameObject<Boss>(
 			L"BOSS_TX",
@@ -115,9 +169,9 @@ namespace basecross {
 			AddGameObject<Cannon>(
 				texture,
 				tag,
-				Vec3(4.0f, 4.0f, 4.0f),
+				Vec3(5.0f, 5.0f, 5.0f),
 				Quat(),
-				Vec3(x * 9.0f - 9.0f, 0.0f, -3.0f),
+				Vec3(x * 9.0f - 9.0f, 0.0f, 0.0f),
 				i, false);
 		}
 
@@ -129,7 +183,7 @@ namespace basecross {
 				L"NEEDLE_TX",
 				L"30frame",
 				Vec3(0.3f, 0.3f, 0.3f),
-				Quat(),
+				Quat(Vec3(0, 1.0f, 0), XM_PI),
 				Vec3((float)rand() / 32767 * 20.0f - 10.0f, 0.125f, 60.0f - (float)rand() / 32767 * 15.0f),
 				false);
 		}
@@ -142,7 +196,7 @@ namespace basecross {
 				L"GUN_TX",
 				L"NonMove",
 				Vec3(0.25f, 0.25f, 0.25f),
-				Quat(),
+				Quat(Vec3(0, 1.0f, 0), XM_PI),
 				Vec3((float)rand() / 32767 * 20.0f - 10.0f, 0.125f, 60.0f - (float)rand() / 32767 * 20.0f),
 				false);
 			for (int j = 0; j < 2; j++) {
@@ -171,7 +225,7 @@ namespace basecross {
 				L"ANGEL_TX",
 				L"30frame",
 				Vec3(0.25f, 0.25f, 0.25f),
-				Quat(),
+				Quat(Vec3(0, 1.0f, 0), XM_PI),
 				Vec3((float)rand() / 32767 * 20.0f - 10.0f, 0.125f, 60.0f - (float)rand() / 32767 * 20.0f),
 				false);
 		}
@@ -185,7 +239,7 @@ namespace basecross {
 				L"HAND_BOSS_TX",
 				L"30frame",
 				Vec3(1.8f, 1.8f, 1.8f),
-				Quat(),
+				Quat(Vec3(0, 1.0f, 0), XM_PI),
 				Vec3((float)rand() / 32767 * 20.0f - 10.0f, 0.125f, 60.0f - (float)rand() / 32767 * 20.0f),
 				false);
 			AddGameObject<BossHand>(
@@ -215,7 +269,7 @@ namespace basecross {
 				L"THOR_BOSS_TX",
 				L"30frame",
 				Vec3(3.0f, 0.8f, 3.0f),
-				Quat(),
+				Quat(Vec3(0, 1.0f, 0), XM_PI),
 				Vec3((float)rand() / 32767 * 20.0f - 10.0f, 0.125f, 60.0f - (float)rand() / 32767 * 20.0f),
 				false);
 		}
