@@ -1250,9 +1250,6 @@ namespace basecross {
 		m_PtrObj->UpdateAnimation(ElapsedTime);
 		//ステートマシン更新
 		m_StateMachine->Update();
-
-		//HPの確認
-		//CheckHealth();
 	}
 
 	void EnemyObject::OnDrawShadowmap() {
@@ -1479,7 +1476,7 @@ namespace basecross {
 		if (m_HP <= 0.0f) {
 			if (m_isDead == false) {
 				m_isDead = true;
-				m_Rigidbody->m_IsCollisionActive = false;
+				//m_Rigidbody->m_IsCollisionActive = false;
 				m_StateMachine->ChangeState(EnemyComplianceState::Instance());
 				return;
 			}
@@ -1505,6 +1502,7 @@ namespace basecross {
 			Vec3(0, 0, -0.4f)
 		);
 		m_LerpToParent = m_LerpToChild = 0.2f;
+		m_Rigidbody->m_CollType = CollType::typeCAPSULE;
 	}
 
 	//攻撃１行動の開始
@@ -1532,6 +1530,7 @@ namespace basecross {
 		m_isDead = false;
 		m_HP = 3.0f;
 		m_Rigidbody->m_IsCollisionActive = true;
+		m_Rigidbody->m_CollType = CollType::typeSPHERE;
 
 		if (FindTag(L"Blue")) {
 			//メッシュとトランスフォームの差分の設定
@@ -1593,13 +1592,13 @@ namespace basecross {
 
 		//ボスとの衝突判定
 		float length = (m_BossPos - m_Rigidbody->m_Pos).length();
-		if (length < 12.0f) {
+		if (length < 5.0f) {
 			Vec3 Emitter = m_Rigidbody->m_Pos;
 			Emitter.y -= 0.125f;
 			//Sparkの送出
 			auto SparkPtr = GetStage<GameStage>()->FindTagGameObject<MultiFire>(L"MultiFire");
 			SparkPtr->InsertFire(Emitter);
-			SetPosition(Vec3(100, 100, 100));
+			SetPosition(Vec3(0, 0, 70));
 
 			m_StateMachine->ChangeState(EnemyOppositionState::Instance());
 			return;
@@ -1611,7 +1610,6 @@ namespace basecross {
 	//--------------------------------------------------------------------------------------
 	IMPLEMENT_SINGLETON_INSTANCE(EnemyOppositionState)
 	void EnemyOppositionState::Enter(const shared_ptr<EnemyObject>& Obj) {
-		Obj->ComplianceStartBehavior();
 		//何もしない
 	}
 
@@ -2513,7 +2511,7 @@ namespace basecross {
 	//--------------------------------------------------------------------------------------
 	IMPLEMENT_SINGLETON_INSTANCE(HandDefaultState)
 
-		void HandDefaultState::Enter(const shared_ptr<BossHand>& Obj) {
+	void HandDefaultState::Enter(const shared_ptr<BossHand>& Obj) {
 		Obj->ComplianceStartBehavior();
 		//何もしない
 	}

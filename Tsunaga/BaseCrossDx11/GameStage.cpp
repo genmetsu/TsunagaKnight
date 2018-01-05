@@ -34,14 +34,6 @@ namespace basecross {
 		auto Dev = App::GetApp()->GetDeviceResources();
 		Dev->GetShadowMapRenderTarget(2048.0f);
 
-		//背景スプライトの作成
-		/*AddGameObject<MultiSprite>(
-			L"SKY_TX",
-			Vec2(1280, 800),
-			0.0f,
-			Vec2(0, 0),
-			1, 1
-			);*/
 		AddGameObject<SkyBox>(
 			L"SKY_TX",
 			Vec3(2000.0f, 2000.0f, 2000.0f),
@@ -55,13 +47,6 @@ namespace basecross {
 		//平面の作成
 		Quat Qt;
 		Qt.rotationX(XM_PIDIV2);
-		/*AddGameObject<SquareObject>(
-			L"WALL_TX",
-			L"WALL_NORMAL_TX",
-			Vec3(20.0f, 100.0f, 1.0f),
-			Qt,
-			Vec3(0.0f, 0.0f, 40.0f)
-			);*/
 
 		AddGameObject<YamatoStage>(
 			L"YAMATO_TX",
@@ -313,66 +298,6 @@ namespace basecross {
 		m_AudioObjectPtr = ObjectFactory::Create<MultiAudioObject>();
 		m_AudioObjectPtr->AddAudioResource(L"Nanika");
 		m_AudioObjectPtr->Start(L"Nanika", XAUDIO2_LOOP_INFINITE, 0.0f);
-		
-
-		/*AddGameObject<MultiSprite>(
-			L"BOSS_BAR_TX",
-			Vec2(1200, 80),
-			0.0f,
-			Vec2(0, -330),
-			1, 1
-			);
-		AddGameObject<MultiSprite>(
-			L"CANNON_BAR_TX",
-			Vec2(1200, 80),
-			0.0f,
-			Vec2(0, 330),
-			1, 1
-			);
-		AddGameObject<MultiSprite>(
-			L"BOSS_FRAME_TX",
-			Vec2(1200, 80),
-			0.0f,
-			Vec2(0, -330),
-			1, 1
-			);
-		AddGameObject<MultiSprite>(
-			L"CANNON_FRAME_TX",
-			Vec2(1200, 80),
-			0.0f,
-			Vec2(0, 330),
-			1, 1
-			);
-
-		AddGameObject<MultiSprite>(
-			L"BOSS_ICON_TX",
-			Vec2(128.0f * 0.8f, 128.0f * 0.8f),
-			0.0f,
-			Vec2(0, -300),
-			1, 1
-			);
-		AddGameObject<MultiSprite>(
-			L"CANNON_ICON_TX",
-			Vec2(64.0f * 0.8f, 64.0f * 0.8f),
-			0.0f,
-			Vec2(0, 310),
-			1, 1
-			);
-
-		AddGameObject<MultiSprite>(
-			L"PLAYER_BAR_TX",
-			Vec2(300, 30),
-			0.0f,
-			Vec2(0, -40),
-			1, 1
-			);
-		AddGameObject<MultiSprite>(
-			L"PLAYER_FRAME_TX",
-			Vec2(300, 30),
-			0.0f,
-			Vec2(0, -40),
-			1, 1
-			);*/
 
 		AddGameObject<MultiSprite>(
 			L"BOSS_BAR_TX",
@@ -565,7 +490,7 @@ namespace basecross {
 			}*/
 			
 			auto PlayerPtr = FindTagGameObject<Player>(L"Player");
-			int now_cannon = PlayerPtr->GetIsCannon();
+			/*int now_cannon = PlayerPtr->GetIsCannon();
 			if (now_cannon < 3) {
 				auto boss = FindTagGameObject<Boss>(L"BossEnemy");
 				Vec3 boss_pos = boss->GetPosition();
@@ -597,7 +522,7 @@ namespace basecross {
 					camera.m_CamerEye.z -= 6.0f;
 				}
 			}
-			else {
+			else {*/
 				camera.m_CamerAt = PlayerPtr->GetPosition();
 				camera.m_CamerAt.y += 0.5f;
 
@@ -608,7 +533,7 @@ namespace basecross {
 						-cos(camera.m_CameraXZRad) * camera.m_CameraArmLen * sin(camera.m_CameraYRad)
 					);
 				camera.m_CamerEye = camera.m_CamerAt + CameraLocalEye;
-			}
+			//}
 			//Bボタン
 			if (CntlVec[0].wPressedButtons & XINPUT_GAMEPAD_B) {
 				PostEvent(0.0f, GetThis<ObjectInterface>(), App::GetApp()->GetScene<Scene>(), L"ToEmptyStage");

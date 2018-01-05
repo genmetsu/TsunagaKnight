@@ -43,7 +43,7 @@ namespace basecross {
 			return false;
 		}
 		break;
-		case CollType::typeCAPSULE:
+		/*case CollType::typeCAPSULE:
 		{
 			if (HitTest::CollisionTestSphereCapsule(GetSPHERE(), m_Velocity - Dest.m_Velocity,
 				Dest.GetCAPSULE(),
@@ -66,7 +66,7 @@ namespace basecross {
 			}
 			return false;
 		}
-		break;
+		break;*/
 		case CollType::typeOBB:
 		{
 			if (HitTest::CollisionTestSphereObb(GetSPHERE(),
@@ -96,67 +96,67 @@ namespace basecross {
 
 	bool Rigidbody::CollisionCAPSULE(Rigidbody& Dest, float ElapsedTime, CollisionState& state) {
 		switch (Dest.m_CollType) {
-		case CollType::typeSPHERE:
-		{
-			if (HitTest::CollisionTestSphereCapsule(Dest.GetSPHERE(),
-				Dest.m_Velocity - m_Velocity,
-				GetCAPSULE(),
-				0, ElapsedTime, state.m_HitTime)) {
-				CAPSULE SrcCap = GetCAPSULE();
-				Vec3 CapCenter = SrcCap.GetCenter();
-				CapCenter + m_Velocity * state.m_HitTime;
-				SrcCap.SetCenter(CapCenter);
-				SPHERE DestSp = Dest.GetSPHERE();
-				DestSp.m_Center += Dest.m_Velocity * state.m_HitTime;
-				Vec3 Ret;
-				HitTest::SPHERE_CAPSULE(DestSp, SrcCap, Ret);
-				state.m_Src = this;
-				state.m_Dest = &Dest;
-				state.m_SrcHitNormal = Ret - DestSp.m_Center;
-				state.m_SrcHitNormal.normalize();
-				state.m_DestHitNormal = DestSp.m_Center - Ret;
-				state.m_DestHitNormal.normalize();
-				return true;
-			}
-			return false;
-		}
-		break;
-		case CollType::typeCAPSULE:
-		{
-			if (HitTest::CollisionTestCapsuleCapsule(GetCAPSULE(),
-				m_Velocity - Dest.m_Velocity,
-				Dest.GetCAPSULE(),
-				0, ElapsedTime, state.m_HitTime)) {
-				CAPSULE SrcCap = GetCAPSULE();
-				Vec3 CapCenter = SrcCap.GetCenter();
-				CapCenter + m_Velocity * state.m_HitTime;
-				SrcCap.SetCenter(CapCenter);
+		//case CollType::typeSPHERE:
+		//{
+		//	if (HitTest::CollisionTestSphereCapsule(Dest.GetSPHERE(),
+		//		Dest.m_Velocity - m_Velocity,
+		//		GetCAPSULE(),
+		//		0, ElapsedTime, state.m_HitTime)) {
+		//		CAPSULE SrcCap = GetCAPSULE();
+		//		Vec3 CapCenter = SrcCap.GetCenter();
+		//		CapCenter + m_Velocity * state.m_HitTime;
+		//		SrcCap.SetCenter(CapCenter);
+		//		SPHERE DestSp = Dest.GetSPHERE();
+		//		DestSp.m_Center += Dest.m_Velocity * state.m_HitTime;
+		//		Vec3 Ret;
+		//		HitTest::SPHERE_CAPSULE(DestSp, SrcCap, Ret);
+		//		state.m_Src = this;
+		//		state.m_Dest = &Dest;
+		//		state.m_SrcHitNormal = Ret - DestSp.m_Center;
+		//		state.m_SrcHitNormal.normalize();
+		//		state.m_DestHitNormal = DestSp.m_Center - Ret;
+		//		state.m_DestHitNormal.normalize();
+		//		return true;
+		//	}
+		//	return false;
+		//}
+		//break;
+		//case CollType::typeCAPSULE:
+		//{
+		//	if (HitTest::CollisionTestCapsuleCapsule(GetCAPSULE(),
+		//		m_Velocity - Dest.m_Velocity,
+		//		Dest.GetCAPSULE(),
+		//		0, ElapsedTime, state.m_HitTime)) {
+		//		CAPSULE SrcCap = GetCAPSULE();
+		//		Vec3 CapCenter = SrcCap.GetCenter();
+		//		CapCenter + m_Velocity * state.m_HitTime;
+		//		SrcCap.SetCenter(CapCenter);
 
-				CAPSULE DestCap = Dest.GetCAPSULE();
-				CapCenter = DestCap.GetCenter();
-				CapCenter + Dest.m_Velocity * state.m_HitTime;
-				DestCap.SetCenter(CapCenter);
+		//		CAPSULE DestCap = Dest.GetCAPSULE();
+		//		CapCenter = DestCap.GetCenter();
+		//		CapCenter + Dest.m_Velocity * state.m_HitTime;
+		//		DestCap.SetCenter(CapCenter);
 
-				Vec3 RetVec1, RetVec2;
-				HitTest::CAPSULE_CAPSULE(SrcCap, DestCap, RetVec1, RetVec2);
+		//		Vec3 RetVec1, RetVec2;
+		//		HitTest::CAPSULE_CAPSULE(SrcCap, DestCap, RetVec1, RetVec2);
 
-				//接点へのベクトル
-				//DestCapの線分とRetVec1の線分上の最近接点とRetVec1の法線
-				float t;
-				Vec3 SegVecVec1, SegVecVec2;
-				HitTest::ClosetPtPointSegment(RetVec1, DestCap.m_PointBottom, DestCap.m_PointTop, t, SegVecVec1);
-				HitTest::ClosetPtPointSegment(RetVec2, SrcCap.m_PointBottom, SrcCap.m_PointTop, t, SegVecVec2);
-				state.m_Src = this;
-				state.m_Dest = &Dest;
-				state.m_SrcHitNormal = SegVecVec1 - RetVec1;
-				state.m_SrcHitNormal.normalize();
-				state.m_DestHitNormal = SegVecVec2 - RetVec2;
-				state.m_DestHitNormal.normalize();
-				return true;
-			}
-			return false;
-		}
-		break;
+		//		//接点へのベクトル
+		//		//DestCapの線分とRetVec1の線分上の最近接点とRetVec1の法線
+		//		float t;
+		//		Vec3 SegVecVec1, SegVecVec2;
+		//		HitTest::ClosetPtPointSegment(RetVec1, DestCap.m_PointBottom, DestCap.m_PointTop, t, SegVecVec1);
+		//		HitTest::ClosetPtPointSegment(RetVec2, SrcCap.m_PointBottom, SrcCap.m_PointTop, t, SegVecVec2);
+		//		state.m_Src = this;
+		//		state.m_Dest = &Dest;
+		//		state.m_SrcHitNormal = SegVecVec1 - RetVec1;
+		//		state.m_SrcHitNormal.normalize();
+		//		state.m_DestHitNormal = SegVecVec2 - RetVec2;
+		//		state.m_DestHitNormal.normalize();
+		//		return true;
+		//	}
+		//	return false;
+		//}
+		//break;
 		case CollType::typeOBB:
 		{
 			if (HitTest::CollisionTestCapsuleObb(GetCAPSULE(),
