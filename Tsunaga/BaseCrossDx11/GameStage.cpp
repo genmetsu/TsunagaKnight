@@ -167,7 +167,7 @@ namespace basecross {
 				L"NEEDLE_MESH",
 				L"NEEDLE_TX",
 				L"30frame",
-				Vec3(0.3f, 0.3f, 0.3f),
+				Vec3(0.25f, 0.25f, 0.25f),
 				Quat(Vec3(0, 1.0f, 0), XM_PI),
 				Vec3((float)rand() / 32767 * 20.0f - 10.0f, 0.125f, 60.0f - (float)rand() / 32767 * 15.0f),
 				false);
@@ -180,7 +180,7 @@ namespace basecross {
 				L"GUN_MESH",
 				L"GUN_TX",
 				L"NonMove",
-				Vec3(0.25f, 0.25f, 0.25f),
+				Vec3(0.21f, 0.21f, 0.21f),
 				Quat(Vec3(0, 1.0f, 0), XM_PI),
 				Vec3((float)rand() / 32767 * 20.0f - 10.0f, 0.125f, 60.0f - (float)rand() / 32767 * 20.0f),
 				false);
@@ -209,7 +209,7 @@ namespace basecross {
 				L"ANGEL_MESH",
 				L"ANGEL_TX",
 				L"30frame",
-				Vec3(0.25f, 0.25f, 0.25f),
+				Vec3(0.21f, 0.21f, 0.21f),
 				Quat(Vec3(0, 1.0f, 0), XM_PI),
 				Vec3((float)rand() / 32767 * 20.0f - 10.0f, 0.125f, 60.0f - (float)rand() / 32767 * 20.0f),
 				false);
@@ -453,7 +453,6 @@ namespace basecross {
 					camera.m_CameraXZRad = 0;
 				}
 			}
-
 			if (CntlVec[0].fThumbRY != 0) {
 				camera.m_CameraYRad += CntlVec[0].fThumbRY * 0.05f;
 				if (camera.m_CameraYRad >= 2.0f) {
@@ -477,19 +476,24 @@ namespace basecross {
 					}
 				}
 			}
+
 			auto GM = GameManager::getInstance();
 			GM->m_camera_length = camera.m_CameraYRad;
-
-			/*auto GM = GameManager::getInstance();
-			int now_friends_num = GM->GetFriendsNum();
-			if (now_friends_num >= 6) {
-				camera.m_CameraArmLen = (float)now_friends_num * 0.5f;
-				if (GetCamera().m_CameraArmLen >= 50.0f) {
-					GetCamera().m_CameraArmLen = 50.0f;
-				}
-			}*/
-			
 			auto PlayerPtr = FindTagGameObject<Player>(L"Player");
+
+
+			//チェインがある程度長いときは移動しているときカメラを引く
+			int now_friends_num = GM->GetFriendsNum();
+			if (now_friends_num >= 0) {
+				Vec3 PlayerVelo = PlayerPtr->GetVelocity();
+				if (PlayerVelo.length() > 3.0f && camera.m_CameraArmLen < 5.0f) {
+					camera.m_CameraArmLen += 0.02f;
+				}
+				else if (PlayerVelo.length() < 3.0f && camera.m_CameraArmLen > 2.6f) {
+					camera.m_CameraArmLen -= 0.08f;
+				}
+			}
+
 			/*int now_cannon = PlayerPtr->GetIsCannon();
 			if (now_cannon < 3) {
 				auto boss = FindTagGameObject<Boss>(L"BossEnemy");

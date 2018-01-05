@@ -1493,13 +1493,13 @@ namespace basecross {
 			m_Rigidbody->m_Scale,
 			Vec3(0, 0, 0),
 			Quat(),
-			Vec3(0, 0, -0.4f)
+			Vec3(0, -0.05f, -0.3f)
 		);
 		m_ChildLocalMatrix.affineTransformation(
 			m_Rigidbody->m_Scale,
 			Vec3(0, 0, 0),
 			Quat(),
-			Vec3(0, 0, -0.4f)
+			Vec3(0, 0, -0.3f)
 		);
 		m_LerpToParent = m_LerpToChild = 0.2f;
 		m_Rigidbody->m_CollType = CollType::typeCAPSULE;
