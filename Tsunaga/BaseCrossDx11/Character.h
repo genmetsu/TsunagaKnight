@@ -1155,6 +1155,13 @@ namespace basecross {
 		virtual void OppositionBehavior();
 		//--------------------------------------------------------------------------------------
 		/*!
+		@brief 大砲に向かう時の処理
+		@return	なし
+		*/
+		//--------------------------------------------------------------------------------------
+		virtual void ToCannonBehavior();
+		//--------------------------------------------------------------------------------------
+		/*!
 		@brief プレイヤーの弾との衝突判定
 		@return	なし
 		*/
@@ -1213,6 +1220,20 @@ namespace basecross {
 	public:
 		//ステートのインスタンス取得
 		DECLARE_SINGLETON_INSTANCE(EnemyOppositionState)
+		virtual void Enter(const shared_ptr<EnemyObject>& Obj)override;
+		virtual void Execute(const shared_ptr<EnemyObject>& Obj)override;
+		virtual void Exit(const shared_ptr<EnemyObject>& Obj)override;
+	};
+
+	//--------------------------------------------------------------------------------------
+	///	大砲に向かうステート（EnemyObject）
+	//--------------------------------------------------------------------------------------
+	class EnemyToCannonState : public ObjState<EnemyObject>
+	{
+		EnemyToCannonState() {}
+	public:
+		//ステートのインスタンス取得
+		DECLARE_SINGLETON_INSTANCE(EnemyToCannonState)
 		virtual void Enter(const shared_ptr<EnemyObject>& Obj)override;
 		virtual void Execute(const shared_ptr<EnemyObject>& Obj)override;
 		virtual void Exit(const shared_ptr<EnemyObject>& Obj)override;

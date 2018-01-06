@@ -1192,7 +1192,7 @@ namespace basecross {
 		//ステートマシンの構築
 		m_StateMachine.reset(new StateMachine<EnemyObject>(GetThis<EnemyObject>()));
 		//ステート初期値設定
-		m_StateMachine->ChangeState(EnemyOppositionState::Instance());
+		m_StateMachine->ChangeState(EnemyToCannonState::Instance());
 
 		vector<shared_ptr<GameObject>> CannonVec;
 		GetStage<GameStage>()->FindTagGameObjectVec(L"Cannon", CannonVec);
@@ -1379,7 +1379,7 @@ namespace basecross {
 	void EnemyObject::OppositionBehavior() {
 		//前回のターンからの経過時間を求める
 		float ElapsedTime = App::GetApp()->GetElapsedTime();
-		auto shptr = m_ParentPtr.lock();
+		auto shptr = m_PlayerPtr.lock();
 		//親のワールド行列を取得する変数
 		Mat4x4 ParMat;
 		if (shptr) {
@@ -1459,6 +1459,41 @@ namespace basecross {
 					m_Rigidbody->m_Velocity = ToPosVec;
 					m_Rigidbody->m_Pos.y = m_BaseY;
 				}
+			}
+		}
+		Vec3 Temp = m_Rigidbody->m_Velocity;
+		Temp.normalize();
+		float ToAngle = atan2(Temp.x, Temp.z);
+		Quat Qt;
+		Qt.rotationRollPitchYawFromVector(Vec3(0, ToAngle, 0));
+		Qt.normalize();
+		//現在と目標を補間
+		m_Rigidbody->m_Quat = XMQuaternionSlerp(m_Rigidbody->m_Quat, Qt, 0.1f);
+	}
+
+	void EnemyObject::ToCannonBehavior() {
+		//前回のターンからの経過時間を求める
+		float ElapsedTime = App::GetApp()->GetElapsedTime();
+		auto shptr = m_PlayerPtr.lock();
+		if (shptr) {
+			Vec3 toPos = m_CannonPos;
+			Vec3 ToPosVec = toPos - m_Rigidbody->m_Pos;
+			//プレイヤーとの距離を求める
+			Vec3 PlayerPos = shptr->GetPosition();
+			float dis = (PlayerPos - m_Rigidbody->m_Pos).length();
+			// プレイヤーとエネミーの距離が近くなった時の処理
+			if (dis <= (m_SearchDis - 1.0f))
+			{
+				m_StateMachine->ChangeState(EnemyOppositionState::Instance());
+				return;
+			}
+			// 大砲に向かう処理
+			else
+			{
+				ToPosVec.normalize();
+				ToPosVec *= m_Speed;
+				m_Rigidbody->m_Velocity = ToPosVec;
+				m_Rigidbody->m_Pos.y = m_BaseY;
 			}
 		}
 		Vec3 Temp = m_Rigidbody->m_Velocity;
@@ -1599,7 +1634,7 @@ namespace basecross {
 			SparkPtr->InsertFire(Emitter);
 			SetPosition(Vec3(0, 0, 70));
 
-			m_StateMachine->ChangeState(EnemyOppositionState::Instance());
+			m_StateMachine->ChangeState(EnemyToCannonState::Instance());
 			return;
 		}
 	}
@@ -1618,6 +1653,23 @@ namespace basecross {
 	}
 
 	void EnemyOppositionState::Exit(const shared_ptr<EnemyObject>& Obj) {
+		//何もしない
+	}
+
+	//--------------------------------------------------------------------------------------
+	///	大砲に向かうステート（EnemyObject）
+	//--------------------------------------------------------------------------------------
+	IMPLEMENT_SINGLETON_INSTANCE(EnemyToCannonState)
+	void EnemyToCannonState::Enter(const shared_ptr<EnemyObject>& Obj) {
+		//何もしない
+	}
+
+	void EnemyToCannonState::Execute(const shared_ptr<EnemyObject>& Obj) {
+		Obj->ToCannonBehavior();
+		Obj->CollisionBullet();
+	}
+
+	void EnemyToCannonState::Exit(const shared_ptr<EnemyObject>& Obj) {
 		//何もしない
 	}
 
@@ -2167,6 +2219,8 @@ namespace basecross {
 		m_Rigidbody = PtrGameStage->AddRigidbody(body);
 
 		m_isDead = false;
+
+		m_PlayerPtr = GetStage()->FindTagGameObject<Player>(L"Player");
 
 		//メッシュの取得
 		auto MeshPtr = App::GetApp()->GetResource<MeshResource>(m_MeshResName);
