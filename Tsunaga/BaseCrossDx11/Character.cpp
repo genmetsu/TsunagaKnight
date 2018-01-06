@@ -1103,9 +1103,10 @@ namespace basecross {
 		m_Speed(0.5f),
 		m_Tackle(false),
 		m_StopTime(1.5f),
-		m_SearchDis(1.0f),
-		m_TackleSpeed(5.0f),
-		m_TackleStart(Vec3(0.0f, 0.0f, 0.0f)),
+		m_SearchDis(3.0f),
+		m_TackleTime(0.75f),
+		m_TackleSpeed(6.0f),
+		m_TackleStartPos(Vec3(0.0f, 0.0f, 0.0f)),
 		m_OwnShadowActive(OwnShadowActive),
 		m_LerpToParent(0.2f),
 		m_LerpToChild(0.2f),
@@ -1397,14 +1398,13 @@ namespace basecross {
 			//行列の反映
 			World *= ParMat;
 			//この時点でWorldは目標となる位置
-			//Vec3 toPos = World.transInMatrix();
-			Vec3 toPos = m_CannonPos;
+			Vec3 toPos = World.transInMatrix();
 			Vec3 ToPosVec = toPos - m_Rigidbody->m_Pos;
 			//距離を求める
 			float dis = ToPosVec.length();
 
-			// 突進して1.5秒たったら・・・・
-			if (m_FrameCount > m_StopTime * 1.5f)
+			// 突進してしばらくたったら
+			if (m_FrameCount > m_StopTime + m_TackleTime)
 			{
 				m_Tackle = false;
 				m_FrameCount = 0.0f;
@@ -1416,28 +1416,29 @@ namespace basecross {
 				m_Tackle = true;
 				if (m_TargetPos == Vec3(0.0f, 0.0f, 0.0f)) {
 					m_TargetPos = toPos;
-					m_TackleStart = m_Rigidbody->m_Pos;
+					m_TackleStartPos = m_Rigidbody->m_Pos;
 				}
 			}
 
 			// 突進の処理
 			if (m_Tackle == true)
 			{
-				Vec3 Tag = m_TargetPos - m_TackleStart;
+				Vec3 Tag = m_TargetPos - m_TackleStartPos;
 				Tag.normalize();
 				Tag *= m_TackleSpeed;
 				m_Rigidbody->m_Pos.y = m_BaseY;
 				m_Rigidbody->m_Velocity = Tag;
 				m_FrameCount += ElapsedTime;
-				return;
 			}
-
 			// エネミー移動処理
-			if (m_Tackle == false)
+			else if (m_Tackle == false)
 			{
-				if (m_FrameCount >= 1.0f)
+				if (m_FrameCount > 0.0f)
 				{
-					m_Rigidbody->m_Velocity *= 0.7f;
+					ToPosVec.normalize();
+					ToPosVec *= 0.01f;
+					m_Rigidbody->m_Velocity = ToPosVec;
+					m_Rigidbody->m_Pos.y = m_BaseY;
 					m_FrameCount += ElapsedTime;
 				}
 				// プレイヤーとエネミーの距離が近くなった時の処理
@@ -1450,7 +1451,6 @@ namespace basecross {
 					Emitter.y -= 0.125f;
 					FirePtr->InsertSigns(Emitter);
 				}
-
 				// プレイヤーに向かう処理
 				else
 				{
@@ -1464,7 +1464,6 @@ namespace basecross {
 		Vec3 Temp = m_Rigidbody->m_Velocity;
 		Temp.normalize();
 		float ToAngle = atan2(Temp.x, Temp.z);
-
 		Quat Qt;
 		Qt.rotationRollPitchYawFromVector(Vec3(0, ToAngle, 0));
 		Qt.normalize();
@@ -2105,7 +2104,9 @@ namespace basecross {
 		const Vec3 & Pos, bool OwnShadowActive) :
 		EnemyObject(StagePtr, ParentPtr, MeshResName, TextureResName, DefaultAnimation, Scale, Qt, Pos, OwnShadowActive)
 	{
-		m_Speed = 0.8f;
+		m_Speed = 0.6f;
+		m_SearchDis = 2.5f;
+		m_TackleSpeed = 4.0f;
 		AddTag(L"Green");
 		AddTag(L"Zako");
 		//メッシュとトランスフォームの差分の設定
@@ -2120,6 +2121,7 @@ namespace basecross {
 	AngelEnemy::~AngelEnemy()
 	{
 	}
+	
 	//--------------------------------------------------------------------------------------
 	/// 中ボスエネミー近距離
 	//--------------------------------------------------------------------------------------

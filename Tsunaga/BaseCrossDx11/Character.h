@@ -962,20 +962,21 @@ namespace basecross {
 		float m_SearchDis;
 		//突撃のスピード
 		float m_TackleSpeed;
+		//突進時間
+		float m_TackleTime;
 		float m_HP;
 		float m_AttackPoint;
 		//自分を固定するY軸の高さ
 		float m_BaseY;
 
 		Vec3 m_CannonPos;
-
 		Vec3 m_BossPos;
 		Vec3 m_ToBossVec;
 
 		//死んだかどうか
 		bool m_isDead;
-
-		Vec3 m_TackleStart;
+		//突進する際の最初のポジション
+		Vec3 m_TackleStartPos;
 
 		//プレイヤーのポインタ
 		weak_ptr<GameObject> m_PlayerPtr;
