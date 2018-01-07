@@ -964,6 +964,9 @@ namespace basecross {
 		float m_TackleSpeed;
 		//突進時間
 		float m_TackleTime;
+		//攻撃後の硬直時間
+		float m_AfterAttackTime;
+
 		float m_HP;
 		float m_AttackPoint;
 		//自分を固定するY軸の高さ
@@ -1155,6 +1158,13 @@ namespace basecross {
 		virtual void OppositionBehavior();
 		//--------------------------------------------------------------------------------------
 		/*!
+		@brief 攻撃後の硬直処理
+		@return	なし
+		*/
+		//--------------------------------------------------------------------------------------
+		virtual void AttackEndBehavior();
+		//--------------------------------------------------------------------------------------
+		/*!
 		@brief 大砲に向かう時の処理
 		@return	なし
 		*/
@@ -1220,6 +1230,20 @@ namespace basecross {
 	public:
 		//ステートのインスタンス取得
 		DECLARE_SINGLETON_INSTANCE(EnemyOppositionState)
+		virtual void Enter(const shared_ptr<EnemyObject>& Obj)override;
+		virtual void Execute(const shared_ptr<EnemyObject>& Obj)override;
+		virtual void Exit(const shared_ptr<EnemyObject>& Obj)override;
+	};
+
+	//--------------------------------------------------------------------------------------
+	///	攻撃後の硬直ステート（EnemyObject）
+	//--------------------------------------------------------------------------------------
+	class EnemyAttackEndState : public ObjState<EnemyObject>
+	{
+		EnemyAttackEndState() {}
+	public:
+		//ステートのインスタンス取得
+		DECLARE_SINGLETON_INSTANCE(EnemyAttackEndState)
 		virtual void Enter(const shared_ptr<EnemyObject>& Obj)override;
 		virtual void Execute(const shared_ptr<EnemyObject>& Obj)override;
 		virtual void Exit(const shared_ptr<EnemyObject>& Obj)override;
@@ -1331,6 +1355,12 @@ namespace basecross {
 	//--------------------------------------------------------------------------------------
 	class ShootEnemy : public EnemyObject
 	{
+		//敵対時の打ち出す弾の速度
+		float m_EnemyShootSpeed;
+		//つながっている時の撃ち出す弾の速度
+		float m_PlayerShootSpeed;
+		//つながっているときの弾の撃ち出し頻度
+		float m_PlayerShootTime;
 	public:
 		//--------------------------------------------------------------------------------------
 		/*!
@@ -1400,8 +1430,6 @@ namespace basecross {
 		float m_Speed;
 		//フレームカウント
 		float m_FrameCount;
-		//弾のスピード
-		float m_ShootSpeed;
 
 		wstring m_my_Tag;
 
@@ -1423,7 +1451,7 @@ namespace basecross {
 		
 		// 弾が撃たれているかどうか
 		bool IsShoot;
-		// 弾の存在
+		// 弾の存在時間
 		float m_BulletTime;
 
 	public:

@@ -1106,6 +1106,7 @@ namespace basecross {
 		m_SearchDis(3.0f),
 		m_TackleTime(0.75f),
 		m_TackleSpeed(6.0f),
+		m_AfterAttackTime(2.0f),
 		m_TackleStartPos(Vec3(0.0f, 0.0f, 0.0f)),
 		m_OwnShadowActive(OwnShadowActive),
 		m_LerpToParent(0.2f),
@@ -1409,6 +1410,9 @@ namespace basecross {
 				m_Tackle = false;
 				m_FrameCount = 0.0f;
 				m_TargetPos = Vec3(0.0f, 0.0f, 0.0f);
+				m_Rigidbody->m_Velocity *= 0.01f;
+				m_StateMachine->ChangeState(EnemyAttackEndState::Instance());
+				return;
 			}
 			// 止まりはじめ
 			else if (m_FrameCount > m_StopTime && m_Tackle == false)
@@ -1469,6 +1473,17 @@ namespace basecross {
 		Qt.normalize();
 		//現在と目標を補間
 		m_Rigidbody->m_Quat = XMQuaternionSlerp(m_Rigidbody->m_Quat, Qt, 0.1f);
+	}
+
+	void EnemyObject::AttackEndBehavior() {
+		if (m_FrameCount > m_AfterAttackTime) {
+			m_FrameCount = 0.0f;
+			m_StateMachine->ChangeState(EnemyOppositionState::Instance());
+			return;
+		}
+		//前回のターンからの経過時間を求める
+		float ElapsedTime = App::GetApp()->GetElapsedTime();
+		m_FrameCount += ElapsedTime;
 	}
 
 	void EnemyObject::ToCannonBehavior() {
@@ -1657,6 +1672,23 @@ namespace basecross {
 	}
 
 	//--------------------------------------------------------------------------------------
+	///	攻撃後の硬直ステート（EnemyObject）
+	//--------------------------------------------------------------------------------------
+	IMPLEMENT_SINGLETON_INSTANCE(EnemyAttackEndState)
+	void EnemyAttackEndState::Enter(const shared_ptr<EnemyObject>& Obj) {
+		//何もしない
+	}
+
+	void EnemyAttackEndState::Execute(const shared_ptr<EnemyObject>& Obj) {
+		Obj->AttackEndBehavior();
+		Obj->CollisionBullet();
+	}
+
+	void EnemyAttackEndState::Exit(const shared_ptr<EnemyObject>& Obj) {
+		//何もしない
+	}
+
+	//--------------------------------------------------------------------------------------
 	///	大砲に向かうステート（EnemyObject）
 	//--------------------------------------------------------------------------------------
 	IMPLEMENT_SINGLETON_INSTANCE(EnemyToCannonState)
@@ -1749,6 +1781,7 @@ namespace basecross {
 			Vec3(0.0f, XM_PI, 0.0f),
 			Vec3(0.0f, 0.0f, 0.0f)
 		);
+		m_AfterAttackTime = 1.5f;
 	}
 
 	NeedleEnemy::~NeedleEnemy()
@@ -1804,6 +1837,9 @@ namespace basecross {
 	{
 		m_Speed = 0.3f;
 		m_SearchDis = 5.0;
+		m_EnemyShootSpeed = 2.0f;
+		m_PlayerShootSpeed = 5.0f;
+		m_PlayerShootTime = 1.0f;
 		AddTag(L"Blue");
 		AddTag(L"Zako");
 		//メッシュとトランスフォームの差分の設定
@@ -1834,7 +1870,7 @@ namespace basecross {
 			m_Rigidbody->m_Velocity = ToPosVec;
 			m_Rigidbody->m_Pos.y = m_Scale.y / 2.0f;
 
-			if (m_StopTime < m_FrameCount) {
+			if (m_FrameCount > m_StopTime) {
 				//球を飛ばす処理
 				vector<shared_ptr<GameObject>> ShootVec;
 				GetStage<GameStage>()->FindTagGameObjectVec(L"Bullet", ShootVec);
@@ -1845,8 +1881,9 @@ namespace basecross {
 						if (nowShooting == false)
 						{
 							m_PtrObj->ChangeCurrentAnimation(L"Attack");
-							Ptr->Wakeup(ToPosVec * 0.1f + m_Rigidbody->m_Pos, ToPosVec.normalize());
+							Ptr->Wakeup(m_Rigidbody->m_Pos + ToPosVec * 0.1f, ToPosVec.normalize() * m_EnemyShootSpeed);
 							m_FrameCount = 0.0f;
+							m_StateMachine->ChangeState(EnemyAttackEndState::Instance());
 							return;
 						}
 					}
@@ -1881,36 +1918,16 @@ namespace basecross {
 	}
 
 	void ShootEnemy::OnUpdate() {
-		
-
 		EnemyObject::OnUpdate();
 	}
 
 	void ShootEnemy::UpdateBehavior() {
-
 		FriendsBehavior();
-
 		float ElapsedTime = App::GetApp()->GetElapsedTime();
-		auto shptr = m_ParentPtr.lock();
-		//親のワールド行列を取得する変数
-		Mat4x4 ParMat;
+		auto shptr = m_PlayerPtr.lock();
 		if (shptr) {
-			//行列取得用のインターフェイスを持ってるかどうか
-			auto matintptr = dynamic_pointer_cast<MatrixInterface>(shptr);
-			if (matintptr) {
-				matintptr->GetWorldMatrix(ParMat);
-			}
-
-			Mat4x4 World;
-			World.identity();
-			//行列の定義
-			World = m_PlayerLocalMatrix;
-			//スケーリングを1.0にした行列に変換
-			ParMat.scaleIdentity();
-			//行列の反映
-			World *= ParMat;
-			//この時点でWorldは目標となる位置
-			Vec3 toPos = World.transInMatrix();
+			//プレイヤー方向への二つのベクトルを作り、そこから外積を作って側面に弾を飛ばすようにする
+			Vec3 toPos = shptr->GetPosition();
 			Vec3 toPos2 = toPos;
 
 			toPos.y = 1.0f;
@@ -1922,9 +1939,11 @@ namespace basecross {
 			Vec3 force = cross(force1, force2);
 			force.y = 0;
 			force.normalize();
-
+			
+			//回転の向きは90度
 			float angle = -XM_PIDIV2;
 
+			//常にステージの奥に向かって弾を撃つようにする
 			if (force.z < 0)
 			{
 				force.z *= -1.0f;
@@ -1940,7 +1959,7 @@ namespace basecross {
 				Vec3(0.0f, 0.0f, 0.0f)
 			);
 
-			if (m_FrameCount > 1.0f) {
+			if (m_FrameCount > m_PlayerShootTime) {
 				vector<shared_ptr<GameObject>> ShootVec;
 				GetStage<GameStage>()->FindTagGameObjectVec(L"PlayerBullet", ShootVec);
 				for (auto v : ShootVec) {
@@ -1950,7 +1969,7 @@ namespace basecross {
 						if (nowShooting == false)
 						{
 							m_PtrObj->ChangeCurrentAnimation(L"Attack");
-							Ptr->Wakeup(force * 0.1f + m_Rigidbody->m_Pos, force);
+							Ptr->Wakeup(force * 0.1f + m_Rigidbody->m_Pos, force * m_PlayerShootSpeed);
 							m_FrameCount = 0.0f;
 							return;
 						}
@@ -2001,9 +2020,8 @@ namespace basecross {
 		m_Pos(Pos),
 		m_OwnShadowActive(OwnShadowActive),
 		m_my_Tag(Tag),
-		m_ShootSpeed(2.0f),
 		m_FrameCount(0.0f),
-		m_BulletTime(10.0f),
+		m_BulletTime(20.0f),
 		IsShoot(false)
 	{
 	}
@@ -2143,7 +2161,7 @@ namespace basecross {
 	void BulletObject::Wakeup(const Vec3 & Position, const Vec3 & Velocity)
 	{
 		SetPosition(Position);
-		m_Rigidbody->m_Velocity = Velocity * m_ShootSpeed;
+		m_Rigidbody->m_Velocity = Velocity;
 		IsShoot = true;
 	}
 
@@ -2159,6 +2177,8 @@ namespace basecross {
 		m_Speed = 0.6f;
 		m_SearchDis = 2.5f;
 		m_TackleSpeed = 4.0f;
+		m_TackleTime = 1.7f;
+		m_AfterAttackTime = 1.2f;
 		AddTag(L"Green");
 		AddTag(L"Zako");
 		//メッシュとトランスフォームの差分の設定
@@ -2252,7 +2272,6 @@ namespace basecross {
 		m_SimpleObj->m_FogColor = Col4(0.07f, 0.0f, 0.09f, 1.0f);
 		m_SimpleObj->m_FogStart = -10.0f;
 		m_SimpleObj->m_FogEnd = -100.0f;
-
 
 		//シャドウマップ描画データの構築
 		m_PtrShadowmapObj = make_shared<ShadowmapObject>();
