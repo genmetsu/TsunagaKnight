@@ -209,7 +209,7 @@ namespace basecross {
 				L"ANGEL_MESH",
 				L"ANGEL_TX",
 				L"30frame",
-				Vec3(0.21f, 0.21f, 0.21f),
+				Vec3(0.19f, 0.19f, 0.19f),
 				Quat(Vec3(0, 1.0f, 0), XM_PI),
 				Vec3((float)rand() / 32767 * 20.0f - 10.0f, 0.125f, 60.0f - (float)rand() / 32767 * 20.0f),
 				false);

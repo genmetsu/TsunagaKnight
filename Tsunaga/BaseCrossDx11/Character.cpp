@@ -1481,6 +1481,8 @@ namespace basecross {
 			m_StateMachine->ChangeState(EnemyOppositionState::Instance());
 			return;
 		}
+		//高さを固定
+		m_Rigidbody->m_Pos.y = m_BaseY;
 		//前回のターンからの経過時間を求める
 		float ElapsedTime = App::GetApp()->GetElapsedTime();
 		m_FrameCount += ElapsedTime;
@@ -1779,7 +1781,7 @@ namespace basecross {
 			Vec3(1.0f, 1.0f, 1.0f),
 			Vec3(0.0f, 0.0f, 0.0f),
 			Vec3(0.0f, XM_PI, 0.0f),
-			Vec3(0.0f, 0.0f, 0.0f)
+			Vec3(0.0f, -0.2f, 0.0f)
 		);
 		m_AfterAttackTime = 1.5f;
 	}
@@ -1868,7 +1870,7 @@ namespace basecross {
 			ToPosVec.normalize();
 			ToPosVec *= m_Speed;
 			m_Rigidbody->m_Velocity = ToPosVec;
-			m_Rigidbody->m_Pos.y = m_Scale.y / 2.0f;
+			m_Rigidbody->m_Pos.y = m_BaseY;
 
 			if (m_FrameCount > m_StopTime) {
 				//球を飛ばす処理
@@ -1881,8 +1883,12 @@ namespace basecross {
 						if (nowShooting == false)
 						{
 							m_PtrObj->ChangeCurrentAnimation(L"Attack");
-							Ptr->Wakeup(m_Rigidbody->m_Pos + ToPosVec * 0.1f, ToPosVec.normalize() * m_EnemyShootSpeed);
+							ToPosVec.y = 0.0f;
+							Vec3 ShootPos = m_Rigidbody->m_Pos + ToPosVec * 1.3f;
+							ShootPos.y += 0.1f;
+							Ptr->Wakeup(ShootPos, ToPosVec.normalize() * m_EnemyShootSpeed);
 							m_FrameCount = 0.0f;
+							m_Rigidbody->m_Velocity *= 0.01f;
 							m_StateMachine->ChangeState(EnemyAttackEndState::Instance());
 							return;
 						}
@@ -1969,7 +1975,9 @@ namespace basecross {
 						if (nowShooting == false)
 						{
 							m_PtrObj->ChangeCurrentAnimation(L"Attack");
-							Ptr->Wakeup(force * 0.1f + m_Rigidbody->m_Pos, force * m_PlayerShootSpeed);
+							Vec3 ShootPos = m_Rigidbody->m_Pos + force * 0.1f;
+							ShootPos.y += 0.1f;
+							Ptr->Wakeup(ShootPos, force * m_PlayerShootSpeed);
 							m_FrameCount = 0.0f;
 							return;
 						}
@@ -2186,7 +2194,7 @@ namespace basecross {
 			Vec3(1.0f, 1.0f, 1.0f),
 			Vec3(0.0f, 0.0f, 0.0f),
 			Vec3(0.0f, XM_PI, 0.0f),
-			Vec3(0.0f, 0.0f, 0.0f)
+			Vec3(0.0f, -0.25f, 0.0f)
 		);
 	}
 
