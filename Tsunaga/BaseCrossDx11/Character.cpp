@@ -2074,14 +2074,14 @@ namespace basecross {
 		//描画データの構築
 		m_PtrObj = make_shared<SimpleDrawObject>();
 		m_PtrObj->m_MeshRes = MeshPtr;
-		m_PtrObj->m_TextureRes = TexPtr;
+		//m_PtrObj->m_TextureRes = TexPtr;
 		m_PtrObj->m_WorldMatrix = World;
 		m_PtrObj->m_Camera = GetStage<Stage>()->GetCamera();
 		m_PtrObj->m_OwnShadowmapActive = m_OwnShadowActive;
 		m_PtrObj->m_ShadowmapUse = true;
 		if (m_my_Tag == L"Bullet") {
 			m_PtrObj->m_Diffuse = Col4(0.2f, 0.2f, 0.2f, 1.0f);
-			m_PtrObj->m_Emissive = Col4(0.2f, 0.2f, 0.2f, 1.0f);
+			m_PtrObj->m_Emissive = Col4(0.0f, 0.0f, 0.0f, 1.0f);
 		}
 
 		//シャドウマップ描画データの構築
