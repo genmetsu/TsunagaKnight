@@ -1277,7 +1277,7 @@ namespace basecross {
 
 				if (length < Radius + PlayerRadius) {
 
-					Vec3 Emitter = m_Rigidbody->m_Pos;
+					Vec3 Emitter = BulletPos;
 					Emitter.y -= 0.125f;
 					//Sparkの送出
 					auto SparkPtr = GetStage<GameStage>()->FindTagGameObject<MultiSpark>(L"MultiSpark");
@@ -1847,29 +1847,28 @@ namespace basecross {
 		FriendsBehavior();
 		//敵との当たり判定
 		vector<shared_ptr<GameObject>> EnemyVec;
-		GetStage<GameStage>()->FindTagGameObjectVec(L"EnemyObject", EnemyVec);
+		GetStage<GameStage>()->FindTagGameObjectVec(L"Zako", EnemyVec);
 		for (auto enemy : EnemyVec) {
 			if (enemy) {
-				if (!enemy->FindTag(L"LongBoss")) {
-					auto PtrEnemy = dynamic_pointer_cast<EnemyObject>(enemy);
 
-					Vec3 EnemyPos = PtrEnemy->GetPosition();
-					float length = (EnemyPos - m_Rigidbody->m_Pos).length();
+				auto PtrEnemy = dynamic_pointer_cast<EnemyObject>(enemy);
 
-					float EnemyRadius = PtrEnemy->GetScale() / 2.0f;
-					float PlayerRadius = m_Rigidbody->m_Scale.x;
+				Vec3 EnemyPos = PtrEnemy->GetPosition();
+				float length = (EnemyPos - m_Rigidbody->m_Pos).length();
 
-					if (length <= EnemyRadius + PlayerRadius) {
-						if (PtrEnemy->GetHP() > 0) {
-							Vec3 Emitter = m_Rigidbody->m_Pos;
-							Emitter.y -= 0.125f;
-							//Sparkの送出
-							auto SparkPtr = GetStage<GameStage>()->FindTagGameObject<MultiSpark>(L"MultiSpark");
-							SparkPtr->InsertSpark(Emitter);
-							//敵を異次元に飛ばす（仮倒し処理）
-							PtrEnemy->SetPosition(Vec3(0, 0, 70));
-							return;
-						}
+				float EnemyRadius = PtrEnemy->GetScale() / 2.0f;
+				float PlayerRadius = m_Rigidbody->m_Scale.x;
+
+				if (length <= EnemyRadius + PlayerRadius) {
+					if (PtrEnemy->GetHP() > 0) {
+						Vec3 Emitter = m_Rigidbody->m_Pos;
+						Emitter.y -= 0.125f;
+						//Sparkの送出
+						auto SparkPtr = GetStage<GameStage>()->FindTagGameObject<MultiSpark>(L"MultiSpark");
+						SparkPtr->InsertSpark(Emitter);
+						//敵を異次元に飛ばす（仮倒し処理）
+						PtrEnemy->SetPosition(Vec3(0, 0, 70));
+						return;
 					}
 				}
 			}
@@ -2437,7 +2436,7 @@ namespace basecross {
 					FirePtr->InsertSigns(Emitter);
 
 					vector<shared_ptr<GameObject>> HandVec;
-					GetStage<GameStage>()->FindTagGameObjectVec(L"BOSS_HAND", HandVec);
+					GetStage<GameStage>()->FindTagGameObjectVec(L"BossHand", HandVec);
 					for (auto hand : HandVec) {
 						if (hand) {
 							auto PtrHand = dynamic_pointer_cast<BossHand>(hand);
@@ -2529,7 +2528,7 @@ namespace basecross {
 	BossHand::~BossHand() {}
 
 	void BossHand::OnCreate() {	
-		AddTag(L"BOSS_HAND");
+		AddTag(L"BossHand");
 
 		//Rigidbodyの初期化
 		auto PtrGameStage = GetStage<GameStage>();
@@ -2549,7 +2548,7 @@ namespace basecross {
 		//メッシュの取得
 		shared_ptr<MeshResource> MeshPtr;
 
-		if (FindTag(L"LEFT_HAND")) {
+		if (FindTag(L"LeftHand")) {
 			MeshPtr = App::GetApp()->GetResource<MeshResource>(L"LEFT_HAND_MESH");
 			m_DefaultPos = Vec3(-1.1f, -0.5f, 1.0f);
 			m_AttackPos = Vec3(-0.3f, 0.3f, 1.7f);
@@ -2700,7 +2699,7 @@ namespace basecross {
 
 	void BossHand::ComplianceStartBehavior() {
 		//ローカル行列の定義
-		if (FindTag(L"LEFT_HAND")) {
+		if (FindTag(L"LeftHand")) {
 			m_LocalMatrix.affineTransformation(
 				m_Rigidbody->m_Scale,
 				Vec3(0, 0, 0),

@@ -230,7 +230,7 @@ namespace basecross {
 			AddGameObject<BossHand>(
 				ptr,
 				L"HAND_TX",
-				L"LEFT_HAND",
+				L"LeftHand",
 				Vec3(0.5f, 1.0f, 0.5f),
 				Quat(),
 				Vec3(0.0f, 0.5f, 0.0f),
@@ -238,7 +238,7 @@ namespace basecross {
 			AddGameObject<BossHand>(
 				ptr,
 				L"HAND_TX",
-				L"RIGHT_HAND",
+				L"RightHand",
 				Vec3(0.5f, 1.0f, 0.5f),
 				Quat(),
 				Vec3(0.0f, 0.5f, 0.0f),
@@ -259,9 +259,7 @@ namespace basecross {
 				false);
 		}
 
-		
-
-
+	
 		//スパークエフェクト
 		AddGameObject<MultiSpark>();
 		//ファイアエフェクト

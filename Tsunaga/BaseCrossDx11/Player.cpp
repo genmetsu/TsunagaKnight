@@ -411,7 +411,7 @@ namespace basecross {
 				float PlayerRadius = m_Rigidbody->m_Scale.x / 2.0f;
 
 				if (length < Radius + PlayerRadius) {
-
+					PtrBullet->SetPosition(Vec3(100, 100, 100));
 					Vec3 Emitter = m_Rigidbody->m_Pos;
 					Emitter.y -= 0.125f;
 					//Spark‚Ì‘—o
