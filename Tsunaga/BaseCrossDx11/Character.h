@@ -386,11 +386,31 @@ namespace basecross {
 		void InsertFire(const Vec3& Pos);
 	};
 
+	//--------------------------------------------------------------------------------------
+	//class AttackSigns : public MultiParticle;
+	//用途: 雑魚の攻撃を示唆するエフェクト
+	//--------------------------------------------------------------------------------------
 	class AttackSigns : public MultiParticle {
 	public:
 		//構築と破棄
 		AttackSigns(shared_ptr<Stage>& StagePtr);
 		virtual ~AttackSigns();
+		//初期化
+		virtual void OnCreate() override;
+		void InsertSigns(const Vec3& Pos);
+		virtual void OnUpdate() override;
+
+	};
+
+	//--------------------------------------------------------------------------------------
+	//class BossAttackSigns : public MultiParticle;
+	//用途: ボスの攻撃を示唆するエフェクト
+	//--------------------------------------------------------------------------------------
+	class BossAttackSigns : public MultiParticle {
+	public:
+		//構築と破棄
+		BossAttackSigns(shared_ptr<Stage>& StagePtr);
+		virtual ~BossAttackSigns();
 		//初期化
 		virtual void OnCreate() override;
 		void InsertSigns(const Vec3& Pos);
@@ -1576,6 +1596,8 @@ namespace basecross {
 		shared_ptr<BcDrawObject> m_SimpleObj;
 		//描画オブジェクト(weak_ptr)
 		weak_ptr<BcPNTStaticRenderer> m_StaticRenderer;
+
+
 	public:
 		//--------------------------------------------------------------------------------------
 		/*!
@@ -1605,7 +1627,7 @@ namespace basecross {
 		@return	なし
 		*/
 		//--------------------------------------------------------------------------------------
-		//virtual void OppositionBehavior() override;
+		virtual void OppositionBehavior() override;
 		//--------------------------------------------------------------------------------------
 		/*!
 		@brief 更新
@@ -1641,12 +1663,23 @@ namespace basecross {
 		Quat m_Qt;
 		//位置
 		Vec3 m_Pos;
+		float m_FrameCount;
+		//攻撃準備の時間
+		float m_AttackSetupTime;
+		//手を振り下ろす前の硬直時間
+		float m_BeforeAttackTime;
+		//攻撃時間
+		float m_AttackTime;
+		//元の位置に戻る時間
+		float m_ReturnDefaultTime;
+
+		Vec3 m_AttackPos;
+		Vec3 m_DefaultPos;
+		Vec3 m_BeforePos;
 		//親オブジェクト
 		weak_ptr<GameObject> m_ParentPtr;
 		//Rigidbodyのshared_ptr
 		shared_ptr<Rigidbody> m_Rigidbody;
-		//文字列描画オブジェクト
-		shared_ptr<StringDrawObject> m_StringDrawObject;
 		//メッシュとの差分計算用
 		Mat4x4 m_MeshToTransformMatrix;
 		///描画データ
@@ -1658,16 +1691,10 @@ namespace basecross {
 		//シャドウマップ描画オブジェクト(weak_ptr)
 		weak_ptr<ShadowmapRenderer> m_ShadowmapRenderer;
 		bool m_OwnShadowActive;
-		//このオブジェクトのプレイヤーから見たローカル行列
-		Mat4x4 m_PlayerLocalMatrix;
-		//プレイヤーの直後（先頭）の場合の補間係数
+		//このオブジェクトから見たローカル行列
+		Mat4x4 m_LocalMatrix;
+		//親との補間係数
 		float m_LerpToParent;
-		//このオブジェクトのチャイルドオブジェクトから見たローカル行列
-		Mat4x4 m_ChildLocalMatrix;
-		//チャイルド後の場合の補間係数
-		float m_LerpToChild;
-		//Attack1の場合の目標となる回転
-		float m_Attack1ToRot;
 		//ステートマシーン
 		unique_ptr<StateMachine<BossHand>>  m_StateMachine;
 	public:
@@ -1747,7 +1774,7 @@ namespace basecross {
 		virtual void GetWorldMatrix(Mat4x4& m) const override;
 		//--------------------------------------------------------------------------------------
 		/*!
-		@brief 追従する行動の開始
+		@brief 通常行動の開始
 		@return	なし
 		*/
 		//--------------------------------------------------------------------------------------
@@ -1773,13 +1800,6 @@ namespace basecross {
 		*/
 		//--------------------------------------------------------------------------------------
 		void UpdateBehavior();
-		//--------------------------------------------------------------------------------------
-		/*!
-		@brief 攻撃処理
-		@return	なし
-		*/
-		//--------------------------------------------------------------------------------------
-		void AttackBehavior();
 		//--------------------------------------------------------------------------------------
 		/*!
 		@brief ステートを変更する
@@ -1821,6 +1841,7 @@ namespace basecross {
 		virtual void Execute(const shared_ptr<BossHand>& Obj)override;
 		virtual void Exit(const shared_ptr<BossHand>& Obj)override;
 	};
+
 	//--------------------------------------------------------------------------------------
 	/// 中ボスキャラ　遠距離
 	/// LD = Long Distance

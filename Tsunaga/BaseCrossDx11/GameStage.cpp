@@ -267,6 +267,7 @@ namespace basecross {
 		//ファイアエフェクト
 		AddGameObject<MultiFire>();
 		AddGameObject<AttackSigns>();
+		AddGameObject<BossAttackSigns>();
 		AddGameObject<StepEffect>();
 
 		//描画オブジェクトの追加
@@ -484,7 +485,7 @@ namespace basecross {
 
 			//チェインがある程度長いときは移動しているときカメラを引く
 			int now_friends_num = GM->GetFriendsNum();
-			if (now_friends_num >= 0) {
+			if (now_friends_num >= 5) {
 				Vec3 PlayerVelo = PlayerPtr->GetVelocity();
 				if (PlayerVelo.length() > 3.0f && camera.m_CameraArmLen < 5.0f) {
 					camera.m_CameraArmLen += 0.02f;

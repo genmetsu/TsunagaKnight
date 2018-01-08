@@ -504,17 +504,70 @@ namespace basecross {
 		//カメラの方向に少し移動させる
 		auto &Camera = GetStage()->GetCamera();
 		Vec3 Camera_Pos = Camera.m_CamerEye;
+		Camera_Pos.y = 0.0f;
 		Vec3 MoveVec = Camera_Pos - Pos;
 		MoveVec.normalize();
 		for (auto& rParticleSprite : ParticlePtr->GetParticleSpriteVec()) {
 			rParticleSprite.m_LocalScale = Vec2(0.05f, 0.05f);
-			rParticleSprite.m_LocalPos += (MoveVec+Vec3(0,0.05f,0));
+			rParticleSprite.m_LocalPos += MoveVec * 0.15f;
 			//色の指定
 			rParticleSprite.m_Color = Col4(1.0f, 0.0f, 0.0f, 1.0f);
 		}
 	}
 
 	void AttackSigns::OnUpdate()
+	{
+		MultiParticle::OnUpdate();
+		float ElapsedTime = App::GetApp()->GetElapsedTime();
+		for (auto ParticlePtr : GetParticleVec()) {
+			for (auto& rParticleSprite : ParticlePtr->GetParticleSpriteVec()) {
+				if (rParticleSprite.m_Active) {
+					rParticleSprite.m_LocalScale.x += 0.15f;
+					rParticleSprite.m_Color.w -= 0.025f;
+				}
+			}
+		}
+	}
+	//--------------------------------------------------------------------------------------
+	//class BossAttackSigns : public MultiParticle;
+	//用途:ボスの攻撃する前兆エフェクト
+	//--------------------------------------------------------------------------------------
+	BossAttackSigns::BossAttackSigns(shared_ptr<Stage>& StagePtr) :
+		MultiParticle(StagePtr)
+	{}
+	BossAttackSigns::~BossAttackSigns() {}
+
+	//初期化
+	void BossAttackSigns::OnCreate() {
+		//加算描画処理をする
+		SetAddType(false);
+		//タグの追加
+		AddTag(L"BossAttackSigns");
+	}
+
+
+	void BossAttackSigns::InsertSigns(const Vec3& Pos)
+	{
+		auto ParticlePtr = InsertParticle(5);
+		ParticlePtr->m_EmitterPos = Pos;
+		ParticlePtr->SetTextureResource(L"SPARK_TX");
+		ParticlePtr->m_MaxTime = 1.25f;
+		vector<ParticleSprite>& pSpriteVec = ParticlePtr->GetParticleSpriteVec();
+		//カメラの方向に少し移動させる
+		auto &Camera = GetStage()->GetCamera();
+		Vec3 Camera_Pos = Camera.m_CamerEye;
+		Camera_Pos.y = 0.0f;
+		Vec3 MoveVec = Camera_Pos - Pos;
+		MoveVec.normalize();
+		for (auto& rParticleSprite : ParticlePtr->GetParticleSpriteVec()) {
+			rParticleSprite.m_LocalScale = Vec2(0.1f, 0.1f);
+			rParticleSprite.m_LocalPos += (MoveVec * 1.5f);
+			//色の指定
+			rParticleSprite.m_Color = Col4(1.0f, 1.0f, 0.0f, 1.0f);
+		}
+	}
+
+	void BossAttackSigns::OnUpdate()
 	{
 		MultiParticle::OnUpdate();
 		float ElapsedTime = App::GetApp()->GetElapsedTime();
@@ -1452,7 +1505,7 @@ namespace basecross {
 					//fireの送出
 					auto FirePtr = GetStage<GameStage>()->FindTagGameObject<AttackSigns>(L"AttackSigns");
 					Vec3 Emitter = m_Rigidbody->m_Pos;
-					Emitter.y -= 0.125f;
+					Emitter.y += 0.125f;
 					FirePtr->InsertSigns(Emitter);
 				}
 				// プレイヤーに向かう処理
@@ -1778,7 +1831,7 @@ namespace basecross {
 		AddTag(L"Zako");
 		//メッシュとトランスフォームの差分の設定
 		m_MeshToTransformMatrix.affineTransformation(
-			Vec3(1.0f, 1.0f, 1.0f),
+			Vec3(1.1f, 1.1f, 1.1f),
 			Vec3(0.0f, 0.0f, 0.0f),
 			Vec3(0.0f, XM_PI, 0.0f),
 			Vec3(0.0f, -0.2f, 0.0f)
@@ -1907,7 +1960,7 @@ namespace basecross {
 				//サインの送出
 				auto FirePtr = GetStage<GameStage>()->FindTagGameObject<AttackSigns>(L"AttackSigns");
 				Vec3 Emitter = m_Rigidbody->m_Pos;
-				Emitter.y -= 0.125f;
+				Emitter.y += 0.15f;
 				FirePtr->InsertSigns(Emitter);
 			}
 
@@ -2074,7 +2127,6 @@ namespace basecross {
 		//描画データの構築
 		m_PtrObj = make_shared<SimpleDrawObject>();
 		m_PtrObj->m_MeshRes = MeshPtr;
-		//m_PtrObj->m_TextureRes = TexPtr;
 		m_PtrObj->m_WorldMatrix = World;
 		m_PtrObj->m_Camera = GetStage<Stage>()->GetCamera();
 		m_PtrObj->m_OwnShadowmapActive = m_OwnShadowActive;
@@ -2213,6 +2265,7 @@ namespace basecross {
 	{
 		m_Speed = 0.5f;
 		m_HP = 15.0f;
+		m_TackleSpeed = 0.001f;
 		
 		AddTag(L"CloseBoss");
 		//メッシュとトランスフォームの差分の設定
@@ -2264,7 +2317,7 @@ namespace basecross {
 		//ターゲット座標の初期化
 		m_TargetPos = Vec3(0.0f, 0.0f, 0.0f);
 
-		m_BaseY = m_Rigidbody->m_Scale.y / 2.0f + 1.0f;
+		m_BaseY = m_Rigidbody->m_Scale.y / 2.0f + 0.6f;
 
 		auto TexPtr = App::GetApp()->GetResource<TextureResource>(m_TextureResName);
 
@@ -2303,6 +2356,113 @@ namespace basecross {
 				return;
 			}
 		}
+	}
+
+	void CR_BossEnemy::OppositionBehavior() {
+		//前回のターンからの経過時間を求める
+		float ElapsedTime = App::GetApp()->GetElapsedTime();
+		auto shptr = m_PlayerPtr.lock();
+		//親のワールド行列を取得する変数
+		Mat4x4 ParMat;
+		if (shptr) {
+			//行列取得用のインターフェイスを持ってるかどうか
+			auto matintptr = dynamic_pointer_cast<MatrixInterface>(shptr);
+			if (matintptr) {
+				matintptr->GetWorldMatrix(ParMat);
+			}
+
+			Mat4x4 World;
+			World.identity();
+			//行列の定義
+			World = m_PlayerLocalMatrix;
+			//スケーリングを1.0にした行列に変換
+			ParMat.scaleIdentity();
+			//行列の反映
+			World *= ParMat;
+			//この時点でWorldは目標となる位置
+			Vec3 toPos = World.transInMatrix();
+			Vec3 ToPosVec = toPos - m_Rigidbody->m_Pos;
+			//距離を求める
+			float dis = ToPosVec.length();
+
+			// 突進してしばらくたったら
+			if (m_FrameCount > m_StopTime + m_TackleTime)
+			{
+				m_Tackle = false;
+				m_FrameCount = 0.0f;
+				m_TargetPos = Vec3(0.0f, 0.0f, 0.0f);
+				m_Rigidbody->m_Velocity *= 0.01f;
+				m_StateMachine->ChangeState(EnemyAttackEndState::Instance());
+				return;
+			}
+			// 止まりはじめ
+			else if (m_FrameCount > m_StopTime && m_Tackle == false)
+			{
+				m_Tackle = true;
+				if (m_TargetPos == Vec3(0.0f, 0.0f, 0.0f)) {
+					m_TargetPos = toPos;
+					m_TackleStartPos = m_Rigidbody->m_Pos;
+				}
+			}
+
+			// 突進の処理
+			if (m_Tackle == true)
+			{
+				Vec3 Tag = m_TargetPos - m_TackleStartPos;
+				Tag.normalize();
+				Tag *= m_TackleSpeed;
+				m_Rigidbody->m_Pos.y = m_BaseY;
+				m_Rigidbody->m_Velocity = Tag;
+				m_FrameCount += ElapsedTime;
+			}
+			// エネミー移動処理
+			else if (m_Tackle == false)
+			{
+				if (m_FrameCount > 0.0f)
+				{
+					ToPosVec.normalize();
+					ToPosVec *= 0.01f;
+					m_Rigidbody->m_Velocity = ToPosVec;
+					m_Rigidbody->m_Pos.y = m_BaseY;
+					m_FrameCount += ElapsedTime;
+				}
+				// プレイヤーとエネミーの距離が近くなった時の処理
+				else if (dis <= m_SearchDis)
+				{
+					m_FrameCount += ElapsedTime;
+					//fireの送出
+					auto FirePtr = GetStage<GameStage>()->FindTagGameObject<BossAttackSigns>(L"BossAttackSigns");
+					Vec3 Emitter = m_Rigidbody->m_Pos;
+					Emitter.y += 0.35f;
+					FirePtr->InsertSigns(Emitter);
+
+					vector<shared_ptr<GameObject>> HandVec;
+					GetStage<GameStage>()->FindTagGameObjectVec(L"BOSS_HAND", HandVec);
+					for (auto hand : HandVec) {
+						if (hand) {
+							auto PtrHand = dynamic_pointer_cast<BossHand>(hand);
+							PtrHand->SetState(L"Attack");
+						}
+					}
+				}
+				// プレイヤーに向かう処理
+				else
+				{
+					ToPosVec.normalize();
+					ToPosVec *= m_Speed;
+					m_Rigidbody->m_Velocity = ToPosVec;
+					m_Rigidbody->m_Pos.y = m_BaseY;
+				}
+			}
+		}
+		Vec3 Temp = m_Rigidbody->m_Velocity;
+		Temp.normalize();
+		float ToAngle = atan2(Temp.x, Temp.z);
+		Quat Qt;
+		Qt.rotationRollPitchYawFromVector(Vec3(0, ToAngle, 0));
+		Qt.normalize();
+		//現在と目標を補間
+		m_Rigidbody->m_Quat = XMQuaternionSlerp(m_Rigidbody->m_Quat, Qt, 0.1f);
 	}
 
 	void CR_BossEnemy::OnUpdate() {
@@ -2349,9 +2509,11 @@ namespace basecross {
 		m_Qt(Qt),
 		m_Pos(Pos),
 		m_OwnShadowActive(OwnShadowActive),
-		m_LerpToParent(0.2f),
-		m_LerpToChild(0.2f),
-		m_Attack1ToRot(0)
+		m_BeforeAttackTime(1.0f),
+		m_AttackSetupTime(1.0f),
+		m_AttackTime(1.5f),
+		m_ReturnDefaultTime(0.5f),
+		m_LerpToParent(0.2f)
 	{
 		//タグの追加
 		AddTag(TagName);
@@ -2362,10 +2524,12 @@ namespace basecross {
 			Vec3(0.0f, XM_PI, 0.0f),
 			Vec3(0.0f, -0.5f, 0.0f)
 		);
+		m_FrameCount = 0.0f;
 	}
 	BossHand::~BossHand() {}
 
 	void BossHand::OnCreate() {	
+		AddTag(L"BOSS_HAND");
 
 		//Rigidbodyの初期化
 		auto PtrGameStage = GetStage<GameStage>();
@@ -2387,9 +2551,13 @@ namespace basecross {
 
 		if (FindTag(L"LEFT_HAND")) {
 			MeshPtr = App::GetApp()->GetResource<MeshResource>(L"LEFT_HAND_MESH");
+			m_DefaultPos = Vec3(-1.1f, -0.5f, 1.0f);
+			m_AttackPos = Vec3(-0.3f, 0.3f, 1.7f);
 		}
 		else {
 			MeshPtr = App::GetApp()->GetResource<MeshResource>(L"RIGHT_HAND_MESH");
+			m_DefaultPos = Vec3(1.1f, -0.5f, 1.0f);
+			m_AttackPos = Vec3(0.3f, 0.3f, 1.7f);
 		}
 
 		//行列の定義
@@ -2412,7 +2580,6 @@ namespace basecross {
 		m_PtrObj->m_ShadowmapUse = false;
 		m_PtrObj->m_BlendState = BlendState::AlphaBlend;
 		m_PtrObj->m_RasterizerState = RasterizerState::DoubleDraw;
-		//m_PtrObj->m_Alpha = 0.0f;
 		m_PtrObj->m_FogEnabled = true;
 		m_PtrObj->m_FogColor = Col4(0.07f, 0.0f, 0.09f, 1.0f);
 		m_PtrObj->m_FogStart = -10.0f;
@@ -2439,8 +2606,26 @@ namespace basecross {
 	void BossHand::OnUpdate2() {
 	}
 
-
 	void BossHand::OnDrawShadowmap() {
+		//行列の定義
+		Mat4x4 World;
+		World.affineTransformation(
+			m_Rigidbody->m_Scale,
+			Vec3(0, 0, 0),
+			m_Rigidbody->m_Quat,
+			m_Rigidbody->m_Pos
+		);
+		//差分を計算
+		World = m_MeshToTransformMatrix * World;
+		//描画データの行列をコピー
+		m_PtrShadowmapObj->m_WorldMatrix = World;
+		m_PtrShadowmapObj->m_Camera = GetStage<Stage>()->GetCamera();
+		auto shptr = m_ShadowmapRenderer.lock();
+		if (!shptr) {
+			shptr = GetStage<Stage>()->FindTagGameObject<ShadowmapRenderer>(L"ShadowmapRenderer");
+			m_ShadowmapRenderer = shptr;
+		}
+		shptr->AddDrawObject(m_PtrShadowmapObj);
 	}
 
 	void BossHand::OnDraw() {
@@ -2496,9 +2681,8 @@ namespace basecross {
 			World.identity();
 			float LerpNum = 0.2f;
 
-			World = m_PlayerLocalMatrix;
+			World = m_LocalMatrix;
 			LerpNum = m_LerpToParent;
-
 
 			//スケーリングを1.0にした行列に変換
 			ParMat.scaleIdentity();
@@ -2511,18 +2695,13 @@ namespace basecross {
 			Vec3 Velo = toPos - m_Rigidbody->m_Pos;
 			Velo /= ElapsedTime;
 			m_Rigidbody->m_Velocity = Velo;
-
 		}
-	}
-
-	void BossHand::AttackBehavior() {
-		
 	}
 
 	void BossHand::ComplianceStartBehavior() {
 		//ローカル行列の定義
 		if (FindTag(L"LEFT_HAND")) {
-			m_PlayerLocalMatrix.affineTransformation(
+			m_LocalMatrix.affineTransformation(
 				m_Rigidbody->m_Scale,
 				Vec3(0, 0, 0),
 				Quat(),
@@ -2530,52 +2709,66 @@ namespace basecross {
 			);
 		}
 		else {
-			m_PlayerLocalMatrix.affineTransformation(
+			m_LocalMatrix.affineTransformation(
 				m_Rigidbody->m_Scale,
 				Vec3(0, 0, 0),
 				Quat(),
 				Vec3(1.1f, -0.5f, 1.0f)
 			);
 		}
-		//このステートではチャイルドの場合も同じ
-		m_ChildLocalMatrix = m_PlayerLocalMatrix;
-		m_LerpToParent = m_LerpToChild = 0.2f;
+		m_LerpToParent = 0.2f;
 	}
 
 	//攻撃１行動の開始
 	void BossHand::Attack1StartBehavior() {
-		m_Attack1ToRot = 0.1f;
-		//ローカル行列の定義
-		m_PlayerLocalMatrix.affineTransformation(
-			m_Rigidbody->m_Scale,
-			Vec3(0, 0, 0),
-			Quat(Vec3(1.0, 0, 0), m_Attack1ToRot),
-			Vec3(0, 0.5f, 0.0f)
-		);
-		m_ChildLocalMatrix.affineTransformation(
-			m_Rigidbody->m_Scale,
-			Vec3(0, 0, 0),
-			Quat(),
-			Vec3(0, 0.5f, -0.5f)
-		);
-		m_LerpToParent = m_LerpToChild = 0.5f;
-
 	}
 
 	bool BossHand::Attack1ExcuteBehavior() {
-		m_Attack1ToRot += 0.15f;
-		if (m_Attack1ToRot >= (XM_PI + 2.0f)) {
-			m_Attack1ToRot = 0.0f;
+		//前回のターンからの経過時間を求める
+		float ElapsedTime = App::GetApp()->GetElapsedTime();
+		if (m_FrameCount > m_AttackSetupTime + m_BeforeAttackTime + m_AttackTime + m_ReturnDefaultTime) {
+			m_FrameCount = 0.0f;
 			return true;
 		}
-		//ローカル行列の定義
-		Vec3 Pos(0, sin(m_Attack1ToRot) * 0.5f, -cos(m_Attack1ToRot) * 0.5f);
-		m_PlayerLocalMatrix.affineTransformation(
-			m_Rigidbody->m_Scale,
-			Vec3(0, 0, 0),
-			Quat(Vec3(1.0, 0, 0), m_Attack1ToRot),
-			Pos
-		);
+		if (m_FrameCount > m_AttackSetupTime + m_BeforeAttackTime + m_AttackTime) {
+			//ローカル行列の定義
+			Vec3 NewPos = (m_DefaultPos - m_BeforePos) * ((m_FrameCount - m_AttackSetupTime - m_BeforeAttackTime - m_AttackTime) / m_ReturnDefaultTime);
+			m_LocalMatrix.affineTransformation(
+				m_Rigidbody->m_Scale,
+				Vec3(0, 0, 0),
+				Quat(),
+				m_BeforePos + NewPos
+			);
+		}
+		else if (m_FrameCount > m_AttackSetupTime + m_BeforeAttackTime) {
+			if (m_Rigidbody->m_Pos.y <  m_Rigidbody->m_Scale.y / 2.0f) {
+				
+			}
+			else {
+				//ローカル行列の定義
+				Vec3 NewPos = m_BeforePos;
+				NewPos.y -= 0.1f;
+				m_LocalMatrix.affineTransformation(
+					m_Rigidbody->m_Scale,
+					Vec3(0, 0, 0),
+					Quat(),
+					NewPos
+				);
+				m_BeforePos = NewPos;
+			}
+		}
+		else if (m_FrameCount < m_AttackSetupTime) {
+			//ローカル行列の定義
+			Vec3 NewPos = (m_AttackPos - m_DefaultPos) * (m_FrameCount / m_AttackSetupTime);
+			m_LocalMatrix.affineTransformation(
+				m_Rigidbody->m_Scale,
+				Vec3(0, 0, 0),
+				Quat(),
+				m_DefaultPos + NewPos
+			);
+			m_BeforePos = m_DefaultPos + NewPos;
+		}
+		m_FrameCount += ElapsedTime;
 		return false;
 	}
 
@@ -2612,27 +2805,21 @@ namespace basecross {
 	//--------------------------------------------------------------------------------------
 	IMPLEMENT_SINGLETON_INSTANCE(HandAttackState)
 
-		void HandAttackState::Enter(const shared_ptr<BossHand>& Obj) {
-
+	void HandAttackState::Enter(const shared_ptr<BossHand>& Obj) {
 		Obj->Attack1StartBehavior();
-
 	}
 
 	void HandAttackState::Execute(const shared_ptr<BossHand>& Obj) {
 		if (Obj->Attack1ExcuteBehavior()) {
 			Obj->GetStateMachine()->ChangeState(HandDefaultState::Instance());
-			//auto PlayerPtr = Obj->GetStage()->FindTagGameObject<Player>(L"Player");
-			//PlayerPtr->ChangeDefaultState();
 			return;
 		}
 		Obj->UpdateBehavior();
-		Obj->AttackBehavior();
 	}
 
 	void HandAttackState::Exit(const shared_ptr<BossHand>& Obj) {
 
 	}
-
 
 	//--------------------------------------------------------------------------------------
 	/// 中ボスエネミー遠距離
