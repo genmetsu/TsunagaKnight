@@ -383,7 +383,8 @@ namespace basecross {
 		virtual ~MultiFire();
 		//‰Šú‰»
 		virtual void OnCreate() override;
-		void InsertFire(const Vec3& Pos);
+		void InsertFire(const Vec3& Pos,float Scale);
+		virtual void OnUpdate() override;
 	};
 
 	//--------------------------------------------------------------------------------------

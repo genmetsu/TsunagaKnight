@@ -455,7 +455,7 @@ namespace basecross {
 		AddTag(L"MultiFire");
 	}
 
-	void MultiFire::InsertFire(const Vec3& Pos) {
+	void MultiFire::InsertFire(const Vec3& Pos ,float Scale) {
 		auto ParticlePtr = InsertParticle(16);
 		ParticlePtr->m_EmitterPos = Pos;
 		ParticlePtr->SetTextureResource(L"FIRE_TX");
@@ -471,9 +471,22 @@ namespace basecross {
 				rParticleSprite.m_LocalPos.y * 5.0f,
 				rParticleSprite.m_LocalPos.z * 5.0f
 			);
-			rParticleSprite.m_LocalScale *= 5.0f;
+			rParticleSprite.m_LocalScale *= Scale;
 			//色の指定
 			rParticleSprite.m_Color = Col4(1.0f, 1.0f, 1.0f, 1.0f);
+		}
+	}
+
+	void MultiFire::OnUpdate()
+	{
+		MultiParticle::OnUpdate();
+		float ElapsedTime = App::GetApp()->GetElapsedTime();
+		for (auto ParticlePtr : GetParticleVec()) {
+			for (auto& rParticleSprite : ParticlePtr->GetParticleSpriteVec()) {
+				if (rParticleSprite.m_Active) {
+					rParticleSprite.m_Color.w -= 0.03f;
+				}
+			}
 		}
 	}
 	//--------------------------------------------------------------------------------------
@@ -1289,10 +1302,14 @@ namespace basecross {
 					m_HP--;
 
 					if (m_HP <= 0.0f) {
-						
+						Vec3 Emitter = GetPosition();
+						//Fireの送出
+						auto SparkPtr = GetStage<GameStage>()->FindTagGameObject<MultiFire>(L"MultiFire");
+						SparkPtr->InsertFire(Emitter, m_Scale.x * 3.0f);
 						//敵を異次元に飛ばす（仮倒し処理）
 						SetPosition(Vec3(0, 0, 70));
 						m_HP = 2.0f;
+						m_StateMachine->ChangeState(EnemyToCannonState::Instance());
 					}
 					return;
 				}
@@ -1580,7 +1597,6 @@ namespace basecross {
 		if (m_HP <= 0.0f) {
 			if (m_isDead == false) {
 				m_isDead = true;
-				//m_Rigidbody->m_IsCollisionActive = false;
 				m_StateMachine->ChangeState(EnemyComplianceState::Instance());
 				return;
 			}
@@ -1701,7 +1717,7 @@ namespace basecross {
 			Emitter.y -= 0.125f;
 			//Sparkの送出
 			auto SparkPtr = GetStage<GameStage>()->FindTagGameObject<MultiFire>(L"MultiFire");
-			SparkPtr->InsertFire(Emitter);
+			SparkPtr->InsertFire(Emitter, 8.0f);
 			SetPosition(Vec3(0, 0, 70));
 
 			m_StateMachine->ChangeState(EnemyToCannonState::Instance());
@@ -1861,11 +1877,10 @@ namespace basecross {
 
 				if (length <= EnemyRadius + PlayerRadius) {
 					if (PtrEnemy->GetHP() > 0) {
-						Vec3 Emitter = m_Rigidbody->m_Pos;
-						Emitter.y -= 0.125f;
-						//Sparkの送出
-						auto SparkPtr = GetStage<GameStage>()->FindTagGameObject<MultiSpark>(L"MultiSpark");
-						SparkPtr->InsertSpark(Emitter);
+						Vec3 Emitter = PtrEnemy->GetPosition();
+						//Fireの送出
+						auto SparkPtr = GetStage<GameStage>()->FindTagGameObject<MultiFire>(L"MultiFire");
+						SparkPtr->InsertFire(Emitter, 1.0f);
 						//敵を異次元に飛ばす（仮倒し処理）
 						PtrEnemy->SetPosition(Vec3(0, 0, 70));
 						return;
@@ -1917,7 +1932,7 @@ namespace basecross {
 		m_SearchDis = 5.0;
 		m_EnemyShootSpeed = 2.0f;
 		m_PlayerShootSpeed = 5.0f;
-		m_PlayerShootTime = 1.0f;
+		m_PlayerShootTime = 1.5f;
 		AddTag(L"Blue");
 		AddTag(L"Zako");
 		//メッシュとトランスフォームの差分の設定
@@ -2105,7 +2120,7 @@ namespace basecross {
 		m_OwnShadowActive(OwnShadowActive),
 		m_my_Tag(Tag),
 		m_FrameCount(0.0f),
-		m_BulletTime(20.0f),
+		m_BulletTime(15.0f),
 		IsShoot(false)
 	{
 	}
@@ -2856,6 +2871,8 @@ namespace basecross {
 		m_Speed = 0.5f;
 		m_HP = 5.0f;
 		AddTag(L"LongBoss");
+		m_TackleSpeed = 1.0f;
+		m_SearchDis = 4.0f;
 		//メッシュとトランスフォームの差分の設定
 		m_MeshToTransformMatrix.affineTransformation(
 			Vec3(0.8f, 3.0f, 0.8f),

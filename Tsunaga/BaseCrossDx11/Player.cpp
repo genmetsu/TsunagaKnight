@@ -929,16 +929,18 @@ namespace basecross {
 		}
 		for (int i = 0; i < num; i++) {
 			auto enemy = dynamic_pointer_cast<EnemyObject>(m_friends[0].lock());
-			//if () {
-				//つながり消す
-				enemy->GetStateMachine()->ChangeState(EnemyOppositionState::Instance());
-				enemy->SetPosition(Vec3(0, 0, 70));
-				enemy->Spawn();
-				//配列を消し、つながりの数を再計算
-				m_friends.erase(m_friends.begin());
-				m_friends_num = m_friends.size();
-				
-			//}
+
+			Vec3 Emitter = enemy->GetPosition();
+			//Fireの送出
+			auto SparkPtr = GetStage<GameStage>()->FindTagGameObject<MultiFire>(L"MultiFire");
+			SparkPtr->InsertFire(Emitter,1.0f);
+
+			enemy->GetStateMachine()->ChangeState(EnemyToCannonState::Instance());
+			enemy->SetPosition(Vec3(0, 0, 70));
+			enemy->Spawn();
+			//配列を消し、つながりの数を再計算
+			m_friends.erase(m_friends.begin());
+			m_friends_num = m_friends.size();
 		}
 
 		auto GM = GameManager::getInstance();
