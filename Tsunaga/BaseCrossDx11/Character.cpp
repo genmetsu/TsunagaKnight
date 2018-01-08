@@ -1629,7 +1629,7 @@ namespace basecross {
 
 	}
 
-	void EnemyObject::BulletEndBehaviour() {
+	void EnemyObject::Spawn() {
 		AddTag(L"Zako");
 		m_isDead = false;
 		m_HP = 3.0f;
@@ -1776,7 +1776,7 @@ namespace basecross {
 	}
 
 	void EnemyComplianceState::Exit(const shared_ptr<EnemyObject>& Obj) {
-		
+		Obj->RemoveTag(L"Chain");
 	}
 
 	//--------------------------------------------------------------------------------------
@@ -1793,7 +1793,7 @@ namespace basecross {
 	}
 
 	void EnemyBulletState::Exit(const shared_ptr<EnemyObject>& Obj) {
-		Obj->BulletEndBehaviour();
+		Obj->Spawn();
 	}
 
 	//--------------------------------------------------------------------------------------

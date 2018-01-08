@@ -351,6 +351,9 @@ namespace basecross {
 						m_KnockBackVec = m_Rigidbody->m_Pos - EnemyPos;
 						m_KnockBackVec.y = 0.0f;
 						m_KnockBackVec.normalize();
+						//つながりを消す
+						auto s = GetStage()->FindTagGameObject<Sword>(L"Sword");
+						s->DeleteChains(3);
 						//ダメージステートに変更
 						m_StateMachine->ChangeState(DamagedState::Instance());
 						return;
@@ -421,6 +424,9 @@ namespace basecross {
 					m_KnockBackVec = m_Rigidbody->m_Pos - BulletPos;
 					m_KnockBackVec.y = 0.0f;
 					m_KnockBackVec.normalize();
+					//つながりを消す
+					auto s = GetStage()->FindTagGameObject<Sword>(L"Sword");
+					s->DeleteChains(3);
 					//ダメージステートに変更
 					m_StateMachine->ChangeState(DamagedState::Instance());
 					return;
@@ -450,6 +456,9 @@ namespace basecross {
 					m_KnockBackVec = m_Rigidbody->m_Pos - HandPos;
 					m_KnockBackVec.y = 0.0f;
 					m_KnockBackVec.normalize();
+					//つながりを消す
+					auto s = GetStage()->FindTagGameObject<Sword>(L"Sword");
+					s->DeleteChains(3);
 					//ダメージステートに変更
 					m_StateMachine->ChangeState(DamagedState::Instance());
 					return;
@@ -911,6 +920,40 @@ namespace basecross {
 		}
 
 		return bullet_num;
+	}
+
+	//つながりを消す処理
+	void Sword::DeleteChains(int num) {
+		if (m_friends_num < num) {
+			num = m_friends_num;
+		}
+		for (int i = 0; i < num; i++) {
+			auto enemy = dynamic_pointer_cast<EnemyObject>(m_friends[0].lock());
+			//if () {
+				//つながり消す
+				enemy->GetStateMachine()->ChangeState(EnemyOppositionState::Instance());
+				enemy->SetPosition(Vec3(0, 0, 70));
+				enemy->Spawn();
+				//配列を消し、つながりの数を再計算
+				m_friends.erase(m_friends.begin());
+				m_friends_num = m_friends.size();
+				
+			//}
+		}
+
+		auto GM = GameManager::getInstance();
+		GM->SetFriendsNum(m_friends_num);
+
+		//再整列
+		for (int i = 0; i < m_friends_num; i++) {
+			auto this_friend = dynamic_pointer_cast<EnemyObject>(m_friends[i].lock());
+			if (i == 0) {
+				this_friend->SetParent(m_ParentPtr);
+			}
+			else {
+				this_friend->SetParent(m_friends[i - 1]);
+			}
+		}
 	}
 
 	void Sword::ComplianceStartBehavior() {
