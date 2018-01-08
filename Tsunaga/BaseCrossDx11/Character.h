@@ -1808,8 +1808,11 @@ namespace basecross {
 		//--------------------------------------------------------------------------------------
 		void SetState(wstring state_name);
 
+		Vec3 GetPosition() {
+			return m_Rigidbody->m_Pos;
+		}
 		float GetScale() {
-			return m_Scale.x;
+			return m_Scale.y;
 		}
 	};
 

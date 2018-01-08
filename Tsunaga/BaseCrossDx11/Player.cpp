@@ -427,6 +427,35 @@ namespace basecross {
 				}
 			}
 		}
+		//ボスハンドとの衝突判定
+		vector<shared_ptr<GameObject>> HandVec;
+		GetStage<GameStage>()->FindTagGameObjectVec(L"BossHand", HandVec);
+		for (auto hand : HandVec) {
+			if (hand) {
+				auto PtrHand = dynamic_pointer_cast<BossHand>(hand);
+
+				Vec3 HandPos = PtrHand->GetPosition();
+				float length = (HandPos - m_Rigidbody->m_Pos).length();
+
+				float Radius = PtrHand->GetScale() / 2.0f;
+				float PlayerRadius = m_Rigidbody->m_Scale.x / 2.0f;
+
+				if (length < Radius + PlayerRadius) {
+					Vec3 Emitter = m_Rigidbody->m_Pos;
+					Emitter.y -= 0.125f;
+					//Sparkの送出
+					auto SparkPtr = GetStage<GameStage>()->FindTagGameObject<MultiSpark>(L"MultiSpark");
+					SparkPtr->InsertSpark(Emitter);
+					//ノックバック方向の設定
+					m_KnockBackVec = m_Rigidbody->m_Pos - HandPos;
+					m_KnockBackVec.y = 0.0f;
+					m_KnockBackVec.normalize();
+					//ダメージステートに変更
+					m_StateMachine->ChangeState(DamagedState::Instance());
+					return;
+				}
+			}
+		}
 	}
 
 	void Player::DamagedBehaviour() {
@@ -803,7 +832,7 @@ namespace basecross {
 	void Sword::AttackBehavior() {
 		//攻撃の衝突判定
 		vector<shared_ptr<GameObject>> EnemyVec;
-		GetStage<GameStage>()->FindTagGameObjectVec(L"EnemyObject", EnemyVec);
+		GetStage<GameStage>()->FindTagGameObjectVec(L"Zako", EnemyVec);
 		for (auto enemy : EnemyVec) {
 			if (enemy) {
 				auto PtrEnemy = dynamic_pointer_cast<EnemyObject>(enemy);
@@ -816,34 +845,34 @@ namespace basecross {
 
 				if (length < EnemyRadius + SwordRadius) {
 					if (PtrEnemy->GetHP() > 0) {
-						
-						if (!(PtrEnemy->FindTag(L"LongBoss") || PtrEnemy->FindTag(L"CloseBoss"))){
-							Vec3 Emitter = m_Rigidbody->m_Pos;
-							Emitter.y -= 0.125f;
-							//Sparkの送出
-							auto SparkPtr = GetStage<GameStage>()->FindTagGameObject<MultiSpark>(L"MultiSpark");
-							SparkPtr->InsertSpark(Emitter);
 
-							//ダメージ処理
-							PtrEnemy->SetHP(0.0f);
-							//配列に敵をセットする
-							SetFriends(PtrEnemy);
-							//配列の長さを取って2番目以降なら自分の前の敵を親にする
-							m_friends_num = m_friends.size();
 
-							auto GM = GameManager::getInstance();
-							GM->SetFriendsNum(m_friends_num);
-							if (m_friends_num == 1) {
-								auto PlayerPtr = GetStage()->FindTagGameObject<Player>(L"Player");
-								PtrEnemy->SetParent(PlayerPtr);
-							}
-							if (m_friends_num >= 2) {
-								PtrEnemy->SetParent(m_friends[m_friends_num - 2]);
-							}
-							PtrEnemy->CheckHealth();
-							break;
-						}	
+						Vec3 Emitter = m_Rigidbody->m_Pos;
+						Emitter.y -= 0.125f;
+						//Sparkの送出
+						auto SparkPtr = GetStage<GameStage>()->FindTagGameObject<MultiSpark>(L"MultiSpark");
+						SparkPtr->InsertSpark(Emitter);
+
+						//ダメージ処理
+						PtrEnemy->SetHP(0.0f);
+						//配列に敵をセットする
+						SetFriends(PtrEnemy);
+						//配列の長さを取って2番目以降なら自分の前の敵を親にする
+						m_friends_num = m_friends.size();
+
+						auto GM = GameManager::getInstance();
+						GM->SetFriendsNum(m_friends_num);
+						if (m_friends_num == 1) {
+							auto PlayerPtr = GetStage()->FindTagGameObject<Player>(L"Player");
+							PtrEnemy->SetParent(PlayerPtr);
+						}
+						if (m_friends_num >= 2) {
+							PtrEnemy->SetParent(m_friends[m_friends_num - 2]);
+						}
+						PtrEnemy->CheckHealth();
+						break;
 					}
+
 				}
 			}
 		}

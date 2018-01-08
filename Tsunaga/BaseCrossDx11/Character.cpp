@@ -1873,6 +1873,30 @@ namespace basecross {
 				}
 			}
 		}
+		//ボスハンドとの衝突判定
+		vector<shared_ptr<GameObject>> HandVec;
+		GetStage<GameStage>()->FindTagGameObjectVec(L"BossHand", HandVec);
+		for (auto hand : HandVec) {
+			if (hand) {
+				auto PtrHand = dynamic_pointer_cast<BossHand>(hand);
+
+				Vec3 HandPos = PtrHand->GetPosition();
+				float length = (HandPos - m_Rigidbody->m_Pos).length();
+
+				float Radius = PtrHand->GetScale() / 2.0f;
+				float PlayerRadius = m_Rigidbody->m_Scale.x / 2.0f;
+
+				if (length < Radius + PlayerRadius) {
+					Vec3 Emitter = m_Rigidbody->m_Pos;
+					Emitter.y -= 0.125f;
+					//Sparkの送出
+					auto SparkPtr = GetStage<GameStage>()->FindTagGameObject<MultiSpark>(L"MultiSpark");
+					SparkPtr->InsertSpark(Emitter);
+					//ノックバック方向の設定
+					return;
+				}
+			}
+		}
 	}
 
 	void NeedleEnemy::OnUpdate() {
