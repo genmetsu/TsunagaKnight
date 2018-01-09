@@ -316,6 +316,12 @@ namespace basecross {
 		m_PtrObj->m_OwnShadowmapActive = m_OwnShadowActive;
 		m_PtrObj->m_ShadowmapUse = true;
 
+		m_PtrObj->BoneInit();
+		m_PtrObj->AddAnimation(L"Default", 0, 30, true, 30.0f);
+		m_PtrObj->AddAnimation(L"Damage", 30, 90, false, 60.0f);
+		m_PtrObj->AddAnimation(L"Dead", 90, 170, false, 60.0f);
+		m_PtrObj->ChangeCurrentAnimation(L"Default");
+
 		//シャドウマップ描画データの構築
 		m_PtrShadowmapObj = make_shared<ShadowmapObject>();
 		m_PtrShadowmapObj->m_MeshRes = MeshPtr;
@@ -326,6 +332,8 @@ namespace basecross {
 	}
 
 	void Boss::OnUpdate() {
+		float ElapsedTime = App::GetApp()->GetElapsedTime();
+		m_PtrObj->UpdateAnimation(ElapsedTime);
 		if (m_HP < 0.0f) {
 			SetPosition(Vec3(100, 100, 100));
 		}
@@ -370,7 +378,7 @@ namespace basecross {
 		m_PtrObj->m_Camera = GetStage<Stage>()->GetCamera();
 		auto shptr = m_Renderer.lock();
 		if (!shptr) {
-			shptr = GetStage<Stage>()->FindTagGameObject<BcPNTStaticRenderer>(L"BcPNTStaticRenderer");
+			shptr = GetStage<Stage>()->FindTagGameObject<BcPNTBoneModelRenderer>(L"BcPNTBoneModelRenderer");
 			m_Renderer = shptr;
 		}
 		shptr->AddDrawObject(m_PtrObj);
