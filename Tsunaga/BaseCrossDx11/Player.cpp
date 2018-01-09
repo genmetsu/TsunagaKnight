@@ -962,7 +962,7 @@ namespace basecross {
 				enemy->SetPosition(Vec3(0, 0, 70));
 				enemy->Spawn();
 				//”z—ñ‚ğÁ‚µA‚Â‚È‚ª‚è‚Ì”‚ğÄŒvZ
-				m_friends.erase(m_friends.begin());
+				m_friends.erase(m_friends.begin() + i);
 				m_friends_num = m_friends.size();
 				delete_count++;
 				if (delete_count >= num) {
