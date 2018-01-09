@@ -949,20 +949,28 @@ namespace basecross {
 		if (m_friends_num < num) {
 			num = m_friends_num;
 		}
-		for (int i = 0; i < num; i++) {
-			auto enemy = dynamic_pointer_cast<EnemyObject>(m_friends[0].lock());
+		int delete_count = 0;
+		for (int i = 0; i < m_friends_num;) {
+			auto enemy = dynamic_pointer_cast<EnemyObject>(m_friends[i].lock());
+			if (enemy->GetFollowingAngelNum() == 0) {
+				Vec3 Emitter = enemy->GetPosition();
+				//Fireの送出
+				auto SparkPtr = GetStage<GameStage>()->FindTagGameObject<MultiFire>(L"MultiFire");
+				SparkPtr->InsertFire(Emitter, 1.0f);
 
-			Vec3 Emitter = enemy->GetPosition();
-			//Fireの送出
-			auto SparkPtr = GetStage<GameStage>()->FindTagGameObject<MultiFire>(L"MultiFire");
-			SparkPtr->InsertFire(Emitter,1.0f);
-
-			enemy->GetStateMachine()->ChangeState(EnemyToCannonState::Instance());
-			enemy->SetPosition(Vec3(0, 0, 70));
-			enemy->Spawn();
-			//配列を消し、つながりの数を再計算
-			m_friends.erase(m_friends.begin());
-			m_friends_num = m_friends.size();
+				enemy->GetStateMachine()->ChangeState(EnemyToCannonState::Instance());
+				enemy->SetPosition(Vec3(0, 0, 70));
+				enemy->Spawn();
+				//配列を消し、つながりの数を再計算
+				m_friends.erase(m_friends.begin());
+				m_friends_num = m_friends.size();
+				delete_count++;
+				if (delete_count >= num) {
+					break;
+				}
+			}
+			else
+				i++;
 		}
 
 		auto GM = GameManager::getInstance();
