@@ -22,7 +22,7 @@ namespace basecross {
 		m_Posision(Pos),
 		m_FrameCount(0.0f),
 		m_isStep(false),
-		m_AttackDis(2.0f),
+		m_AttackDis(1.7f),
 		m_FOV(0.707f),
 		m_NowCannonClass(3),
 		m_JumpLock(false)
@@ -162,9 +162,9 @@ namespace basecross {
 			if (m_JumpLock) {
 				Vec3 Emitter = m_Rigidbody->m_Pos;
 				Emitter.y -= m_Rigidbody->m_Scale.y / 2.0f;;
-				//Spaerkの送出
-				auto SpaerkPtr = GetStage<GameStage>()->FindTagGameObject<MultiSpark>(L"MultiSpark");
-				SpaerkPtr->InsertSpark(Emitter);
+				//Sparkの送出
+				auto SparkPtr = GetStage<GameStage>()->FindTagGameObject<MultiSpark>(L"MultiSpark");
+				SparkPtr->InsertSpark(Emitter);
 			}
 			m_JumpLock = false;
 		}
@@ -922,11 +922,21 @@ namespace basecross {
 		//再整列
 		for (int i = 0; i < m_friends_num; i++) {
 			auto this_friend = dynamic_pointer_cast<EnemyObject>(m_friends[i].lock());
+			this_friend->SetFollowingAngelNum(0);
 			if (i == 0) {
 				this_friend->SetParent(m_ParentPtr);
 			}
 			else {
 				this_friend->SetParent(m_friends[i - 1]);
+				auto parent = dynamic_pointer_cast<EnemyObject>(m_friends[i - 1].lock());
+				//親がエンジェルエネミーなら何番目にいるかSetする
+				int ParentFollowingAngelNum = parent->GetFollowingAngelNum();
+				if (parent->FindTag(L"Green")) {
+					this_friend->SetFollowingAngelNum(1);
+				}
+				else if (ParentFollowingAngelNum && ParentFollowingAngelNum < 3) {
+					this_friend->SetFollowingAngelNum(ParentFollowingAngelNum + 1);
+				}
 			}
 		}
 
@@ -960,11 +970,21 @@ namespace basecross {
 		//再整列
 		for (int i = 0; i < m_friends_num; i++) {
 			auto this_friend = dynamic_pointer_cast<EnemyObject>(m_friends[i].lock());
+			this_friend->SetFollowingAngelNum(0);
 			if (i == 0) {
 				this_friend->SetParent(m_ParentPtr);
 			}
 			else {
 				this_friend->SetParent(m_friends[i - 1]);
+				auto parent = dynamic_pointer_cast<EnemyObject>(m_friends[i - 1].lock());
+				//親がエンジェルエネミーなら何番目にいるかSetする
+				int ParentFollowingAngelNum = parent->GetFollowingAngelNum();
+				if (parent->FindTag(L"Green")) {
+					this_friend->SetFollowingAngelNum(1);
+				}
+				else if (ParentFollowingAngelNum && ParentFollowingAngelNum < 3) {
+					this_friend->SetFollowingAngelNum(ParentFollowingAngelNum + 1);
+				}
 			}
 		}
 	}

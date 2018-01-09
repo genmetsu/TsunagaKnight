@@ -42,7 +42,7 @@ namespace basecross {
 		Vec3 m_KnockBackVec;
 		/// フレームカウント用変数
 		float m_FrameCount;
-		//攻撃するときにほせいをかける距離
+		//攻撃するときに補正をかける距離
 		float m_AttackDis;
 		//攻撃するときに補正をかける角度
 		float m_FOV;
