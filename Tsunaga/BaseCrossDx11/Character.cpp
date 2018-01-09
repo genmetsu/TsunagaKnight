@@ -1267,6 +1267,8 @@ namespace basecross {
 
 		//メッシュの取得
 		auto MeshPtr = App::GetApp()->GetResource<MeshResource>(m_MeshResName);
+		//サウンドオブジェクトの初期化
+		m_DeadSound = ObjectFactory::Create<SoundObject>(L"Pan");
 
 		//行列の定義
 		Mat4x4 World;
@@ -1359,6 +1361,8 @@ namespace basecross {
 						//Fireの送出
 						auto SparkPtr = GetStage<GameStage>()->FindTagGameObject<MultiFire>(L"MultiFire");
 						SparkPtr->InsertFire(Emitter, m_Scale.x * 3.0f);
+						//サウンドの発行
+						m_DeadSound->Start(0, 0.5f);
 						//敵を異次元に飛ばす（仮倒し処理）
 						SetPosition(Vec3(0, 0, 70));
 						m_HP = 2.0f;
@@ -1940,6 +1944,8 @@ namespace basecross {
 						//Fireの送出
 						auto SparkPtr = GetStage<GameStage>()->FindTagGameObject<MultiFire>(L"MultiFire");
 						SparkPtr->InsertFire(Emitter, 1.0f);
+						//サウンドの発行
+						m_DeadSound->Start(0, 0.5f);
 						//敵を異次元に飛ばす（仮倒し処理）
 						PtrEnemy->SetPosition(Vec3(0, 0, 70));
 						return;

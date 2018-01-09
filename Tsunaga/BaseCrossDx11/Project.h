@@ -9,6 +9,7 @@
 #include "resource.h"
 #include "ProjectShader.h"
 #include "ProjectBehavior.h"
+#include "SoundObject.h"
 #include "Scene.h"
 #include "RigidbodyManager.h"
 #include "DrawObjects.h"

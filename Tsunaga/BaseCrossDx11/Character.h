@@ -1025,6 +1025,8 @@ namespace basecross {
 		//
 		//Rigidbodyのshared_ptr
 		shared_ptr<Rigidbody> m_Rigidbody;
+		//サウンドオブジェクト
+		shared_ptr<SoundObject> m_DeadSound;
 
 		//描画データ
 		shared_ptr<BcDrawObject> m_PtrObj;

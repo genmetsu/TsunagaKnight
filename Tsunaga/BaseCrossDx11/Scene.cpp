@@ -228,7 +228,8 @@ namespace basecross {
 		App::GetApp()->RegisterWav(L"Nanika", strMusic);
 		// SE
 		wstring panWav = DataDir + L"pan.wav";
-		App::GetApp()->RegisterWav(L"pan", panWav);
+		App::GetApp()->RegisterWav(L"Pan", panWav);
+
 	}
 
 
