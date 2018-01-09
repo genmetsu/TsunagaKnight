@@ -1357,12 +1357,15 @@ namespace basecross {
 					m_HP--;
 
 					if (m_HP <= 0.0f) {
+						Vec3 p_pos = m_PlayerPtr.lock()->GetPosition();
+						float p_dis = (p_pos - GetPosition()).length();
+						//サウンドの発行
+						m_DeadSound->Start(0, 1.0f / p_dis);
+
 						Vec3 Emitter = GetPosition();
 						//Fireの送出
 						auto SparkPtr = GetStage<GameStage>()->FindTagGameObject<MultiFire>(L"MultiFire");
 						SparkPtr->InsertFire(Emitter, m_Scale.x * 3.0f);
-						//サウンドの発行
-						m_DeadSound->Start(0, 0.5f);
 						//敵を異次元に飛ばす（仮倒し処理）
 						SetPosition(Vec3(0, 0, 70));
 						m_HP = 2.0f;
@@ -1940,12 +1943,15 @@ namespace basecross {
 
 				if (length <= EnemyRadius + PlayerRadius) {
 					if (PtrEnemy->GetHP() > 0) {
+						Vec3 p_pos = m_PlayerPtr.lock()->GetPosition();
+						float p_dis = (p_pos - GetPosition()).length();
+						//サウンドの発行
+						m_DeadSound->Start(0, 1.0f / p_dis);
+
 						Vec3 Emitter = PtrEnemy->GetPosition();
 						//Fireの送出
 						auto SparkPtr = GetStage<GameStage>()->FindTagGameObject<MultiFire>(L"MultiFire");
 						SparkPtr->InsertFire(Emitter, 1.0f);
-						//サウンドの発行
-						m_DeadSound->Start(0, 0.5f);
 						//敵を異次元に飛ばす（仮倒し処理）
 						PtrEnemy->SetPosition(Vec3(0, 0, 70));
 						return;
