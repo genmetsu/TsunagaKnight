@@ -267,6 +267,7 @@ namespace basecross {
 		AddGameObject<AttackSigns>();
 		AddGameObject<BossAttackSigns>();
 		AddGameObject<StepEffect>();
+		AddGameObject<MultiGuardEffect>();
 
 		//描画オブジェクトの追加
 		CreateDrawObjects();

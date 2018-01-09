@@ -877,6 +877,17 @@ namespace basecross {
 						}
 						if (m_friends_num >= 2) {
 							PtrEnemy->SetParent(m_friends[m_friends_num - 2]);
+							auto parent = dynamic_pointer_cast<EnemyObject>(m_friends[m_friends_num - 2].lock());
+							//親がエンジェルエネミーなら何番目にいるかSetする
+							int ParentFollowingAngelNum = parent->GetFollowingAngelNum();
+							if (parent->FindTag(L"Green")) {
+								PtrEnemy->SetFollowingAngelNum(1);
+							}
+							else if (ParentFollowingAngelNum && ParentFollowingAngelNum < 3) {
+								PtrEnemy->SetFollowingAngelNum(ParentFollowingAngelNum + 1);
+							}
+							else
+								PtrEnemy->SetFollowingAngelNum(0);
 						}
 						PtrEnemy->CheckHealth();
 						break;

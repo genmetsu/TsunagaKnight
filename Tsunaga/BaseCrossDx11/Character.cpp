@@ -438,6 +438,57 @@ namespace basecross {
 		}
 	}
 
+	//--------------------------------------------------------------------------------------
+	//class MultiGuardEffect : public MultiParticle;
+	//用途: エンジェルエネミーの防御エフェクト
+	//--------------------------------------------------------------------------------------
+	//構築と破棄
+	MultiGuardEffect::MultiGuardEffect(shared_ptr<Stage>& StagePtr) :
+		MultiParticle(StagePtr)
+	{}
+	MultiGuardEffect::~MultiGuardEffect() {}
+
+	//初期化
+	void MultiGuardEffect::OnCreate() {
+		//加算描画処理をする
+		SetAddType(true);
+		//タグの追加
+		AddTag(L"MultiGuardEffect");
+	}
+
+	void MultiGuardEffect::InsertSpark(const Vec3& Pos) {
+		auto ParticlePtr = InsertParticle(16);
+		ParticlePtr->m_EmitterPos = Pos;
+		ParticlePtr->SetTextureResource(L"SPARK_TX");
+		ParticlePtr->m_MaxTime = 0.5f;
+		vector<ParticleSprite>& pSpriteVec = ParticlePtr->GetParticleSpriteVec();
+		for (auto& rParticleSprite : ParticlePtr->GetParticleSpriteVec()) {
+			rParticleSprite.m_LocalPos.x = Util::RandZeroToOne() * 0.1f - 0.05f;
+			rParticleSprite.m_LocalPos.y = Util::RandZeroToOne() * 0.1f;
+			rParticleSprite.m_LocalPos.z = Util::RandZeroToOne() * 0.1f - 0.05f;
+			rParticleSprite.m_LocalScale = Vec2(0.2, 0.2);
+			//各パーティクルの移動速度を指定
+			rParticleSprite.m_Velocity = Vec3(
+				rParticleSprite.m_LocalPos.x * 10.0f,
+				rParticleSprite.m_LocalPos.y * 10.0f,
+				rParticleSprite.m_LocalPos.z * 10.0f
+			);
+			//色の指定
+			rParticleSprite.m_Color = Col4(0.0f, 1.0f, 0.0f, 0.03f);
+		}
+	}
+
+	void MultiGuardEffect::OnUpdate() {
+		MultiParticle::OnUpdate();
+		float ElapsedTime = App::GetApp()->GetElapsedTime();
+
+		for (auto ParticlePtr : GetParticleVec()) {
+			for (auto& rParticleSprite : ParticlePtr->GetParticleSpriteVec()) {
+				if (rParticleSprite.m_Active) {
+				}
+			}
+		}
+	}
 
 	//--------------------------------------------------------------------------------------
 	//class MultiFire : public MultiParticle;
@@ -1228,6 +1279,8 @@ namespace basecross {
 		//ターゲット座標の初期化
 		m_TargetPos = Vec3(0.0f, 0.0f, 0.0f);
 
+		m_FollowingAngelNum = 0;
+
 		auto TexPtr = App::GetApp()->GetResource<TextureResource>(m_TextureResName);
 		//描画データの構築
 		m_PtrObj = make_shared<BcDrawObject>();
@@ -1440,6 +1493,13 @@ namespace basecross {
 				Velo /= ElapsedTime;
 				m_Rigidbody->m_Velocity = Velo;
 			}
+		}
+		if (m_FollowingAngelNum) {
+			Vec3 Emitter = m_Rigidbody->m_Pos;
+			Emitter.y -= 0.125f;
+			//Sparkの送出
+			auto SparkPtr = GetStage<GameStage>()->FindTagGameObject<MultiGuardEffect>(L"MultiGuardEffect");
+			SparkPtr->InsertSpark(Emitter);
 		}
 	}
 
@@ -1685,7 +1745,6 @@ namespace basecross {
 		if (FindTag(L"Green")) {
 			auto PtrCannon = GetStage()->FindTagGameObject<Cannon>(L"GREEN_CANNON");
 			Vec3 new_pos = PtrCannon->GetPosition();
-
 			SetPosition(new_pos);
 		}
 		if (FindTag(L"Red")) {

@@ -369,7 +369,21 @@ namespace basecross {
 		virtual void OnCreate() override;
 		void InsertSpark(const Vec3& Pos);
 		virtual void OnUpdate() override;
+	};
 
+	//--------------------------------------------------------------------------------------
+	//class MultiGuardEffect : public MultiParticle;
+	//用途: エンジェルエネミーの防御エフェクト
+	//--------------------------------------------------------------------------------------
+	class MultiGuardEffect : public MultiParticle {
+	public:
+		//構築と破棄
+		MultiGuardEffect(shared_ptr<Stage>& StagePtr);
+		virtual ~MultiGuardEffect();
+		//初期化
+		virtual void OnCreate() override;
+		void InsertSpark(const Vec3& Pos);
+		virtual void OnUpdate() override;
 	};
 
 	//--------------------------------------------------------------------------------------
@@ -987,6 +1001,8 @@ namespace basecross {
 		float m_TackleTime;
 		//攻撃後の硬直時間
 		float m_AfterAttackTime;
+		//エンジェルエネミーから何番目に位置するか
+		int m_FollowingAngelNum;
 
 		float m_HP;
 		float m_AttackPoint;
@@ -1211,8 +1227,19 @@ namespace basecross {
 		@return	なし
 		*/
 		//--------------------------------------------------------------------------------------
-
 		void CheckParent();
+		//--------------------------------------------------------------------------------------
+		/*!
+		@brief エンジェルエネミーから何番目にいるか取得する
+		@return	m_FollowingAngelNum
+		*/
+		//--------------------------------------------------------------------------------------
+		int GetFollowingAngelNum() {
+			return m_FollowingAngelNum;
+		}
+		void SetFollowingAngelNum(int value) {
+			m_FollowingAngelNum = value;
+		}
 		//--------------------------------------------------------------------------------------
 		/*!
 		@brief 親の確認を行う
