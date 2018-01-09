@@ -924,7 +924,8 @@ namespace basecross {
 			auto this_friend = dynamic_pointer_cast<EnemyObject>(m_friends[i].lock());
 			this_friend->SetFollowingAngelNum(0);
 			if (i == 0) {
-				this_friend->SetParent(m_ParentPtr);
+				auto PlayerPtr = GetStage()->FindTagGameObject<Player>(L"Player");
+				this_friend->SetParent(PlayerPtr);
 			}
 			else {
 				this_friend->SetParent(m_friends[i - 1]);
@@ -972,7 +973,8 @@ namespace basecross {
 			auto this_friend = dynamic_pointer_cast<EnemyObject>(m_friends[i].lock());
 			this_friend->SetFollowingAngelNum(0);
 			if (i == 0) {
-				this_friend->SetParent(m_ParentPtr);
+				auto PlayerPtr = GetStage()->FindTagGameObject<Player>(L"Player");
+				this_friend->SetParent(PlayerPtr);
 			}
 			else {
 				this_friend->SetParent(m_friends[i - 1]);
