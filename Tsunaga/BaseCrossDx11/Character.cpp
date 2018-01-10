@@ -727,8 +727,7 @@ namespace basecross {
 		m_YWrap(YWrap),
 		m_Emissive(0,0,0,0),
 		m_BlendState(BlendState::Opaque)
-	{}
-	void SpriteBase::OnCreate() {
+	{
 		float HelfSize = 0.5f;
 		//頂点配列(縦横指定数ずつ表示)
 		m_BackupVertices = {
@@ -737,6 +736,8 @@ namespace basecross {
 			{ VertexPositionColorTexture(Vec3(-HelfSize, -HelfSize, 0), Col4(1.0f,1.0f,1.0f,1.0f), Vec2(0.0f, (float)m_YWrap)) },
 			{ VertexPositionColorTexture(Vec3(HelfSize, -HelfSize, 0), Col4(1.0f,1.0f,1.0f,1.0f), Vec2((float)m_XWrap, (float)m_YWrap)) },
 		};
+	}
+	void SpriteBase::OnCreate() {
 		//頂点の初期修正（仮想関数呼びだし）
 		AdjustVertex();
 		//インデックス配列
@@ -866,6 +867,14 @@ namespace basecross {
 		m_TotalTime(0)
 	{
 		SetBlendState(BlendState::Additive);
+		float HelfSize = 0.5f;
+		//頂点配列(縦横指定数ずつ表示)
+		m_BackupVertices = {
+			{ VertexPositionColorTexture(Vec3(0, HelfSize, 0),Col4(1.0f,1.0f,1.0f,1.0f), Vec2(0.0f, 0.0f)) },
+			{ VertexPositionColorTexture(Vec3(HelfSize*2.0f, HelfSize, 0), Col4(1.0f,1.0f,1.0f,1.0f), Vec2((float)m_XWrap, 0.0f)) },
+			{ VertexPositionColorTexture(Vec3(0, -HelfSize, 0), Col4(1.0f,1.0f,1.0f,1.0f), Vec2(0.0f, (float)m_YWrap)) },
+			{ VertexPositionColorTexture(Vec3(HelfSize*2.0f, -HelfSize, 0), Col4(1.0f,1.0f,1.0f,1.0f), Vec2((float)m_XWrap, (float)m_YWrap)) },
+		};
 	}
 
 	void RotateSprite::AdjustVertex() {
@@ -889,10 +898,10 @@ namespace basecross {
 	}
 
 	void RotateSprite::UpdateVertex(float ElapsedTime, VertexPositionColorTexture* vertices) {
-		m_Rot += ElapsedTime;
+		/*m_Rot += ElapsedTime;
 		if (m_Rot >= XM_2PI) {
 			m_Rot = 0;
-		}
+		}*/
 		m_TotalTime += ElapsedTime;
 		if (m_TotalTime >= 1.0f) {
 			m_TotalTime = 0;
@@ -911,6 +920,84 @@ namespace basecross {
 				UV
 			);
 		}
+		m_Scale.x -= 1.0f;
+
+	}
+
+	//--------------------------------------------------------------------------------------
+	///	大砲のゲージ
+	//--------------------------------------------------------------------------------------
+	CannonGauge::CannonGauge(const shared_ptr<Stage>& StagePtr,
+		const wstring& TextureResName,
+		const Vec2& StartScale,
+		float StartRot,
+		const Vec2& StartPos,
+		UINT XWrap, UINT YWrap) :
+		SpriteBase(StagePtr, TextureResName, StartScale, StartRot, StartPos, XWrap, YWrap),
+		m_TotalTime(0)
+	{
+		SetBlendState(BlendState::Trace);
+		float HelfSize = 0.5f;
+		//頂点配列(縦横指定数ずつ表示)
+		m_BackupVertices = {
+			{ VertexPositionColorTexture(Vec3(0, HelfSize, 0),Col4(1.0f,1.0f,1.0f,1.0f), Vec2(0.0f, 0.0f)) },
+			{ VertexPositionColorTexture(Vec3(HelfSize*2.0f, HelfSize, 0), Col4(1.0f,1.0f,1.0f,1.0f), Vec2((float)m_XWrap, 0.0f)) },
+			{ VertexPositionColorTexture(Vec3(0, -HelfSize, 0), Col4(1.0f,1.0f,1.0f,1.0f), Vec2(0.0f, (float)m_YWrap)) },
+			{ VertexPositionColorTexture(Vec3(HelfSize*2.0f, -HelfSize, 0), Col4(1.0f,1.0f,1.0f,1.0f), Vec2((float)m_XWrap, (float)m_YWrap)) },
+		};
+	}
+
+	void CannonGauge::AdjustVertex() {
+	}
+
+	void CannonGauge::UpdateVertex(float ElapsedTime, VertexPositionColorTexture* vertices) {
+		Col4 UpdateCol(1.0f, 1.0f, 1.0f, 1.0f);
+		for (size_t i = 0; i < m_SquareMesh->GetNumVertices(); i++) {
+			vertices[i] = VertexPositionColorTexture(
+				m_BackupVertices[i].position,
+				UpdateCol,
+				m_BackupVertices[i].textureCoordinate
+			);
+		}
+		m_Scale.x -= 1.0f;
+	}
+
+	//--------------------------------------------------------------------------------------
+	///	ボスのHPゲージ
+	//--------------------------------------------------------------------------------------
+	BossHPGauge::BossHPGauge(const shared_ptr<Stage>& StagePtr,
+		const wstring& TextureResName,
+		const Vec2& StartScale,
+		float StartRot,
+		const Vec2& StartPos,
+		UINT XWrap, UINT YWrap) :
+		SpriteBase(StagePtr, TextureResName, StartScale, StartRot, StartPos, XWrap, YWrap),
+		m_TotalTime(0)
+	{
+		SetBlendState(BlendState::Trace);
+		float HelfSize = 0.5f;
+		//頂点配列(縦横指定数ずつ表示)
+		m_BackupVertices = {
+			{ VertexPositionColorTexture(Vec3(0, HelfSize, 0),Col4(1.0f,1.0f,1.0f,1.0f), Vec2(0.0f, 0.0f)) },
+			{ VertexPositionColorTexture(Vec3(HelfSize*2.0f, HelfSize, 0), Col4(1.0f,1.0f,1.0f,1.0f), Vec2((float)m_XWrap, 0.0f)) },
+			{ VertexPositionColorTexture(Vec3(0, -HelfSize, 0), Col4(1.0f,1.0f,1.0f,1.0f), Vec2(0.0f, (float)m_YWrap)) },
+			{ VertexPositionColorTexture(Vec3(HelfSize*2.0f, -HelfSize, 0), Col4(1.0f,1.0f,1.0f,1.0f), Vec2((float)m_XWrap, (float)m_YWrap)) },
+		};
+	}
+
+	void BossHPGauge::AdjustVertex() {
+	}
+
+	void BossHPGauge::UpdateVertex(float ElapsedTime, VertexPositionColorTexture* vertices) {
+		Col4 UpdateCol(1.0f, 1.0f, 1.0f, 1.0f);
+		for (size_t i = 0; i < m_SquareMesh->GetNumVertices(); i++) {
+			vertices[i] = VertexPositionColorTexture(
+				m_BackupVertices[i].position,
+				UpdateCol,
+				m_BackupVertices[i].textureCoordinate
+			);
+		}
+		m_Scale.x -= 1.0f;
 	}
 
 	//--------------------------------------------------------------------------------------
@@ -1724,6 +1811,7 @@ namespace basecross {
 		AddTag(L"Zako");
 		m_isDead = false;
 		m_HP = 3.0f;
+		m_FrameCount = 0.0f;
 		m_Rigidbody->m_IsCollisionActive = true;
 		m_Rigidbody->m_CollType = CollType::typeSPHERE;
 

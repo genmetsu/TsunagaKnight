@@ -175,11 +175,11 @@ namespace basecross {
 		App::GetApp()->RegisterTexture(L"BOSS_ICON_TX", strTexture);
 		strTexture = DataDir + L"Cannon_HP_Icon.png";
 		App::GetApp()->RegisterTexture(L"CANNON_ICON_TX", strTexture);
-		strTexture = DataDir + L"Boss_HP_Bar.png";
+		strTexture = DataDir + L"Boss_HP_Bar_v2.png";
 		App::GetApp()->RegisterTexture(L"BOSS_BAR_TX", strTexture);
 		strTexture = DataDir + L"Boss_HP_Frame.png";
 		App::GetApp()->RegisterTexture(L"BOSS_FRAME_TX", strTexture);
-		strTexture = DataDir + L"Cannon_HP_Bar.png";
+		strTexture = DataDir + L"Cannon_HP_Bar_v2.png";
 		App::GetApp()->RegisterTexture(L"CANNON_BAR_TX", strTexture);
 		strTexture = DataDir + L"Cannon_HP_Frame.png";
 		App::GetApp()->RegisterTexture(L"CANNON_FRAME_TX", strTexture);
