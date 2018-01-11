@@ -26,6 +26,8 @@ namespace basecross {
 		float m_Player_HP;
 		float m_Cannon_HP;
 		float m_Boss_HP;
+		float m_Default_Cannon_HP;
+		float m_Default_Boss_HP;
 		int m_friends_num;
 		
 	public:
@@ -43,6 +45,19 @@ namespace basecross {
 		}
 		float GetCannonHP() {
 			return m_Cannon_HP;
+		}
+		void SetDefaultCannonHP(float value) {
+			m_Default_Cannon_HP = value;
+		}
+		float GetDefaultCannonHP() {
+			return m_Default_Cannon_HP;
+		}
+
+		void SetDefaultBossHP(float value) {
+			m_Default_Boss_HP = value;
+		}
+		float GetDefaultBossHP() {
+			return m_Default_Boss_HP;
 		}
 
 		void SetBossHP(float value) {
@@ -378,7 +393,7 @@ namespace basecross {
 		@return	なし
 		*/
 		//--------------------------------------------------------------------------------------
-		void Damage() { m_HP--; }
+		void Damage(float value) { m_HP -= value; }
 	};
 
 	//--------------------------------------------------------------------------------------
@@ -788,6 +803,8 @@ namespace basecross {
 	//--------------------------------------------------------------------------------------
 	class BossHPGauge : public SpriteBase {
 		float m_TotalTime;	//頂点変更に使用するタイム
+		float m_DefalutHP;
+		float m_DefaultSize;
 	public:
 		//--------------------------------------------------------------------------------------
 		/*!
@@ -1069,6 +1086,8 @@ namespace basecross {
 		@return	なし
 		*/
 		//--------------------------------------------------------------------------------------
+
+		void Rotation(Vec3 vec);
 		void CheckHealth();
 
 		float GetHP() {
@@ -1138,6 +1157,9 @@ namespace basecross {
 		Vec3 m_CannonPos;
 		Vec3 m_BossPos;
 		Vec3 m_ToBossVec;
+
+		//大砲にセットされたとき何番目に発射されるか
+		int m_ShootNumber;
 
 		//死んだかどうか
 		bool m_isDead;
@@ -1383,6 +1405,13 @@ namespace basecross {
 		}
 		void SetHP(float Value){
 			m_HP = Value;
+		}
+
+		void SetShootNumber(int value) {
+			m_ShootNumber = value;
+		}
+		int GetShootNumber() {
+			return m_ShootNumber;
 		}
 
 		float GetAttackPoint(){

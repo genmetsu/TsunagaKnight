@@ -289,8 +289,12 @@ namespace basecross {
 			m_Pos
 		);
 
-		m_HP = 10.0f;
+		m_HP = 20.0f;
+		m_DefaultHP = m_HP;
 		AddTag(L"BossEnemy");
+
+		auto GM = GameManager::getInstance();
+		GM->SetDefaultBossHP(m_DefaultHP);
 
 		//Rigidbodyの初期化
 		auto PtrGameStage = GetStage<GameStage>();
@@ -337,6 +341,8 @@ namespace basecross {
 		if (m_HP < 0.0f) {
 			SetPosition(Vec3(100, 100, 100));
 		}
+		auto GM = GameManager::getInstance();
+		GM->SetBossHP(m_HP);
 	}
 
 	void Boss::OnDrawShadowmap() {
@@ -959,7 +965,7 @@ namespace basecross {
 				m_BackupVertices[i].textureCoordinate
 			);
 		}
-		m_Scale.x -= 1.0f;
+		//m_Scale.x -= 1.0f;
 	}
 
 	//--------------------------------------------------------------------------------------
@@ -983,6 +989,7 @@ namespace basecross {
 			{ VertexPositionColorTexture(Vec3(0, -HelfSize, 0), Col4(1.0f,1.0f,1.0f,1.0f), Vec2(0.0f, (float)m_YWrap)) },
 			{ VertexPositionColorTexture(Vec3(HelfSize*2.0f, -HelfSize, 0), Col4(1.0f,1.0f,1.0f,1.0f), Vec2((float)m_XWrap, (float)m_YWrap)) },
 		};
+		m_DefaultSize = StartScale.x;
 	}
 
 	void BossHPGauge::AdjustVertex() {
@@ -997,7 +1004,10 @@ namespace basecross {
 				m_BackupVertices[i].textureCoordinate
 			);
 		}
-		m_Scale.x -= 1.0f;
+		auto GM = GameManager::getInstance();
+		float bossHP = GM->GetBossHP();
+		float ratio = bossHP / GM->GetDefaultBossHP();
+		m_Scale.x = m_DefaultSize * ratio;
 	}
 
 	//--------------------------------------------------------------------------------------
@@ -1230,7 +1240,17 @@ namespace basecross {
 	}
 
 	void Cannon::OnUpdate() {
-		
+	}
+
+	void Cannon::Rotation(Vec3 vec) {
+		Vec3 Temp = vec - m_Rigidbody->m_Pos;
+		Temp.normalize();
+		float ToAngle = atan2(Temp.x, Temp.z);
+		Quat Qt;
+		Qt.rotationRollPitchYawFromVector(Vec3(0, ToAngle, 0));
+		Qt.normalize();
+		//現在と目標を補間
+		m_Rigidbody->m_Quat = XMQuaternionSlerp(m_Rigidbody->m_Quat, Qt, 0.1f);
 	}
 
 	void Cannon::OnDrawShadowmap() {
@@ -1317,6 +1337,7 @@ namespace basecross {
 		m_StopTime(1.5f),
 		m_SearchDis(3.0f),
 		m_TackleTime(0.75f),
+		m_ShootNumber(0),
 		m_TackleSpeed(6.0f),
 		m_AfterAttackTime(2.0f),
 		m_TackleStartPos(Vec3(0.0f, 0.0f, 0.0f)),
@@ -1812,6 +1833,7 @@ namespace basecross {
 		m_isDead = false;
 		m_HP = 3.0f;
 		m_FrameCount = 0.0f;
+		m_ShootNumber = 0;
 		m_Rigidbody->m_IsCollisionActive = true;
 		m_Rigidbody->m_CollType = CollType::typeSPHERE;
 
@@ -1844,20 +1866,25 @@ namespace basecross {
 	}
 
 	void EnemyObject::BulletStartBehavior() {
+		m_FrameCount = 0.0f;
+		AddTag(L"Shooted");
 
 		if (FindTag(L"Green")) {
 			auto PtrCannon = GetStage()->FindTagGameObject<Cannon>(L"GREEN_CANNON");
 			Vec3 new_pos = PtrCannon->GetPosition();
+			new_pos.y += 1.0f;
 			SetPosition(new_pos);
 		}
 		if (FindTag(L"Red")) {
 			auto PtrCannon = GetStage()->FindTagGameObject<Cannon>(L"RED_CANNON");
 			Vec3 new_pos = PtrCannon->GetPosition();
+			new_pos.y += 1.0f;
 			SetPosition(new_pos);
 		}
 		if (FindTag(L"Blue")) {
 			auto PtrCannon = GetStage()->FindTagGameObject<Cannon>(L"BLUE_CANNON");
 			Vec3 new_pos = PtrCannon->GetPosition();
+			new_pos.y += 1.0f;
 			SetPosition(new_pos);
 		}
 
@@ -1869,22 +1896,37 @@ namespace basecross {
 	}
 
 	void EnemyObject::BulletExcuteBehavior() {
+		float ElapsedTime = App::GetApp()->GetElapsedTime();
+		if (m_FrameCount > m_ShootNumber) {
+			m_Rigidbody->m_Velocity = m_ToBossVec * 15.0f;
 
-		m_Rigidbody->m_Velocity = m_ToBossVec * 15.0f;
+			//ボスとの衝突判定
+			float length = (m_BossPos - m_Rigidbody->m_Pos).length();
+			if (length < 5.0f) {
+				Vec3 Emitter = m_Rigidbody->m_Pos;
+				Emitter.y -= 0.125f;
+				//Sparkの送出
+				auto SparkPtr = GetStage<GameStage>()->FindTagGameObject<MultiFire>(L"MultiFire");
+				SparkPtr->InsertFire(Emitter, 8.0f);
 
-		//ボスとの衝突判定
-		float length = (m_BossPos - m_Rigidbody->m_Pos).length();
-		if (length < 5.0f) {
-			Vec3 Emitter = m_Rigidbody->m_Pos;
-			Emitter.y -= 0.125f;
-			//Sparkの送出
-			auto SparkPtr = GetStage<GameStage>()->FindTagGameObject<MultiFire>(L"MultiFire");
-			SparkPtr->InsertFire(Emitter, 8.0f);
-			SetPosition(Vec3(0, 0, 70));
+				auto BossPtr = GetStage()->FindTagGameObject<Boss>(L"BossEnemy");
+				BossPtr->Damage(1.0f);
 
-			m_StateMachine->ChangeState(EnemyToCannonState::Instance());
-			return;
+				SetPosition(Vec3(0, 0, 70));
+
+				m_StateMachine->ChangeState(EnemyToCannonState::Instance());
+				return;
+			}
 		}
+		Vec3 Temp = m_Rigidbody->m_Velocity;
+		Temp.normalize();
+		float ToAngle = atan2(Temp.x, Temp.z);
+		Quat Qt;
+		Qt.rotationRollPitchYawFromVector(Vec3(0, ToAngle, 0));
+		Qt.normalize();
+		//現在と目標を補間
+		m_Rigidbody->m_Quat = XMQuaternionSlerp(m_Rigidbody->m_Quat, Qt, 0.1f);
+		m_FrameCount += ElapsedTime * 5.0f;
 	}
 
 	//--------------------------------------------------------------------------------------
@@ -1971,6 +2013,7 @@ namespace basecross {
 	}
 
 	void EnemyBulletState::Exit(const shared_ptr<EnemyObject>& Obj) {
+		Obj->RemoveTag(L"Shooted");
 		Obj->Spawn();
 	}
 
