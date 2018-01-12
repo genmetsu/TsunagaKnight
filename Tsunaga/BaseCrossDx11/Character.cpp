@@ -293,6 +293,8 @@ namespace basecross {
 		m_DefaultHP = m_HP;
 		AddTag(L"BossEnemy");
 
+		m_isDead = false;
+
 		auto GM = GameManager::getInstance();
 		GM->SetDefaultBossHP(m_DefaultHP);
 
@@ -338,8 +340,10 @@ namespace basecross {
 	void Boss::OnUpdate() {
 		float ElapsedTime = App::GetApp()->GetElapsedTime();
 		m_PtrObj->UpdateAnimation(ElapsedTime);
-		if (m_HP < 0.0f) {
-			SetPosition(Vec3(100, 100, 100));
+		if (m_HP <= 0.0f && m_isDead == false) {
+			//SetPosition(Vec3(100, 100, 100));
+			ChangeAnimation(L"Dead");
+			m_isDead = true;
 		}
 		auto GM = GameManager::getInstance();
 		GM->SetBossHP(m_HP);
@@ -392,6 +396,10 @@ namespace basecross {
 
 	Vec3 Boss::GetPosition() {
 		return m_Rigidbody->m_Pos;
+	}
+
+	void Boss::ChangeAnimation(wstring anim) {
+		m_PtrObj->ChangeCurrentAnimation(anim);
 	}
 
 	//--------------------------------------------------------------------------------------
@@ -1911,6 +1919,9 @@ namespace basecross {
 
 				auto BossPtr = GetStage()->FindTagGameObject<Boss>(L"BossEnemy");
 				BossPtr->Damage(1.0f);
+				if (BossPtr->GetHP() >= 0.0f) {
+					BossPtr->ChangeAnimation(L"Damage");
+				}
 
 				SetPosition(Vec3(0, 0, 70));
 

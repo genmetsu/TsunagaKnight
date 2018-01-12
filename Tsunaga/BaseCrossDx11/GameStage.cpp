@@ -524,6 +524,9 @@ namespace basecross {
 							PlayerPtr->SetPosition(MoveVec * MoveLength + c->GetPosition());
 							camera.m_CameraArmLen = 2.5f;
 							m_FrameCount = 0.0f;
+							if (boss->GetHP() > 0.0f) {
+								boss->ChangeAnimation(L"Default");
+							}
 							return;
 						}
 						m_FrameCount += ElapsedTime;
@@ -562,6 +565,9 @@ namespace basecross {
 							PlayerPtr->SetPosition(MoveVec * MoveLength + c->GetPosition());
 							camera.m_CameraArmLen = 2.5f;
 							m_FrameCount = 0.0f;
+							if (boss->GetHP() > 0.0f) {
+								boss->ChangeAnimation(L"Default");
+							}
 							return;
 						}
 						m_FrameCount += ElapsedTime;
@@ -601,6 +607,9 @@ namespace basecross {
 							PlayerPtr->SetPosition(MoveVec * MoveLength + c->GetPosition());
 							camera.m_CameraArmLen = 2.5f;
 							m_FrameCount = 0.0f;
+							if (boss->GetHP() > 0.0f) {
+								boss->ChangeAnimation(L"Default");
+							}
 							return;
 						}
 						m_FrameCount += ElapsedTime;
