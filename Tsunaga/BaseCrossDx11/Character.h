@@ -23,12 +23,50 @@ namespace basecross {
 		~GameManager() {}
 		static GameManager* GM;
 
-		float m_player_HP;
+		float m_Player_HP;
+		float m_Cannon_HP;
+		float m_Boss_HP;
+		float m_Default_Cannon_HP;
+		float m_Default_Boss_HP;
 		int m_friends_num;
 		
 	public:
 		float m_camera_length;
 		static GameManager* getInstance();
+
+		void SetPlayerHP(float value) {
+			m_Player_HP = value;
+		}
+		float GetPlayerHP() {
+			return m_Player_HP;
+		}
+		void SetCannonHP(float value) {
+			m_Cannon_HP = value;
+		}
+		float GetCannonHP() {
+			return m_Cannon_HP;
+		}
+		void SetDefaultCannonHP(float value) {
+			m_Default_Cannon_HP = value;
+		}
+		float GetDefaultCannonHP() {
+			return m_Default_Cannon_HP;
+		}
+
+		void SetDefaultBossHP(float value) {
+			m_Default_Boss_HP = value;
+		}
+		float GetDefaultBossHP() {
+			return m_Default_Boss_HP;
+		}
+
+		void SetBossHP(float value) {
+			m_Boss_HP = value;
+		}
+		float GetBossHP() {
+			return m_Boss_HP;
+		}
+
 		void SetFriendsNum(int value) {
 			m_friends_num = value;
 		};
@@ -266,6 +304,8 @@ namespace basecross {
 		Vec3 m_Pos;
 		//HP
 		float m_HP;
+		//最初のHP
+		float m_DefaultHP;
 
 		//Rigidbodyのshared_ptr
 		shared_ptr<Rigidbody> m_Rigidbody;
@@ -353,7 +393,7 @@ namespace basecross {
 		@return	なし
 		*/
 		//--------------------------------------------------------------------------------------
-		void Damage() { m_HP--; }
+		void Damage(float value) { m_HP -= value; }
 	};
 
 	//--------------------------------------------------------------------------------------
@@ -711,6 +751,104 @@ namespace basecross {
 	};
 
 	//--------------------------------------------------------------------------------------
+	/// 大砲のゲージ
+	//--------------------------------------------------------------------------------------
+	class CannonGauge : public SpriteBase {
+		float m_TotalTime;	//頂点変更に使用するタイム
+	public:
+		//--------------------------------------------------------------------------------------
+		/*!
+		@brief バックアップ頂点の修正(仮想関数)。派生クラスは独自の頂点初期修正を実装
+		@return	なし
+		*/
+		//--------------------------------------------------------------------------------------
+		virtual void AdjustVertex() override;
+		//--------------------------------------------------------------------------------------
+		/*!
+		@brief 頂点の変更
+		@param[in]	ElapsedTime	ターン時間
+		@param[out]	vertices	マップされた頂点データ
+		@return	なし
+		*/
+		//--------------------------------------------------------------------------------------
+		virtual void UpdateVertex(float ElapsedTime, VertexPositionColorTexture* vertices) override;
+		//--------------------------------------------------------------------------------------
+		/*!
+		@brief コンストラクタ
+		@param[in]	StagePtr	ステージのポインタ
+		@param[in]	TextureResName	初期テクスチャリソース名
+		@param[in]	StartScale	初期大きさ
+		@param[in]	StartRot	初期回転
+		@param[in]	StartPos	初期位置
+		@param[in]	XWrap	X方向のラップ数
+		@param[in]	YWrap	Y方向のラップ数
+		*/
+		//--------------------------------------------------------------------------------------
+		CannonGauge(const shared_ptr<Stage>& StagePtr,
+			const wstring& TextureResName,
+			const Vec2& StartScale,
+			float StartRot,
+			const Vec2& StartPos,
+			UINT XWrap, UINT YWrap);
+		//--------------------------------------------------------------------------------------
+		/*!
+		@brief デストラクタ
+		*/
+		//--------------------------------------------------------------------------------------
+		virtual ~CannonGauge() {}
+	};
+
+	//--------------------------------------------------------------------------------------
+	/// ボスの体力ゲージ
+	//--------------------------------------------------------------------------------------
+	class BossHPGauge : public SpriteBase {
+		float m_TotalTime;	//頂点変更に使用するタイム
+		float m_DefalutHP;
+		float m_DefaultSize;
+	public:
+		//--------------------------------------------------------------------------------------
+		/*!
+		@brief バックアップ頂点の修正(仮想関数)。派生クラスは独自の頂点初期修正を実装
+		@return	なし
+		*/
+		//--------------------------------------------------------------------------------------
+		virtual void AdjustVertex() override;
+		//--------------------------------------------------------------------------------------
+		/*!
+		@brief 頂点の変更
+		@param[in]	ElapsedTime	ターン時間
+		@param[out]	vertices	マップされた頂点データ
+		@return	なし
+		*/
+		//--------------------------------------------------------------------------------------
+		virtual void UpdateVertex(float ElapsedTime, VertexPositionColorTexture* vertices) override;
+		//--------------------------------------------------------------------------------------
+		/*!
+		@brief コンストラクタ
+		@param[in]	StagePtr	ステージのポインタ
+		@param[in]	TextureResName	初期テクスチャリソース名
+		@param[in]	StartScale	初期大きさ
+		@param[in]	StartRot	初期回転
+		@param[in]	StartPos	初期位置
+		@param[in]	XWrap	X方向のラップ数
+		@param[in]	YWrap	Y方向のラップ数
+		*/
+		//--------------------------------------------------------------------------------------
+		BossHPGauge(const shared_ptr<Stage>& StagePtr,
+			const wstring& TextureResName,
+			const Vec2& StartScale,
+			float StartRot,
+			const Vec2& StartPos,
+			UINT XWrap, UINT YWrap);
+		//--------------------------------------------------------------------------------------
+		/*!
+		@brief デストラクタ
+		*/
+		//--------------------------------------------------------------------------------------
+		virtual ~BossHPGauge() {}
+	};
+
+	//--------------------------------------------------------------------------------------
 	///	背景スプライト
 	//--------------------------------------------------------------------------------------
 	class MultiSprite : public SpriteBase {
@@ -859,6 +997,8 @@ namespace basecross {
 
 		//耐久度
 		float m_HP;
+		//最初の耐久度
+		float m_DefaultHP;
 
 		//Rigidbodyのshared_ptr
 		shared_ptr<Rigidbody> m_Rigidbody;
@@ -946,6 +1086,8 @@ namespace basecross {
 		@return	なし
 		*/
 		//--------------------------------------------------------------------------------------
+
+		void Rotation(Vec3 vec);
 		void CheckHealth();
 
 		float GetHP() {
@@ -1005,6 +1147,9 @@ namespace basecross {
 		int m_FollowingAngelNum;
 
 		float m_HP;
+		//最初のHP
+		float m_DefaultHP;
+
 		float m_AttackPoint;
 		//自分を固定するY軸の高さ
 		float m_BaseY;
@@ -1012,6 +1157,9 @@ namespace basecross {
 		Vec3 m_CannonPos;
 		Vec3 m_BossPos;
 		Vec3 m_ToBossVec;
+
+		//大砲にセットされたとき何番目に発射されるか
+		int m_ShootNumber;
 
 		//死んだかどうか
 		bool m_isDead;
@@ -1257,6 +1405,13 @@ namespace basecross {
 		}
 		void SetHP(float Value){
 			m_HP = Value;
+		}
+
+		void SetShootNumber(int value) {
+			m_ShootNumber = value;
+		}
+		int GetShootNumber() {
+			return m_ShootNumber;
 		}
 
 		float GetAttackPoint(){

@@ -911,6 +911,7 @@ namespace basecross {
 				m_friends_num = m_friends.size();
 				//‚¢‚­‚Â‚Ìƒ`ƒFƒCƒ“‚ð”­ŽË‚·‚é‚©
 				bullet_num++;
+				f_pointer->SetShootNumber(bullet_num);
 			}
 			else
 				i++;

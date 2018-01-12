@@ -57,7 +57,7 @@ namespace basecross {
 
 		AddGameObject<TransparentWall>(
 			Vec3(0.5f, 0.5f, 60.0f),
-			Quat(Vec3(0, 1.0f, 0), - XM_PI / 180.0f * 4.18f),
+			Quat(Vec3(0, 1.0f, 0), -XM_PI / 180.0f * 4.18f),
 			Vec3(15.15f, 0.25f, 14.0f)
 			);
 
@@ -70,7 +70,7 @@ namespace basecross {
 		AddGameObject<TransparentWall>(
 			Vec3(0.5f, 0.5f, 40.0f),
 			Quat(Vec3(0, 1.0f, 0), -XM_PI / 180.0f * 16.0f),
-			Vec3(9.75f, 0.25f,54.0f)
+			Vec3(9.75f, 0.25f, 54.0f)
 			);
 
 		AddGameObject<TransparentWall>(
@@ -111,7 +111,7 @@ namespace basecross {
 
 		AddGameObject<Boss>(
 			L"BOSS_TX",
-			Vec3(10.0f,10.0f, 10.0f),
+			Vec3(10.0f, 10.0f, 10.0f),
 			Quat(),
 			Vec3(0.0f, 12.0f, 60.0f),
 			true);
@@ -123,7 +123,7 @@ namespace basecross {
 				true,
 				Vec3(0.0f, 0.5f, 10.0f)
 				);
-		
+
 		//剣の作成
 		AddGameObject<Sword>(
 			Par,
@@ -259,7 +259,7 @@ namespace basecross {
 				false);
 		}
 
-	
+
 		//スパークエフェクト
 		AddGameObject<MultiSpark>();
 		//ファイアエフェクト
@@ -281,32 +281,23 @@ namespace basecross {
 			Vec2(-480, 260),
 			4, 4
 			);*/
-
-
 			//メッセージを表示するスプライトの作成
-			/*AddGameObject<MessageSprite>(
-				L"MESSAGE_TX",
-				Vec2(256, 64),
-				0.0f,
-				Vec2(480, 260),
-				1, 1
-				);*/
-
-				//文字列描画オブジェクトの作成
-		AddGameObject<StringDrawObject>();
-
-		m_AudioObjectPtr = ObjectFactory::Create<MultiAudioObject>();
-		m_AudioObjectPtr->AddAudioResource(L"Nanika");
-		m_AudioObjectPtr->Start(L"Nanika", XAUDIO2_LOOP_INFINITE, 0.5f);
-
-		AddGameObject<MultiSprite>(
-			L"BOSS_BAR_TX",
-			Vec2(1000, 50),
+		/*AddGameObject<MessageSprite>(
+			L"MESSAGE_TX",
+			Vec2(256, 64),
 			0.0f,
-			Vec2(0, -330),
+			Vec2(480, 260),
+			1, 1
+			);*/
+
+		AddGameObject<BossHPGauge>(
+			L"BOSS_BAR_TX",
+			Vec2(960, 24),
+			0.0f,
+			Vec2(-480, -330),
 			1, 1
 			);
-		
+
 		AddGameObject<MultiSprite>(
 			L"BOSS_FRAME_TX",
 			Vec2(1000, 50),
@@ -314,18 +305,18 @@ namespace basecross {
 			Vec2(0, -330),
 			1, 1
 			);
-		AddGameObject<MultiSprite>(
+		AddGameObject<CannonGauge>(
 			L"CANNON_BAR_TX",
-			Vec2(300, 40),
+			Vec2(300, 18),
 			0.0f,
-			Vec2(-410, 330),
+			Vec2(-555, 330),
 			1, 1
 			);
 		AddGameObject<MultiSprite>(
 			L"CANNON_FRAME_TX",
-			Vec2(300, 40),
+			Vec2(320, 40),
 			0.0f,
-			Vec2(-410, 330),
+			Vec2(-405, 330),
 			1, 1
 			);
 
@@ -373,6 +364,14 @@ namespace basecross {
 					);
 			}
 		}
+
+		//文字列描画オブジェクトの作成
+		AddGameObject<StringDrawObject>();
+
+		m_AudioObjectPtr = ObjectFactory::Create<MultiAudioObject>();
+		m_AudioObjectPtr->AddAudioResource(L"Nanika");
+		m_AudioObjectPtr->Start(L"Nanika", XAUDIO2_LOOP_INFINITE, 0.5f);
+
 	}
 
 	//描画オブジェクトの追加
@@ -494,39 +493,81 @@ namespace basecross {
 				}
 			}
 
-			/*int now_cannon = PlayerPtr->GetIsCannon();
+			int now_cannon = PlayerPtr->GetIsCannon();
 			if (now_cannon < 3) {
 				auto boss = FindTagGameObject<Boss>(L"BossEnemy");
 				Vec3 boss_pos = boss->GetPosition();
 				if (now_cannon == 0) {
+					vector<shared_ptr<GameObject>> ShootedEnemyVec;
+					FindTagGameObjectVec(L"Shooted", ShootedEnemyVec);
+					int max_num = 0;
+					Vec3 ShootPos;
+					for (auto enemy : ShootedEnemyVec) {
+						if (enemy) {
+							auto PtrEnemy = dynamic_pointer_cast<EnemyObject>(enemy);
+							if (PtrEnemy->GetShootNumber() > max_num) {
+								max_num = PtrEnemy->GetShootNumber();
+								ShootPos = PtrEnemy->GetPosition();
+							}
+						}
+					}
 					auto c = FindTagGameObject<Cannon>(L"GREEN_CANNON");
+					c->Rotation(boss_pos);
 					camera.m_CamerAt = boss_pos;
 					camera.m_CameraArmLen = 30;
-					camera.m_CamerEye = c->GetPosition();
+					camera.m_CamerEye = ShootPos;
 					camera.m_CamerEye.x -= 4.0f;
-					camera.m_CamerEye.y += 2.0f;
-					camera.m_CamerEye.z -= 6.0f;
+					//camera.m_CamerEye.y += 2.0f;
+					camera.m_CamerEye.z -= 7.0f;
 				}
 				if (now_cannon == 1) {
+					vector<shared_ptr<GameObject>> ShootedEnemyVec;
+					FindTagGameObjectVec(L"Shooted", ShootedEnemyVec);
+					int max_num = 0;
+					Vec3 ShootPos;
+					for (auto enemy : ShootedEnemyVec) {
+						if (enemy) {
+							auto PtrEnemy = dynamic_pointer_cast<EnemyObject>(enemy);
+							if (PtrEnemy->GetShootNumber() > max_num) {
+								max_num = PtrEnemy->GetShootNumber();
+								ShootPos = PtrEnemy->GetPosition();
+							}
+						}
+					}
 					auto c = FindTagGameObject<Cannon>(L"RED_CANNON");
+					c->Rotation(boss_pos);
 					camera.m_CamerAt = boss_pos;
 					camera.m_CameraArmLen = 30;
-					camera.m_CamerEye = c->GetPosition();
+					camera.m_CamerEye = ShootPos;
 					camera.m_CamerEye.x -= 3.0f;
-					camera.m_CamerEye.y += 2.0f;
-					camera.m_CamerEye.z -= 6.0f;
+					//camera.m_CamerEye.y += 2.0f;
+					camera.m_CamerEye.z -= 7.0f;
 				}
 				if (now_cannon == 2) {
+					vector<shared_ptr<GameObject>> ShootedEnemyVec;
+					FindTagGameObjectVec(L"Shooted", ShootedEnemyVec);
+					int max_num = 0;
+					Vec3 ShootPos;
+					for (auto enemy : ShootedEnemyVec) {
+						if (enemy) {
+							auto PtrEnemy = dynamic_pointer_cast<EnemyObject>(enemy);
+							if (PtrEnemy->GetShootNumber() > max_num) {
+								max_num = PtrEnemy->GetShootNumber();
+								ShootPos = PtrEnemy->GetPosition();
+							}
+						}
+					}
 					auto c = FindTagGameObject<Cannon>(L"BLUE_CANNON");
+					c->Rotation(boss_pos);
 					camera.m_CamerAt = boss_pos;
 					camera.m_CameraArmLen = 30;
-					camera.m_CamerEye = c->GetPosition();
+					camera.m_CamerEye = ShootPos;
 					camera.m_CamerEye.x -= 2.0f;
-					camera.m_CamerEye.y += 2.0f;
-					camera.m_CamerEye.z -= 6.0f;
+					//camera.m_CamerEye.y += 2.0f;
+					camera.m_CamerEye.z -= 7.0f;
 				}
 			}
-			else {*/
+			else {
 				camera.m_CamerAt = PlayerPtr->GetPosition();
 				camera.m_CamerAt.y += 0.5f;
 
@@ -537,7 +578,7 @@ namespace basecross {
 						-cos(camera.m_CameraXZRad) * camera.m_CameraArmLen * sin(camera.m_CameraYRad)
 					);
 				camera.m_CamerEye = camera.m_CamerAt + CameraLocalEye;
-			//}
+			}
 			//Bボタン
 			if (CntlVec[0].wPressedButtons & XINPUT_GAMEPAD_B) {
 				PostEvent(0.0f, GetThis<ObjectInterface>(), App::GetApp()->GetScene<Scene>(), L"ToEmptyStage");
