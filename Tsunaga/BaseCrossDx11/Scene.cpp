@@ -168,8 +168,9 @@ namespace basecross {
 
 		strTexture = DataDir + L"TsunagaKnight.png";
 		App::GetApp()->RegisterTexture(L"TsunagaKnight_TX", strTexture);
-		strTexture = DataDir + L"PRESS ANY BUTTON.png";
-		App::GetApp()->RegisterTexture(L"PRESS ANY BUTTON_TX", strTexture);
+		strTexture = DataDir + L"PresAnyButton.png";
+		App::GetApp()->RegisterTexture(L"PresAnyButton_TX", strTexture);
+
 
 		strTexture = DataDir + L"Boss_HP_Icon.png";
 		App::GetApp()->RegisterTexture(L"BOSS_ICON_TX", strTexture);

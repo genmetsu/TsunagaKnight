@@ -26,16 +26,16 @@ void TitleScene::OnCreate() {
 	//背景スプライトの作成
 	AddGameObject<MultiSprite>(
 		L"TsunagaKnight_TX",
-		Vec2(1280, 800),
+		Vec2(640, 720*0.4f),
 		0.0f,
-		Vec2(0, 0),
+		Vec2(0, 200),
 		1, 1
 		);
 
 	//背景スプライトの作成
-	AddGameObject<MultiSprite>(
-		L"PRESS ANY BUTTON_TX",
-		Vec2(640, 200),
+	AddGameObject<MessageSprite>(
+		L"PresAnyButton_TX",
+		Vec2(512, 64),
 		0.0f,
 		Vec2(0, -300),
 		1, 1
@@ -77,13 +77,21 @@ void TitleScene::OnDrawStage() {
 
 void TitleScene::OnUpdate() 
 {
-
+	
+		//ターン毎の初期化
+		GetRigidbodyManager()->InitRigidbody();
+		for (auto& v : GetGameObjectVec()) {
+			//各オブジェクトの更新
+			v->OnUpdate();
+		}
+		
+	
 
 	auto CntlVec = App::GetApp()->GetInputDevice().GetControlerVec();
 	if (CntlVec[0].bConnected)
 	{
 		//Bボタン
-		if (CntlVec[0].wPressedButtons & XINPUT_GAMEPAD_B) 
+		if (CntlVec[0].wPressedButtons) 
 		{
 			PostEvent(0.0f, GetThis<ObjectInterface>(), App::GetApp()->GetScene<Scene>(), L"ToGameStage");
 		}
