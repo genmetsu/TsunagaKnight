@@ -341,7 +341,6 @@ namespace basecross {
 		float ElapsedTime = App::GetApp()->GetElapsedTime();
 		m_PtrObj->UpdateAnimation(ElapsedTime);
 		if (m_HP <= 0.0f && m_isDead == false) {
-			//SetPosition(Vec3(100, 100, 100));
 			ChangeAnimation(L"Dead");
 			m_isDead = true;
 		}
@@ -666,6 +665,65 @@ namespace basecross {
 			}
 		}
 	}
+
+	//--------------------------------------------------------------------------------------
+	//class CannonEffect : public MultiParticle;
+	//用途: 大砲のエフェクト
+	//--------------------------------------------------------------------------------------
+	CannonEffect::CannonEffect(shared_ptr<Stage>& StagePtr) :
+		MultiParticle(StagePtr)
+	{}
+	CannonEffect::~CannonEffect() {}
+
+	//初期化
+	void CannonEffect::OnCreate() {
+		//加算描画処理をする
+		SetAddType(true);
+		//タグの追加
+		AddTag(L"CannonEffect");
+	}
+
+
+	void CannonEffect::InsertEffect(const Vec3& Pos)
+	{
+		auto ParticlePtr = InsertParticle(2);
+		ParticlePtr->m_EmitterPos = Pos;
+		ParticlePtr->SetTextureResource(L"STEP_TX");
+		ParticlePtr->m_MaxTime = 0.5f;
+
+		auto &camera = GetStage()->GetCamera();
+		Vec3 camera_pos = camera.m_CamerEye;
+
+		Vec3 MoveVec = camera_pos - Pos;
+		MoveVec.normalize();
+
+		vector<ParticleSprite>& pSpriteVec = ParticlePtr->GetParticleSpriteVec();
+		for (auto& rParticleSprite : ParticlePtr->GetParticleSpriteVec()) {
+			//各パーティクルの移動速度を指定
+			rParticleSprite.m_Velocity = Vec3(
+				rParticleSprite.m_LocalPos.x * 5.0f,
+				rParticleSprite.m_LocalPos.y * 5.0f,
+				rParticleSprite.m_LocalPos.z * 5.0f
+			);
+			//色の指定
+			rParticleSprite.m_Color = Col4(0.3f, 0.3f, 0.3f, 1.0f);
+			rParticleSprite.m_LocalScale *= 3.0f;
+		}
+	}
+
+	void CannonEffect::OnUpdate()
+	{
+		MultiParticle::OnUpdate();
+		float ElapsedTime = App::GetApp()->GetElapsedTime();
+		for (auto ParticlePtr : GetParticleVec()) {
+			for (auto& rParticleSprite : ParticlePtr->GetParticleSpriteVec()) {
+				if (rParticleSprite.m_Active) {
+					rParticleSprite.m_Color.w -= 0.03f;
+				}
+			}
+		}
+	}
+
 	//--------------------------------------------------------------------------------------
 	//class StepEffect : public MultiParticle;
 	//用途: ステップエフェクト
@@ -1386,6 +1444,7 @@ namespace basecross {
 		m_Rigidbody = PtrGameStage->AddRigidbody(body);
 
 		m_isDead = false;
+		m_Bomb = false;
 
 		m_PlayerPtr = GetStage()->FindTagGameObject<Player>(L"Player");
 
@@ -1839,6 +1898,7 @@ namespace basecross {
 	void EnemyObject::Spawn() {
 		AddTag(L"Zako");
 		m_isDead = false;
+		m_Bomb = false;
 		m_HP = 3.0f;
 		m_FrameCount = 0.0f;
 		m_ShootNumber = 0;
@@ -1906,13 +1966,21 @@ namespace basecross {
 	void EnemyObject::BulletExcuteBehavior() {
 		float ElapsedTime = App::GetApp()->GetElapsedTime();
 		if (m_FrameCount > m_ShootNumber) {
+			if (m_ShootNumber == 1 && m_Bomb == false && m_FrameCount >= 2.5f) {
+				//Sparkの送出
+				Vec3 Emitter = m_Rigidbody->m_Pos;
+				Emitter.z += 5.0f;
+				//Sparkの送出
+				auto SparkPtr = GetStage<GameStage>()->FindTagGameObject<MultiFire>(L"MultiFire");
+				SparkPtr->InsertFire(Emitter, 6.0f);
+				m_Bomb = true;
+			}
 			m_Rigidbody->m_Velocity = m_ToBossVec * 15.0f;
 
 			//ボスとの衝突判定
 			float length = (m_BossPos - m_Rigidbody->m_Pos).length();
 			if (length < 5.0f) {
 				Vec3 Emitter = m_Rigidbody->m_Pos;
-				Emitter.y -= 0.125f;
 				//Sparkの送出
 				auto SparkPtr = GetStage<GameStage>()->FindTagGameObject<MultiFire>(L"MultiFire");
 				SparkPtr->InsertFire(Emitter, 8.0f);

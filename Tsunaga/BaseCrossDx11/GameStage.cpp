@@ -268,6 +268,7 @@ namespace basecross {
 		AddGameObject<AttackSigns>();
 		AddGameObject<BossAttackSigns>();
 		AddGameObject<StepEffect>();
+		AddGameObject<CannonEffect>();
 		AddGameObject<MultiGuardEffect>();
 
 		//描画オブジェクトの追加
@@ -310,14 +311,14 @@ namespace basecross {
 			L"CANNON_BAR_TX",
 			Vec2(300, 18),
 			0.0f,
-			Vec2(-555, 330),
+			Vec2(-555 + 64, 330),
 			1, 1
 			);
 		AddGameObject<MultiSprite>(
 			L"CANNON_FRAME_TX",
 			Vec2(320, 40),
 			0.0f,
-			Vec2(-405, 330),
+			Vec2(-405 + 64, 330),
 			1, 1
 			);
 
@@ -329,12 +330,20 @@ namespace basecross {
 			1, 1
 			);
 		AddGameObject<MultiSprite>(
-			L"CANNON_ICON_TX",
-			Vec2(64.0f * 0.8f, 64.0f * 0.8f),
+			L"KUREHA_ICON_TX",
+			Vec2(64, 64),
 			0.0f,
-			Vec2(-590, 330),
+			Vec2(-600, 325),
 			1, 1
 			);
+		AddGameObject<MultiSprite>(
+			L"CANNON_ICON_TX",
+			Vec2(52, 52),
+			0.0f,
+			Vec2(-530, 325),
+			1, 1
+			);
+
 
 		for (int i = 0; i < 20; i++) {
 			if (i % 3 == 0) {
@@ -342,7 +351,7 @@ namespace basecross {
 					L"ANGEL_ICON_TX",
 					Vec2(30, 30),
 					0.0f,
-					Vec2(-590, 280 - i * 30),
+					Vec2(-600, 270 - i * 30),
 					1, 1
 					);
 			}
@@ -351,7 +360,7 @@ namespace basecross {
 					L"GUN_ICON_TX",
 					Vec2(30, 30),
 					0.0f,
-					Vec2(-590, 280 - i * 30),
+					Vec2(-600, 270 - i * 30),
 					1, 1
 					);
 			}
@@ -360,7 +369,7 @@ namespace basecross {
 					L"NEEDLE_ICON_TX",
 					Vec2(30, 30),
 					0.0f,
-					Vec2(-590, 280 - i * 30),
+					Vec2(-600, 270 - i * 30),
 					1, 1
 					);
 			}

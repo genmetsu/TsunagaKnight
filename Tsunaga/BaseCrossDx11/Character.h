@@ -488,6 +488,22 @@ namespace basecross {
 	};
 
 	//--------------------------------------------------------------------------------------
+	//class CannonEffect : public MultiParticle;
+	//用途: 砲撃のエフェクト
+	//--------------------------------------------------------------------------------------
+	class CannonEffect : public MultiParticle {
+	public:
+		//構築と破棄
+		CannonEffect(shared_ptr<Stage>& StagePtr);
+		virtual ~CannonEffect();
+		//初期化
+		virtual void OnCreate() override;
+		void InsertEffect(const Vec3& Pos);
+		virtual void OnUpdate() override;
+
+	};
+
+	//--------------------------------------------------------------------------------------
 	//class StepEffect : public MultiParticle;
 	//用途: ステップのエフェクト
 	//--------------------------------------------------------------------------------------
@@ -1174,6 +1190,8 @@ namespace basecross {
 
 		//大砲にセットされたとき何番目に発射されるか
 		int m_ShootNumber;
+
+		bool m_Bomb;
 
 		//死んだかどうか
 		bool m_isDead;
