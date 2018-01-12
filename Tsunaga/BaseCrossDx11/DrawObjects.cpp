@@ -13,9 +13,9 @@ namespace basecross {
 	//--------------------------------------------------------------------------------------
 	float ShadowmapRenderer::m_LightHeight(20.0f);
 	float ShadowmapRenderer::m_LightNear(1.0f);
-	float ShadowmapRenderer::m_LightFar(200.0f);
-	float ShadowmapRenderer::m_ViewWidth(16.0f);
-	float ShadowmapRenderer::m_ViewHeight(16.0f);
+	float ShadowmapRenderer::m_LightFar(50.0f);
+	float ShadowmapRenderer::m_ViewWidth(32.0f);
+	float ShadowmapRenderer::m_ViewHeight(32.0f);
 
 	ShadowmapRenderer::ShadowmapRenderer(const shared_ptr<Stage>& StagePtr, const wstring& Tagname) :
 		GameObject(StagePtr)
