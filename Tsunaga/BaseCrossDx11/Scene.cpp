@@ -230,16 +230,16 @@ namespace basecross {
 		wstring strMusic = DataDir + L"BGM1.wav";
 		App::GetApp()->RegisterWav(L"Nanika", strMusic);
 		// SE
-		wstring panWav = DataDir + L"buki.wav";
+		wstring panWav = DataDir + L"pan.wav";
 		App::GetApp()->RegisterWav(L"Pan", panWav);
 
-		/*wstring bossWav = DataDir + L"bossdamage.wav";
-		App::GetApp()->RegisterWav(L"bossdamage", bossWav);*/
+		wstring bossWav = DataDir + L"bossdamage.wav";
+		App::GetApp()->RegisterWav(L"bossdamage", bossWav);
 
-		//wstring bukiWav = DataDir + L"buki.wav";
-		//App::GetApp()->RegisterWav(L"Buki", bukiWav);
+		wstring bukiWav = DataDir + L"buki.wav";
+		App::GetApp()->RegisterWav(L"Buki", bukiWav);
 
-		/*wstring cannonWav = DataDir + L"cannon.wav";
+		wstring cannonWav = DataDir + L"cannon.wav";
 		App::GetApp()->RegisterWav(L"cannon", cannonWav);
 
 		wstring chainsawWav = DataDir + L"chainsaw.wav";
@@ -270,10 +270,7 @@ namespace basecross {
 		App::GetApp()->RegisterWav(L"shoot", shootWav);
 
 		wstring hazureruWav = DataDir + L"hazureru.wav";
-		App::GetApp()->RegisterWav(L"hazureru", hazureruWav);*/
-
-
-
+		App::GetApp()->RegisterWav(L"hazureru", hazureruWav);
 
 	}
 
