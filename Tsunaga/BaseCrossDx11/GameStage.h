@@ -23,6 +23,7 @@ namespace basecross {
 		void RegisterDefaultSphere();
 		weak_ptr<Player> m_PtrPlayer;
 		shared_ptr<MultiAudioObject> m_AudioObjectPtr;
+		float m_FrameCount;
 	public:
 		//--------------------------------------------------------------------------------------
 		/*!

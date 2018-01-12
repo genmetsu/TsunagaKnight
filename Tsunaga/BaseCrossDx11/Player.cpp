@@ -375,13 +375,6 @@ namespace basecross {
 				float PlayerRadius = m_Rigidbody->m_Scale.x / 2.0f;
 
 				if (length < CannonRadius + PlayerRadius) {
-
-					Vec3 Emitter = m_Rigidbody->m_Pos;
-					Emitter.y -= 0.125f;
-					//Spark‚Ì‘—o
-					auto SparkPtr = GetStage<GameStage>()->FindTagGameObject<MultiSpark>(L"MultiSpark");
-					SparkPtr->InsertSpark(Emitter);
-
 					if (PtrCannon->GetCannonClass() == 0) {
 						auto s = GetStage()->FindTagGameObject<Sword>(L"Sword");
 						s->SetEnemyToCannon(L"Green");

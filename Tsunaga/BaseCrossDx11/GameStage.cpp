@@ -29,6 +29,7 @@ namespace basecross {
 	}
 
 	void GameStage::OnCreate() {
+		m_FrameCount = 0.0f;
 
 		//シャドウマップの描画デバイスの取得
 		auto Dev = App::GetApp()->GetDeviceResources();
@@ -441,6 +442,7 @@ namespace basecross {
 
 
 	void GameStage::OnUpdate() {
+		float ElapsedTime = App::GetApp()->GetElapsedTime();
 		auto& camera = GetCamera();
 		//コントローラの取得
 		auto CntlVec = App::GetApp()->GetInputDevice().GetControlerVec();
@@ -477,7 +479,7 @@ namespace basecross {
 			}
 
 			auto GM = GameManager::getInstance();
-			GM->m_camera_length = camera.m_CameraYRad;
+			GM->m_camera_length = camera.m_CameraArmLen;
 			auto PlayerPtr = FindTagGameObject<Player>(L"Player");
 
 
@@ -500,6 +502,7 @@ namespace basecross {
 				if (now_cannon == 0) {
 					vector<shared_ptr<GameObject>> ShootedEnemyVec;
 					FindTagGameObjectVec(L"Shooted", ShootedEnemyVec);
+					auto c = FindTagGameObject<Cannon>(L"GREEN_CANNON");
 					int max_num = 0;
 					Vec3 ShootPos;
 					for (auto enemy : ShootedEnemyVec) {
@@ -511,7 +514,21 @@ namespace basecross {
 							}
 						}
 					}
-					auto c = FindTagGameObject<Cannon>(L"GREEN_CANNON");
+					if (max_num == 0) {
+						if (m_FrameCount > 1.0f) {
+							PlayerPtr->SetIsCannnon(3);
+							Vec3 MoveVec = PlayerPtr->GetPosition() - c->GetPosition();
+							MoveVec.y = 0.0f;
+							MoveVec.normalize();
+							float MoveLength = c->GetScale() / 2.0f + PlayerPtr->GetScale() / 2.0f;
+							PlayerPtr->SetPosition(MoveVec * MoveLength + c->GetPosition());
+							camera.m_CameraArmLen = 2.5f;
+							m_FrameCount = 0.0f;
+							return;
+						}
+						m_FrameCount += ElapsedTime;
+						return;
+					}
 					c->Rotation(boss_pos);
 					camera.m_CamerAt = boss_pos;
 					camera.m_CameraArmLen = 30;
@@ -523,6 +540,7 @@ namespace basecross {
 				if (now_cannon == 1) {
 					vector<shared_ptr<GameObject>> ShootedEnemyVec;
 					FindTagGameObjectVec(L"Shooted", ShootedEnemyVec);
+					auto c = FindTagGameObject<Cannon>(L"RED_CANNON");
 					int max_num = 0;
 					Vec3 ShootPos;
 					for (auto enemy : ShootedEnemyVec) {
@@ -534,7 +552,22 @@ namespace basecross {
 							}
 						}
 					}
-					auto c = FindTagGameObject<Cannon>(L"RED_CANNON");
+					if (max_num == 0) {
+						if (m_FrameCount > 1.0f) {
+							PlayerPtr->SetIsCannnon(3);
+							Vec3 MoveVec = PlayerPtr->GetPosition() - c->GetPosition();
+							MoveVec.y = 0.0f;
+							MoveVec.normalize();
+							float MoveLength = c->GetScale() / 2.0f + PlayerPtr->GetScale() / 2.0f;
+							PlayerPtr->SetPosition(MoveVec * MoveLength + c->GetPosition());
+							camera.m_CameraArmLen = 2.5f;
+							m_FrameCount = 0.0f;
+							return;
+						}
+						m_FrameCount += ElapsedTime;
+						return;
+					}
+					
 					c->Rotation(boss_pos);
 					camera.m_CamerAt = boss_pos;
 					camera.m_CameraArmLen = 30;
@@ -546,6 +579,7 @@ namespace basecross {
 				if (now_cannon == 2) {
 					vector<shared_ptr<GameObject>> ShootedEnemyVec;
 					FindTagGameObjectVec(L"Shooted", ShootedEnemyVec);
+					auto c = FindTagGameObject<Cannon>(L"BLUE_CANNON");
 					int max_num = 0;
 					Vec3 ShootPos;
 					for (auto enemy : ShootedEnemyVec) {
@@ -557,7 +591,21 @@ namespace basecross {
 							}
 						}
 					}
-					auto c = FindTagGameObject<Cannon>(L"BLUE_CANNON");
+					if (max_num == 0) {
+						if (m_FrameCount > 1.0f) {
+							PlayerPtr->SetIsCannnon(3);
+							Vec3 MoveVec = PlayerPtr->GetPosition() - c->GetPosition();
+							MoveVec.y = 0.0f;
+							MoveVec.normalize();
+							float MoveLength = c->GetScale() / 2.0f + PlayerPtr->GetScale() / 2.0f;
+							PlayerPtr->SetPosition(MoveVec * MoveLength + c->GetPosition());
+							camera.m_CameraArmLen = 2.5f;
+							m_FrameCount = 0.0f;
+							return;
+						}
+						m_FrameCount += ElapsedTime;
+						return;
+					}
 					c->Rotation(boss_pos);
 					camera.m_CamerAt = boss_pos;
 					camera.m_CameraArmLen = 30;
