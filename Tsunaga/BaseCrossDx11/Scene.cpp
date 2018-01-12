@@ -225,7 +225,7 @@ namespace basecross {
 		App::GetApp()->RegisterTexture(L"STEP_TX", strTexture);
 
 		// BGM
-		wstring strMusic = DataDir + L"Venom.wav";
+		wstring strMusic = DataDir + L"BGM1.wav";
 		App::GetApp()->RegisterWav(L"Nanika", strMusic);
 		// SE
 		wstring panWav = DataDir + L"buki.wav";

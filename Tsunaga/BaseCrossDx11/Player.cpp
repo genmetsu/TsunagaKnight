@@ -254,18 +254,18 @@ namespace basecross {
 		if (CntlVec[0].bConnected) {
 			Vec3 Direction = GetMoveVector();
 			//Aボタン
-			if (CntlVec[0].wPressedButtons & XINPUT_GAMEPAD_A) {
+			if (CntlVec[0].wPressedButtons & XINPUT_GAMEPAD_LEFT_SHOULDER) {
 				m_StateMachine->ChangeState(StepState::Instance());
 				return;
 			}
-			else if (CntlVec[0].wPressedButtons & XINPUT_GAMEPAD_X) {
+			else if (CntlVec[0].wPressedButtons & XINPUT_GAMEPAD_RIGHT_SHOULDER) {
 				m_StateMachine->ChangeState(PlayerAttackState::Instance());
 				return;
 			}
-			else if (CntlVec[0].wPressedButtons & XINPUT_GAMEPAD_Y) {
+			/*else if (CntlVec[0].wPressedButtons & XINPUT_GAMEPAD_Y) {
 				auto s = GetStage()->FindTagGameObject<Sword>(L"Sword");
 				s->SetEnemyToCannon(L"Green");
-			}
+			}*/
 			else if (length(Direction) < 0.1f) {
 				m_Rigidbody->m_Velocity.x *= 0.8f;
 				m_Rigidbody->m_Velocity.z *= 0.8f;
@@ -576,8 +576,8 @@ namespace basecross {
 		//コントローラの取得
 		auto CntlVec = App::GetApp()->GetInputDevice().GetControlerVec();
 		if (CntlVec[0].bConnected) {
-			//Xボタン
-			if (CntlVec[0].wPressedButtons & XINPUT_GAMEPAD_A) {
+			//Lボタン
+			if (CntlVec[0].wPressedButtons & XINPUT_GAMEPAD_LEFT_SHOULDER) {
 				Obj->GetStateMachine()->ChangeState(StepState::Instance());
 			}
 		}
