@@ -270,6 +270,7 @@ namespace basecross {
 		AddGameObject<StepEffect>();
 		AddGameObject<CannonEffect>();
 		AddGameObject<MultiGuardEffect>();
+		AddGameObject<EnemyMoveEffect>();
 
 		//描画オブジェクトの追加
 		CreateDrawObjects();
@@ -380,7 +381,7 @@ namespace basecross {
 
 		m_AudioObjectPtr = ObjectFactory::Create<MultiAudioObject>();
 		m_AudioObjectPtr->AddAudioResource(L"Nanika");
-		m_AudioObjectPtr->Start(L"Nanika", XAUDIO2_LOOP_INFINITE, 0.5f);
+		m_AudioObjectPtr->Start(L"Nanika", XAUDIO2_LOOP_INFINITE, 0.1f);
 
 	}
 

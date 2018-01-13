@@ -441,6 +441,21 @@ namespace basecross {
 	};
 
 	//--------------------------------------------------------------------------------------
+	//class EnemyMoveEffect : public MultiParticle;
+	//用途: エネミーの移動エフェクト
+	//--------------------------------------------------------------------------------------
+	class EnemyMoveEffect : public MultiParticle {
+	public:
+		//構築と破棄
+		EnemyMoveEffect(shared_ptr<Stage>& StagePtr);
+		virtual ~EnemyMoveEffect();
+		//初期化
+		virtual void OnCreate() override;
+		void InsertSpark(const Vec3& Pos);
+		virtual void OnUpdate() override;
+	};
+
+	//--------------------------------------------------------------------------------------
 	//class MultiFire : public MultiParticle;
 	//用途: 複数の炎クラス
 	//--------------------------------------------------------------------------------------

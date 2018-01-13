@@ -512,6 +512,59 @@ namespace basecross {
 	}
 
 	//--------------------------------------------------------------------------------------
+	//class EnemyMoveEffect : public MultiParticle;
+	//用途: エネミーの移動エフェクト
+	//--------------------------------------------------------------------------------------
+	//構築と破棄
+	EnemyMoveEffect::EnemyMoveEffect(shared_ptr<Stage>& StagePtr) :
+		MultiParticle(StagePtr)
+	{}
+	EnemyMoveEffect::~EnemyMoveEffect() {}
+
+	//初期化
+	void EnemyMoveEffect::OnCreate() {
+		//加算描画処理をする
+		SetAddType(true);
+		//タグの追加
+		AddTag(L"EnemyMoveEffect");
+		
+	}
+
+	void EnemyMoveEffect::InsertSpark(const Vec3& Pos) {
+		auto ParticlePtr = InsertParticle(3);
+		ParticlePtr->m_EmitterPos = Pos;
+		ParticlePtr->SetTextureResource(L"SPARK_TX");
+		ParticlePtr->m_MaxTime = 0.5f;
+		vector<ParticleSprite>& pSpriteVec = ParticlePtr->GetParticleSpriteVec();
+		for (auto& rParticleSprite : ParticlePtr->GetParticleSpriteVec()) {
+			rParticleSprite.m_LocalPos.x = Util::RandZeroToOne() * 0.1f - 0.05f;
+			rParticleSprite.m_LocalPos.y = Util::RandZeroToOne() * 0.1f;
+			rParticleSprite.m_LocalPos.z = Util::RandZeroToOne() * 0.1f - 0.05f;
+			rParticleSprite.m_LocalScale = Vec2(0.2, 0.2);
+			//各パーティクルの移動速度を指定
+			rParticleSprite.m_Velocity = Vec3(
+				rParticleSprite.m_LocalPos.x * 10.0f,
+				rParticleSprite.m_LocalPos.y * 10.0f,
+				rParticleSprite.m_LocalPos.z * 10.0f
+			);
+			//色の指定
+			rParticleSprite.m_Color = Col4(0.5f, 0.5f, 0.5f, 0.06f);
+		}
+	}
+
+	void EnemyMoveEffect::OnUpdate() {
+		MultiParticle::OnUpdate();
+		float ElapsedTime = App::GetApp()->GetElapsedTime();
+
+		for (auto ParticlePtr : GetParticleVec()) {
+			for (auto& rParticleSprite : ParticlePtr->GetParticleSpriteVec()) {
+				if (rParticleSprite.m_Active) {
+				}
+			}
+		}
+	}
+
+	//--------------------------------------------------------------------------------------
 	//class MultiFire : public MultiParticle;
 	//用途: 複数の炎クラス
 	//--------------------------------------------------------------------------------------
@@ -1691,6 +1744,13 @@ namespace basecross {
 			auto SparkPtr = GetStage<GameStage>()->FindTagGameObject<MultiGuardEffect>(L"MultiGuardEffect");
 			SparkPtr->InsertSpark(Emitter);
 		}
+		else if (m_FollowingAngelNum == 0 && m_Rigidbody->m_Velocity.length() > 1.0f) {
+			Vec3 Emitter = m_Rigidbody->m_Pos;
+			Emitter.y -= 0.125f;
+			//Sparkの送出
+			auto SparkPtr = GetStage<GameStage>()->FindTagGameObject<EnemyMoveEffect>(L"EnemyMoveEffect");
+			SparkPtr->InsertSpark(Emitter);
+		}
 	}
 
 	void EnemyObject::UpdateBehavior() {
@@ -1753,6 +1813,11 @@ namespace basecross {
 				m_Rigidbody->m_Pos.y = m_BaseY;
 				m_Rigidbody->m_Velocity = Tag;
 				m_FrameCount += ElapsedTime;
+				Vec3 Emitter = m_Rigidbody->m_Pos;
+				Emitter.y -= 0.125f;
+				//Sparkの送出
+				auto SparkPtr = GetStage<GameStage>()->FindTagGameObject<EnemyMoveEffect>(L"EnemyMoveEffect");
+				SparkPtr->InsertSpark(Emitter);
 			}
 			// エネミー移動処理
 			else if (m_Tackle == false)
