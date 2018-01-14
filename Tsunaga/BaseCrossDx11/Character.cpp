@@ -1459,6 +1459,8 @@ namespace basecross {
 		m_isDead = false;
 		m_Bomb = false;
 
+		m_DefaultHP = m_HP;
+
 		m_PlayerPtr = GetStage()->FindTagGameObject<Player>(L"Player");
 
 		//ƒƒbƒVƒ…‚ÌŽæ“¾
@@ -1575,7 +1577,7 @@ namespace basecross {
 						SparkPtr->InsertFire(Emitter, m_Scale.x * 3.0f);
 						//“G‚ðˆÙŽŸŒ³‚É”ò‚Î‚·i‰¼“|‚µˆ—j
 						SetPosition(Vec3(0, 0, 70));
-						m_HP = 2.0f;
+						m_HP = m_DefaultHP;
 						m_StateMachine->ChangeState(EnemyToCannonState::Instance());
 					}
 					return;
@@ -1961,7 +1963,7 @@ namespace basecross {
 		AddTag(L"Zako");
 		m_isDead = false;
 		m_Bomb = false;
-		m_HP = 3.0f;
+		m_HP = m_DefaultHP;
 		m_FrameCount = 0.0f;
 		m_ShootNumber = 0;
 		m_Rigidbody->m_IsCollisionActive = true;
@@ -2728,6 +2730,7 @@ namespace basecross {
 	{
 		m_Speed = 0.5f;
 		m_HP = 20.0f;
+		m_DefaultHP = m_HP;
 		m_TackleSpeed = 0.0f;
 		
 		AddTag(L"HandBoss");
@@ -3299,6 +3302,7 @@ namespace basecross {
 	{
 		m_Speed = 0.5f;
 		m_HP = 10.0f;
+		m_DefaultHP = m_HP;
 		AddTag(L"SawBoss");
 		m_TackleSpeed = 1.0f;
 		m_SearchDis = 6.0f;
