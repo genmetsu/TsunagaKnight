@@ -686,6 +686,22 @@ namespace basecross {
 				PtrZako->SetUpdateActive(false);
 			}
 		}
+		auto s_boss = FindTagGameObject<EnemyObject>(L"SawBoss");
+		if (s_boss) {
+			s_boss->SetUpdateActive(false);
+		}
+		auto h_boss = FindTagGameObject<EnemyObject>(L"HandBoss");
+		if (h_boss) {
+			h_boss->SetUpdateActive(false);
+		}
+		vector<shared_ptr<GameObject>> HandVec;
+		FindTagGameObjectVec(L"BossHand", HandVec);
+		for (auto hand : HandVec) {
+			if (hand) {
+				auto PtrHand = dynamic_pointer_cast<BossHand>(hand);
+				PtrHand->SetUpdateActive(false);
+			}
+		}
 	}
 
 	void GameStage::CannonStateEndBehaviour() {
@@ -695,6 +711,22 @@ namespace basecross {
 			if (zako) {
 				auto PtrZako = dynamic_pointer_cast<EnemyObject>(zako);
 				PtrZako->SetUpdateActive(true);
+			}
+		}
+		auto s_boss = FindTagGameObject<EnemyObject>(L"SawBoss");
+		if (s_boss) {
+			s_boss->SetUpdateActive(true);
+		}
+		auto h_boss = FindTagGameObject<EnemyObject>(L"HandBoss");
+		if (h_boss) {
+			h_boss->SetUpdateActive(true);
+		}
+		vector<shared_ptr<GameObject>> HandVec;
+		FindTagGameObjectVec(L"BossHand", HandVec);
+		for (auto hand : HandVec) {
+			if (hand) {
+				auto PtrHand = dynamic_pointer_cast<BossHand>(hand);
+				PtrHand->SetUpdateActive(true);
 			}
 		}
 	}
