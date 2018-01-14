@@ -2090,6 +2090,12 @@ namespace basecross {
 
 		bool m_UpdateActive;
 
+		float m_frame_count;
+
+		bool m_isDamage;
+
+		float m_DamageRate;
+
 		//Rigidbodyのshared_ptr
 		shared_ptr<Rigidbody> m_Rigidbody;
 		//メッシュとの差分計算用
@@ -2176,10 +2182,18 @@ namespace basecross {
 		@return	なし
 		*/
 		//--------------------------------------------------------------------------------------
-		void Damage(float value) { m_HP -= value; }
+		void Damage(float value);
 
 		float GetHP() {
 			return m_HP;
+		}
+
+		void SetIsDamage(bool value) {
+			m_isDamage = value;
+			
+		}
+		bool GetIsDamage() {
+			return m_isDamage;
 		}
 
 		//--------------------------------------------------------------------------------------

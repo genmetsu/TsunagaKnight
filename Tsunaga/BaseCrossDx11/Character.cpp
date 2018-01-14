@@ -3356,11 +3356,15 @@ namespace basecross {
 			m_Pos
 		);
 
-		m_HP = 20.0f;
+		m_frame_count = 0.0f;
+		m_DamageRate = 0.0f;
+
+		m_HP = 100.0f;
 		m_DefaultHP = m_HP;
 		AddTag(L"BossEnemy");
 
 		m_isDead = false;
+		m_isDamage = false;
 
 		auto GM = GameManager::getInstance();
 		GM->SetDefaultBossHP(m_DefaultHP);
@@ -3407,12 +3411,37 @@ namespace basecross {
 	void Boss::OnUpdate() {
 		float ElapsedTime = App::GetApp()->GetElapsedTime();
 		m_PtrObj->UpdateAnimation(ElapsedTime);
+
+
+
 		if (m_HP <= 0.0f && m_isDead == false) {
 			ChangeAnimation(L"Dead");
 			m_isDead = true;
 		}
 		auto GM = GameManager::getInstance();
 		GM->SetBossHP(m_HP);
+
+
+		if (m_isDamage) {
+			m_frame_count += ElapsedTime;
+		}
+		if (m_frame_count >= 2.0f && m_isDamage == true) {
+			m_isDamage = false;
+			m_frame_count = 0.0f;
+			m_DamageRate = 0.0f;
+		}
+	}
+
+	void Boss::Damage(float value) {
+		if (m_isDamage) {
+			m_DamageRate += 0.75f;
+			m_HP -= (value + m_DamageRate);
+		}
+		else {
+			m_HP -= value;
+			SetIsDamage(true);
+			m_DamageRate++;
+		}
 	}
 
 	void Boss::OnDrawShadowmap() {
