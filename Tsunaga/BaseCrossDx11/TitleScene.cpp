@@ -26,7 +26,7 @@ void TitleScene::OnCreate() {
 	//背景スプライトの作成
 	AddGameObject<MultiSprite>(
 		L"TsunagaKnight_TX",
-		Vec2(640, 720*0.4f),
+		Vec2(1920 * 0.5f, 650 *0.5f),
 		0.0f,
 		Vec2(0, 200),
 		1, 1
@@ -35,7 +35,7 @@ void TitleScene::OnCreate() {
 	//背景スプライトの作成
 	AddGameObject<MessageSprite>(
 		L"PresAnyButton_TX",
-		Vec2(512, 64),
+		Vec2(256, 60),
 		0.0f,
 		Vec2(0, -300),
 		1, 1
