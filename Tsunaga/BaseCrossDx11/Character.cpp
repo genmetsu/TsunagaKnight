@@ -1239,6 +1239,94 @@ namespace basecross {
 	}
 
 	//--------------------------------------------------------------------------------------
+	///	メッセージを表示するスプライト
+	//--------------------------------------------------------------------------------------
+	ResultCursorSprite::ResultCursorSprite(const shared_ptr<Stage>& StagePtr,
+		const wstring& TextureResName,
+		const Vec2& StartScale,
+		float StartRot,
+		const Vec2& StartPos,
+		UINT XWrap, UINT YWrap) :
+		SpriteBase(StagePtr, TextureResName, StartScale, StartRot, StartPos, XWrap, YWrap),
+		m_TotalTime(0)
+	{
+		SetBlendState(BlendState::Trace);
+		m_Moved = false;
+	}
+
+	void ResultCursorSprite::AdjustVertex() {
+		//頂点色を変更する
+
+	}
+
+	void  ResultCursorSprite::UpdateVertex(float ElapsedTime, VertexPositionColorTexture* vertices) {
+		if (GetStage<GameStage>()->GetIsClear() || GetStage<GameStage>()->GetIsFail()) {
+			m_TotalTime += ElapsedTime;
+			if (m_TotalTime >= 1.0f) {
+				m_TotalTime = 1.0f;
+			}
+			//float sin_val = sin(m_TotalTime) * 0.5f + 0.5f;
+			Col4 UpdateCol(1.0f, 1.0f, 1.0f, m_TotalTime);
+			for (size_t i = 0; i < m_SquareMesh->GetNumVertices(); i++) {
+				vertices[i] = VertexPositionColorTexture(
+					m_BackupVertices[i].position,
+					UpdateCol,
+					m_BackupVertices[i].textureCoordinate
+				);
+
+			}
+		}
+		else {
+
+			Col4 UpdateCol(1.0f, 1.0f, 1.0f, 0.0f);
+			for (size_t i = 0; i < m_SquareMesh->GetNumVertices(); i++) {
+				vertices[i] = VertexPositionColorTexture(
+					m_BackupVertices[i].position,
+					UpdateCol,
+					m_BackupVertices[i].textureCoordinate
+				);
+
+			}
+		}
+		//コントローラの取得
+		auto CntlVec = App::GetApp()->GetInputDevice().GetControlerVec();
+		if (CntlVec[0].bConnected) {
+			if (CntlVec[0].fThumbLX != 0) {
+				//コントローラの向き計算
+				float MoveX = CntlVec[0].fThumbLX;
+				if (MoveX > 0) {
+					if (MoveX > 0.8f && m_Moved == false) {
+						m_Pos.x *= -1.0f;
+						m_Moved = true;
+					}
+					else if (MoveX < 0.7f && m_Moved == true) {
+						m_Moved = false;
+					}
+				}
+				else if (MoveX < 0) {
+					if (MoveX < -0.8f && m_Moved == false) {
+						m_Pos.x *= -1.0f;
+						m_Moved = true;
+					}
+					else if (MoveX > -0.7f && m_Moved == true) {
+						m_Moved = false;
+					}
+				}
+			}
+			if ((CntlVec[0].wPressedButtons & XINPUT_GAMEPAD_A)
+				|| (CntlVec[0].wPressedButtons & XINPUT_GAMEPAD_B)) {
+				if (m_Pos.x < 0) {
+					PostEvent(0.0f, GetThis<ObjectInterface>(), App::GetApp()->GetScene<Scene>(), L"ToGameStage");
+				}
+				else {
+					PostEvent(0.0f, GetThis<ObjectInterface>(), App::GetApp()->GetScene<Scene>(), L"ToTitle");
+				}
+			}
+			
+		}
+	}
+
+	//--------------------------------------------------------------------------------------
 	///	背景スプライト
 	//--------------------------------------------------------------------------------------
 	MultiSprite::MultiSprite(const shared_ptr<Stage>& StagePtr,

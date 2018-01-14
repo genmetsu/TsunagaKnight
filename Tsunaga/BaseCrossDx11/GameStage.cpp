@@ -386,7 +386,7 @@ namespace basecross {
 
 		m_AudioObjectPtr = ObjectFactory::Create<MultiAudioObject>();
 		m_AudioObjectPtr->AddAudioResource(L"Nanika");
-		m_AudioObjectPtr->Start(L"Nanika", XAUDIO2_LOOP_INFINITE, 0.1f);
+		m_AudioObjectPtr->Start(L"Nanika", XAUDIO2_LOOP_INFINITE, 0.3f);
 
 	}
 
@@ -644,7 +644,7 @@ namespace basecross {
 			//Bƒ{ƒ^ƒ“
 			if (CntlVec[0].wPressedButtons & XINPUT_GAMEPAD_B) {
 				//PostEvent(0.0f, GetThis<ObjectInterface>(), App::GetApp()->GetScene<Scene>(), L"ToEmptyStage");
-				//SetIsFail(true);
+				SetIsFail(true);
 			}
 			
 		}
@@ -744,6 +744,7 @@ namespace basecross {
 	}
 
 	void GameStage::GameClearBehaviour() {
+		m_AudioObjectPtr->Stop(L"Nanika");
 		vector<shared_ptr<GameObject>> ZakoVec;
 		FindTagGameObjectVec(L"Zako", ZakoVec);
 		for (auto zako : ZakoVec) {
@@ -828,9 +829,34 @@ namespace basecross {
 			Vec2(110, 120),
 			1, 1
 			);
+
+		AddGameObject<ResultCursorSprite>(
+			L"RESULT_ARROW",
+			Vec2(320, 80),
+			0.0f,
+			Vec2(-130, -240),
+			1, 1
+			);
+		AddGameObject<ResultSprite>(
+			L"RETRY_LOGO",
+			Vec2(200, 50),
+			0.0f,
+			Vec2(-130, -240),
+			1, 1
+			);
+
+		AddGameObject<ResultSprite>(
+			L"TO_TITLE_LOGO",
+			Vec2(200, 50),
+			0.0f,
+			Vec2(130, -240),
+			1, 1
+			);
 	}
 
 	void GameStage::GameOverBehaviour() {
+		m_AudioObjectPtr->Stop(L"Nanika");
+
 		vector<shared_ptr<GameObject>> ZakoVec;
 		FindTagGameObjectVec(L"Zako", ZakoVec);
 		for (auto zako : ZakoVec) {
@@ -915,6 +941,29 @@ namespace basecross {
 			Vec2(110, 120),
 			1, 1
 			);
+		AddGameObject<ResultCursorSprite>(
+			L"RESULT_ARROW",
+			Vec2(320, 80),
+			0.0f,
+			Vec2(-130, -240),
+			1, 1
+			);
+		AddGameObject<ResultSprite>(
+			L"RETRY_LOGO",
+			Vec2(200, 50),
+			0.0f,
+			Vec2(-130, -240),
+			1, 1
+			);
+
+		AddGameObject<ResultSprite>(
+			L"TO_TITLE_LOGO",
+			Vec2(200, 50),
+			0.0f,
+			Vec2(130, -240),
+			1, 1
+			);
+		
 	}
 
 	//--------------------------------------------------------------------------------------
