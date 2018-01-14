@@ -1361,15 +1361,22 @@ namespace basecross {
 		//--------------------------------------------------------------------------------------
 
 		void RotateToVelocity();
+
 		void SetParent(weak_ptr<GameObject> gameObject) {
 			m_ParentPtr = gameObject;
 		};
+
+		void ChangeState(wstring name);
 
 		float GetHP(){
 			return m_HP;
 		}
 		void SetHP(float Value){
 			m_HP = Value;
+		}
+
+		void Damage(float value) {
+			m_HP -= value;
 		}
 
 		void SetShootNumber(int value) {

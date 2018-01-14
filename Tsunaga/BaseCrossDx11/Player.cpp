@@ -352,7 +352,7 @@ namespace basecross {
 						auto SparkPtr = GetStage<GameStage>()->FindTagGameObject<AttackSpark>(L"AttackSpark");
 						SparkPtr->InsertSpark(Emitter);
 
-						m_DamageSound->Start(0, 0.7f);
+						m_DamageSound->Start(0, 0.4f);
 						m_BombSound->Start(0, 0.5f);
 
 						//ノックバック方向の設定
@@ -437,7 +437,7 @@ namespace basecross {
 					auto SparkPtr = GetStage<GameStage>()->FindTagGameObject<AttackSpark>(L"AttackSpark");
 					SparkPtr->InsertSpark(Emitter);
 
-					m_DamageSound->Start(0, 0.7f);
+					m_DamageSound->Start(0, 0.4f);
 					m_BombSound->Start(0, 0.5f);
 
 					//ノックバック方向の設定
@@ -468,12 +468,11 @@ namespace basecross {
 
 				if (length < Radius + PlayerRadius) {
 					Vec3 Emitter = m_Rigidbody->m_Pos;
-					Emitter.y -= 0.125f;
 					//Sparkの送出
-					auto SparkPtr = GetStage<GameStage>()->FindTagGameObject<MultiSpark>(L"MultiSpark");
+					auto SparkPtr = GetStage<GameStage>()->FindTagGameObject<AttackSpark>(L"AttackSpark");
 					SparkPtr->InsertSpark(Emitter);
 
-					m_DamageSound->Start(0, 0.7f);
+					m_DamageSound->Start(0, 0.4f);
 					m_BombSound->Start(0, 0.5f);
 
 					//ノックバック方向の設定

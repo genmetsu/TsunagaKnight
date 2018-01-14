@@ -1953,6 +1953,11 @@ namespace basecross {
 		}
 	}
 
+	void EnemyObject::ChangeState(wstring name) {
+
+		m_StateMachine->ChangeState(EnemyToCannonState::Instance());
+	}
+
 	void EnemyObject::Spawn() {
 		AddTag(L"Zako");
 		m_isDead = false;
@@ -2254,11 +2259,32 @@ namespace basecross {
 				float PlayerRadius = m_Rigidbody->m_Scale.x / 2.0f;
 
 				if (length < Radius + PlayerRadius) {
+
+					auto PtrBoss = GetStage()->FindTagGameObject<EnemyObject>(L"HandBoss");
+				
 					Vec3 Emitter = m_Rigidbody->m_Pos;
-					Emitter.y -= 0.125f;
 					//Sparkの送出
-					auto SparkPtr = GetStage<GameStage>()->FindTagGameObject<MultiSpark>(L"MultiSpark");
+					auto SparkPtr = GetStage<GameStage>()->FindTagGameObject<AttackSpark>(L"AttackSpark");
 					SparkPtr->InsertSpark(Emitter);
+
+					PtrBoss->Damage(0.1f);
+					if (PtrBoss->GetHP() <= 0.0f) {
+						Vec3 p_pos = m_PlayerPtr.lock()->GetPosition();
+						float p_dis = (p_pos - GetPosition()).length();
+						if (p_dis < 1.0f) {
+							p_dis = 1.0f;
+						}
+						
+						m_CannonSound->Start(0, 1.0f / p_dis);
+						
+						Vec3 Emitter = PtrBoss->GetPosition();
+						//Fireの送出
+						auto FirePtr = GetStage<GameStage>()->FindTagGameObject<MultiFire>(L"MultiFire");
+						FirePtr->InsertFire(Emitter, PtrBoss->GetScale() * 3.0f);
+						//敵を異次元に飛ばす（仮倒し処理）
+						PtrBoss->SetPosition(Vec3(0, 0, 70));
+						PtrBoss->ChangeState(L"");
+					}
 					//ノックバック方向の設定
 					return;
 				}
@@ -2673,7 +2699,7 @@ namespace basecross {
 		EnemyObject(StagePtr, ParentPtr, MeshResName, TextureResName, DefaultAnimation, Scale, Qt, Pos, OwnShadowActive)
 	{
 		m_Speed = 0.5f;
-		m_HP = 15.0f;
+		m_HP = 20.0f;
 		m_TackleSpeed = 0.0f;
 		
 		AddTag(L"HandBoss");
@@ -3244,7 +3270,7 @@ namespace basecross {
 		EnemyObject(StagePtr, ParentPtr, MeshResName, TextureResName,DefaultAnimation, Scale, Qt, Pos, OwnShadowActive)
 	{
 		m_Speed = 0.5f;
-		m_HP = 5.0f;
+		m_HP = 10.0f;
 		AddTag(L"SawBoss");
 		m_TackleSpeed = 1.0f;
 		m_SearchDis = 6.0f;
