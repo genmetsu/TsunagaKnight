@@ -1722,13 +1722,17 @@ namespace basecross {
 
 		vector<shared_ptr<GameObject>> CannonVec;
 		GetStage<GameStage>()->FindTagGameObjectVec(L"Cannon", CannonVec);
+
+		int num = rand() % 3;
 		for (auto cannon : CannonVec)
 		{
 			if (cannon)
 			{
 				auto Ptrcannon = dynamic_pointer_cast<Cannon>(cannon);
-				m_CannonPos = Ptrcannon->GetPosition();
-				return;
+				if (num == Ptrcannon->GetCannonClass()) {
+					m_CannonPos = Ptrcannon->GetPosition();
+					break;
+				}
 			}
 		}
 	}
@@ -2973,7 +2977,7 @@ namespace basecross {
 		const Vec3 & Pos, bool OwnShadowActive) :
 		EnemyObject(StagePtr, ParentPtr, MeshResName, TextureResName, DefaultAnimation, Scale, Qt, Pos, OwnShadowActive)
 	{
-		m_Speed = 0.5f;
+		m_Speed = 1.5f;
 		m_HP = 20.0f;
 		m_DefaultHP = m_HP;
 		m_TackleSpeed = 0.0f;
@@ -3265,12 +3269,12 @@ namespace basecross {
 		if (FindTag(L"LeftHand")) {
 			MeshPtr = App::GetApp()->GetResource<MeshResource>(L"LEFT_HAND_MESH");
 			m_DefaultPos = Vec3(-1.1f, -0.5f, 1.0f);
-			m_AttackPos = Vec3(-0.3f, 0.3f, 1.7f);
+			m_AttackPos = Vec3(-0.3f, 0.3f, 2.5f);
 		}
 		else {
 			MeshPtr = App::GetApp()->GetResource<MeshResource>(L"RIGHT_HAND_MESH");
 			m_DefaultPos = Vec3(1.1f, -0.5f, 1.0f);
-			m_AttackPos = Vec3(0.3f, 0.3f, 1.7f);
+			m_AttackPos = Vec3(0.3f, 0.3f, 2.5f);
 		}
 
 		//行列の定義
@@ -3545,11 +3549,11 @@ namespace basecross {
 		const Vec3 & Pos, bool OwnShadowActive) :
 		EnemyObject(StagePtr, ParentPtr, MeshResName, TextureResName,DefaultAnimation, Scale, Qt, Pos, OwnShadowActive)
 	{
-		m_Speed = 0.5f;
-		m_HP = 10.0f;
+		m_Speed = 1.0f;
+		m_HP = 15.0f;
 		m_DefaultHP = m_HP;
 		AddTag(L"SawBoss");
-		m_TackleSpeed = 1.0f;
+		m_TackleSpeed = 1.3f;
 		m_SearchDis = 6.0f;
 		//メッシュとトランスフォームの差分の設定
 		m_MeshToTransformMatrix.affineTransformation(

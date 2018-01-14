@@ -227,7 +227,7 @@ namespace basecross {
 				L"30frame",
 				Vec3(1.8f, 1.8f, 1.8f),
 				Quat(Vec3(0, 1.0f, 0), XM_PI),
-				Vec3((float)rand() / 32767 * 20.0f - 10.0f, 0.125f, 60.0f - (float)rand() / 32767 * 20.0f),
+				Vec3((float)rand() / 32767 * 10.0f - 5.0f, 0.125f, 60.0f - (float)rand() / 32767 * 10.0f),
 				false);
 			AddGameObject<BossHand>(
 				ptr,
@@ -257,7 +257,7 @@ namespace basecross {
 				L"30frame",
 				Vec3(3.0f, 0.8f, 3.0f),
 				Quat(Vec3(0, 1.0f, 0), XM_PI),
-				Vec3((float)rand() / 32767 * 20.0f - 10.0f, 0.125f, 60.0f - (float)rand() / 32767 * 20.0f),
+				Vec3((float)rand() / 32767 * 10.0f - 5.0f, 0.125f, 60.0f - (float)rand() / 32767 * 10.0f),
 				false);
 		}
 
