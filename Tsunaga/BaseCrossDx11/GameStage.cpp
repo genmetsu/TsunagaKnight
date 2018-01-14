@@ -527,11 +527,6 @@ namespace basecross {
 					if (max_num == 0) {
 						if (m_FrameCount > 1.0f) {
 							PlayerPtr->SetIsCannnon(3);
-							Vec3 MoveVec = PlayerPtr->GetPosition() - c->GetPosition();
-							MoveVec.y = 0.0f;
-							MoveVec.normalize();
-							float MoveLength = c->GetScale() / 2.0f + PlayerPtr->GetScale() / 2.0f;
-							PlayerPtr->SetPosition(MoveVec * MoveLength + c->GetPosition());
 							camera.m_CameraArmLen = 2.5f;
 							m_FrameCount = 0.0f;
 							if (boss->GetHP() > 0.0f) {
@@ -568,11 +563,6 @@ namespace basecross {
 					if (max_num == 0) {
 						if (m_FrameCount > 1.0f) {
 							PlayerPtr->SetIsCannnon(3);
-							Vec3 MoveVec = PlayerPtr->GetPosition() - c->GetPosition();
-							MoveVec.y = 0.0f;
-							MoveVec.normalize();
-							float MoveLength = c->GetScale() / 2.0f + PlayerPtr->GetScale() / 2.0f;
-							PlayerPtr->SetPosition(MoveVec * MoveLength + c->GetPosition());
 							camera.m_CameraArmLen = 2.5f;
 							m_FrameCount = 0.0f;
 							if (boss->GetHP() > 0.0f) {
@@ -610,11 +600,6 @@ namespace basecross {
 					if (max_num == 0) {
 						if (m_FrameCount > 1.0f) {
 							PlayerPtr->SetIsCannnon(3);
-							Vec3 MoveVec = PlayerPtr->GetPosition() - c->GetPosition();
-							MoveVec.y = 0.0f;
-							MoveVec.normalize();
-							float MoveLength = c->GetScale() / 2.0f + PlayerPtr->GetScale() / 2.0f;
-							PlayerPtr->SetPosition(MoveVec * MoveLength + c->GetPosition());
 							camera.m_CameraArmLen = 2.5f;
 							m_FrameCount = 0.0f;
 							if (boss->GetHP() > 0.0f) {
@@ -650,6 +635,14 @@ namespace basecross {
 			if (CntlVec[0].wPressedButtons & XINPUT_GAMEPAD_B) {
 				PostEvent(0.0f, GetThis<ObjectInterface>(), App::GetApp()->GetScene<Scene>(), L"ToEmptyStage");
 			}
+			//Bボタン
+			if (CntlVec[0].wPressedButtons & XINPUT_GAMEPAD_X) {
+				CannonStateStartBehaviour();
+			}
+			//Bボタン
+			if (CntlVec[0].wPressedButtons & XINPUT_GAMEPAD_Y) {
+				CannonStateEndBehaviour();
+			}
 		}
 	}
 
@@ -682,6 +675,28 @@ namespace basecross {
 
 	void GameStage::OnDraw() {
 		m_RigidbodyManager->OnDraw();
+	}
+
+	void GameStage::CannonStateStartBehaviour() {
+		vector<shared_ptr<GameObject>> ZakoVec;
+		FindTagGameObjectVec(L"Zako", ZakoVec);
+		for (auto zako : ZakoVec) {
+			if (zako) {
+				auto PtrZako = dynamic_pointer_cast<EnemyObject>(zako);
+				PtrZako->SetUpdateActive(false);
+			}
+		}
+	}
+
+	void GameStage::CannonStateEndBehaviour() {
+		vector<shared_ptr<GameObject>> ZakoVec;
+		FindTagGameObjectVec(L"Zako", ZakoVec);
+		for (auto zako : ZakoVec) {
+			if (zako) {
+				auto PtrZako = dynamic_pointer_cast<EnemyObject>(zako);
+				PtrZako->SetUpdateActive(true);
+			}
+		}
 	}
 
 	//--------------------------------------------------------------------------------------

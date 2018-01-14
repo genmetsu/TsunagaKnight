@@ -73,6 +73,10 @@ namespace basecross {
 		//--------------------------------------------------------------------------------------
 		virtual void OnDraw()override;
 
+		void CannonStateStartBehaviour();
+		void CannonStateEndBehaviour();
+
+
 		shared_ptr<Player> GetPlayerPtr()const {
 			auto shptr = m_PtrPlayer.lock();
 			if (shptr) {

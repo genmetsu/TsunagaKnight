@@ -379,17 +379,33 @@ namespace basecross {
 						auto s = GetStage()->FindTagGameObject<Sword>(L"Sword");
 						s->SetEnemyToCannon(L"Green");
 						m_NowCannonClass = 0;
+						Vec3 MoveVec = m_Rigidbody->m_Pos - CannonPos;
+						MoveVec.y = 0.0f;
+						MoveVec.normalize();
+						float MoveLength = PtrCannon->GetScale() / 2.0f + GetScale() / 2.0f;
+						SetPosition(MoveVec * MoveLength * 1.5f + PtrCannon->GetPosition());
 					}
 					if (PtrCannon->GetCannonClass() == 1) {
 						auto s = GetStage()->FindTagGameObject<Sword>(L"Sword");
 						s->SetEnemyToCannon(L"Red");
 						m_NowCannonClass = 1;
+						Vec3 MoveVec = m_Rigidbody->m_Pos - CannonPos;
+						MoveVec.y = 0.0f;
+						MoveVec.normalize();
+						float MoveLength = PtrCannon->GetScale() / 2.0f + GetScale() / 2.0f;
+						SetPosition(MoveVec * MoveLength* 1.5f + PtrCannon->GetPosition());
 					}
 					if (PtrCannon->GetCannonClass() == 2) {
 						auto s = GetStage()->FindTagGameObject<Sword>(L"Sword");
 						s->SetEnemyToCannon(L"Blue");
 						m_NowCannonClass = 2;
+						Vec3 MoveVec = m_Rigidbody->m_Pos - CannonPos;
+						MoveVec.y = 0.0f;
+						MoveVec.normalize();
+						float MoveLength = PtrCannon->GetScale() / 2.0f + GetScale() / 2.0f;
+						SetPosition(MoveVec * MoveLength * 1.5f + PtrCannon->GetPosition());
 					}
+					
 				}
 			}
 		}
@@ -905,6 +921,9 @@ namespace basecross {
 				//‚¢‚­‚Â‚Ìƒ`ƒFƒCƒ“‚ð”­ŽË‚·‚é‚©
 				bullet_num++;
 				f_pointer->SetShootNumber(bullet_num);
+			}
+			else if (bullet_num > 0) {
+				break;
 			}
 			else
 				i++;

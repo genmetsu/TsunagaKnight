@@ -309,6 +309,8 @@ namespace basecross {
 
 		bool m_isDead;
 
+		bool m_UpdateActive;
+
 		//Rigidbodyのshared_ptr
 		shared_ptr<Rigidbody> m_Rigidbody;
 		//メッシュとの差分計算用
@@ -1048,6 +1050,7 @@ namespace basecross {
 		//Rigidbodyのshared_ptr
 		shared_ptr<Rigidbody> m_Rigidbody;
 
+		bool m_UpdateActive;
 
 		//メッシュとの差分計算用
 		Mat4x4 m_MeshToTransformMatrix;
@@ -1207,6 +1210,8 @@ namespace basecross {
 		int m_ShootNumber;
 
 		bool m_Bomb;
+
+		bool m_UpdateActive;
 
 		//死んだかどうか
 		bool m_isDead;
@@ -1443,6 +1448,8 @@ namespace basecross {
 		@return	なし
 		*/
 		//--------------------------------------------------------------------------------------
+
+		void RotateToVelocity();
 		void SetParent(weak_ptr<GameObject> gameObject) {
 			m_ParentPtr = gameObject;
 		};
@@ -1466,6 +1473,13 @@ namespace basecross {
 		}
 		void SetAttackPoint(float Value){
 			m_AttackPoint = Value;
+		}
+
+		void SetUpdateActive(bool value) {
+			m_UpdateActive = value;
+		}
+		bool GetUpdateActive() {
+			return m_UpdateActive;
 		}
 
 		float GetScale(){
@@ -1701,6 +1715,7 @@ namespace basecross {
 		weak_ptr<ShadowmapRenderer> m_ShadowmapRenderer;
 		bool m_OwnShadowActive;
 		
+		bool m_UpdateActive;
 		// 弾が撃たれているかどうか
 		bool IsShoot;
 		// 弾の存在時間

@@ -1494,6 +1494,7 @@ namespace basecross {
 		body.SetToBefore();
 		m_Rigidbody = PtrGameStage->AddRigidbody(body);
 
+		m_UpdateActive = true;
 		m_isDead = false;
 		m_Bomb = false;
 
@@ -1816,7 +1817,6 @@ namespace basecross {
 				auto SparkPtr = GetStage<GameStage>()->FindTagGameObject<EnemyMoveEffect>(L"EnemyMoveEffect");
 				SparkPtr->InsertSpark(Emitter);
 			}
-			// エネミー移動処理
 			else if (m_Tackle == false)
 			{
 				if (m_FrameCount > 0.0f)
@@ -1828,7 +1828,7 @@ namespace basecross {
 					m_FrameCount += ElapsedTime;
 				}
 				// プレイヤーとエネミーの距離が近くなった時の処理
-				else if (dis <= m_SearchDis)
+				else if (dis <= m_SearchDis && m_UpdateActive)
 				{
 					m_FrameCount += ElapsedTime;
 					//fireの送出
@@ -1842,19 +1842,15 @@ namespace basecross {
 				{
 					ToPosVec.normalize();
 					ToPosVec *= m_Speed;
+					if (m_UpdateActive == false) {
+						ToPosVec *= 0.0f;
+					}
 					m_Rigidbody->m_Velocity = ToPosVec;
 					m_Rigidbody->m_Pos.y = m_BaseY;
 				}
 			}
 		}
-		Vec3 Temp = m_Rigidbody->m_Velocity;
-		Temp.normalize();
-		float ToAngle = atan2(Temp.x, Temp.z);
-		Quat Qt;
-		Qt.rotationRollPitchYawFromVector(Vec3(0, ToAngle, 0));
-		Qt.normalize();
-		//現在と目標を補間
-		m_Rigidbody->m_Quat = XMQuaternionSlerp(m_Rigidbody->m_Quat, Qt, 0.1f);
+		RotateToVelocity();
 	}
 
 	void EnemyObject::AttackEndBehavior() {
@@ -1891,18 +1887,14 @@ namespace basecross {
 			{
 				ToPosVec.normalize();
 				ToPosVec *= m_Speed;
+				if (m_UpdateActive == false) {
+					ToPosVec *= 0.0f;
+				}
 				m_Rigidbody->m_Velocity = ToPosVec;
 				m_Rigidbody->m_Pos.y = m_BaseY;
 			}
 		}
-		Vec3 Temp = m_Rigidbody->m_Velocity;
-		Temp.normalize();
-		float ToAngle = atan2(Temp.x, Temp.z);
-		Quat Qt;
-		Qt.rotationRollPitchYawFromVector(Vec3(0, ToAngle, 0));
-		Qt.normalize();
-		//現在と目標を補間
-		m_Rigidbody->m_Quat = XMQuaternionSlerp(m_Rigidbody->m_Quat, Qt, 0.1f);
+		RotateToVelocity();
 	}
 
 	void EnemyObject::CheckHealth() {
@@ -1955,6 +1947,21 @@ namespace basecross {
 		);
 		m_LerpToParent = m_LerpToChild = 0.5f;
 
+	}
+
+	void EnemyObject::RotateToVelocity() {
+		//回転の処理
+		Vec3 Temp = m_Rigidbody->m_Velocity;
+		Temp.normalize();
+		float ToAngle = atan2(Temp.x, Temp.z);
+		Quat Qt;
+		Qt.rotationRollPitchYawFromVector(Vec3(0, ToAngle, 0));
+		Qt.normalize();
+		//現在と目標を補間
+		//移動しないときは回転しない
+		if (m_Rigidbody->m_Velocity.length() > 0.0f) {
+			m_Rigidbody->m_Quat = XMQuaternionSlerp(m_Rigidbody->m_Quat, Qt, 0.1f);
+		}
 	}
 
 	void EnemyObject::Spawn() {
@@ -2059,14 +2066,7 @@ namespace basecross {
 				return;
 			}
 		}
-		Vec3 Temp = m_Rigidbody->m_Velocity;
-		Temp.normalize();
-		float ToAngle = atan2(Temp.x, Temp.z);
-		Quat Qt;
-		Qt.rotationRollPitchYawFromVector(Vec3(0, ToAngle, 0));
-		Qt.normalize();
-		//現在と目標を補間
-		m_Rigidbody->m_Quat = XMQuaternionSlerp(m_Rigidbody->m_Quat, Qt, 0.1f);
+		RotateToVelocity();
 		m_FrameCount += ElapsedTime * 5.0f;
 	}
 
@@ -2311,57 +2311,53 @@ namespace basecross {
 			//移動する処理
 			ToPosVec.normalize();
 			ToPosVec *= m_Speed;
+			if (m_UpdateActive == false) {
+				ToPosVec *= 0.0f;
+			}
 			m_Rigidbody->m_Velocity = ToPosVec;
 			m_Rigidbody->m_Pos.y = m_BaseY;
 
-			if (m_FrameCount > m_StopTime) {
-				//球を飛ばす処理
-				vector<shared_ptr<GameObject>> ShootVec;
-				GetStage<GameStage>()->FindTagGameObjectVec(L"Bullet", ShootVec);
-				for (auto v : ShootVec) {
-					if (v) {
-						auto Ptr = dynamic_pointer_cast<BulletObject>(v);
-						bool nowShooting = Ptr->GetIsShoot();
-						if (nowShooting == false)
-						{
-							m_PtrObj->ChangeCurrentAnimation(L"Attack");
-							ToPosVec.y = 0.0f;
-							Vec3 ShootPos = m_Rigidbody->m_Pos + ToPosVec * 1.3f;
-							ShootPos.y += 0.1f;
-							Ptr->Wakeup(ShootPos, ToPosVec.normalize() * m_EnemyShootSpeed);
-							m_FrameCount = 0.0f;
-							m_Rigidbody->m_Velocity *= 0.01f;
-							m_StateMachine->ChangeState(EnemyAttackEndState::Instance());
-							return;
+			if (m_UpdateActive) {
+				if (m_FrameCount > m_StopTime) {
+					//球を飛ばす処理
+					vector<shared_ptr<GameObject>> ShootVec;
+					GetStage<GameStage>()->FindTagGameObjectVec(L"Bullet", ShootVec);
+					for (auto v : ShootVec) {
+						if (v) {
+							auto Ptr = dynamic_pointer_cast<BulletObject>(v);
+							bool nowShooting = Ptr->GetIsShoot();
+							if (nowShooting == false)
+							{
+								m_PtrObj->ChangeCurrentAnimation(L"Attack");
+								ToPosVec.y = 0.0f;
+								Vec3 ShootPos = m_Rigidbody->m_Pos + ToPosVec * 1.3f;
+								ShootPos.y += 0.1f;
+								Ptr->Wakeup(ShootPos, ToPosVec.normalize() * m_EnemyShootSpeed);
+								m_FrameCount = 0.0f;
+								m_Rigidbody->m_Velocity *= 0.01f;
+								m_StateMachine->ChangeState(EnemyAttackEndState::Instance());
+								return;
+							}
 						}
 					}
 				}
+				//遅くする
+				if (m_FrameCount > 0.0f) {
+					m_FrameCount += ElapsedTime;
+					m_Rigidbody->m_Velocity *= 0.01f;
+				}
+				// プレイヤーとエネミーの距離が近くなった時の処理
+				else if (dis <= m_SearchDis)
+				{
+					m_FrameCount += ElapsedTime;
+					//サインの送出
+					auto FirePtr = GetStage<GameStage>()->FindTagGameObject<AttackSigns>(L"AttackSigns");
+					Vec3 Emitter = m_Rigidbody->m_Pos;
+					Emitter.y += 0.15f;
+					FirePtr->InsertSigns(Emitter);
+				}
 			}
-			//遅くする
-			if (m_FrameCount > 0.0f) {
-				m_FrameCount += ElapsedTime;
-				m_Rigidbody->m_Velocity *= 0.01f;
-			}
-			// プレイヤーとエネミーの距離が近くなった時の処理
-			else if (dis <= m_SearchDis)
-			{
-				m_FrameCount += ElapsedTime;
-				//サインの送出
-				auto FirePtr = GetStage<GameStage>()->FindTagGameObject<AttackSigns>(L"AttackSigns");
-				Vec3 Emitter = m_Rigidbody->m_Pos;
-				Emitter.y += 0.15f;
-				FirePtr->InsertSigns(Emitter);
-			}
-
-			//回転の処理
-			Vec3 Temp = m_Rigidbody->m_Velocity;
-			Temp.normalize();
-			float ToAngle = atan2(Temp.x, Temp.z);
-			Quat Qt;
-			Qt.rotationRollPitchYawFromVector(Vec3(0, ToAngle, 0));
-			Qt.normalize();
-			//現在と目標を補間
-			m_Rigidbody->m_Quat = XMQuaternionSlerp(m_Rigidbody->m_Quat, Qt, 0.1f);
+			RotateToVelocity();
 		}
 	}
 
@@ -2844,14 +2840,7 @@ namespace basecross {
 				}
 			}
 		}
-		Vec3 Temp = m_Rigidbody->m_Velocity;
-		Temp.normalize();
-		float ToAngle = atan2(Temp.x, Temp.z);
-		Quat Qt;
-		Qt.rotationRollPitchYawFromVector(Vec3(0, ToAngle, 0));
-		Qt.normalize();
-		//現在と目標を補間
-		m_Rigidbody->m_Quat = XMQuaternionSlerp(m_Rigidbody->m_Quat, Qt, 0.1f);
+		RotateToVelocity();
 	}
 
 	void CR_BossEnemy::OnUpdate() {
