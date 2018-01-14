@@ -237,7 +237,7 @@ namespace basecross {
 		App::GetApp()->RegisterWav(L"bossdamage", bossWav);
 
 		wstring bukiWav = DataDir + L"buki.wav";
-		App::GetApp()->RegisterWav(L"Buki", bukiWav);
+		App::GetApp()->RegisterWav(L"buki", bukiWav);
 
 		wstring cannonWav = DataDir + L"cannon.wav";
 		App::GetApp()->RegisterWav(L"cannon", cannonWav);
@@ -258,19 +258,19 @@ namespace basecross {
 		App::GetApp()->RegisterWav(L"nakama", nakamaWav);
 
 		wstring roboteyeflashWav = DataDir + L"roboteyeflash.wav";
-		App::GetApp()->RegisterWav(L"roboteyeflash", roboteyeflashWav);
+		App::GetApp()->RegisterWav(L"eye_flash", roboteyeflashWav);
 
-		wstring sakeruWav = DataDir + L"sakeru.wav";
-		App::GetApp()->RegisterWav(L"sakeru", sakeruWav);
+		wstring sakeruWav = DataDir + L"step.wav";
+		App::GetApp()->RegisterWav(L"step_sound", sakeruWav);
 
-		wstring ShakeoffWav = DataDir + L"Shakeoff.wav";
-		App::GetApp()->RegisterWav(L"Shakeoff", ShakeoffWav);
+		wstring DamageVoiceWav = DataDir + L"damage_voice.wav";
+		App::GetApp()->RegisterWav(L"damage_voice", DamageVoiceWav);
 
 		wstring shootWav = DataDir + L"shoot.wav";
 		App::GetApp()->RegisterWav(L"shoot", shootWav);
 
-		wstring hazureruWav = DataDir + L"hazureru.wav";
-		App::GetApp()->RegisterWav(L"hazureru", hazureruWav);
+		wstring AttackVoiceWav = DataDir + L"attack_voice.wav";
+		App::GetApp()->RegisterWav(L"attack_voice", AttackVoiceWav);
 
 	}
 

@@ -311,6 +311,59 @@ namespace basecross {
 	}
 
 	//--------------------------------------------------------------------------------------
+	//class AttackSpark : public MultiParticle;
+	//用途: 攻撃のスパーククラス
+	//--------------------------------------------------------------------------------------
+	//構築と破棄
+	AttackSpark::AttackSpark(shared_ptr<Stage>& StagePtr) :
+		MultiParticle(StagePtr)
+	{}
+	AttackSpark::~AttackSpark() {}
+
+	//初期化
+	void AttackSpark::OnCreate() {
+		//加算描画処理をする
+		SetAddType(true);
+		//タグの追加
+		AddTag(L"AttackSpark");
+	}
+
+	void AttackSpark::InsertSpark(const Vec3& Pos) {
+		auto ParticlePtr = InsertParticle(128);
+		ParticlePtr->m_EmitterPos = Pos;
+		ParticlePtr->SetTextureResource(L"SPARK_TX");
+		ParticlePtr->m_MaxTime = 0.3f;
+		vector<ParticleSprite>& pSpriteVec = ParticlePtr->GetParticleSpriteVec();
+		for (auto& rParticleSprite : ParticlePtr->GetParticleSpriteVec()) {
+			rParticleSprite.m_LocalPos.x = Util::RandZeroToOne() * 0.1f - 0.05f;
+			rParticleSprite.m_LocalPos.y = Util::RandZeroToOne() * 0.1f;
+			rParticleSprite.m_LocalPos.z = Util::RandZeroToOne() * 0.1f - 0.05f;
+			rParticleSprite.m_LocalScale = Vec2(0.1, 0.1);
+			//各パーティクルの移動速度を指定
+			rParticleSprite.m_Velocity = Vec3(
+				rParticleSprite.m_LocalPos.x * 30.0f,
+				rParticleSprite.m_LocalPos.y * 30.0f,
+				rParticleSprite.m_LocalPos.z * 30.0f
+			);
+			//色の指定
+			rParticleSprite.m_Color = Col4(1.0f, 0.4f, 0.0f, 1.0f);
+		}
+	}
+
+	void AttackSpark::OnUpdate() {
+		MultiParticle::OnUpdate();
+		float ElapsedTime = App::GetApp()->GetElapsedTime();
+
+		for (auto ParticlePtr : GetParticleVec()) {
+			for (auto& rParticleSprite : ParticlePtr->GetParticleSpriteVec()) {
+				if (rParticleSprite.m_Active) {
+					rParticleSprite.m_Color.w -= 0.06f;
+				}
+			}
+		}
+	}
+
+	//--------------------------------------------------------------------------------------
 	//class MultiGuardEffect : public MultiParticle;
 	//用途: エンジェルエネミーの防御エフェクト
 	//--------------------------------------------------------------------------------------
@@ -678,6 +731,63 @@ namespace basecross {
 			for (auto& rParticleSprite : ParticlePtr->GetParticleSpriteVec()) {
 				if (rParticleSprite.m_Active) {
 					rParticleSprite.m_Color.w -= 0.03f;
+				}
+			}
+		}
+	}
+
+	//--------------------------------------------------------------------------------------
+	//class ShootingEffect : public MultiParticle;
+	//用途: 大砲で撃たれているときのエフェクト
+	//--------------------------------------------------------------------------------------
+	ShootingEffect::ShootingEffect(shared_ptr<Stage>& StagePtr) :
+		MultiParticle(StagePtr)
+	{}
+	ShootingEffect::~ShootingEffect() {}
+
+	//初期化
+	void ShootingEffect::OnCreate() {
+		//加算描画処理をする
+		SetAddType(true);
+		//タグの追加
+		AddTag(L"ShootingEffect");
+	}
+
+
+	void ShootingEffect::InsertEffect(const Vec3& Pos)
+	{
+		auto ParticlePtr = InsertParticle(2);
+		ParticlePtr->m_EmitterPos = Pos;
+		ParticlePtr->SetTextureResource(L"STEP_TX");
+		ParticlePtr->m_MaxTime = 0.3f;
+
+		auto &camera = GetStage()->GetCamera();
+		Vec3 camera_pos = camera.m_CamerEye;
+
+		Vec3 MoveVec = camera_pos - Pos;
+		MoveVec.normalize();
+
+		vector<ParticleSprite>& pSpriteVec = ParticlePtr->GetParticleSpriteVec();
+		for (auto& rParticleSprite : ParticlePtr->GetParticleSpriteVec()) {
+			//各パーティクルの移動速度を指定
+			rParticleSprite.m_Velocity = Vec3(
+				rParticleSprite.m_LocalPos.x * 5.0f,
+				rParticleSprite.m_LocalPos.y * 5.0f,
+				rParticleSprite.m_LocalPos.z * 5.0f
+			);
+			//色の指定
+			rParticleSprite.m_Color = Col4(1.0f, 1.0f, 1.0f, 0.7f);
+		}
+	}
+
+	void ShootingEffect::OnUpdate()
+	{
+		MultiParticle::OnUpdate();
+		float ElapsedTime = App::GetApp()->GetElapsedTime();
+		for (auto ParticlePtr : GetParticleVec()) {
+			for (auto& rParticleSprite : ParticlePtr->GetParticleSpriteVec()) {
+				if (rParticleSprite.m_Active) {
+					rParticleSprite.m_Color.w -= 0.1f;
 				}
 			}
 		}
@@ -1355,6 +1465,10 @@ namespace basecross {
 		auto MeshPtr = App::GetApp()->GetResource<MeshResource>(m_MeshResName);
 		//サウンドオブジェクトの初期化
 		m_DeadSound = ObjectFactory::Create<SoundObject>(L"Pan");
+		m_BossDamageSound = ObjectFactory::Create<SoundObject>(L"bossdamage");
+		m_FriendsSound = ObjectFactory::Create<SoundObject>(L"nakama");
+		m_CannonSound = ObjectFactory::Create<SoundObject>(L"cannon");
+		m_EyeFlashSound = ObjectFactory::Create<SoundObject>(L"eye_flash");
 
 		//行列の定義
 		Mat4x4 World;
@@ -1445,8 +1559,16 @@ namespace basecross {
 					if (m_HP <= 0.0f) {
 						Vec3 p_pos = m_PlayerPtr.lock()->GetPosition();
 						float p_dis = (p_pos - GetPosition()).length();
+						if (p_dis < 1.0f) {
+							p_dis = 1.0f;
+						}
 						//サウンドの発行
-						m_DeadSound->Start(0, 1.0f / p_dis);
+						if (FindTag(L"Zako")) {
+							m_DeadSound->Start(0, 1.0f / p_dis);
+						}
+						else {
+							m_CannonSound->Start(0, 1.0f / p_dis);
+						}
 
 						Vec3 Emitter = GetPosition();
 						//Fireの送出
@@ -1687,6 +1809,10 @@ namespace basecross {
 				else if (dis <= m_SearchDis && m_UpdateActive)
 				{
 					m_FrameCount += ElapsedTime;
+					if (dis < 1.0f) {
+						dis = 1.0f;
+					}
+					m_EyeFlashSound->Start(0, 0.2f / dis);
 					//fireの送出
 					auto FirePtr = GetStage<GameStage>()->FindTagGameObject<AttackSigns>(L"AttackSigns");
 					Vec3 Emitter = m_Rigidbody->m_Pos;
@@ -1789,6 +1915,7 @@ namespace basecross {
 		);
 		m_LerpToParent = m_LerpToChild = 0.2f;
 		m_Rigidbody->m_CollType = CollType::typeCAPSULE;
+		m_FriendsSound->Start(0, 0.15f);
 	}
 
 	//攻撃１行動の開始
@@ -1904,6 +2031,8 @@ namespace basecross {
 				//Sparkの送出
 				auto SparkPtr = GetStage<GameStage>()->FindTagGameObject<MultiFire>(L"MultiFire");
 				SparkPtr->InsertFire(Emitter, 6.0f);
+
+				m_CannonSound->Start(0, 1.0f);
 				m_Bomb = true;
 			}
 			m_Rigidbody->m_Velocity = m_ToBossVec * 15.0f;
@@ -1915,6 +2044,8 @@ namespace basecross {
 				//Sparkの送出
 				auto SparkPtr = GetStage<GameStage>()->FindTagGameObject<MultiFire>(L"MultiFire");
 				SparkPtr->InsertFire(Emitter, 8.0f);
+
+				m_BossDamageSound->Start(0, 0.8f);
 
 				auto BossPtr = GetStage()->FindTagGameObject<Boss>(L"BossEnemy");
 				BossPtr->Damage(1.0f);
@@ -1929,6 +2060,11 @@ namespace basecross {
 			}
 		}
 		RotateToVelocity();
+		//エフェクトの再生
+		auto FirePtr = GetStage<GameStage>()->FindTagGameObject<ShootingEffect>(L"ShootingEffect");
+		Vec3 Emitter = m_Rigidbody->m_Pos;
+		FirePtr->InsertEffect(Emitter);
+
 		m_FrameCount += ElapsedTime * 5.0f;
 	}
 
@@ -2087,6 +2223,9 @@ namespace basecross {
 					if (PtrEnemy->GetHP() > 0) {
 						Vec3 p_pos = m_PlayerPtr.lock()->GetPosition();
 						float p_dis = (p_pos - GetPosition()).length();
+						if (p_dis < 1.0f) {
+							p_dis = 1.0f;
+						}
 						//サウンドの発行
 						m_DeadSound->Start(0, 1.0f / p_dis);
 
@@ -2161,6 +2300,11 @@ namespace basecross {
 	{
 	}
 
+	void ShootEnemy::OnCreate() {
+		EnemyObject::OnCreate();
+		m_ShootSound = ObjectFactory::Create<SoundObject>(L"shoot");
+	}
+
 	void ShootEnemy::OppositionBehavior() {
 		float ElapsedTime = App::GetApp()->GetElapsedTime();
 		auto shptr = m_PlayerPtr.lock();
@@ -2191,6 +2335,13 @@ namespace basecross {
 							if (nowShooting == false)
 							{
 								m_PtrObj->ChangeCurrentAnimation(L"Attack");
+								Vec3 p_pos = m_PlayerPtr.lock()->GetPosition();
+								float p_dis = (p_pos - GetPosition()).length();
+								if (p_dis < 1.0f) {
+									p_dis = 1.0f;
+								}
+								//サウンドの発行
+								m_ShootSound->Start(0, 0.1f / p_dis);
 								ToPosVec.y = 0.0f;
 								Vec3 ShootPos = m_Rigidbody->m_Pos + ToPosVec * 1.3f;
 								ShootPos.y += 0.1f;
@@ -2211,6 +2362,10 @@ namespace basecross {
 				// プレイヤーとエネミーの距離が近くなった時の処理
 				else if (dis <= m_SearchDis)
 				{
+					if (dis < 1.0f) {
+						dis = 1.0f;
+					}
+					m_EyeFlashSound->Start(0, 0.2f / dis);
 					m_FrameCount += ElapsedTime;
 					//サインの送出
 					auto FirePtr = GetStage<GameStage>()->FindTagGameObject<AttackSigns>(L"AttackSigns");
@@ -2275,11 +2430,18 @@ namespace basecross {
 						if (nowShooting == false)
 						{
 							m_PtrObj->ChangeCurrentAnimation(L"Attack");
+							Vec3 p_pos = m_PlayerPtr.lock()->GetPosition();
+							float p_dis = (p_pos - GetPosition()).length();
+							if (p_dis < 1.0f) {
+								p_dis = 1.0f;
+							}
+							//サウンドの発行
+							m_ShootSound->Start(0, 0.1f / p_dis);
 							Vec3 ShootPos = m_Rigidbody->m_Pos + force * 0.1f;
 							ShootPos.y += 0.1f;
 							Ptr->Wakeup(ShootPos, force * m_PlayerShootSpeed);
 							m_FrameCount = 0.0f;
-							return;
+							break;
 						}
 					}
 				}
@@ -2532,6 +2694,8 @@ namespace basecross {
 		//タグの追加
 		AddTag(L"EnemyObject");
 
+		m_EyeFlashSound = ObjectFactory::Create<SoundObject>(L"eye_flash");
+
 		//Rigidbodyの初期化
 		auto PtrGameStage = GetStage<GameStage>();
 		Rigidbody body;
@@ -2678,6 +2842,11 @@ namespace basecross {
 					Vec3 Emitter = m_Rigidbody->m_Pos;
 					Emitter.y += 0.35f;
 					FirePtr->InsertSigns(Emitter);
+
+					if (dis < 1.0f) {
+						dis = 1.0f;
+					}
+					m_EyeFlashSound->Start(0, 0.2f / dis);
 
 					vector<shared_ptr<GameObject>> HandVec;
 					GetStage<GameStage>()->FindTagGameObjectVec(L"BossHand", HandVec);
@@ -3078,7 +3247,7 @@ namespace basecross {
 		m_HP = 5.0f;
 		AddTag(L"SawBoss");
 		m_TackleSpeed = 1.0f;
-		m_SearchDis = 4.0f;
+		m_SearchDis = 6.0f;
 		//メッシュとトランスフォームの差分の設定
 		m_MeshToTransformMatrix.affineTransformation(
 			Vec3(0.8f, 3.0f, 0.8f),

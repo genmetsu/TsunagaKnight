@@ -105,6 +105,11 @@ namespace basecross {
 		m_KnockBackVec = Vec3(0.0f);
 		m_RunAnimationFrameCount = 0.0f;
 
+		m_StepSound = ObjectFactory::Create<SoundObject>(L"step_sound");
+		m_DamageSound = ObjectFactory::Create<SoundObject>(L"damage_voice");
+		m_AttackSound = ObjectFactory::Create<SoundObject>(L"attack_voice");
+		m_BombSound = ObjectFactory::Create<SoundObject>(L"Pan");
+
 		m_Rigidbody = PtrGameStage->AddRigidbody(body);
 
 		//行列の定義
@@ -343,10 +348,13 @@ namespace basecross {
 				if (length <= EnemyRadius + PlayerRadius) {
 					if (PtrEnemy->GetHP() > 0) {
 						Vec3 Emitter = m_Rigidbody->m_Pos;
-						Emitter.y -= 0.125f;
 						//Sparkの送出
-						auto SparkPtr = GetStage<GameStage>()->FindTagGameObject<MultiSpark>(L"MultiSpark");
+						auto SparkPtr = GetStage<GameStage>()->FindTagGameObject<AttackSpark>(L"AttackSpark");
 						SparkPtr->InsertSpark(Emitter);
+
+						m_DamageSound->Start(0, 0.7f);
+						m_BombSound->Start(0, 0.5f);
+
 						//ノックバック方向の設定
 						m_KnockBackVec = m_Rigidbody->m_Pos - EnemyPos;
 						m_KnockBackVec.y = 0.0f;
@@ -425,10 +433,13 @@ namespace basecross {
 				if (length < Radius + PlayerRadius) {
 					PtrBullet->SetPosition(Vec3(100, 100, 100));
 					Vec3 Emitter = m_Rigidbody->m_Pos;
-					Emitter.y -= 0.125f;
 					//Sparkの送出
-					auto SparkPtr = GetStage<GameStage>()->FindTagGameObject<MultiSpark>(L"MultiSpark");
+					auto SparkPtr = GetStage<GameStage>()->FindTagGameObject<AttackSpark>(L"AttackSpark");
 					SparkPtr->InsertSpark(Emitter);
+
+					m_DamageSound->Start(0, 0.7f);
+					m_BombSound->Start(0, 0.5f);
+
 					//ノックバック方向の設定
 					m_KnockBackVec = m_Rigidbody->m_Pos - BulletPos;
 					m_KnockBackVec.y = 0.0f;
@@ -461,6 +472,10 @@ namespace basecross {
 					//Sparkの送出
 					auto SparkPtr = GetStage<GameStage>()->FindTagGameObject<MultiSpark>(L"MultiSpark");
 					SparkPtr->InsertSpark(Emitter);
+
+					m_DamageSound->Start(0, 0.7f);
+					m_BombSound->Start(0, 0.5f);
+
 					//ノックバック方向の設定
 					m_KnockBackVec = m_Rigidbody->m_Pos - HandPos;
 					m_KnockBackVec.y = 0.0f;
@@ -477,10 +492,11 @@ namespace basecross {
 	}
 
 	void Player::DamagedBehaviour() {
-		m_Rigidbody->m_Velocity += m_KnockBackVec * 0.7f;
+		m_Rigidbody->m_Velocity = m_KnockBackVec * 5.0f;
 	}
 
 	void Player::PlayerStepEffect() {
+		m_StepSound->Start(0, 0.2f);
 		//エフェクトの再生
 		auto FirePtr = GetStage<GameStage>()->FindTagGameObject<StepEffect>(L"StepEffect");
 		Vec3 Emitter = m_Rigidbody->m_Pos;
@@ -497,7 +513,7 @@ namespace basecross {
 		//前回のターンからの経過時間を求める
 		float ElapsedTime = App::GetApp()->GetElapsedTime();
 
-		m_Rigidbody->m_Velocity += m_StepVec * (1.0f - m_FrameCount);
+		m_Rigidbody->m_Velocity += m_StepVec * (1.0f - m_FrameCount * 3.0f);
 		m_FrameCount += ElapsedTime;
 
 		if (m_FrameCount >= 0.3f) {
@@ -510,6 +526,8 @@ namespace basecross {
 	void Player::AttackBehaviour() {
 		auto sword = GetStage()->FindTagGameObject<Sword>(L"Sword");
 		sword->SetState(L"Attack");
+
+		//m_AttackSound->Start(0, 0.4f);
 
 		//攻撃中の移動の補正
 		vector<shared_ptr<GameObject>> EnemyVec;
@@ -713,6 +731,8 @@ namespace basecross {
 		m_PtrObj->m_BlendState = BlendState::AlphaBlend;
 		m_PtrObj->m_RasterizerState = RasterizerState::DoubleDraw;
 		//m_PtrObj->m_Alpha = 0.0f;
+
+		m_AttackSound = ObjectFactory::Create<SoundObject>(L"buki");
 
 		//シャドウマップ描画データの構築
 		m_PtrShadowmapObj = make_shared<ShadowmapObject>();
@@ -1043,6 +1063,7 @@ namespace basecross {
 		);
 		m_LerpToParent = m_LerpToChild = 0.5f;
 
+		m_AttackSound->Start(0, 0.2f);
 	}
 
 	bool Sword::Attack1ExcuteBehavior() {

@@ -31,6 +31,11 @@ namespace basecross {
 		///砲撃した場合のbool
 		int m_NowCannonClass;
 
+		shared_ptr<SoundObject> m_AttackSound;
+		shared_ptr<SoundObject> m_StepSound;
+		shared_ptr<SoundObject> m_DamageSound;
+		shared_ptr<SoundObject> m_BombSound;
+
 		//移動しているかどうか
 		enum RunningMode {
 			RunStart,Running,RunEnd
@@ -213,6 +218,8 @@ namespace basecross {
 		Vec3 GetVelocity() {
 			return m_Rigidbody->m_Velocity;
 		}
+
+		//void StepStartBehaviour();
 		//--------------------------------------------------------------------------------------
 		/*!
 		@brief ステップ中のふるまい
@@ -395,6 +402,8 @@ namespace basecross {
 
 		//文字列描画オブジェクト
 		shared_ptr<StringDrawObject> m_StringDrawObject;
+
+		shared_ptr<SoundObject> m_AttackSound;
 
 		///描画データ
 		shared_ptr<BcDrawObject> m_PtrObj;

@@ -262,12 +262,14 @@ namespace basecross {
 
 
 		//スパークエフェクト
+		AddGameObject<AttackSpark>();
 		AddGameObject<MultiSpark>();
 		//ファイアエフェクト
 		AddGameObject<MultiFire>();
 		AddGameObject<AttackSigns>();
 		AddGameObject<BossAttackSigns>();
 		AddGameObject<StepEffect>();
+		AddGameObject<ShootingEffect>();
 		AddGameObject<CannonEffect>();
 		AddGameObject<MultiGuardEffect>();
 		AddGameObject<EnemyMoveEffect>();

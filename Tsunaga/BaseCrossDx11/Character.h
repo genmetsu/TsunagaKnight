@@ -304,6 +304,21 @@ namespace basecross {
 	};
 
 	//--------------------------------------------------------------------------------------
+	//class AttackSpark : public MultiParticle;
+	//用途: 攻撃のスパーククラス
+	//--------------------------------------------------------------------------------------
+	class AttackSpark : public MultiParticle {
+	public:
+		//構築と破棄
+		AttackSpark(shared_ptr<Stage>& StagePtr);
+		virtual ~AttackSpark();
+		//初期化
+		virtual void OnCreate() override;
+		void InsertSpark(const Vec3& Pos);
+		virtual void OnUpdate() override;
+	};
+
+	//--------------------------------------------------------------------------------------
 	//class MultiGuardEffect : public MultiParticle;
 	//用途: エンジェルエネミーの防御エフェクト
 	//--------------------------------------------------------------------------------------
@@ -405,6 +420,22 @@ namespace basecross {
 		//構築と破棄
 		StepEffect(shared_ptr<Stage>& StagePtr);
 		virtual ~StepEffect();
+		//初期化
+		virtual void OnCreate() override;
+		void InsertEffect(const Vec3& Pos);
+		virtual void OnUpdate() override;
+
+	};
+
+	//--------------------------------------------------------------------------------------
+	//class ShootingEffect : public MultiParticle;
+	//用途: 大砲で撃たれているときのエフェクト
+	//--------------------------------------------------------------------------------------
+	class ShootingEffect : public MultiParticle {
+	public:
+		//構築と破棄
+		ShootingEffect(shared_ptr<Stage>& StagePtr);
+		virtual ~ShootingEffect();
 		//初期化
 		virtual void OnCreate() override;
 		void InsertEffect(const Vec3& Pos);
@@ -1103,6 +1134,10 @@ namespace basecross {
 		shared_ptr<Rigidbody> m_Rigidbody;
 		//サウンドオブジェクト
 		shared_ptr<SoundObject> m_DeadSound;
+		shared_ptr<SoundObject> m_BossDamageSound;
+		shared_ptr<SoundObject> m_FriendsSound;
+		shared_ptr<SoundObject> m_CannonSound;
+		shared_ptr<SoundObject> m_EyeFlashSound;
 
 		//描画データ
 		shared_ptr<BcDrawObject> m_PtrObj;
@@ -1503,6 +1538,8 @@ namespace basecross {
 		float m_PlayerShootSpeed;
 		//つながっているときの弾の撃ち出し頻度
 		float m_PlayerShootTime;
+
+		shared_ptr<SoundObject> m_ShootSound;
 	public:
 		//--------------------------------------------------------------------------------------
 		/*!
@@ -1526,6 +1563,13 @@ namespace basecross {
 		*/
 		//--------------------------------------------------------------------------------------
 		virtual ~ShootEnemy();
+		//--------------------------------------------------------------------------------------
+		/*!
+		@brief 初期化
+		@return	なし
+		*/
+		//--------------------------------------------------------------------------------------
+		virtual void OnCreate() override;
 		//--------------------------------------------------------------------------------------
 		/*!
 		@brief 敵対中の処理
@@ -1719,7 +1763,6 @@ namespace basecross {
 		shared_ptr<BcDrawObject> m_SimpleObj;
 		//描画オブジェクト(weak_ptr)
 		weak_ptr<BcPNTStaticRenderer> m_StaticRenderer;
-
 
 	public:
 		//--------------------------------------------------------------------------------------
