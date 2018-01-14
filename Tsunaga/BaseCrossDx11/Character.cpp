@@ -1693,6 +1693,12 @@ namespace basecross {
 					Emitter.y += 0.125f;
 					FirePtr->InsertSigns(Emitter);
 				}
+				// プレイヤーとエネミーの距離が遠くなったら再び大砲に向かう
+				else if (dis >= m_SearchDis * 3.0f && m_UpdateActive)
+				{
+					m_StateMachine->ChangeState(EnemyToCannonState::Instance());
+					return;
+				}
 				// プレイヤーに向かう処理
 				else
 				{
