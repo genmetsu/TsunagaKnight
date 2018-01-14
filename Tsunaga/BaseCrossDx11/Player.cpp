@@ -105,6 +105,8 @@ namespace basecross {
 		m_KnockBackVec = Vec3(0.0f);
 		m_RunAnimationFrameCount = 0.0f;
 
+		m_UpdateActive = true;
+
 		m_StepSound = ObjectFactory::Create<SoundObject>(L"step_sound");
 		m_DamageSound = ObjectFactory::Create<SoundObject>(L"damage_voice");
 		m_AttackSound = ObjectFactory::Create<SoundObject>(L"attack_voice");
@@ -258,19 +260,18 @@ namespace basecross {
 		auto CntlVec = App::GetApp()->GetInputDevice().GetControlerVec();
 		if (CntlVec[0].bConnected) {
 			Vec3 Direction = GetMoveVector();
+			if (!m_UpdateActive) {
+				Direction = Vec3(0);
+			}
 			//Aƒ{ƒ^ƒ“
-			if (CntlVec[0].wPressedButtons & XINPUT_GAMEPAD_LEFT_SHOULDER) {
+			if ((CntlVec[0].wPressedButtons & XINPUT_GAMEPAD_LEFT_SHOULDER) && m_UpdateActive) {
 				m_StateMachine->ChangeState(StepState::Instance());
 				return;
 			}
-			else if (CntlVec[0].wPressedButtons & XINPUT_GAMEPAD_RIGHT_SHOULDER) {
+			else if ((CntlVec[0].wPressedButtons & XINPUT_GAMEPAD_RIGHT_SHOULDER) && m_UpdateActive) {
 				m_StateMachine->ChangeState(PlayerAttackState::Instance());
 				return;
 			}
-			/*else if (CntlVec[0].wPressedButtons & XINPUT_GAMEPAD_Y) {
-				auto s = GetStage()->FindTagGameObject<Sword>(L"Sword");
-				s->SetEnemyToCannon(L"Green");
-			}*/
 			else if (length(Direction) < 0.1f) {
 				m_Rigidbody->m_Velocity.x *= 0.8f;
 				m_Rigidbody->m_Velocity.z *= 0.8f;
@@ -386,6 +387,7 @@ namespace basecross {
 					if (PtrCannon->GetCannonClass() == 0) {
 						auto s = GetStage()->FindTagGameObject<Sword>(L"Sword");
 						s->SetEnemyToCannon(L"Green");
+						GetStage<GameStage>()->CannonStateStartBehaviour();
 						m_NowCannonClass = 0;
 						Vec3 MoveVec = m_Rigidbody->m_Pos - CannonPos;
 						MoveVec.y = 0.0f;
@@ -396,6 +398,7 @@ namespace basecross {
 					if (PtrCannon->GetCannonClass() == 1) {
 						auto s = GetStage()->FindTagGameObject<Sword>(L"Sword");
 						s->SetEnemyToCannon(L"Red");
+						GetStage<GameStage>()->CannonStateStartBehaviour();
 						m_NowCannonClass = 1;
 						Vec3 MoveVec = m_Rigidbody->m_Pos - CannonPos;
 						MoveVec.y = 0.0f;
@@ -406,6 +409,7 @@ namespace basecross {
 					if (PtrCannon->GetCannonClass() == 2) {
 						auto s = GetStage()->FindTagGameObject<Sword>(L"Sword");
 						s->SetEnemyToCannon(L"Blue");
+						GetStage<GameStage>()->CannonStateStartBehaviour();
 						m_NowCannonClass = 2;
 						Vec3 MoveVec = m_Rigidbody->m_Pos - CannonPos;
 						MoveVec.y = 0.0f;

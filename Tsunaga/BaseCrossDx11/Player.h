@@ -28,6 +28,8 @@ namespace basecross {
 		bool m_JumpLock;
 		/// ステップ（回避行動）してるかどうか
 		bool m_isStep;
+
+		bool m_UpdateActive;
 		///砲撃した場合のbool
 		int m_NowCannonClass;
 
@@ -296,6 +298,14 @@ namespace basecross {
 		int GetIsCannon() {
 			return m_NowCannonClass;
 		}
+
+		void SetUpdateActive(bool value) {
+			m_UpdateActive = value;
+		}
+		bool GetUpdateActive() {
+			return m_UpdateActive;
+		}
+
 		//--------------------------------------------------------------------------------------
 		/*!
 		@brief	ステートマシンを得る

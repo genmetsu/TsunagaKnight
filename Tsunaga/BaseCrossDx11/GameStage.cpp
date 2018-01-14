@@ -528,6 +528,7 @@ namespace basecross {
 					}
 					if (max_num == 0) {
 						if (m_FrameCount > 1.0f) {
+							CannonStateEndBehaviour();
 							PlayerPtr->SetIsCannnon(3);
 							camera.m_CameraArmLen = 2.5f;
 							m_FrameCount = 0.0f;
@@ -564,6 +565,7 @@ namespace basecross {
 					}
 					if (max_num == 0) {
 						if (m_FrameCount > 1.0f) {
+							CannonStateEndBehaviour();
 							PlayerPtr->SetIsCannnon(3);
 							camera.m_CameraArmLen = 2.5f;
 							m_FrameCount = 0.0f;
@@ -601,6 +603,7 @@ namespace basecross {
 					}
 					if (max_num == 0) {
 						if (m_FrameCount > 1.0f) {
+							CannonStateEndBehaviour();
 							PlayerPtr->SetIsCannnon(3);
 							camera.m_CameraArmLen = 2.5f;
 							m_FrameCount = 0.0f;
@@ -637,14 +640,7 @@ namespace basecross {
 			if (CntlVec[0].wPressedButtons & XINPUT_GAMEPAD_B) {
 				PostEvent(0.0f, GetThis<ObjectInterface>(), App::GetApp()->GetScene<Scene>(), L"ToEmptyStage");
 			}
-			//Bボタン
-			if (CntlVec[0].wPressedButtons & XINPUT_GAMEPAD_X) {
-				CannonStateStartBehaviour();
-			}
-			//Bボタン
-			if (CntlVec[0].wPressedButtons & XINPUT_GAMEPAD_Y) {
-				CannonStateEndBehaviour();
-			}
+			
 		}
 	}
 
@@ -704,6 +700,10 @@ namespace basecross {
 				PtrHand->SetUpdateActive(false);
 			}
 		}
+		auto player = FindTagGameObject<Player>(L"Player");
+		if (player) {
+			player->SetUpdateActive(false);
+		}
 	}
 
 	void GameStage::CannonStateEndBehaviour() {
@@ -730,6 +730,10 @@ namespace basecross {
 				auto PtrHand = dynamic_pointer_cast<BossHand>(hand);
 				PtrHand->SetUpdateActive(true);
 			}
+		}
+		auto player = FindTagGameObject<Player>(L"Player");
+		if (player) {
+			player->SetUpdateActive(true);
 		}
 	}
 

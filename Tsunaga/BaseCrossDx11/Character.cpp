@@ -1416,7 +1416,7 @@ namespace basecross {
 		m_SearchDis(3.0f),
 		m_TackleTime(0.75f),
 		m_ShootNumber(0),
-		m_TackleSpeed(6.0f),
+		m_TackleSpeed(3.0f),
 		m_AfterAttackTime(2.0f),
 		m_TackleStartPos(Vec3(0.0f, 0.0f, 0.0f)),
 		m_OwnShadowActive(OwnShadowActive),
@@ -1546,9 +1546,8 @@ namespace basecross {
 				if (length < Radius + PlayerRadius) {
 
 					Vec3 Emitter = BulletPos;
-					Emitter.y -= 0.125f;
 					//Sparkの送出
-					auto SparkPtr = GetStage<GameStage>()->FindTagGameObject<MultiSpark>(L"MultiSpark");
+					auto SparkPtr = GetStage<GameStage>()->FindTagGameObject<AttackSpark>(L"AttackSpark");
 					SparkPtr->InsertSpark(Emitter);
 					//弾を異次元に飛ばす
 					PtrBullet->SetPosition(Vec3(0.0f, -10.0f, 0.0f));
@@ -2245,6 +2244,30 @@ namespace basecross {
 				}
 			}
 		}
+		//弾との衝突判定
+		vector<shared_ptr<GameObject>> BulletVec;
+		GetStage<GameStage>()->FindTagGameObjectVec(L"Bullet", BulletVec);
+		for (auto bullet : BulletVec) {
+			if (bullet) {
+				auto PtrBullet = dynamic_pointer_cast<BulletObject>(bullet);
+
+				Vec3 BulletPos = PtrBullet->GetPosition();
+				float length = (BulletPos - m_Rigidbody->m_Pos).length();
+
+				float Radius = PtrBullet->GetScale() / 2.0f;
+				float PlayerRadius = m_Rigidbody->m_Scale.x / 2.0f;
+
+				if (length < Radius + PlayerRadius) {
+					PtrBullet->SetPosition(Vec3(100, 100, 100));
+					Vec3 Emitter = m_Rigidbody->m_Pos;
+					//Sparkの送出
+					auto SparkPtr = GetStage<GameStage>()->FindTagGameObject<AttackSpark>(L"AttackSpark");
+					SparkPtr->InsertSpark(Emitter);
+
+					return;
+				}
+			}
+		}
 		//ボスハンドとの衝突判定
 		vector<shared_ptr<GameObject>> HandVec;
 		GetStage<GameStage>()->FindTagGameObjectVec(L"BossHand", HandVec);
@@ -2308,9 +2331,9 @@ namespace basecross {
 	{
 		m_Speed = 0.3f;
 		m_SearchDis = 5.0;
-		m_EnemyShootSpeed = 2.0f;
+		m_EnemyShootSpeed = 1.2f;
 		m_PlayerShootSpeed = 5.0f;
-		m_PlayerShootTime = 1.5f;
+		m_PlayerShootTime = 1.8f;
 		AddTag(L"Blue");
 		AddTag(L"Zako");
 		//メッシュとトランスフォームの差分の設定
@@ -2570,6 +2593,11 @@ namespace basecross {
 			m_PtrObj->m_Diffuse = Col4(0.2f, 0.2f, 0.2f, 1.0f);
 			m_PtrObj->m_Emissive = Col4(0.0f, 0.0f, 0.0f, 1.0f);
 		}
+		else {
+
+			m_PtrObj->m_Diffuse = Col4(0.0f, 0.3f, 1.0f, 1.0f);
+			m_PtrObj->m_Emissive = Col4(0.0f, 0.3f, 1.0f, 1.0f);
+		}
 
 		//シャドウマップ描画データの構築
 		m_PtrShadowmapObj = make_shared<ShadowmapObject>();
@@ -2671,7 +2699,7 @@ namespace basecross {
 	{
 		m_Speed = 0.6f;
 		m_SearchDis = 2.5f;
-		m_TackleSpeed = 4.0f;
+		m_TackleSpeed = 2.0f;
 		m_TackleTime = 1.7f;
 		m_AfterAttackTime = 1.2f;
 		AddTag(L"Green");
