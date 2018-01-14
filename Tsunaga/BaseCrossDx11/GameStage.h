@@ -25,6 +25,7 @@ namespace basecross {
 		shared_ptr<MultiAudioObject> m_AudioObjectPtr;
 		float m_FrameCount;
 		bool m_isClear;
+		bool m_isFail;
 	public:
 		//--------------------------------------------------------------------------------------
 		/*!
@@ -78,6 +79,7 @@ namespace basecross {
 		void CannonStateEndBehaviour();
 
 		void GameClearBehaviour();
+		void GameOverBehaviour();
 
 		void SetIsClear(bool value) {
 			m_isClear = value;
@@ -85,6 +87,14 @@ namespace basecross {
 		}
 		bool GetIsClear() {
 			return m_isClear;
+		}
+
+		void SetIsFail(bool value) {
+			m_isFail = value;
+			GameOverBehaviour();
+		}
+		bool GetIsFail() {
+			return m_isFail;
 		}
 
 

@@ -109,6 +109,9 @@ namespace basecross {
 
 		m_UpdateActive = true;
 
+		m_CannonHP = 30.0f;
+		m_DefaultCannonHP = m_CannonHP;
+
 		m_StepSound = ObjectFactory::Create<SoundObject>(L"step_sound");
 		m_DamageSound = ObjectFactory::Create<SoundObject>(L"damage_voice");
 		m_AttackSound = ObjectFactory::Create<SoundObject>(L"attack_voice");

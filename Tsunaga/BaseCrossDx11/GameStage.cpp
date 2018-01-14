@@ -31,7 +31,7 @@ namespace basecross {
 	void GameStage::OnCreate() {
 		m_FrameCount = 0.0f;
 		m_isClear = false;
-
+		m_isFail = false;
 		//シャドウマップの描画デバイスの取得
 		auto Dev = App::GetApp()->GetDeviceResources();
 		Dev->GetShadowMapRenderTarget(2048.0f);
@@ -380,70 +380,6 @@ namespace basecross {
 			}
 		}
 
-		AddGameObject<ResultSprite>(
-			L"RESULT_BACK",
-			Vec2(1280, 720),
-			0.0f,
-			Vec2(0, 0),
-			1, 1
-			);
-		AddGameObject<ResultSprite>(
-			L"CLEAR_LOGO",
-			Vec2(600, 300),
-			0.0f,
-			Vec2(0, 250),
-			1, 1
-			);
-
-		AddGameObject<ResultSprite>(
-			L"TIME_LOGO",
-			Vec2(320, 80),
-			0.0f,
-			Vec2(-200, -30),
-			1, 1
-			);
-
-		AddGameObject<ResultSprite>(
-			L"LIFE_LOGO",
-			Vec2(320, 80),
-			0.0f,
-			Vec2(-250, -120),
-			1, 1
-			);
-
-		AddGameObject<ResultSprite>(
-			L"PAERCENT_LOGO",
-			Vec2(80, 80),
-			0.0f,
-			Vec2(300, -120),
-			1, 1
-			);
-
-		AddGameObject<ResultSprite>(
-			L"RANK_LOGO",
-			Vec2(400, 100),
-			0.0f,
-			Vec2(-100, 120),
-			1, 1
-			);
-
-		AddGameObject<ResultSprite>(
-			L"RESULT_S",
-			Vec2(180, 180),
-			0.0f,
-			Vec2(110, 120),
-			1, 1
-			);
-
-
-		/*AddGameObject<ResultSprite>(
-			L"RESULT_FRAME",
-			Vec2(1280, 720),
-			0.0f,
-			Vec2(0, 0),
-			1, 1
-			);*/
-
 
 		//文字列描画オブジェクトの作成
 		AddGameObject<StringDrawObject>();
@@ -708,7 +644,7 @@ namespace basecross {
 			//Bボタン
 			if (CntlVec[0].wPressedButtons & XINPUT_GAMEPAD_B) {
 				//PostEvent(0.0f, GetThis<ObjectInterface>(), App::GetApp()->GetScene<Scene>(), L"ToEmptyStage");
-				SetIsClear(true);
+				//SetIsFail(true);
 			}
 			
 		}
@@ -836,6 +772,149 @@ namespace basecross {
 		if (player) {
 			player->SetUpdateActive(false);
 		}
+
+
+		AddGameObject<ResultSprite>(
+			L"RESULT_BACK",
+			Vec2(1280, 720),
+			0.0f,
+			Vec2(0, 0),
+			1, 1
+			);
+		AddGameObject<ResultSprite>(
+			L"CLEAR_LOGO",
+			Vec2(600, 300),
+			0.0f,
+			Vec2(0, 250),
+			1, 1
+			);
+
+		AddGameObject<ResultSprite>(
+			L"TIME_LOGO",
+			Vec2(320, 80),
+			0.0f,
+			Vec2(-200, -30),
+			1, 1
+			);
+
+		AddGameObject<ResultSprite>(
+			L"LIFE_LOGO",
+			Vec2(320, 80),
+			0.0f,
+			Vec2(-250, -120),
+			1, 1
+			);
+
+		AddGameObject<ResultSprite>(
+			L"PAERCENT_LOGO",
+			Vec2(80, 80),
+			0.0f,
+			Vec2(300, -120),
+			1, 1
+			);
+
+		AddGameObject<ResultSprite>(
+			L"RANK_LOGO",
+			Vec2(400, 100),
+			0.0f,
+			Vec2(-100, 120),
+			1, 1
+			);
+
+		AddGameObject<ResultSprite>(
+			L"RESULT_S",
+			Vec2(180, 180),
+			0.0f,
+			Vec2(110, 120),
+			1, 1
+			);
+	}
+
+	void GameStage::GameOverBehaviour() {
+		vector<shared_ptr<GameObject>> ZakoVec;
+		FindTagGameObjectVec(L"Zako", ZakoVec);
+		for (auto zako : ZakoVec) {
+			if (zako) {
+				auto PtrZako = dynamic_pointer_cast<EnemyObject>(zako);
+				PtrZako->SetUpdateActive(false);
+			}
+		}
+		auto s_boss = FindTagGameObject<EnemyObject>(L"SawBoss");
+		if (s_boss) {
+			s_boss->SetUpdateActive(false);
+		}
+		auto h_boss = FindTagGameObject<EnemyObject>(L"HandBoss");
+		if (h_boss) {
+			h_boss->SetUpdateActive(false);
+		}
+		vector<shared_ptr<GameObject>> HandVec;
+		FindTagGameObjectVec(L"BossHand", HandVec);
+		for (auto hand : HandVec) {
+			if (hand) {
+				auto PtrHand = dynamic_pointer_cast<BossHand>(hand);
+				PtrHand->SetUpdateActive(false);
+			}
+		}
+		auto player = FindTagGameObject<Player>(L"Player");
+		if (player) {
+			player->SetUpdateActive(false);
+		}
+
+
+		AddGameObject<ResultSprite>(
+			L"RESULT_BACK",
+			Vec2(1280, 720),
+			0.0f,
+			Vec2(0, 0),
+			1, 1
+			);
+		AddGameObject<ResultSprite>(
+			L"FAIL_LOGO",
+			Vec2(600, 300),
+			0.0f,
+			Vec2(0, 250),
+			1, 1
+			);
+
+		AddGameObject<ResultSprite>(
+			L"TIME_LOGO",
+			Vec2(320, 80),
+			0.0f,
+			Vec2(-200, -30),
+			1, 1
+			);
+
+		AddGameObject<ResultSprite>(
+			L"LIFE_LOGO",
+			Vec2(320, 80),
+			0.0f,
+			Vec2(-250, -120),
+			1, 1
+			);
+
+		AddGameObject<ResultSprite>(
+			L"PAERCENT_LOGO",
+			Vec2(80, 80),
+			0.0f,
+			Vec2(300, -120),
+			1, 1
+			);
+
+		AddGameObject<ResultSprite>(
+			L"RANK_LOGO",
+			Vec2(400, 100),
+			0.0f,
+			Vec2(-100, 120),
+			1, 1
+			);
+
+		AddGameObject<ResultSprite>(
+			L"RESULT_D",
+			Vec2(180, 180),
+			0.0f,
+			Vec2(110, 120),
+			1, 1
+			);
 	}
 
 	//--------------------------------------------------------------------------------------

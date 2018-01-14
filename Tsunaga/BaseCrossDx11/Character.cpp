@@ -1088,6 +1088,7 @@ namespace basecross {
 			{ VertexPositionColorTexture(Vec3(0, -HelfSize, 0), Col4(1.0f,1.0f,1.0f,1.0f), Vec2(0.0f, (float)m_YWrap)) },
 			{ VertexPositionColorTexture(Vec3(HelfSize*2.0f, -HelfSize, 0), Col4(1.0f,1.0f,1.0f,1.0f), Vec2((float)m_XWrap, (float)m_YWrap)) },
 		};
+		m_DefaultSize = StartScale.x;
 	}
 
 	void CannonGauge::AdjustVertex() {
@@ -1102,7 +1103,10 @@ namespace basecross {
 				m_BackupVertices[i].textureCoordinate
 			);
 		}
-		//m_Scale.x -= 1.0f;
+		auto player = GetStage()->FindTagGameObject<Player>(L"Player");
+		float HP = player->GetCannonHP();
+		float ratio = HP / player->GetDefaultBossHP();
+		m_Scale.x = m_DefaultSize * ratio;
 	}
 
 	//--------------------------------------------------------------------------------------
@@ -1204,7 +1208,7 @@ namespace basecross {
 	}
 
 	void  ResultSprite::UpdateVertex(float ElapsedTime, VertexPositionColorTexture* vertices) {
-		if (GetStage<GameStage>()->GetIsClear()) {
+		if (GetStage<GameStage>()->GetIsClear() || GetStage<GameStage>()->GetIsFail()) {
 			m_TotalTime += ElapsedTime;
 			if (m_TotalTime >= 1.0f) {
 				m_TotalTime = 1.0f;
@@ -1991,6 +1995,49 @@ namespace basecross {
 				}
 				m_Rigidbody->m_Velocity = ToPosVec;
 				m_Rigidbody->m_Pos.y = m_BaseY;
+			}
+		}
+		//大砲との衝突
+		vector<shared_ptr<GameObject>> CannonVec;
+		GetStage<GameStage>()->FindTagGameObjectVec(L"Cannon", CannonVec);
+		for (auto cannon : CannonVec) {
+			if (cannon) {
+				auto PtrCannon = dynamic_pointer_cast<Cannon>(cannon);
+
+				Vec3 CannonPos = PtrCannon->GetPosition();
+				float length = (CannonPos - m_Rigidbody->m_Pos).length();
+
+				float CannonRadius = PtrCannon->GetScale() / 2.0f;
+				float PlayerRadius = m_Rigidbody->m_Scale.x / 2.0f;
+
+				if (length < CannonRadius + PlayerRadius + 1.0f) {
+					Vec3 Emitter = m_Rigidbody->m_Pos;
+					//Sparkの送出
+					auto SparkPtr = GetStage<GameStage>()->FindTagGameObject<AttackSpark>(L"AttackSpark");
+					SparkPtr->InsertSpark(Emitter);
+					//Fireの送出
+					auto FirePtr = GetStage<GameStage>()->FindTagGameObject<MultiFire>(L"MultiFire");
+					FirePtr->InsertFire(Emitter, 1.0f);
+
+					Vec3 p_pos = m_PlayerPtr.lock()->GetPosition();
+					float p_dis = (p_pos - GetPosition()).length();
+					if (p_dis < 1.0f) {
+						p_dis = 1.0f;
+					}
+					//サウンドの発行
+					m_DeadSound->Start(0, (0.7f / p_dis) + 0.3f);
+
+					auto p_ptr = dynamic_pointer_cast<Player>(shptr);
+					p_ptr->CannonDamage(1.0f);
+					if (p_ptr->GetCannonHP() <= 0.0f ) {
+						GetStage<GameStage>()->SetIsFail(true);
+					}
+					
+					//敵を異次元に飛ばす（仮倒し処理）
+					SetPosition(Vec3(0, 0, 70));
+
+					break;
+				}
 			}
 		}
 		RotateToVelocity();
@@ -3535,6 +3582,7 @@ namespace basecross {
 				GetStage<GameStage>()->SetIsClear(true);
 				m_isDead = false;
 				m_Rigidbody->m_Pos = Vec3(100, 100, 100);
+				m_HP = 0.0001f;
 			}
 			m_frame_count += ElapsedTime;
 			return;
@@ -3596,10 +3644,10 @@ namespace basecross {
 		if (player->GetIsCannon() == m_now_barrior) {
 			if (m_isDamage) {
 				m_DamageRate += 0.75f;
-				m_HP -= (value + m_DamageRate) * 2.0f;
+				m_HP -= (value + m_DamageRate) * 1.7f;
 			}
 			else {
-				m_HP -= value * 2.0f;
+				m_HP -= value * 1.7f;
 				SetIsDamage(true);
 				m_DamageRate++;
 			}

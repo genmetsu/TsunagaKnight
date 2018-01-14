@@ -53,6 +53,9 @@ namespace basecross {
 		float m_AttackDis;
 		//攻撃するときに補正をかける角度
 		float m_FOV;
+
+		float m_CannonHP;
+		float m_DefaultCannonHP;
 		//移動アニメーション用フレームカウント
 		float m_RunAnimationFrameCount;
 		//Rigidbodyのshared_ptr
@@ -299,11 +302,25 @@ namespace basecross {
 			return m_NowCannonClass;
 		}
 
+		float GetDefaultBossHP() {
+			return m_DefaultCannonHP;
+		}
+
 		void SetUpdateActive(bool value) {
 			m_UpdateActive = value;
 		}
 		bool GetUpdateActive() {
 			return m_UpdateActive;
+		}
+
+		void SetCannonHP(float value) {
+			m_CannonHP = value;
+		}
+		float GetCannonHP() {
+			return m_CannonHP;
+		}
+		void CannonDamage(float value) {
+			m_CannonHP -= value;
 		}
 
 		//--------------------------------------------------------------------------------------
