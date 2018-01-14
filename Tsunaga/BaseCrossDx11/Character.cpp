@@ -415,6 +415,65 @@ namespace basecross {
 	}
 
 	//--------------------------------------------------------------------------------------
+	//class BossEffect : public MultiParticle;
+	//用途: ボスの防御エフェクト
+	//--------------------------------------------------------------------------------------
+	//構築と破棄
+	BossEffect::BossEffect(shared_ptr<Stage>& StagePtr) :
+		MultiParticle(StagePtr)
+	{}
+	BossEffect::~BossEffect() {}
+
+	//初期化
+	void BossEffect::OnCreate() {
+		//加算描画処理をする
+		SetAddType(true);
+		//タグの追加
+		AddTag(L"BossEffect");
+	}
+
+	void BossEffect::InsertSpark(const Vec3& Pos,wstring name) {
+		auto ParticlePtr = InsertParticle(8);
+		ParticlePtr->m_EmitterPos = Pos;
+		ParticlePtr->SetTextureResource(L"SPARK_TX");
+		ParticlePtr->m_MaxTime = 0.08f;
+		vector<ParticleSprite>& pSpriteVec = ParticlePtr->GetParticleSpriteVec();
+		for (auto& rParticleSprite : ParticlePtr->GetParticleSpriteVec()) {
+			rParticleSprite.m_LocalPos.x = Util::RandZeroToOne() * 5.0f;
+			rParticleSprite.m_LocalPos.y = Util::RandZeroToOne() * 5.0f;
+			rParticleSprite.m_LocalPos.z = Util::RandZeroToOne() * 5.0f;
+			rParticleSprite.m_LocalScale = Vec2(20.0, 20.0);
+			//各パーティクルの移動速度を指定
+			rParticleSprite.m_Velocity = Vec3(
+				rParticleSprite.m_LocalPos.x * 10.0f,
+				rParticleSprite.m_LocalPos.y * 10.0f,
+				rParticleSprite.m_LocalPos.z * 10.0f
+			);
+			//色の指定
+			if (name == L"Red") {
+				rParticleSprite.m_Color = Col4(1.0f, 0.0f, 0.0f, 0.1f);
+			}
+			if (name == L"Green") {
+				rParticleSprite.m_Color = Col4(0.0f, 1.0f, 0.0f, 0.1f);
+			}
+			if (name == L"Blue") {
+				rParticleSprite.m_Color = Col4(0.0f, 0.0f, 1.0f, 0.1f);
+			}
+		}
+	}
+
+	void BossEffect::OnUpdate() {
+		MultiParticle::OnUpdate();
+		float ElapsedTime = App::GetApp()->GetElapsedTime();
+		/*for (auto ParticlePtr : GetParticleVec()) {
+		for (auto& rParticleSprite : ParticlePtr->GetParticleSpriteVec()) {
+		if (rParticleSprite.m_Active) {
+		}
+		}
+		}*/
+	}
+
+	//--------------------------------------------------------------------------------------
 	//class EnemyMoveEffect : public MultiParticle;
 	//用途: エネミーの移動エフェクト
 	//--------------------------------------------------------------------------------------
@@ -3409,6 +3468,7 @@ namespace basecross {
 
 		m_frame_count = 0.0f;
 		m_DamageRate = 0.0f;
+		m_now_barrior = 0;
 
 		m_HP = 75.0f;
 		m_DefaultHP = m_HP;
@@ -3491,17 +3551,69 @@ namespace basecross {
 			m_frame_count = 0.0f;
 			m_DamageRate = 0.0f;
 		}
+
+
+
+		if (m_HP > 0.0f) {
+			auto player = GetStage()->FindTagGameObject<Player>(L"Player");
+			int now_num = player->GetIsCannon();
+			if (now_num == 3) {
+				m_frame_count += ElapsedTime;
+			}
+			if (m_frame_count >= 20.0f && m_now_barrior == 0) {
+				m_now_barrior = 1;
+				m_frame_count = 0.0f;
+			}
+			if (m_frame_count >= 20.0f && m_now_barrior == 1) {
+				m_now_barrior = 2;
+				m_frame_count = 0.0f;
+			}
+			if (m_frame_count >= 20.0f && m_now_barrior == 2) {
+				m_now_barrior = 0;
+				m_frame_count = 0.0f;
+			}
+			
+			Vec3 Emitter = m_Rigidbody->m_Pos;
+			Emitter.x -= 3.0f;
+			Emitter.y -= 3.0f;
+			//Sparkの送出
+			auto SparkPtr = GetStage<GameStage>()->FindTagGameObject<BossEffect>(L"BossEffect");
+			if (m_now_barrior == 0) {
+				SparkPtr->InsertSpark(Emitter, L"Green");
+			}
+			else if (m_now_barrior == 1) {
+				SparkPtr->InsertSpark(Emitter, L"Red");
+			}
+			else if (m_now_barrior == 2) {
+				SparkPtr->InsertSpark(Emitter, L"Blue");
+			}
+		}
+
 	}
 
 	void Boss::Damage(float value) {
-		if (m_isDamage) {
-			m_DamageRate += 0.75f;
-			m_HP -= (value + m_DamageRate);
+		auto player = GetStage()->FindTagGameObject<Player>(L"Player");
+		if (player->GetIsCannon() == m_now_barrior) {
+			if (m_isDamage) {
+				m_DamageRate += 0.75f;
+				m_HP -= (value + m_DamageRate) * 2.0f;
+			}
+			else {
+				m_HP -= value * 2.0f;
+				SetIsDamage(true);
+				m_DamageRate++;
+			}
 		}
 		else {
-			m_HP -= value;
-			SetIsDamage(true);
-			m_DamageRate++;
+			if (m_isDamage) {
+				m_DamageRate += 0.75f;
+				m_HP -= (value + m_DamageRate);
+			}
+			else {
+				m_HP -= value;
+				SetIsDamage(true);
+				m_DamageRate++;
+			}
 		}
 	}
 

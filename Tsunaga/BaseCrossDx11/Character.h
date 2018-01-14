@@ -334,6 +334,21 @@ namespace basecross {
 	};
 
 	//--------------------------------------------------------------------------------------
+	//class BossEffect : public MultiParticle;
+	//用途 ボスのエフェクト
+	//--------------------------------------------------------------------------------------
+	class BossEffect : public MultiParticle {
+	public:
+		//構築と破棄
+		BossEffect(shared_ptr<Stage>& StagePtr);
+		virtual ~BossEffect();
+		//初期化
+		virtual void OnCreate() override;
+		void InsertSpark(const Vec3& Pos,wstring name);
+		virtual void OnUpdate() override;
+	};
+
+	//--------------------------------------------------------------------------------------
 	//class EnemyMoveEffect : public MultiParticle;
 	//用途: エネミーの移動エフェクト
 	//--------------------------------------------------------------------------------------
@@ -2136,6 +2151,8 @@ namespace basecross {
 
 		bool m_isDead;
 
+		int m_now_barrior;
+
 		bool m_UpdateActive;
 
 		float m_frame_count;
@@ -2231,6 +2248,10 @@ namespace basecross {
 		*/
 		//--------------------------------------------------------------------------------------
 		void Damage(float value);
+
+		int GetNowBarrior() {
+			return m_now_barrior;
+		}
 
 		float GetHP() {
 			return m_HP;

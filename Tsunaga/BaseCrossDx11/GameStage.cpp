@@ -272,6 +272,7 @@ namespace basecross {
 		AddGameObject<StepEffect>();
 		AddGameObject<ShootingEffect>();
 		AddGameObject<CannonEffect>();
+		AddGameObject<BossEffect>();
 		AddGameObject<MultiGuardEffect>();
 		AddGameObject<EnemyMoveEffect>();
 
