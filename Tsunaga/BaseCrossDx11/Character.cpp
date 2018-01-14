@@ -449,14 +449,14 @@ namespace basecross {
 
 	void MultiSpark::OnUpdate() {
 		MultiParticle::OnUpdate();
-		float ElapsedTime = App::GetApp()->GetElapsedTime();
+		/*float ElapsedTime = App::GetApp()->GetElapsedTime();
 
 		for (auto ParticlePtr : GetParticleVec()) {
 			for (auto& rParticleSprite : ParticlePtr->GetParticleSpriteVec()) {
 				if (rParticleSprite.m_Active) {
 				}
 			}
-		}
+		}*/
 	}
 
 	//--------------------------------------------------------------------------------------
@@ -478,16 +478,16 @@ namespace basecross {
 	}
 
 	void MultiGuardEffect::InsertSpark(const Vec3& Pos) {
-		auto ParticlePtr = InsertParticle(16);
+		auto ParticlePtr = InsertParticle(8);
 		ParticlePtr->m_EmitterPos = Pos;
 		ParticlePtr->SetTextureResource(L"SPARK_TX");
-		ParticlePtr->m_MaxTime = 0.5f;
+		ParticlePtr->m_MaxTime = 0.08f;
 		vector<ParticleSprite>& pSpriteVec = ParticlePtr->GetParticleSpriteVec();
 		for (auto& rParticleSprite : ParticlePtr->GetParticleSpriteVec()) {
 			rParticleSprite.m_LocalPos.x = Util::RandZeroToOne() * 0.1f - 0.05f;
 			rParticleSprite.m_LocalPos.y = Util::RandZeroToOne() * 0.1f;
 			rParticleSprite.m_LocalPos.z = Util::RandZeroToOne() * 0.1f - 0.05f;
-			rParticleSprite.m_LocalScale = Vec2(0.2, 0.2);
+			rParticleSprite.m_LocalScale = Vec2(0.5, 0.5);
 			//各パーティクルの移動速度を指定
 			rParticleSprite.m_Velocity = Vec3(
 				rParticleSprite.m_LocalPos.x * 10.0f,
@@ -495,20 +495,19 @@ namespace basecross {
 				rParticleSprite.m_LocalPos.z * 10.0f
 			);
 			//色の指定
-			rParticleSprite.m_Color = Col4(0.0f, 1.0f, 0.0f, 0.03f);
+			rParticleSprite.m_Color = Col4(0.0f, 1.0f, 0.0f, 0.1f);
 		}
 	}
 
 	void MultiGuardEffect::OnUpdate() {
 		MultiParticle::OnUpdate();
 		float ElapsedTime = App::GetApp()->GetElapsedTime();
-
-		for (auto ParticlePtr : GetParticleVec()) {
+		/*for (auto ParticlePtr : GetParticleVec()) {
 			for (auto& rParticleSprite : ParticlePtr->GetParticleSpriteVec()) {
 				if (rParticleSprite.m_Active) {
 				}
 			}
-		}
+		}*/
 	}
 
 	//--------------------------------------------------------------------------------------
@@ -534,7 +533,7 @@ namespace basecross {
 		auto ParticlePtr = InsertParticle(3);
 		ParticlePtr->m_EmitterPos = Pos;
 		ParticlePtr->SetTextureResource(L"SPARK_TX");
-		ParticlePtr->m_MaxTime = 0.5f;
+		ParticlePtr->m_MaxTime = 0.4f;
 		vector<ParticleSprite>& pSpriteVec = ParticlePtr->GetParticleSpriteVec();
 		for (auto& rParticleSprite : ParticlePtr->GetParticleSpriteVec()) {
 			rParticleSprite.m_LocalPos.x = Util::RandZeroToOne() * 0.1f - 0.05f;
@@ -548,20 +547,20 @@ namespace basecross {
 				rParticleSprite.m_LocalPos.z * 10.0f
 			);
 			//色の指定
-			rParticleSprite.m_Color = Col4(0.5f, 0.5f, 0.5f, 0.06f);
+			rParticleSprite.m_Color = Col4(0.5f, 0.5f, 0.5f, 0.1f);
 		}
 	}
 
 	void EnemyMoveEffect::OnUpdate() {
 		MultiParticle::OnUpdate();
-		float ElapsedTime = App::GetApp()->GetElapsedTime();
+		/*float ElapsedTime = App::GetApp()->GetElapsedTime();
 
 		for (auto ParticlePtr : GetParticleVec()) {
 			for (auto& rParticleSprite : ParticlePtr->GetParticleSpriteVec()) {
 				if (rParticleSprite.m_Active) {
 				}
 			}
-		}
+		}*/
 	}
 
 	//--------------------------------------------------------------------------------------
@@ -682,7 +681,6 @@ namespace basecross {
 		//タグの追加
 		AddTag(L"BossAttackSigns");
 	}
-
 
 	void BossAttackSigns::InsertSigns(const Vec3& Pos)
 	{
@@ -1739,7 +1737,6 @@ namespace basecross {
 		}
 		if (m_FollowingAngelNum) {
 			Vec3 Emitter = m_Rigidbody->m_Pos;
-			Emitter.y -= 0.125f;
 			//Sparkの送出
 			auto SparkPtr = GetStage<GameStage>()->FindTagGameObject<MultiGuardEffect>(L"MultiGuardEffect");
 			SparkPtr->InsertSpark(Emitter);
