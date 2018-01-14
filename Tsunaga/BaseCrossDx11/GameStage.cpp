@@ -30,6 +30,7 @@ namespace basecross {
 
 	void GameStage::OnCreate() {
 		m_FrameCount = 0.0f;
+		m_isClear = false;
 
 		//シャドウマップの描画デバイスの取得
 		auto Dev = App::GetApp()->GetDeviceResources();
@@ -378,6 +379,71 @@ namespace basecross {
 			}
 		}
 
+		AddGameObject<ResultSprite>(
+			L"RESULT_BACK",
+			Vec2(1280, 720),
+			0.0f,
+			Vec2(0, 0),
+			1, 1
+			);
+		AddGameObject<ResultSprite>(
+			L"CLEAR_LOGO",
+			Vec2(600, 300),
+			0.0f,
+			Vec2(0, 250),
+			1, 1
+			);
+
+		AddGameObject<ResultSprite>(
+			L"TIME_LOGO",
+			Vec2(320, 80),
+			0.0f,
+			Vec2(-200, -30),
+			1, 1
+			);
+
+		AddGameObject<ResultSprite>(
+			L"LIFE_LOGO",
+			Vec2(320, 80),
+			0.0f,
+			Vec2(-250, -120),
+			1, 1
+			);
+
+		AddGameObject<ResultSprite>(
+			L"PAERCENT_LOGO",
+			Vec2(80, 80),
+			0.0f,
+			Vec2(300, -120),
+			1, 1
+			);
+
+		AddGameObject<ResultSprite>(
+			L"RANK_LOGO",
+			Vec2(400, 100),
+			0.0f,
+			Vec2(-100, 120),
+			1, 1
+			);
+
+		AddGameObject<ResultSprite>(
+			L"RESULT_S",
+			Vec2(180, 180),
+			0.0f,
+			Vec2(110, 120),
+			1, 1
+			);
+
+
+		/*AddGameObject<ResultSprite>(
+			L"RESULT_FRAME",
+			Vec2(1280, 720),
+			0.0f,
+			Vec2(0, 0),
+			1, 1
+			);*/
+
+
 		//文字列描画オブジェクトの作成
 		AddGameObject<StringDrawObject>();
 
@@ -460,31 +526,33 @@ namespace basecross {
 		auto CntlVec = App::GetApp()->GetInputDevice().GetControlerVec();
 		if (CntlVec[0].bConnected) {
 
-			if (CntlVec[0].fThumbRX != 0) {
-				camera.m_CameraXZRad -= CntlVec[0].fThumbRX * 0.05f;
-				if (abs(camera.m_CameraXZRad) >= XM_2PI) {
-					camera.m_CameraXZRad = 0;
-				}
-			}
-			if (CntlVec[0].fThumbRY != 0) {
-				camera.m_CameraYRad += CntlVec[0].fThumbRY * 0.05f;
-				if (camera.m_CameraYRad >= 2.0f) {
-					camera.m_CameraYRad = 2.0f;
-				}
-				else if (camera.m_CameraYRad <= 0.5f) {
-					camera.m_CameraYRad = 0.5f;
-				}
-				if (camera.m_CameraYRad >= XM_PIDIV2 - 0.3f) {
-					if (CntlVec[0].fThumbRY > 0) {
-						camera.m_CameraArmLen -= CntlVec[0].fThumbRY * 0.1f;
-						if (GetCamera().m_CameraArmLen <= 1.5f) {
-							camera.m_CameraArmLen = 1.5f;
-						}
+			if (!m_isClear) {
+				if (CntlVec[0].fThumbRX != 0) {
+					camera.m_CameraXZRad -= CntlVec[0].fThumbRX * 0.05f;
+					if (abs(camera.m_CameraXZRad) >= XM_2PI) {
+						camera.m_CameraXZRad = 0;
 					}
-					else if (CntlVec[0].fThumbRY < 0) {
-						camera.m_CameraArmLen -= CntlVec[0].fThumbRY * 0.1f;
-						if (GetCamera().m_CameraArmLen >= 50.0f) {
-							GetCamera().m_CameraArmLen = 50.0f;
+				}
+				if (CntlVec[0].fThumbRY != 0) {
+					camera.m_CameraYRad += CntlVec[0].fThumbRY * 0.05f;
+					if (camera.m_CameraYRad >= 2.0f) {
+						camera.m_CameraYRad = 2.0f;
+					}
+					else if (camera.m_CameraYRad <= 0.5f) {
+						camera.m_CameraYRad = 0.5f;
+					}
+					if (camera.m_CameraYRad >= XM_PIDIV2 - 0.3f) {
+						if (CntlVec[0].fThumbRY > 0) {
+							camera.m_CameraArmLen -= CntlVec[0].fThumbRY * 0.1f;
+							if (GetCamera().m_CameraArmLen <= 1.5f) {
+								camera.m_CameraArmLen = 1.5f;
+							}
+						}
+						else if (CntlVec[0].fThumbRY < 0) {
+							camera.m_CameraArmLen -= CntlVec[0].fThumbRY * 0.1f;
+							if (GetCamera().m_CameraArmLen >= 50.0f) {
+								GetCamera().m_CameraArmLen = 50.0f;
+							}
 						}
 					}
 				}
@@ -638,7 +706,8 @@ namespace basecross {
 			}
 			//Bボタン
 			if (CntlVec[0].wPressedButtons & XINPUT_GAMEPAD_B) {
-				PostEvent(0.0f, GetThis<ObjectInterface>(), App::GetApp()->GetScene<Scene>(), L"ToEmptyStage");
+				//PostEvent(0.0f, GetThis<ObjectInterface>(), App::GetApp()->GetScene<Scene>(), L"ToEmptyStage");
+				SetIsClear(true);
 			}
 			
 		}
@@ -734,6 +803,37 @@ namespace basecross {
 		auto player = FindTagGameObject<Player>(L"Player");
 		if (player) {
 			player->SetUpdateActive(true);
+		}
+	}
+
+	void GameStage::GameClearBehaviour() {
+		vector<shared_ptr<GameObject>> ZakoVec;
+		FindTagGameObjectVec(L"Zako", ZakoVec);
+		for (auto zako : ZakoVec) {
+			if (zako) {
+				auto PtrZako = dynamic_pointer_cast<EnemyObject>(zako);
+				PtrZako->SetUpdateActive(false);
+			}
+		}
+		auto s_boss = FindTagGameObject<EnemyObject>(L"SawBoss");
+		if (s_boss) {
+			s_boss->SetUpdateActive(false);
+		}
+		auto h_boss = FindTagGameObject<EnemyObject>(L"HandBoss");
+		if (h_boss) {
+			h_boss->SetUpdateActive(false);
+		}
+		vector<shared_ptr<GameObject>> HandVec;
+		FindTagGameObjectVec(L"BossHand", HandVec);
+		for (auto hand : HandVec) {
+			if (hand) {
+				auto PtrHand = dynamic_pointer_cast<BossHand>(hand);
+				PtrHand->SetUpdateActive(false);
+			}
+		}
+		auto player = FindTagGameObject<Player>(L"Player");
+		if (player) {
+			player->SetUpdateActive(false);
 		}
 	}
 

@@ -190,6 +190,36 @@ namespace basecross {
 		App::GetApp()->RegisterTexture(L"PLAYER_BAR_TX", strTexture);
 		strTexture = DataDir + L"Player_HP_Frame.png";
 		App::GetApp()->RegisterTexture(L"PLAYER_FRAME_TX", strTexture);
+		strTexture = DataDir + L"Result_UI_A.png";
+		App::GetApp()->RegisterTexture(L"RESULT_A", strTexture);
+		strTexture = DataDir + L"Result_UI_B.png";
+		App::GetApp()->RegisterTexture(L"RESULT_B", strTexture);
+		strTexture = DataDir + L"Result_UI_C.png";
+		App::GetApp()->RegisterTexture(L"RESULT_C", strTexture);
+		strTexture = DataDir + L"Result_UI_D.png";
+		App::GetApp()->RegisterTexture(L"RESULT_D", strTexture);
+		strTexture = DataDir + L"Result_UI_S.png";
+		App::GetApp()->RegisterTexture(L"RESULT_S", strTexture);
+		strTexture = DataDir + L"Result_UI_Clear.png";
+		App::GetApp()->RegisterTexture(L"CLEAR_LOGO", strTexture);
+		strTexture = DataDir + L"Result_UI_Miss.png";
+		App::GetApp()->RegisterTexture(L"FAIL_LOGO", strTexture);
+		strTexture = DataDir + L"Result_UI_frame.png";
+		App::GetApp()->RegisterTexture(L"RESULT_FRAME", strTexture);
+		strTexture = DataDir + L"Result_UI_Life.png";
+		App::GetApp()->RegisterTexture(L"LIFE_LOGO", strTexture);
+		strTexture = DataDir + L"Result_UI_BG.png";
+		App::GetApp()->RegisterTexture(L"RESULT_BACK", strTexture);
+		strTexture = DataDir + L"Result_UI_retry.png";
+		App::GetApp()->RegisterTexture(L"RETRY_LOGO", strTexture);
+		strTexture = DataDir + L"Result_UI_Play.png";
+		App::GetApp()->RegisterTexture(L"TIME_LOGO", strTexture);
+		strTexture = DataDir + L"Result_UI_Percet.png";
+		App::GetApp()->RegisterTexture(L"PAERCENT_LOGO", strTexture);
+		strTexture = DataDir + L"Result_UI_Life.png";
+		App::GetApp()->RegisterTexture(L"LIFE_LOGO", strTexture);
+		strTexture = DataDir + L"Result_UI_Rank.png";
+		App::GetApp()->RegisterTexture(L"RANK_LOGO", strTexture);
 
 		//ボーンモデルのリソース
 		auto ModelMesh = MeshResource::CreateBoneModelMesh(DataDir, L"Kureha_fbx_v2.bmf");

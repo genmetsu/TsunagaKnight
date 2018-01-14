@@ -39,38 +39,40 @@ namespace basecross {
 
 	Vec3 Player::GetMoveVector() {
 		Vec3 Angle(0, 0, 0);
-		auto PtrGameStage = GetStage<GameStage>();
-		Vec3 CameraEye, CameraAt;
-		PtrGameStage->GetCamera().GetCameraEyeAt(CameraEye, CameraAt);
+		if (m_UpdateActive) {
+			auto PtrGameStage = GetStage<GameStage>();
+			Vec3 CameraEye, CameraAt;
+			PtrGameStage->GetCamera().GetCameraEyeAt(CameraEye, CameraAt);
 
-		//コントローラの取得
-		auto CntlVec = App::GetApp()->GetInputDevice().GetControlerVec();
-		if (CntlVec[0].bConnected) {
-			if (CntlVec[0].fThumbLX != 0 || CntlVec[0].fThumbLY != 0) {
-				float MoveLength = 0;	//動いた時のスピード
-										//進行方向の向きを計算
-				Vec3 Front = m_Rigidbody->m_Pos - CameraEye;
-				Front.y = 0;
-				Front.normalize();
-				//進行方向向きからの角度を算出
-				float FrontAngle = atan2(Front.z, Front.x);
-				//コントローラの向き計算
-				float MoveX = CntlVec[0].fThumbLX;
-				float MoveZ = CntlVec[0].fThumbLY;
-				Vec2 MoveVec(MoveX, MoveZ);
-				float MoveSize = length(MoveVec);
-				//コントローラの向きから角度を計算
-				float CntlAngle = atan2(-MoveX, MoveZ);
-				//トータルの角度を算出
-				float TotalAngle = FrontAngle + CntlAngle;
-				//角度からベクトルを作成
-				Angle = Vec3(cos(TotalAngle), 0, sin(TotalAngle));
-				//正規化する
-				Angle.normalize();
-				//移動サイズを設定。
-				Angle *= MoveSize;
-				//Y軸は変化させない
-				Angle.y = 0;
+			//コントローラの取得
+			auto CntlVec = App::GetApp()->GetInputDevice().GetControlerVec();
+			if (CntlVec[0].bConnected) {
+				if (CntlVec[0].fThumbLX != 0 || CntlVec[0].fThumbLY != 0) {
+					float MoveLength = 0;	//動いた時のスピード
+											//進行方向の向きを計算
+					Vec3 Front = m_Rigidbody->m_Pos - CameraEye;
+					Front.y = 0;
+					Front.normalize();
+					//進行方向向きからの角度を算出
+					float FrontAngle = atan2(Front.z, Front.x);
+					//コントローラの向き計算
+					float MoveX = CntlVec[0].fThumbLX;
+					float MoveZ = CntlVec[0].fThumbLY;
+					Vec2 MoveVec(MoveX, MoveZ);
+					float MoveSize = length(MoveVec);
+					//コントローラの向きから角度を計算
+					float CntlAngle = atan2(-MoveX, MoveZ);
+					//トータルの角度を算出
+					float TotalAngle = FrontAngle + CntlAngle;
+					//角度からベクトルを作成
+					Angle = Vec3(cos(TotalAngle), 0, sin(TotalAngle));
+					//正規化する
+					Angle.normalize();
+					//移動サイズを設定。
+					Angle *= MoveSize;
+					//Y軸は変化させない
+					Angle.y = 0;
+				}
 			}
 		}
 		return Angle;
@@ -756,7 +758,7 @@ namespace basecross {
 	}
 
 	void Sword::OnUpdate2() {
-		auto fps = App::GetApp()->GetStepTimer().GetFramesPerSecond();
+		/*auto fps = App::GetApp()->GetStepTimer().GetFramesPerSecond();
 		wstring FPS(L"FPS: ");
 		FPS += Util::UintToWStr(fps);
 		FPS += L"\nElapsedTime: ";
@@ -773,7 +775,7 @@ namespace basecross {
 		if (!m_StringDrawObject) {
 			m_StringDrawObject = GetStage<GameStage>()->FindTagGameObject<StringDrawObject>(L"StringDrawObject");
 		}
-		m_StringDrawObject->SetText(FPS);
+		m_StringDrawObject->SetText(FPS);*/
 	}
 
 

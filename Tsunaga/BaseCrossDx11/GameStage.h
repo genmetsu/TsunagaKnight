@@ -24,6 +24,7 @@ namespace basecross {
 		weak_ptr<Player> m_PtrPlayer;
 		shared_ptr<MultiAudioObject> m_AudioObjectPtr;
 		float m_FrameCount;
+		bool m_isClear;
 	public:
 		//--------------------------------------------------------------------------------------
 		/*!
@@ -75,6 +76,16 @@ namespace basecross {
 
 		void CannonStateStartBehaviour();
 		void CannonStateEndBehaviour();
+
+		void GameClearBehaviour();
+
+		void SetIsClear(bool value) {
+			m_isClear = value;
+			GameClearBehaviour();
+		}
+		bool GetIsClear() {
+			return m_isClear;
+		}
 
 
 		shared_ptr<Player> GetPlayerPtr()const {

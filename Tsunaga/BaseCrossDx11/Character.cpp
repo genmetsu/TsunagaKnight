@@ -1125,6 +1125,57 @@ namespace basecross {
 	}
 
 	//--------------------------------------------------------------------------------------
+	///	メッセージを表示するスプライト
+	//--------------------------------------------------------------------------------------
+	ResultSprite::ResultSprite(const shared_ptr<Stage>& StagePtr,
+		const wstring& TextureResName,
+		const Vec2& StartScale,
+		float StartRot,
+		const Vec2& StartPos,
+		UINT XWrap, UINT YWrap) :
+		SpriteBase(StagePtr, TextureResName, StartScale, StartRot, StartPos, XWrap, YWrap),
+		m_TotalTime(0)
+	{
+		SetBlendState(BlendState::Trace);
+	}
+
+	void ResultSprite::AdjustVertex() {
+		//頂点色を変更する
+		
+	}
+
+	void  ResultSprite::UpdateVertex(float ElapsedTime, VertexPositionColorTexture* vertices) {
+		if (GetStage<GameStage>()->GetIsClear()) {
+			m_TotalTime += ElapsedTime;
+			if (m_TotalTime >= 1.0f) {
+				m_TotalTime = 1.0f;
+			}
+			//float sin_val = sin(m_TotalTime) * 0.5f + 0.5f;
+			Col4 UpdateCol(1.0f, 1.0f, 1.0f, m_TotalTime);
+			for (size_t i = 0; i < m_SquareMesh->GetNumVertices(); i++) {
+				vertices[i] = VertexPositionColorTexture(
+					m_BackupVertices[i].position,
+					UpdateCol,
+					m_BackupVertices[i].textureCoordinate
+				);
+
+			}
+		}
+		else {
+			
+			Col4 UpdateCol(1.0f, 1.0f, 1.0f, 0.0f);
+			for (size_t i = 0; i < m_SquareMesh->GetNumVertices(); i++) {
+				vertices[i] = VertexPositionColorTexture(
+					m_BackupVertices[i].position,
+					UpdateCol,
+					m_BackupVertices[i].textureCoordinate
+				);
+
+			}
+		}
+	}
+
+	//--------------------------------------------------------------------------------------
 	///	背景スプライト
 	//--------------------------------------------------------------------------------------
 	MultiSprite::MultiSprite(const shared_ptr<Stage>& StagePtr,
@@ -3359,7 +3410,7 @@ namespace basecross {
 		m_frame_count = 0.0f;
 		m_DamageRate = 0.0f;
 
-		m_HP = 100.0f;
+		m_HP = 75.0f;
 		m_DefaultHP = m_HP;
 		AddTag(L"BossEnemy");
 
@@ -3417,6 +3468,16 @@ namespace basecross {
 		if (m_HP <= 0.0f && m_isDead == false) {
 			ChangeAnimation(L"Dead");
 			m_isDead = true;
+			m_frame_count = 0.0f;
+		}
+		else if (m_isDead) {
+			if (m_frame_count >= 2.0f) {
+				GetStage<GameStage>()->SetIsClear(true);
+				m_isDead = false;
+				m_Rigidbody->m_Pos = Vec3(100, 100, 100);
+			}
+			m_frame_count += ElapsedTime;
+			return;
 		}
 		auto GM = GameManager::getInstance();
 		GM->SetBossHP(m_HP);
