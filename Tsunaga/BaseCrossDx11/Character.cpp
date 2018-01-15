@@ -2135,6 +2135,28 @@ namespace basecross {
 		RotateToVelocity();
 	}
 
+	void EnemyObject::DamageBehaviour() {
+		float ElapsedTime = App::GetApp()->GetElapsedTime();
+
+		if (m_FrameCount > 1.0f) {
+			m_FrameCount = 0;
+			m_StateMachine->ChangeState(EnemyOppositionState::Instance());
+			return;
+		}
+		else if (m_FrameCount > 0.3f) {
+			m_Rigidbody->m_Velocity = Vec3(0);
+		}
+		else if (m_FrameCount < 0.3f) {
+			auto player = dynamic_pointer_cast<Player>(m_PlayerPtr.lock());
+			Vec3 MoveVec = m_Rigidbody->m_Pos - player->GetPosition();
+			MoveVec.y = 0.0f;
+			MoveVec.normalize();
+			m_Rigidbody->m_Velocity = MoveVec * 4.0f;
+		}
+
+		m_FrameCount += ElapsedTime;
+	}
+
 	void EnemyObject::CheckHealth() {
 		if (m_HP <= 0.0f) {
 			if (m_isDead == false) {
@@ -2204,8 +2226,14 @@ namespace basecross {
 	}
 
 	void EnemyObject::ChangeState(wstring name) {
-
-		m_StateMachine->ChangeState(EnemyToCannonState::Instance());
+		if (name == L"ToCannon") {
+			m_StateMachine->ChangeState(EnemyToCannonState::Instance());
+			return;
+		}
+		else if (name == L"Damage") {
+			m_StateMachine->ChangeState(EnemyDamageState::Instance());
+			return;
+		}
 	}
 
 	void EnemyObject::Spawn() {
@@ -2433,6 +2461,23 @@ namespace basecross {
 	}
 
 	//--------------------------------------------------------------------------------------
+	///	ダメージを受けたときのステート（EnemyObject）
+	//--------------------------------------------------------------------------------------
+	IMPLEMENT_SINGLETON_INSTANCE(EnemyDamageState)
+
+	void EnemyDamageState::Enter(const shared_ptr<EnemyObject>& Obj) {
+		
+	}
+
+	void EnemyDamageState::Execute(const shared_ptr<EnemyObject>& Obj) {
+		Obj->DamageBehaviour();
+	}
+
+	void EnemyDamageState::Exit(const shared_ptr<EnemyObject>& Obj) {
+		//何もしない
+	}
+
+	//--------------------------------------------------------------------------------------
 	///	ニードルエネミー（近接）
 	//--------------------------------------------------------------------------------------
 
@@ -2542,6 +2587,7 @@ namespace basecross {
 					SparkPtr->InsertSpark(Emitter);
 
 					PtrBoss->Damage(0.1f);
+					PtrBoss->ChangeState(L"Damage");
 					if (PtrBoss->GetHP() <= 0.0f) {
 						Vec3 p_pos = m_PlayerPtr.lock()->GetPosition();
 						float p_dis = (p_pos - GetPosition()).length();
@@ -2557,7 +2603,7 @@ namespace basecross {
 						FirePtr->InsertFire(Emitter, PtrBoss->GetScale() * 3.0f);
 						//敵を異次元に飛ばす（仮倒し処理）
 						PtrBoss->SetPosition(Vec3(0, 0, 70));
-						PtrBoss->ChangeState(L"");
+						PtrBoss->ChangeState(L"ToCannon");
 					}
 					//ノックバック方向の設定
 					return;
