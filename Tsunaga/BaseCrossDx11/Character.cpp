@@ -3037,6 +3037,13 @@ namespace basecross {
 
 		m_BaseY = m_Rigidbody->m_Scale.y / 2.0f + 0.6f;
 
+		//サウンドオブジェクトの初期化
+		m_DeadSound = ObjectFactory::Create<SoundObject>(L"Pan");
+		m_BossDamageSound = ObjectFactory::Create<SoundObject>(L"bossdamage");
+		m_FriendsSound = ObjectFactory::Create<SoundObject>(L"nakama");
+		m_CannonSound = ObjectFactory::Create<SoundObject>(L"cannon");
+		m_EyeFlashSound = ObjectFactory::Create<SoundObject>(L"eye_flash");
+
 		auto TexPtr = App::GetApp()->GetResource<TextureResource>(m_TextureResName);
 
 		//描画データの構築
@@ -3065,13 +3072,16 @@ namespace basecross {
 
 		vector<shared_ptr<GameObject>> CannonVec;
 		GetStage<GameStage>()->FindTagGameObjectVec(L"Cannon", CannonVec);
+		int num = rand() % 3;
 		for (auto cannon : CannonVec)
 		{
 			if (cannon)
 			{
 				auto Ptrcannon = dynamic_pointer_cast<Cannon>(cannon);
-				m_CannonPos = Ptrcannon->GetPosition();
-				return;
+				if (num == Ptrcannon->GetCannonClass()) {
+					m_CannonPos = Ptrcannon->GetPosition();
+					break;
+				}
 			}
 		}
 	}
