@@ -22,13 +22,22 @@ void TitleScene::OnUpdateStage() {
 }
 
 void TitleScene::OnCreate() {
+	//背景スプライトの作成
+	AddGameObject<MultiSprite>(
+		L"TITLE_TX",
+		Vec2(1280, 720),
+		0.0f,
+		Vec2(0, 0),
+		1, 1
+		);
+
 
 	//背景スプライトの作成
 	AddGameObject<MultiSprite>(
 		L"TsunagaKnight_TX",
 		Vec2(1920 * 0.5f, 650 *0.5f),
 		0.0f,
-		Vec2(0, 200),
+		Vec2(0, 100),
 		1, 1
 		);
 
@@ -40,6 +49,8 @@ void TitleScene::OnCreate() {
 		Vec2(0, -300),
 		1, 1
 		);
+
+
 	
 
 }

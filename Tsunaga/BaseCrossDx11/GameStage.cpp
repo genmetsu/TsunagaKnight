@@ -644,7 +644,7 @@ namespace basecross {
 			//Bƒ{ƒ^ƒ“
 			if (CntlVec[0].wPressedButtons & XINPUT_GAMEPAD_B) {
 				//PostEvent(0.0f, GetThis<ObjectInterface>(), App::GetApp()->GetScene<Scene>(), L"ToEmptyStage");
-				SetIsFail(true);
+				//SetIsFail(true);
 			}
 			
 		}

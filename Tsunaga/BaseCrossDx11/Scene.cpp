@@ -225,7 +225,8 @@ namespace basecross {
 		strTexture = DataDir + L"Result_UI_Arrow.png";
 		App::GetApp()->RegisterTexture(L"RESULT_ARROW", strTexture);
 
-		
+		strTexture = DataDir + L"space3.jpeg";
+		App::GetApp()->RegisterTexture(L"TITLE_TX", strTexture);
 
 		//ボーンモデルのリソース
 		auto ModelMesh = MeshResource::CreateBoneModelMesh(DataDir, L"Kureha_fbx_v2.bmf");

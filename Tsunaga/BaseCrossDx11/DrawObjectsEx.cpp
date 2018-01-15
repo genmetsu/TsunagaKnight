@@ -108,7 +108,7 @@ namespace basecross {
 	//ç\ízÇ∆è¡ñ≈
 	ParticleDrawObject::ParticleDrawObject(const shared_ptr<Stage>& StagePtr, bool AddType) :
 		GameObject(StagePtr),
-		m_MaxInstance(4000),
+		m_MaxInstance(2000),
 		m_ZBufferUse(true),
 		m_SamplerWrap(false),
 		m_AddType(AddType)
