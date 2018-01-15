@@ -550,7 +550,6 @@ namespace basecross {
 					camera.m_CameraArmLen = 30;
 					camera.m_CamerEye = ShootPos;
 					camera.m_CamerEye.x -= 4.0f;
-					//camera.m_CamerEye.y += 2.0f;
 					camera.m_CamerEye.z -= 7.0f;
 				}
 				if (now_cannon == 1) {
@@ -588,7 +587,6 @@ namespace basecross {
 					camera.m_CameraArmLen = 30;
 					camera.m_CamerEye = ShootPos;
 					camera.m_CamerEye.x -= 3.0f;
-					//camera.m_CamerEye.y += 2.0f;
 					camera.m_CamerEye.z -= 7.0f;
 				}
 				if (now_cannon == 2) {
@@ -625,7 +623,6 @@ namespace basecross {
 					camera.m_CameraArmLen = 30;
 					camera.m_CamerEye = ShootPos;
 					camera.m_CamerEye.x -= 2.0f;
-					//camera.m_CamerEye.y += 2.0f;
 					camera.m_CamerEye.z -= 7.0f;
 				}
 			}
