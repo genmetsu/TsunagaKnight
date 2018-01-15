@@ -2324,5 +2324,6 @@ namespace basecross {
 		void ChangeAnimation(wstring anim);
 	};
 
+
 }
 //end basecross
