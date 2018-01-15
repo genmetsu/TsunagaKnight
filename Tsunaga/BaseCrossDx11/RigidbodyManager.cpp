@@ -716,7 +716,8 @@ namespace basecross {
 		for (auto& v : m_CollisionStateVec) {
 			if (!v.m_Src->m_IsFixed) {
 				v.m_Src->Move(v.m_HitTime);
-				v.m_Src->m_Velocity.slide(v.m_SrcHitNormal);
+				v.m_Src->m_Velocity = SlideEx(v.m_Src->m_Velocity, v.m_SrcHitNormal);
+//				v.m_Src->m_Velocity.slide(v.m_SrcHitNormal);
 			}
 			if (!v.m_Dest->m_IsFixed) {
 				v.m_Dest->Move(v.m_HitTime);
