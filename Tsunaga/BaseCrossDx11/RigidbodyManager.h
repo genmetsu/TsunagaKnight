@@ -13,7 +13,7 @@ namespace basecross {
 		//vecと法線から直行線の長さ（内積で求める）
 		float Len = bsm::dot(Base, Norm);
 		//その長さに伸ばす
-		Vec3 Contact = Norm * Len * 0.5f;
+		Vec3 Contact = Norm * Len * 0.9f;
 		//スライドする方向は現在のベクトルから引き算
 		return (Base - Contact);
 	}
