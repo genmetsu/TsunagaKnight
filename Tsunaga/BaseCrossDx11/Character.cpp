@@ -217,7 +217,6 @@ namespace basecross {
 	//--------------------------------------------------------------------------------------
 	///	透明な壁
 	//--------------------------------------------------------------------------------------
-
 	TransparentWall::TransparentWall(const shared_ptr<Stage>& StagePtr,
 		const Vec3& Scale, const Quat& Qt, const Vec3& Pos) :
 		GameObject(StagePtr),
@@ -2479,6 +2478,23 @@ namespace basecross {
 
 	void EnemyDamageState::Exit(const shared_ptr<EnemyObject>& Obj) {
 		//何もしない
+	}
+
+	//--------------------------------------------------------------------------------------
+	///	スポーン街のステート（EnemyObject）
+	//--------------------------------------------------------------------------------------
+	IMPLEMENT_SINGLETON_INSTANCE(EnemyWaitingState)
+
+	void EnemyWaitingState::Enter(const shared_ptr<EnemyObject>& Obj) {
+
+	}
+
+	void EnemyWaitingState::Execute(const shared_ptr<EnemyObject>& Obj) {
+		
+	}
+
+	void EnemyWaitingState::Exit(const shared_ptr<EnemyObject>& Obj) {
+		
 	}
 
 	//--------------------------------------------------------------------------------------

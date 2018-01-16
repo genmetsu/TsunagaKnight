@@ -1232,6 +1232,8 @@ namespace basecross {
 		bool m_Bomb;
 
 		bool m_UpdateActive;
+		//リスポーン待ちかどうか
+		bool m_isWaiting;
 
 		//死んだかどうか
 		bool m_isDead;
@@ -1619,6 +1621,20 @@ namespace basecross {
 	public:
 		//ステートのインスタンス取得
 		DECLARE_SINGLETON_INSTANCE(EnemyDamageState)
+		virtual void Enter(const shared_ptr<EnemyObject>& Obj)override;
+		virtual void Execute(const shared_ptr<EnemyObject>& Obj)override;
+		virtual void Exit(const shared_ptr<EnemyObject>& Obj)override;
+	};
+
+	//--------------------------------------------------------------------------------------
+	///	スポーン待ちステート（EnemyObject）
+	//--------------------------------------------------------------------------------------
+	class EnemyWaitingState : public ObjState<EnemyObject>
+	{
+		EnemyWaitingState() {}
+	public:
+		//ステートのインスタンス取得
+		DECLARE_SINGLETON_INSTANCE(EnemyWaitingState)
 		virtual void Enter(const shared_ptr<EnemyObject>& Obj)override;
 		virtual void Execute(const shared_ptr<EnemyObject>& Obj)override;
 		virtual void Exit(const shared_ptr<EnemyObject>& Obj)override;
