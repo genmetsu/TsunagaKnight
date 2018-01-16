@@ -1405,6 +1405,10 @@ namespace basecross {
 		m_PtrObj->m_Camera = GetStage<Stage>()->GetCamera();
 		m_PtrObj->m_OwnShadowmapActive = false;
 		m_PtrObj->m_ShadowmapUse = false;
+		m_PtrObj->m_UsedModelColor = false;
+
+		m_PtrObj->m_Diffuse = Col4(1.0f, 1.0f, 1.0f, 1.0f);
+		m_PtrObj->m_Emissive = Col4(1.0f, 1.0f, 1.0f, 1.0f);
 
 		//シャドウマップ描画データの構築
 		m_PtrShadowmapObj = make_shared<ShadowmapObject>();
