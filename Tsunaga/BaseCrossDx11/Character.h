@@ -1496,12 +1496,11 @@ namespace basecross {
 		@return	‚È‚µ
 		*/
 		//--------------------------------------------------------------------------------------
-
-		void RotateToVelocity();
-
 		void SetParent(weak_ptr<GameObject> gameObject) {
 			m_ParentPtr = gameObject;
 		};
+
+		void RotateToVelocity();
 		
 		void ChangeState(wstring name);
 

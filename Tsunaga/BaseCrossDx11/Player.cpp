@@ -998,9 +998,7 @@ namespace basecross {
 				//Fireの送出
 				auto SparkPtr = GetStage<GameStage>()->FindTagGameObject<MultiFire>(L"MultiFire");
 				SparkPtr->InsertFire(Emitter, 1.0f);
-				//enemy->Spawn();
 				enemy->GetStateMachine()->ChangeState(EnemyWaitingState::Instance());
-				//enemy->SetPosition(Vec3(0, 0, 70));
 				
 				//配列を消し、つながりの数を再計算
 				m_friends.erase(m_friends.begin() + i);

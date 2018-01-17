@@ -1784,8 +1784,7 @@ namespace basecross {
 						//Fireの送出
 						auto SparkPtr = GetStage<GameStage>()->FindTagGameObject<MultiFire>(L"MultiFire");
 						SparkPtr->InsertFire(Emitter, m_Scale.x * 3.0f);
-						//敵を異次元に飛ばす（仮倒し処理）
-						//SetPosition(Vec3(0, 0, 70));
+						
 						m_HP = m_DefaultHP;
 						m_StateMachine->ChangeState(EnemyWaitingState::Instance());
 					}
@@ -2142,9 +2141,6 @@ namespace basecross {
 					if (p_ptr->GetCannonHP() <= 0.0f ) {
 						GetStage<GameStage>()->SetIsFail(true);
 					}
-					
-					//敵を異次元に飛ばす（仮倒し処理）
-					//SetPosition(Vec3(0, 0, 70));
 
 					m_StateMachine->ChangeState(EnemyWaitingState::Instance());
 
@@ -2459,7 +2455,6 @@ namespace basecross {
 
 	void EnemyBulletState::Exit(const shared_ptr<EnemyObject>& Obj) {
 		Obj->RemoveTag(L"Shooted");
-		Obj->Spawn();
 	}
 
 	//--------------------------------------------------------------------------------------
@@ -2515,6 +2510,7 @@ namespace basecross {
 
 	void EnemyWaitingState::Exit(const shared_ptr<EnemyObject>& Obj) {
 		Obj->WaitingEndBehaviour();
+		Obj->Spawn();
 	}
 
 	//--------------------------------------------------------------------------------------
@@ -2573,8 +2569,7 @@ namespace basecross {
 						//Fireの送出
 						auto SparkPtr = GetStage<GameStage>()->FindTagGameObject<MultiFire>(L"MultiFire");
 						SparkPtr->InsertFire(Emitter, 1.0f);
-						//敵を異次元に飛ばす（仮倒し処理）
-						//PtrEnemy->SetPosition(Vec3(0, 0, 70));
+					
 						PtrEnemy->ChangeState(L"Waiting");
 						return;
 					}
@@ -2642,8 +2637,7 @@ namespace basecross {
 						//Fireの送出
 						auto FirePtr = GetStage<GameStage>()->FindTagGameObject<MultiFire>(L"MultiFire");
 						FirePtr->InsertFire(Emitter, PtrBoss->GetScale() * 3.0f);
-						//敵を異次元に飛ばす（仮倒し処理）
-						//PtrBoss->SetPosition(Vec3(0, 0, 70));
+						
 						PtrBoss->ChangeState(L"Waiting");
 					}
 					//ノックバック方向の設定
