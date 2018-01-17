@@ -2262,6 +2262,10 @@ namespace basecross {
 
 		float m_DamageRate;
 
+		float m_SpawnCount;
+
+		float m_SpawnTime;
+
 		//Rigidbodyのshared_ptr
 		shared_ptr<Rigidbody> m_Rigidbody;
 		//メッシュとの差分計算用
@@ -2373,6 +2377,14 @@ namespace basecross {
 		*/
 		//--------------------------------------------------------------------------------------
 		void ChangeAnimation(wstring anim);
+
+		//--------------------------------------------------------------------------------------
+		/*!
+		@brief 敵をスポーンさせる
+		@return	なし
+		*/
+		//--------------------------------------------------------------------------------------
+		void SpawnEnemy(wstring tag);
 	};
 
 

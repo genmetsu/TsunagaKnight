@@ -2355,8 +2355,6 @@ namespace basecross {
 					BossPtr->ChangeAnimation(L"Damage");
 				}
 
-				//SetPosition(Vec3(0, 0, 70));
-
 				m_StateMachine->ChangeState(EnemyWaitingState::Instance());
 				return;
 			}
@@ -3671,7 +3669,8 @@ namespace basecross {
 		m_Scale(Scale),
 		m_Qt(Qt),
 		m_Pos(Pos),
-		m_OwnShadowActive(OwnShadowActive)
+		m_OwnShadowActive(OwnShadowActive),
+		m_SpawnTime(5.0f)
 	{}
 	Boss::~Boss() {}
 
@@ -3697,6 +3696,8 @@ namespace basecross {
 		);
 
 		m_frame_count = 0.0f;
+		m_SpawnCount = 0.0f;
+
 		m_DamageRate = 0.0f;
 		m_now_barrior = 0;
 
@@ -3753,8 +3754,7 @@ namespace basecross {
 		float ElapsedTime = App::GetApp()->GetElapsedTime();
 		m_PtrObj->UpdateAnimation(ElapsedTime);
 
-
-
+		//HPがなくなった時の処理
 		if (m_HP <= 0.0f && m_isDead == false) {
 			ChangeAnimation(L"Dead");
 			m_isDead = true;
@@ -3764,16 +3764,19 @@ namespace basecross {
 			if (m_frame_count >= 2.0f) {
 				GetStage<GameStage>()->SetIsClear(true);
 				m_isDead = false;
-				m_Rigidbody->m_Pos = Vec3(100, 100, 100);
+				m_Rigidbody->m_Pos = Vec3(0, -100, 0);
 				m_HP = 0.0001f;
 			}
 			m_frame_count += ElapsedTime;
 			return;
 		}
+
+
+
 		auto GM = GameManager::getInstance();
 		GM->SetBossHP(m_HP);
 
-
+		//ダメージを受けた後すぐまたダメージをうけるとよりダメージが増えるように
 		if (m_isDamage) {
 			m_frame_count += ElapsedTime;
 		}
@@ -3784,13 +3787,32 @@ namespace basecross {
 		}
 
 
-
+		//ボスが生きているときの処理
 		if (m_HP > 0.0f) {
+
+			if (m_SpawnCount > m_SpawnTime) {
+				int num = rand() % 3;
+				if (num == 0) {
+					SpawnEnemy(L"Green");
+				}
+				if (num == 1) {
+					SpawnEnemy(L"Red");
+				}
+				if (num == 2) {
+					SpawnEnemy(L"Blue");
+				}
+				m_SpawnCount = 0.0f;
+			}
+			m_SpawnCount += ElapsedTime;
+
 			auto player = GetStage()->FindTagGameObject<Player>(L"Player");
+			//大砲を撃っているときはFrameCountしないようにする
 			int now_num = player->GetIsCannon();
 			if (now_num == 3) {
 				m_frame_count += ElapsedTime;
 			}
+
+			//一定時間毎にバリアを変える
 			if (m_frame_count >= 20.0f && m_now_barrior == 0) {
 				m_now_barrior = 1;
 				m_frame_count = 0.0f;
@@ -3803,11 +3825,11 @@ namespace basecross {
 				m_now_barrior = 0;
 				m_frame_count = 0.0f;
 			}
-			
+
 			Vec3 Emitter = m_Rigidbody->m_Pos;
 			Emitter.x -= 3.0f;
 			Emitter.y -= 3.0f;
-			//Sparkの送出
+			//バリアエフェクトの送出
 			auto SparkPtr = GetStage<GameStage>()->FindTagGameObject<BossEffect>(L"BossEffect");
 			if (m_now_barrior == 0) {
 				SparkPtr->InsertSpark(Emitter, L"Green");
@@ -3900,6 +3922,22 @@ namespace basecross {
 	void Boss::ChangeAnimation(wstring anim) {
 		m_PtrObj->ChangeCurrentAnimation(anim);
 	}
+
+	void Boss::SpawnEnemy(wstring tag) {
+		vector<shared_ptr<GameObject>> EnemyVec;
+		GetStage<GameStage>()->FindTagGameObjectVec(L"WaitingSpawn", EnemyVec);
+		for (auto enemy : EnemyVec) {
+			if (enemy) {
+				auto PtrEnemy = dynamic_pointer_cast<EnemyObject>(enemy);
+				if (PtrEnemy->FindTag(tag)) {
+					PtrEnemy->ChangeState(L"ToCannon");
+					PtrEnemy->SetPosition(m_Rigidbody->m_Pos);
+					break;
+				}
+			}
+		}
+	}
+	
 
 }
 //end basecross
