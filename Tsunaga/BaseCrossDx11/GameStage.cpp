@@ -22,7 +22,7 @@ namespace basecross {
 			//ƒƒbƒVƒ…‚ª“o˜^‚³‚ê‚Ä‚È‚¯‚ê‚Î“o˜^
 			vector<VertexPositionNormalTexture> vertices;
 			vector<uint16_t> indices;
-			MeshUtill::CreateSphere(1.0f, 18, vertices, indices);
+			MeshUtill::CreateSphere(1.0f, 6, vertices, indices);
 			App::GetApp()->RegisterResource(L"DEFAULT_SPHERE",
 				MeshResource::CreateMeshResource(vertices, indices, false));
 		}
