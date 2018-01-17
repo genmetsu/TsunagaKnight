@@ -1761,7 +1761,7 @@ namespace basecross {
 					auto SparkPtr = GetStage<GameStage>()->FindTagGameObject<AttackSpark>(L"AttackSpark");
 					SparkPtr->InsertSpark(Emitter);
 					//’e‚ğˆÙŸŒ³‚É”ò‚Î‚·
-					PtrBullet->SetPosition(Vec3(0.0f, -10.0f, 0.0f));
+					PtrBullet->SetPosition(Vec3(0.0f, -100.0f, 0.0f));
 
 					//‘Ì—Í‚ğí‚é
 					m_HP--;
@@ -1785,9 +1785,9 @@ namespace basecross {
 						auto SparkPtr = GetStage<GameStage>()->FindTagGameObject<MultiFire>(L"MultiFire");
 						SparkPtr->InsertFire(Emitter, m_Scale.x * 3.0f);
 						//“G‚ğˆÙŸŒ³‚É”ò‚Î‚·i‰¼“|‚µˆ—j
-						SetPosition(Vec3(0, 0, 70));
+						//SetPosition(Vec3(0, 0, 70));
 						m_HP = m_DefaultHP;
-						m_StateMachine->ChangeState(EnemyToCannonState::Instance());
+						m_StateMachine->ChangeState(EnemyWaitingState::Instance());
 					}
 					return;
 				}
@@ -1847,6 +1847,21 @@ namespace basecross {
 
 	Vec3 EnemyObject::GetPosition() {
 		return m_Rigidbody->m_Pos;
+	}
+
+	void EnemyObject::WaitingStartBehaviour() {
+		SetPosition(Vec3(0, -100, 0));
+		m_Rigidbody->m_Velocity = Vec3(0, 0, 0);
+		m_Tackle = false;
+		m_FrameCount = 0.0f;
+		AddTag(L"WaitingSpawn");
+		m_Rigidbody->m_IsCollisionActive = false;
+	}
+
+	void EnemyObject::WaitingEndBehaviour() {
+		m_Rigidbody->m_Velocity = Vec3(0, 0, 0);
+		RemoveTag(L"WaitingSpawn");
+		m_Rigidbody->m_IsCollisionActive = true;
 	}
 
 	void EnemyObject::GetWorldMatrix(Mat4x4& m) const {
@@ -2129,7 +2144,9 @@ namespace basecross {
 					}
 					
 					//“G‚ğˆÙŸŒ³‚É”ò‚Î‚·i‰¼“|‚µˆ—j
-					SetPosition(Vec3(0, 0, 70));
+					//SetPosition(Vec3(0, 0, 70));
+
+					m_StateMachine->ChangeState(EnemyWaitingState::Instance());
 
 					break;
 				}
@@ -2237,6 +2254,10 @@ namespace basecross {
 			m_StateMachine->ChangeState(EnemyDamageState::Instance());
 			return;
 		}
+		else if (name == L"Waiting") {
+			m_StateMachine->ChangeState(EnemyWaitingState::Instance());
+			return;
+		}
 	}
 
 	void EnemyObject::Spawn() {
@@ -2246,7 +2267,6 @@ namespace basecross {
 		m_HP = m_DefaultHP;
 		m_FrameCount = 0.0f;
 		m_ShootNumber = 0;
-		m_Rigidbody->m_IsCollisionActive = true;
 		m_Rigidbody->m_CollType = CollType::typeSPHERE;
 
 		if (FindTag(L"Blue")) {
@@ -2339,9 +2359,9 @@ namespace basecross {
 					BossPtr->ChangeAnimation(L"Damage");
 				}
 
-				SetPosition(Vec3(0, 0, 70));
+				//SetPosition(Vec3(0, 0, 70));
 
-				m_StateMachine->ChangeState(EnemyToCannonState::Instance());
+				m_StateMachine->ChangeState(EnemyWaitingState::Instance());
 				return;
 			}
 		}
@@ -2486,7 +2506,7 @@ namespace basecross {
 	IMPLEMENT_SINGLETON_INSTANCE(EnemyWaitingState)
 
 	void EnemyWaitingState::Enter(const shared_ptr<EnemyObject>& Obj) {
-
+		Obj->WaitingStartBehaviour();
 	}
 
 	void EnemyWaitingState::Execute(const shared_ptr<EnemyObject>& Obj) {
@@ -2494,7 +2514,7 @@ namespace basecross {
 	}
 
 	void EnemyWaitingState::Exit(const shared_ptr<EnemyObject>& Obj) {
-		
+		Obj->WaitingEndBehaviour();
 	}
 
 	//--------------------------------------------------------------------------------------
@@ -2554,7 +2574,8 @@ namespace basecross {
 						auto SparkPtr = GetStage<GameStage>()->FindTagGameObject<MultiFire>(L"MultiFire");
 						SparkPtr->InsertFire(Emitter, 1.0f);
 						//“G‚ğˆÙŸŒ³‚É”ò‚Î‚·i‰¼“|‚µˆ—j
-						PtrEnemy->SetPosition(Vec3(0, 0, 70));
+						//PtrEnemy->SetPosition(Vec3(0, 0, 70));
+						PtrEnemy->ChangeState(L"Waiting");
 						return;
 					}
 				}
@@ -2574,7 +2595,7 @@ namespace basecross {
 				float PlayerRadius = m_Rigidbody->m_Scale.x / 2.0f;
 
 				if (length < Radius + PlayerRadius) {
-					PtrBullet->SetPosition(Vec3(100, 100, 100));
+					PtrBullet->SetPosition(Vec3(0, -100, 0));
 					Vec3 Emitter = m_Rigidbody->m_Pos;
 					//Spark‚Ì‘—o
 					auto SparkPtr = GetStage<GameStage>()->FindTagGameObject<AttackSpark>(L"AttackSpark");
@@ -2622,8 +2643,8 @@ namespace basecross {
 						auto FirePtr = GetStage<GameStage>()->FindTagGameObject<MultiFire>(L"MultiFire");
 						FirePtr->InsertFire(Emitter, PtrBoss->GetScale() * 3.0f);
 						//“G‚ğˆÙŸŒ³‚É”ò‚Î‚·i‰¼“|‚µˆ—j
-						PtrBoss->SetPosition(Vec3(0, 0, 70));
-						PtrBoss->ChangeState(L"ToCannon");
+						//PtrBoss->SetPosition(Vec3(0, 0, 70));
+						PtrBoss->ChangeState(L"Waiting");
 					}
 					//ƒmƒbƒNƒoƒbƒN•ûŒü‚Ìİ’è
 					return;

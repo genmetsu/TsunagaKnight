@@ -440,7 +440,7 @@ namespace basecross {
 				float PlayerRadius = m_Rigidbody->m_Scale.x / 2.0f;
 
 				if (length < Radius + PlayerRadius) {
-					PtrBullet->SetPosition(Vec3(100, 100, 100));
+					PtrBullet->SetPosition(Vec3(0, -100, 0));
 					Vec3 Emitter = m_Rigidbody->m_Pos;
 					//Sparkの送出
 					auto SparkPtr = GetStage<GameStage>()->FindTagGameObject<AttackSpark>(L"AttackSpark");
@@ -761,8 +761,8 @@ namespace basecross {
 	}
 
 	void Sword::OnUpdate2() {
-		/*auto fps = App::GetApp()->GetStepTimer().GetFramesPerSecond();
-		wstring FPS(L"FPS: ");
+		auto fps = App::GetApp()->GetStepTimer().GetFramesPerSecond();
+		wstring FPS(L"\n\n\n\n\nFPS: ");
 		FPS += Util::UintToWStr(fps);
 		FPS += L"\nElapsedTime: ";
 		float ElapsedTime = App::GetApp()->GetElapsedTime();
@@ -778,7 +778,7 @@ namespace basecross {
 		if (!m_StringDrawObject) {
 			m_StringDrawObject = GetStage<GameStage>()->FindTagGameObject<StringDrawObject>(L"StringDrawObject");
 		}
-		m_StringDrawObject->SetText(FPS);*/
+		m_StringDrawObject->SetText(FPS);
 	}
 
 
@@ -998,10 +998,10 @@ namespace basecross {
 				//Fireの送出
 				auto SparkPtr = GetStage<GameStage>()->FindTagGameObject<MultiFire>(L"MultiFire");
 				SparkPtr->InsertFire(Emitter, 1.0f);
-
-				enemy->GetStateMachine()->ChangeState(EnemyToCannonState::Instance());
-				enemy->SetPosition(Vec3(0, 0, 70));
-				enemy->Spawn();
+				//enemy->Spawn();
+				enemy->GetStateMachine()->ChangeState(EnemyWaitingState::Instance());
+				//enemy->SetPosition(Vec3(0, 0, 70));
+				
 				//配列を消し、つながりの数を再計算
 				m_friends.erase(m_friends.begin() + i);
 				m_friends_num = m_friends.size();
