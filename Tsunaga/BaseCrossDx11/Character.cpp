@@ -2801,7 +2801,7 @@ namespace basecross {
 
 			if (m_FrameCount > m_PlayerShootTime) {
 				vector<shared_ptr<GameObject>> ShootVec;
-				GetStage<GameStage>()->FindTagGameObjectVec(L"PlayerBullet", ShootVec);
+				GetStage<GameStage>()->FindTagGameObjectVec(L"BossBullet", ShootVec);
 				for (auto v : ShootVec) {
 					if (v) {
 						auto Ptr = dynamic_pointer_cast<BulletObject>(v);
@@ -2923,8 +2923,11 @@ namespace basecross {
 			m_PtrObj->m_Diffuse = Col4(0.2f, 0.2f, 0.2f, 1.0f);
 			m_PtrObj->m_Emissive = Col4(0.0f, 0.0f, 0.0f, 1.0f);
 		}
+		else if (m_my_Tag == L"BossBullet") {
+			m_PtrObj->m_Diffuse = Col4(0.3f, 0.0f, 0.3f, 1.0f);
+			m_PtrObj->m_Emissive = Col4(0.5f, 0.0f, 0.5f, 1.0f);
+		}
 		else {
-
 			m_PtrObj->m_Diffuse = Col4(0.0f, 0.3f, 1.0f, 1.0f);
 			m_PtrObj->m_Emissive = Col4(0.0f, 0.3f, 1.0f, 1.0f);
 		}
@@ -3670,7 +3673,7 @@ namespace basecross {
 		m_Qt(Qt),
 		m_Pos(Pos),
 		m_OwnShadowActive(OwnShadowActive),
-		m_SpawnTime(5.0f)
+		m_SpawnTime(3.0f)
 	{}
 	Boss::~Boss() {}
 
