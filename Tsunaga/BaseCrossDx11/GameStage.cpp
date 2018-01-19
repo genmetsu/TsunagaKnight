@@ -204,7 +204,7 @@ namespace basecross {
 			}
 		}
 
-		for (int i = 0; i < 100; i++) {
+		/*for (int i = 0; i < 100; i++) {
 			AddGameObject<BulletObject>(
 				L"SPARK_TX",
 				Vec3(0.25f, 0.25f, 0.25f),
@@ -212,7 +212,7 @@ namespace basecross {
 				Vec3(0.0f, -10.0f, 0.0f),
 				false,
 				L"BossBullet");
-		}
+		}*/
 
 		for (int i = 0; i < 10; i++) {
 			float x = (float)(i + 1);
@@ -395,8 +395,8 @@ namespace basecross {
 		AddGameObject<StringDrawObject>();
 
 		m_AudioObjectPtr = ObjectFactory::Create<MultiAudioObject>();
-		m_AudioObjectPtr->AddAudioResource(L"Nanika");
-		m_AudioObjectPtr->Start(L"Nanika", XAUDIO2_LOOP_INFINITE, 0.0f);
+		m_AudioObjectPtr->AddAudioResource(L"BGM_2");
+		m_AudioObjectPtr->Start(L"BGM_2", XAUDIO2_LOOP_INFINITE, 0.6f);
 
 	}
 

@@ -1774,7 +1774,7 @@ namespace basecross {
 						}
 						//サウンドの発行
 						if (FindTag(L"Zako")) {
-							m_DeadSound->Start(0, 1.0f / p_dis);
+							m_DeadSound->Start(0, 0.5f / p_dis);
 						}
 						else {
 							m_CannonSound->Start(0, 1.0f / p_dis);
@@ -2561,7 +2561,7 @@ namespace basecross {
 							p_dis = 1.0f;
 						}
 						//サウンドの発行
-						m_DeadSound->Start(0, 1.0f / p_dis);
+						m_DeadSound->Start(0, 0.5f / p_dis);
 
 						Vec3 Emitter = PtrEnemy->GetPosition();
 						//Fireの送出
@@ -2801,7 +2801,7 @@ namespace basecross {
 
 			if (m_FrameCount > m_PlayerShootTime) {
 				vector<shared_ptr<GameObject>> ShootVec;
-				GetStage<GameStage>()->FindTagGameObjectVec(L"BossBullet", ShootVec);
+				GetStage<GameStage>()->FindTagGameObjectVec(L"PlayerBullet", ShootVec);
 				for (auto v : ShootVec) {
 					if (v) {
 						auto Ptr = dynamic_pointer_cast<BulletObject>(v);
