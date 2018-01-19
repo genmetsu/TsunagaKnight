@@ -353,23 +353,7 @@ namespace basecross {
 
 				if (length <= EnemyRadius + PlayerRadius) {
 					if (PtrEnemy->GetHP() > 0) {
-						Vec3 Emitter = m_Rigidbody->m_Pos;
-						//Sparkの送出
-						auto SparkPtr = GetStage<GameStage>()->FindTagGameObject<AttackSpark>(L"AttackSpark");
-						SparkPtr->InsertSpark(Emitter);
-
-						m_DamageSound->Start(0, 0.4f);
-						m_BombSound->Start(0, 0.5f);
-
-						//ノックバック方向の設定
-						m_KnockBackVec = m_Rigidbody->m_Pos - EnemyPos;
-						m_KnockBackVec.y = 0.0f;
-						m_KnockBackVec.normalize();
-						//つながりを消す
-						auto s = GetStage()->FindTagGameObject<Sword>(L"Sword");
-						s->DeleteChains(3);
-						//ダメージステートに変更
-						m_StateMachine->ChangeState(DamagedState::Instance());
+						DamagedStartBehaviour(EnemyPos);
 						return;
 					}
 				}
@@ -425,43 +409,7 @@ namespace basecross {
 					
 				}
 			}
-		}
-		//弾との衝突判定
-		vector<shared_ptr<GameObject>> BulletVec;
-		GetStage<GameStage>()->FindTagGameObjectVec(L"Bullet", BulletVec);
-		for (auto bullet : BulletVec) {
-			if (bullet) {
-				auto PtrBullet = dynamic_pointer_cast<BulletObject>(bullet);
-
-				Vec3 BulletPos = PtrBullet->GetPosition();
-				float length = (BulletPos - m_Rigidbody->m_Pos).length();
-
-				float Radius = PtrBullet->GetScale() / 2.0f;
-				float PlayerRadius = m_Rigidbody->m_Scale.x / 2.0f;
-
-				if (length < Radius + PlayerRadius) {
-					PtrBullet->SetPosition(Vec3(0, -100, 0));
-					Vec3 Emitter = m_Rigidbody->m_Pos;
-					//Sparkの送出
-					auto SparkPtr = GetStage<GameStage>()->FindTagGameObject<AttackSpark>(L"AttackSpark");
-					SparkPtr->InsertSpark(Emitter);
-
-					m_DamageSound->Start(0, 0.4f);
-					m_BombSound->Start(0, 0.5f);
-
-					//ノックバック方向の設定
-					m_KnockBackVec = m_Rigidbody->m_Pos - BulletPos;
-					m_KnockBackVec.y = 0.0f;
-					m_KnockBackVec.normalize();
-					//つながりを消す
-					auto s = GetStage()->FindTagGameObject<Sword>(L"Sword");
-					s->DeleteChains(3);
-					//ダメージステートに変更
-					m_StateMachine->ChangeState(DamagedState::Instance());
-					return;
-				}
-			}
-		}
+		}	
 		//ボスハンドとの衝突判定
 		vector<shared_ptr<GameObject>> HandVec;
 		GetStage<GameStage>()->FindTagGameObjectVec(L"BossHand", HandVec);
@@ -476,27 +424,31 @@ namespace basecross {
 				float PlayerRadius = m_Rigidbody->m_Scale.x / 2.0f;
 
 				if (length < Radius + PlayerRadius) {
-					Vec3 Emitter = m_Rigidbody->m_Pos;
-					//Sparkの送出
-					auto SparkPtr = GetStage<GameStage>()->FindTagGameObject<AttackSpark>(L"AttackSpark");
-					SparkPtr->InsertSpark(Emitter);
-
-					m_DamageSound->Start(0, 0.4f);
-					m_BombSound->Start(0, 0.5f);
-
-					//ノックバック方向の設定
-					m_KnockBackVec = m_Rigidbody->m_Pos - HandPos;
-					m_KnockBackVec.y = 0.0f;
-					m_KnockBackVec.normalize();
-					//つながりを消す
-					auto s = GetStage()->FindTagGameObject<Sword>(L"Sword");
-					s->DeleteChains(3);
-					//ダメージステートに変更
-					m_StateMachine->ChangeState(DamagedState::Instance());
+					DamagedStartBehaviour(HandPos);
 					return;
 				}
 			}
 		}
+	}
+
+	void Player::DamagedStartBehaviour(Vec3 StartPos) {
+		Vec3 Emitter = m_Rigidbody->m_Pos;
+		//Sparkの送出
+		auto SparkPtr = GetStage<GameStage>()->FindTagGameObject<AttackSpark>(L"AttackSpark");
+		SparkPtr->InsertSpark(Emitter);
+
+		m_DamageSound->Start(0, 0.4f);
+		m_BombSound->Start(0, 0.5f);
+
+		//ノックバック方向の設定
+		m_KnockBackVec = m_Rigidbody->m_Pos - StartPos;
+		m_KnockBackVec.y = 0.0f;
+		m_KnockBackVec.normalize();
+		//つながりを消す
+		auto s = GetStage()->FindTagGameObject<Sword>(L"Sword");
+		s->DeleteChains(3);
+		//ダメージステートに変更
+		m_StateMachine->ChangeState(DamagedState::Instance());
 	}
 
 	void Player::DamagedBehaviour() {

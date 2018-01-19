@@ -1816,6 +1816,9 @@ namespace basecross {
 
 		wstring m_my_Tag;
 
+		//サウンドオブジェクト
+		shared_ptr<SoundObject> m_CollisionSound;
+
 		//親オブジェクト
 		weak_ptr<GameObject> m_ParentPtr;
 		
@@ -2295,6 +2298,10 @@ namespace basecross {
 		float m_SpawnTime;
 
 		float m_AttackFrameCount;
+
+		float m_BeforeAttackTime;
+
+		float m_BulletSpeed;
 
 		Vec3 m_CannonPos[3];
 

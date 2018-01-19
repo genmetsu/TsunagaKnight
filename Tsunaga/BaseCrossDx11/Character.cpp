@@ -2960,6 +2960,9 @@ namespace basecross {
 		//メッシュの取得
 		auto MeshPtr = App::GetApp()->GetResource<MeshResource>(L"DEFAULT_SPHERE");
 
+		//サウンドオブジェクトの初期化
+		m_CollisionSound = ObjectFactory::Create<SoundObject>(L"Pan");
+
 		//行列の定義
 		Mat4x4 World;
 		World.affineTransformation
@@ -3007,6 +3010,100 @@ namespace basecross {
 	{
 		if (m_isShoot) {
 			float ElapsedTime = App::GetApp()->GetElapsedTime();
+
+			//プレイヤーとの衝突
+			auto PlayerPtr = GetStage()->FindTagGameObject<Player>(L"Player");
+			Vec3 p_pos = PlayerPtr->GetPosition();
+			float p_dis = (p_pos - GetPosition()).length();
+			if (p_dis < PlayerPtr->GetScale() / 2.0f + m_Rigidbody->m_Scale.x / 2.0f) {
+				
+				PlayerPtr->DamagedStartBehaviour(GetPosition());
+
+				m_FrameCount = 0.0f;
+				m_isShoot = false;
+				m_Rigidbody->m_IsCollisionActive = false;
+				return;
+			}
+
+			//大砲との衝突
+			vector<shared_ptr<GameObject>> CannonVec;
+			GetStage<GameStage>()->FindTagGameObjectVec(L"Cannon", CannonVec);
+			for (auto cannon : CannonVec) {
+				if (cannon) {
+					auto PtrCannon = dynamic_pointer_cast<Cannon>(cannon);
+
+					Vec3 CannonPos = PtrCannon->GetPosition();
+					float length = (CannonPos - m_Rigidbody->m_Pos).length();
+
+					float CannonRadius = PtrCannon->GetScale() / 2.0f;
+					float PlayerRadius = m_Rigidbody->m_Scale.x / 2.0f;
+
+					if (length < CannonRadius + PlayerRadius + 1.0f) {
+						Vec3 Emitter = m_Rigidbody->m_Pos;
+						//Sparkの送出
+						auto SparkPtr = GetStage<GameStage>()->FindTagGameObject<AttackSpark>(L"AttackSpark");
+						SparkPtr->InsertSpark(Emitter);
+						//Fireの送出
+						auto FirePtr = GetStage<GameStage>()->FindTagGameObject<MultiFire>(L"MultiFire");
+						FirePtr->InsertFire(Emitter, 1.0f);
+
+						if (p_dis < 1.0f) {
+							p_dis = 1.0f;
+						}
+						//サウンドの発行
+						m_CollisionSound->Start(0, (0.7f / p_dis) + 0.3f);
+						
+						PlayerPtr->CannonDamage(1.0f);
+						if (PlayerPtr->GetCannonHP() <= 0.0f) {
+							GetStage<GameStage>()->SetIsFail(true);
+						}
+
+						m_FrameCount = 0.0f;
+						m_isShoot = false;
+						m_Rigidbody->m_IsCollisionActive = false;
+						return;
+					}
+				}
+			}
+
+			if (m_my_Tag == L"BossBullet") {
+				//チェインとの当たり判定
+				vector<shared_ptr<GameObject>> EnemyVec;
+				GetStage<GameStage>()->FindTagGameObjectVec(L"Chain", EnemyVec);
+				for (auto enemy : EnemyVec) {
+					if (enemy) {
+
+						auto PtrEnemy = dynamic_pointer_cast<EnemyObject>(enemy);
+
+						Vec3 EnemyPos = PtrEnemy->GetPosition();
+						float length = (EnemyPos - m_Rigidbody->m_Pos).length();
+
+						float EnemyRadius = PtrEnemy->GetScale() / 2.0f;
+						float PlayerRadius = m_Rigidbody->m_Scale.x;
+
+						if (length <= EnemyRadius + PlayerRadius) {
+
+							if (p_dis < 1.0f) {
+								p_dis = 1.0f;
+							}
+							//サウンドの発行
+							m_CollisionSound->Start(0, 0.5f / p_dis);
+
+							Vec3 Emitter = PtrEnemy->GetPosition();
+							//Fireの送出
+							auto SparkPtr = GetStage<GameStage>()->FindTagGameObject<MultiFire>(L"MultiFire");
+							SparkPtr->InsertFire(Emitter, 1.0f);
+
+							m_FrameCount = 0.0f;
+							m_isShoot = false;
+							m_Rigidbody->m_IsCollisionActive = false;
+
+							return;
+						}
+					}
+				}
+			}
+
 			if (m_FrameCount > m_BulletTime)
 			{
 				m_FrameCount = 0.0f;
@@ -3747,7 +3844,9 @@ namespace basecross {
 		m_Qt(Qt),
 		m_Pos(Pos),
 		m_OwnShadowActive(OwnShadowActive),
-		m_SpawnTime(3.0f)
+		m_SpawnTime(3.0f),
+		m_BulletSpeed(2.0f),
+		m_BeforeAttackTime(1.0f)
 	{}
 	Boss::~Boss() {}
 
@@ -4038,10 +4137,10 @@ namespace basecross {
 			FirePtr->InsertSigns(Emitter);
 			m_AttackFrameCount += ElapsedTime;
 		}
-		else if (m_AttackFrameCount < 1.0f) {
+		else if (m_AttackFrameCount < m_BeforeAttackTime) {
 			m_AttackFrameCount += ElapsedTime;
 		}
-		else if (m_AttackFrameCount >= 1.0f) {
+		else if (m_AttackFrameCount >= m_BeforeAttackTime) {
 			//球を飛ばす処理
 			vector<shared_ptr<GameObject>> ShootVec;
 			GetStage<GameStage>()->FindTagGameObjectVec(L"BossBullet", ShootVec);
@@ -4059,10 +4158,8 @@ namespace basecross {
 
 						Vec3 ShootPos = m_Rigidbody->m_Pos;
 						ShootPos.y = 0.2f;
-						ShootPos += ToPosVec * 1.3f;
 
-
-						Ptr->Wakeup(ShootPos, ToPosVec.normalize() * 3.0f);
+						Ptr->Wakeup(ShootPos, ToPosVec.normalize() * m_BulletSpeed);
 						m_AttackFrameCount = 0.0f;
 						return;
 					}

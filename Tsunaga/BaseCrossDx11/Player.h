@@ -251,6 +251,14 @@ namespace basecross {
 
 		//--------------------------------------------------------------------------------------
 		/*!
+		@brief ダメージを受けた時最初のふるまい
+		@return	なし
+		*/
+		//--------------------------------------------------------------------------------------
+		void DamagedStartBehaviour(Vec3 StartPos);
+
+		//--------------------------------------------------------------------------------------
+		/*!
 		@brief ダメージを受けた時のふるまい
 		@return	なし
 		*/
@@ -300,6 +308,10 @@ namespace basecross {
 		}
 		int GetIsCannon() {
 			return m_NowCannonClass;
+		}
+
+		void SetKnockBackVec(Vec3 vec) {
+			m_KnockBackVec = vec;
 		}
 
 		float GetDefaultBossHP() {
