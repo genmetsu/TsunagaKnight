@@ -231,6 +231,43 @@ namespace basecross {
 		strTexture = DataDir + L"space3.jpeg";
 		App::GetApp()->RegisterTexture(L"TITLE_TX", strTexture);
 
+		strTexture = DataDir + L"Boss_HP_Icon_R_01.png";
+		App::GetApp()->RegisterTexture(L"Boss_HP_Icon_R_01", strTexture);
+
+		strTexture = DataDir + L"Boss_HP_Icon_R_02.png";
+		App::GetApp()->RegisterTexture(L"Boss_HP_Icon_R_02", strTexture);
+
+		strTexture = DataDir + L"Boss_HP_Icon_G_01.png";
+		App::GetApp()->RegisterTexture(L"Boss_HP_Icon_G_01", strTexture);
+
+		strTexture = DataDir + L"Boss_HP_Icon_G_02.png";
+		App::GetApp()->RegisterTexture(L"Boss_HP_Icon_G_02", strTexture);
+
+		strTexture = DataDir + L"Boss_HP_Icon_B_01.png";
+		App::GetApp()->RegisterTexture(L"Boss_HP_Icon_B_01", strTexture);
+
+		strTexture = DataDir + L"Boss_HP_Icon_B_02.png";
+		App::GetApp()->RegisterTexture(L"Boss_HP_Icon_B_02", strTexture);
+
+		strTexture = DataDir + L"UI_Round_1.png";
+		App::GetApp()->RegisterTexture(L"UI_Round_1", strTexture);
+
+		strTexture = DataDir + L"UI_Round_2.png";
+		App::GetApp()->RegisterTexture(L"UI_Round_2", strTexture);
+
+		strTexture = DataDir + L"UI_Round_3.png";
+		App::GetApp()->RegisterTexture(L"UI_Round_3", strTexture);
+
+		strTexture = DataDir + L"UI_Round_4.png";
+		App::GetApp()->RegisterTexture(L"UI_Round_4", strTexture);
+
+		strTexture = DataDir + L"UI_Round_5.png";
+		App::GetApp()->RegisterTexture(L"UI_Round_5", strTexture);
+
+		strTexture = DataDir + L"UI_Star.png";
+		App::GetApp()->RegisterTexture(L"UI_Star", strTexture);
+
+
 		//ボーンモデルのリソース
 		auto ModelMesh = MeshResource::CreateBoneModelMesh(DataDir, L"Kureha_fbx_v2.bmf");
 		App::GetApp()->RegisterResource(L"KUREHA_MESH", ModelMesh);
