@@ -111,12 +111,7 @@ namespace basecross {
 			Vec3(0.0f, 0.25f, -7.0f)
 			);
 
-		AddGameObject<Boss>(
-			L"BOSS_TX",
-			Vec3(10.0f, 10.0f, 10.0f),
-			Quat(),
-			Vec3(0.0f, 12.0f, 60.0f),
-			true);
+		
 
 		//ÉvÉåÉCÉÑÅ[ÇÃçÏê¨
 		auto Par =
@@ -161,6 +156,13 @@ namespace basecross {
 				Vec3(x * 9.0f - 9.0f, 0.0f, 0.0f),
 				i, false);
 		}
+
+		AddGameObject<Boss>(
+			L"BOSS_TX",
+			Vec3(10.0f, 10.0f, 10.0f),
+			Quat(),
+			Vec3(0.0f, 12.0f, 60.0f),
+			true);
 
 		for (int i = 0; i < 20; i++) {
 			float x = (float)(i + 1);
@@ -279,6 +281,7 @@ namespace basecross {
 		AddGameObject<MultiFire>();
 		AddGameObject<AttackSigns>();
 		AddGameObject<BossAttackSigns>();
+		AddGameObject<MiddleBossAttackSigns>();
 		AddGameObject<StepEffect>();
 		AddGameObject<ShootingEffect>();
 		AddGameObject<CannonEffect>();
@@ -751,7 +754,7 @@ namespace basecross {
 	}
 
 	void GameStage::GameClearBehaviour() {
-		m_AudioObjectPtr->Stop(L"Nanika");
+		m_AudioObjectPtr->Stop(L"BGM_2");
 		vector<shared_ptr<GameObject>> ZakoVec;
 		FindTagGameObjectVec(L"Zako", ZakoVec);
 		for (auto zako : ZakoVec) {
@@ -862,7 +865,7 @@ namespace basecross {
 	}
 
 	void GameStage::GameOverBehaviour() {
-		m_AudioObjectPtr->Stop(L"Nanika");
+		m_AudioObjectPtr->Stop(L"BGM_2");
 
 		vector<shared_ptr<GameObject>> ZakoVec;
 		FindTagGameObjectVec(L"Zako", ZakoVec);
