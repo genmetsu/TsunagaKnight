@@ -324,12 +324,6 @@ namespace basecross {
 		wstring gameoverWav = DataDir + L"gameover.wav";
 		App::GetApp()->RegisterWav(L"gameover", gameoverWav);
 
-		wstring tyubossdamageWav = DataDir + L"tyubossdamage.wav";
-		App::GetApp()->RegisterWav(L"tyubossdamage", tyubossdamageWav);
-
-		wstring tyubossdamageWav = DataDir + L"tyubossdamage.wav";
-		App::GetApp()->RegisterWav(L"tyubossdamage", tyubossdamageWav);
-
 		wstring gameclear2Wav = DataDir + L"gameclear2.wav";
 		App::GetApp()->RegisterWav(L"gameclear2", gameclear2Wav);
 
