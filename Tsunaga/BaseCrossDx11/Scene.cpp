@@ -315,6 +315,42 @@ namespace basecross {
 		wstring AttackVoiceWav = DataDir + L"attack_voice.wav";
 		App::GetApp()->RegisterWav(L"attack_voice", AttackVoiceWav);
 
+		wstring tyubossdamageWav = DataDir + L"tyubossdamage.wav";
+		App::GetApp()->RegisterWav(L"tyubossdamage", tyubossdamageWav);
+
+		wstring gunWav = DataDir + L"gun.wav";
+		App::GetApp()->RegisterWav(L"gun", gunWav);
+
+		wstring gameoverWav = DataDir + L"gameover.wav";
+		App::GetApp()->RegisterWav(L"gameover", gameoverWav);
+
+		wstring tyubossdamageWav = DataDir + L"tyubossdamage.wav";
+		App::GetApp()->RegisterWav(L"tyubossdamage", tyubossdamageWav);
+
+		wstring tyubossdamageWav = DataDir + L"tyubossdamage.wav";
+		App::GetApp()->RegisterWav(L"tyubossdamage", tyubossdamageWav);
+
+		wstring gameclear2Wav = DataDir + L"gameclear2.wav";
+		App::GetApp()->RegisterWav(L"gameclear2", gameclear2Wav);
+
+		wstring gameclearWav = DataDir + L"gameclear.wav";
+		App::GetApp()->RegisterWav(L"gameclear", gameclearWav);
+
+		wstring energyWav = DataDir + L"energy.wav";
+		App::GetApp()->RegisterWav(L"energy", energyWav);
+
+		wstring energy2Wav = DataDir + L"energy2.wav";
+		App::GetApp()->RegisterWav(L"energy2", energy2Wav);
+
+		wstring Shakeoff02Wav = DataDir + L"Shakeoff02.wav";
+		App::GetApp()->RegisterWav(L"Shakeoff02", Shakeoff02Wav);
+
+		wstring Shakeoff03Wav = DataDir + L"Shakeoff03.wav";
+		App::GetApp()->RegisterWav(L"Shakeoff03", Shakeoff03Wav);
+
+		wstring MissileWav = DataDir + L"Missile.wav";
+		App::GetApp()->RegisterWav(L"Missile", MissileWav);
+
 	}
 
 
