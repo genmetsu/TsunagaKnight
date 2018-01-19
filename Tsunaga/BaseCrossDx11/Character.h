@@ -389,6 +389,22 @@ namespace basecross {
 		virtual ~AttackSigns();
 		//初期化
 		virtual void OnCreate() override;
+		void InsertSigns(const Vec3& Pos,float Size);
+		virtual void OnUpdate() override;
+
+	};
+
+	//--------------------------------------------------------------------------------------
+	//class MiddleBossAttackSigns : public MultiParticle;
+	//用途: ボスの攻撃を示唆するエフェクト
+	//--------------------------------------------------------------------------------------
+	class MiddleBossAttackSigns : public MultiParticle {
+	public:
+		//構築と破棄
+		MiddleBossAttackSigns(shared_ptr<Stage>& StagePtr);
+		virtual ~MiddleBossAttackSigns();
+		//初期化
+		virtual void OnCreate() override;
 		void InsertSigns(const Vec3& Pos);
 		virtual void OnUpdate() override;
 
@@ -2278,6 +2294,10 @@ namespace basecross {
 
 		float m_SpawnTime;
 
+		float m_AttackFrameCount;
+
+		Vec3 m_CannonPos[3];
+
 		//Rigidbodyのshared_ptr
 		shared_ptr<Rigidbody> m_Rigidbody;
 		//メッシュとの差分計算用
@@ -2381,6 +2401,8 @@ namespace basecross {
 		bool GetIsDamage() {
 			return m_isDamage;
 		}
+
+		void AttackMove();
 
 		//--------------------------------------------------------------------------------------
 		/*!

@@ -593,7 +593,7 @@ namespace basecross {
 	}
 
 
-	void AttackSigns::InsertSigns(const Vec3& Pos)
+	void AttackSigns::InsertSigns(const Vec3& Pos,float Size)
 	{
 		auto ParticlePtr = InsertParticle(2);
 		ParticlePtr->m_EmitterPos = Pos;
@@ -607,7 +607,7 @@ namespace basecross {
 		Vec3 MoveVec = Camera_Pos - Pos;
 		MoveVec.normalize();
 		for (auto& rParticleSprite : ParticlePtr->GetParticleSpriteVec()) {
-			rParticleSprite.m_LocalScale = Vec2(0.05f, 0.05f);
+			rParticleSprite.m_LocalScale = Vec2(0.1f, 0.1f) * Size;
 			rParticleSprite.m_LocalPos += MoveVec * 0.15f;
 			//色の指定
 			rParticleSprite.m_Color = Col4(1.0f, 0.0f, 0.0f, 1.0f);
@@ -627,6 +627,58 @@ namespace basecross {
 			}
 		}
 	}
+	//--------------------------------------------------------------------------------------
+	//class MiddleBossAttackSigns : public MultiParticle;
+	//用途:中ボスの攻撃する前兆エフェクト
+	//--------------------------------------------------------------------------------------
+	MiddleBossAttackSigns::MiddleBossAttackSigns(shared_ptr<Stage>& StagePtr) :
+		MultiParticle(StagePtr)
+	{}
+	MiddleBossAttackSigns::~MiddleBossAttackSigns() {}
+
+	//初期化
+	void MiddleBossAttackSigns::OnCreate() {
+		//加算描画処理をする
+		SetAddType(false);
+		//タグの追加
+		AddTag(L"MiddleBossAttackSigns");
+	}
+
+	void MiddleBossAttackSigns::InsertSigns(const Vec3& Pos)
+	{
+		auto ParticlePtr = InsertParticle(5);
+		ParticlePtr->m_EmitterPos = Pos;
+		ParticlePtr->SetTextureResource(L"SPARK_TX");
+		ParticlePtr->m_MaxTime = 1.25f;
+		vector<ParticleSprite>& pSpriteVec = ParticlePtr->GetParticleSpriteVec();
+		//カメラの方向に少し移動させる
+		auto &Camera = GetStage()->GetCamera();
+		Vec3 Camera_Pos = Camera.m_CamerEye;
+		Camera_Pos.y = 0.0f;
+		Vec3 MoveVec = Camera_Pos - Pos;
+		MoveVec.normalize();
+		for (auto& rParticleSprite : ParticlePtr->GetParticleSpriteVec()) {
+			rParticleSprite.m_LocalScale = Vec2(0.1f, 0.1f);
+			rParticleSprite.m_LocalPos += (MoveVec * 1.5f);
+			//色の指定
+			rParticleSprite.m_Color = Col4(1.0f, 1.0f, 0.0f, 1.0f);
+		}
+	}
+
+	void MiddleBossAttackSigns::OnUpdate()
+	{
+		MultiParticle::OnUpdate();
+		float ElapsedTime = App::GetApp()->GetElapsedTime();
+		for (auto ParticlePtr : GetParticleVec()) {
+			for (auto& rParticleSprite : ParticlePtr->GetParticleSpriteVec()) {
+				if (rParticleSprite.m_Active) {
+					rParticleSprite.m_LocalScale.x += 0.15f;
+					rParticleSprite.m_Color.w -= 0.025f;
+				}
+			}
+		}
+	}
+
 	//--------------------------------------------------------------------------------------
 	//class BossAttackSigns : public MultiParticle;
 	//用途:ボスの攻撃する前兆エフェクト
@@ -658,10 +710,10 @@ namespace basecross {
 		Vec3 MoveVec = Camera_Pos - Pos;
 		MoveVec.normalize();
 		for (auto& rParticleSprite : ParticlePtr->GetParticleSpriteVec()) {
-			rParticleSprite.m_LocalScale = Vec2(0.1f, 0.1f);
+			rParticleSprite.m_LocalScale = Vec2(1.0f, 1.0f);
 			rParticleSprite.m_LocalPos += (MoveVec * 1.5f);
 			//色の指定
-			rParticleSprite.m_Color = Col4(1.0f, 1.0f, 0.0f, 1.0f);
+			rParticleSprite.m_Color = Col4(1.0f, 0.0f, 0.0f, 1.0f);
 		}
 	}
 
@@ -672,7 +724,7 @@ namespace basecross {
 		for (auto ParticlePtr : GetParticleVec()) {
 			for (auto& rParticleSprite : ParticlePtr->GetParticleSpriteVec()) {
 				if (rParticleSprite.m_Active) {
-					rParticleSprite.m_LocalScale.x += 0.15f;
+					rParticleSprite.m_LocalScale.x *= 1.18f;
 					rParticleSprite.m_Color.w -= 0.025f;
 				}
 			}
@@ -2048,7 +2100,7 @@ namespace basecross {
 					auto FirePtr = GetStage<GameStage>()->FindTagGameObject<AttackSigns>(L"AttackSigns");
 					Vec3 Emitter = m_Rigidbody->m_Pos;
 					Emitter.y += 0.125f;
-					FirePtr->InsertSigns(Emitter);
+					FirePtr->InsertSigns(Emitter, 0.5f);
 				}
 				// プレイヤーとエネミーの距離が遠くなったら再び大砲に向かう
 				else if (dis >= m_SearchDis * 3.0f && m_UpdateActive)
@@ -2757,7 +2809,7 @@ namespace basecross {
 					auto FirePtr = GetStage<GameStage>()->FindTagGameObject<AttackSigns>(L"AttackSigns");
 					Vec3 Emitter = m_Rigidbody->m_Pos;
 					Emitter.y += 0.15f;
-					FirePtr->InsertSigns(Emitter);
+					FirePtr->InsertSigns(Emitter,0.5f);
 				}
 			}
 			RotateToVelocity();
@@ -2933,8 +2985,11 @@ namespace basecross {
 			m_PtrObj->m_Emissive = Col4(0.0f, 0.0f, 0.0f, 1.0f);
 		}
 		else if (m_my_Tag == L"BossBullet") {
-			m_PtrObj->m_Diffuse = Col4(0.3f, 0.0f, 0.3f, 1.0f);
-			m_PtrObj->m_Emissive = Col4(0.5f, 0.0f, 0.5f, 1.0f);
+			m_PtrObj->m_Diffuse = Col4(0.2f, 0.0f, 0.2f, 1.0f);
+			m_PtrObj->m_Emissive = Col4(0.7f, 0.0f, 0.5f, 1.0f);
+			m_PtrObj->m_Specular = Col4(0.6f, 0.0f, 0.6f, 1.0f);
+
+			m_BulletTime = 30.0f;
 		}
 		else {
 			m_PtrObj->m_Diffuse = Col4(0.0f, 0.3f, 1.0f, 1.0f);
@@ -3253,7 +3308,7 @@ namespace basecross {
 				{
 					m_FrameCount += ElapsedTime;
 					//fireの送出
-					auto FirePtr = GetStage<GameStage>()->FindTagGameObject<BossAttackSigns>(L"BossAttackSigns");
+					auto FirePtr = GetStage<GameStage>()->FindTagGameObject<MiddleBossAttackSigns>(L"MiddleBossAttackSigns");
 					Vec3 Emitter = m_Rigidbody->m_Pos;
 					Emitter.y += 0.35f;
 					FirePtr->InsertSigns(Emitter);
@@ -3719,6 +3774,7 @@ namespace basecross {
 
 		m_frame_count = 0.0f;
 		m_SpawnCount = 0.0f;
+		m_AttackFrameCount = 0.0f;
 
 		m_DamageRate = 0.0f;
 		m_now_barrior = 0;
@@ -3733,6 +3789,13 @@ namespace basecross {
 		auto GM = GameManager::getInstance();
 		GM->SetDefaultBossHP(m_DefaultHP);
 
+		vector<shared_ptr<GameObject>> CannonVec;
+		GetStage<GameStage>()->FindTagGameObjectVec(L"Cannon", CannonVec);
+		for (size_t i = 0; i < CannonVec.size(); i++) {
+			auto Ptrcannon = dynamic_pointer_cast<Cannon>(CannonVec[i]);
+			m_CannonPos[i] = Ptrcannon->GetPosition();
+		}
+
 		//Rigidbodyの初期化
 		auto PtrGameStage = GetStage<GameStage>();
 		Rigidbody body;
@@ -3742,7 +3805,7 @@ namespace basecross {
 		body.m_Quat = m_Qt;
 		body.m_Pos = m_Pos;
 		body.m_CollType = CollType::typeSPHERE;
-		body.m_IsCollisionActive = true;
+		body.m_IsCollisionActive = false;
 		//		body.m_IsDrawActive = true;
 		body.SetToBefore();
 		m_Rigidbody = PtrGameStage->AddRigidbody(body);
@@ -3792,8 +3855,6 @@ namespace basecross {
 			m_frame_count += ElapsedTime;
 			return;
 		}
-
-
 
 		auto GM = GameManager::getInstance();
 		GM->SetBossHP(m_HP);
@@ -3848,9 +3909,12 @@ namespace basecross {
 				m_frame_count = 0.0f;
 			}
 
+			AttackMove();
+
 			Vec3 Emitter = m_Rigidbody->m_Pos;
 			Emitter.x -= 3.0f;
 			Emitter.y -= 3.0f;
+			Emitter.z += 3.0f;
 			//バリアエフェクトの送出
 			auto SparkPtr = GetStage<GameStage>()->FindTagGameObject<BossEffect>(L"BossEffect");
 			if (m_now_barrior == 0) {
@@ -3955,6 +4019,53 @@ namespace basecross {
 					PtrEnemy->ChangeState(L"ToCannon");
 					PtrEnemy->SetPosition(m_Rigidbody->m_Pos);
 					break;
+				}
+			}
+		}
+	}
+
+	void Boss::AttackMove() {
+		float ElapsedTime = App::GetApp()->GetElapsedTime();
+		m_now_barrior = 3;
+		if (m_Rigidbody->m_Pos.y > 8.0f) {
+			m_Rigidbody->m_Pos.y -= ElapsedTime;
+		}
+		else if(m_AttackFrameCount == 0.0f) {
+			//パーティクルの送出
+			auto FirePtr = GetStage<GameStage>()->FindTagGameObject<BossAttackSigns>(L"BossAttackSigns");
+			Vec3 Emitter = m_Rigidbody->m_Pos;
+			Emitter.z -= 3.0;
+			FirePtr->InsertSigns(Emitter);
+			m_AttackFrameCount += ElapsedTime;
+		}
+		else if (m_AttackFrameCount < 1.0f) {
+			m_AttackFrameCount += ElapsedTime;
+		}
+		else if (m_AttackFrameCount >= 1.0f) {
+			//球を飛ばす処理
+			vector<shared_ptr<GameObject>> ShootVec;
+			GetStage<GameStage>()->FindTagGameObjectVec(L"BossBullet", ShootVec);
+			for (auto v : ShootVec) {
+				if (v) {
+					auto Ptr = dynamic_pointer_cast<BulletObject>(v);
+					bool nowShooting = Ptr->GetIsShoot();
+					if (nowShooting == false)
+					{
+						int r = rand() % 3;
+						Vec3 to_pos = m_CannonPos[r];
+						Vec3 ToPosVec = to_pos - m_Rigidbody->m_Pos;
+						ToPosVec.y = 0;
+						ToPosVec.normalize();
+
+						Vec3 ShootPos = m_Rigidbody->m_Pos;
+						ShootPos.y = 0.2f;
+						ShootPos += ToPosVec * 1.3f;
+
+
+						Ptr->Wakeup(ShootPos, ToPosVec.normalize() * 3.0f);
+						m_AttackFrameCount = 0.0f;
+						return;
+					}
 				}
 			}
 		}
