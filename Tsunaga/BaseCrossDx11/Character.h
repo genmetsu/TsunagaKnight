@@ -1234,6 +1234,8 @@ namespace basecross {
 		bool m_UpdateActive;
 		//ƒŠƒXƒ|[ƒ“‘Ò‚¿‚©‚Ç‚¤‚©
 		bool m_isWaiting;
+		//•`‰æ‚·‚é‚©‚Ç‚¤‚©
+		bool m_isDraw;
 
 		//€‚ñ‚¾‚©‚Ç‚¤‚©
 		bool m_isDead;
@@ -1539,6 +1541,14 @@ namespace basecross {
 		float GetScale(){
 			return m_Scale.x;
 		}
+
+		bool GetIsDraw() {
+			return m_isDraw;
+		}
+		void SetIsDraw(bool value) {
+			m_isDraw = value;
+		}
+
 	};
 
 	//--------------------------------------------------------------------------------------
@@ -1807,8 +1817,9 @@ namespace basecross {
 		bool m_OwnShadowActive;
 		
 		bool m_UpdateActive;
+
 		// ’e‚ªŒ‚‚½‚ê‚Ä‚¢‚é‚©‚Ç‚¤‚©
-		bool IsShoot;
+		bool m_isShoot;
 		// ’e‚Ì‘¶İŠÔ
 		float m_BulletTime;
 
@@ -1888,7 +1899,7 @@ namespace basecross {
 
 		bool GetIsShoot()
 		{
-			return IsShoot;
+			return m_isShoot;
 		}
 	};
 

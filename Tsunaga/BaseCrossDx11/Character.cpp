@@ -1663,6 +1663,7 @@ namespace basecross {
 		m_UpdateActive = true;
 		m_isDead = false;
 		m_Bomb = false;
+		m_isDraw = true;
 
 		m_DefaultHP = m_HP;
 
@@ -1802,46 +1803,50 @@ namespace basecross {
 	}
 
 	void EnemyObject::OnDrawShadowmap() {
-		//行列の定義
-		Mat4x4 World;
-		World.affineTransformation(
-			m_Rigidbody->m_Scale,
-			Vec3(0, 0, 0),
-			m_Rigidbody->m_Quat,
-			m_Rigidbody->m_Pos
-		);
-		//描画データの行列をコピー
-		m_PtrShadowmapObj->m_WorldMatrix = World;
-		m_PtrShadowmapObj->m_Camera = GetStage<Stage>()->GetCamera();
-		auto shptr = m_ShadowmapRenderer.lock();
-		if (!shptr) {
-			shptr = GetStage<Stage>()->FindTagGameObject<ShadowmapRenderer>(L"ShadowmapRenderer");
-			m_ShadowmapRenderer = shptr;
+		if (m_isDraw) {
+			//行列の定義
+			Mat4x4 World;
+			World.affineTransformation(
+				m_Rigidbody->m_Scale,
+				Vec3(0, 0, 0),
+				m_Rigidbody->m_Quat,
+				m_Rigidbody->m_Pos
+			);
+			//描画データの行列をコピー
+			m_PtrShadowmapObj->m_WorldMatrix = World;
+			m_PtrShadowmapObj->m_Camera = GetStage<Stage>()->GetCamera();
+			auto shptr = m_ShadowmapRenderer.lock();
+			if (!shptr) {
+				shptr = GetStage<Stage>()->FindTagGameObject<ShadowmapRenderer>(L"ShadowmapRenderer");
+				m_ShadowmapRenderer = shptr;
+			}
+			shptr->AddDrawObject(m_PtrShadowmapObj);
 		}
-		shptr->AddDrawObject(m_PtrShadowmapObj);
 	}
 
 	void EnemyObject::OnDraw() {
-		//行列の定義
-		Mat4x4 World;
-		World.affineTransformation(
-			m_Rigidbody->m_Scale,
-			Vec3(0, 0, 0),
-			m_Rigidbody->m_Quat,
-			m_Rigidbody->m_Pos
-		);
+		if (m_isDraw) {
+			//行列の定義
+			Mat4x4 World;
+			World.affineTransformation(
+				m_Rigidbody->m_Scale,
+				Vec3(0, 0, 0),
+				m_Rigidbody->m_Quat,
+				m_Rigidbody->m_Pos
+			);
 
-		//差分を計算
-		World = m_MeshToTransformMatrix * World;
+			//差分を計算
+			World = m_MeshToTransformMatrix * World;
 
-		m_PtrObj->m_WorldMatrix = World;
-		m_PtrObj->m_Camera = GetStage<Stage>()->GetCamera();
-		auto shptr = m_Renderer.lock();
-		if (!shptr) {
-			shptr = GetStage<Stage>()->FindTagGameObject<BcPNTBoneModelRenderer>(L"BcPNTBoneModelRenderer");
-			m_Renderer = shptr;
+			m_PtrObj->m_WorldMatrix = World;
+			m_PtrObj->m_Camera = GetStage<Stage>()->GetCamera();
+			auto shptr = m_Renderer.lock();
+			if (!shptr) {
+				shptr = GetStage<Stage>()->FindTagGameObject<BcPNTBoneModelRenderer>(L"BcPNTBoneModelRenderer");
+				m_Renderer = shptr;
+			}
+			shptr->AddDrawObject(m_PtrObj);
 		}
-		shptr->AddDrawObject(m_PtrObj);
 	}
 
 	Vec3 EnemyObject::GetPosition() {
@@ -1853,6 +1858,7 @@ namespace basecross {
 		m_Rigidbody->m_Velocity = Vec3(0, 0, 0);
 		m_Tackle = false;
 		m_FrameCount = 0.0f;
+		m_isDraw = false;
 		AddTag(L"WaitingSpawn");
 		m_Rigidbody->m_IsCollisionActive = false;
 	}
@@ -1860,6 +1866,7 @@ namespace basecross {
 	void EnemyObject::WaitingEndBehaviour() {
 		m_Rigidbody->m_Velocity = Vec3(0, 0, 0);
 		RemoveTag(L"WaitingSpawn");
+		m_isDraw = true;
 		m_Rigidbody->m_IsCollisionActive = true;
 	}
 
@@ -2830,26 +2837,28 @@ namespace basecross {
 	}
 
 	void ShootEnemy::OnDraw() {
-		//行列の定義
-		Mat4x4 World;
-		World.affineTransformation(
-			m_Rigidbody->m_Scale,
-			Vec3(0, 0, 0),
-			m_Rigidbody->m_Quat,
-			m_Rigidbody->m_Pos
-		);
+		if (m_isDraw) {
+			//行列の定義
+			Mat4x4 World;
+			World.affineTransformation(
+				m_Rigidbody->m_Scale,
+				Vec3(0, 0, 0),
+				m_Rigidbody->m_Quat,
+				m_Rigidbody->m_Pos
+			);
 
-		//差分を計算
-		World = m_MeshToTransformMatrix * World;
+			//差分を計算
+			World = m_MeshToTransformMatrix * World;
 
-		m_PtrObj->m_WorldMatrix = World;
-		m_PtrObj->m_Camera = GetStage<Stage>()->GetCamera();
-		auto shptr = m_Renderer.lock();
-		if (!shptr) {
-			shptr = GetStage<Stage>()->FindTagGameObject<BcPNTBoneModelRenderer>(L"BcPNTBoneModelRenderer");
-			m_Renderer = shptr;
+			m_PtrObj->m_WorldMatrix = World;
+			m_PtrObj->m_Camera = GetStage<Stage>()->GetCamera();
+			auto shptr = m_Renderer.lock();
+			if (!shptr) {
+				shptr = GetStage<Stage>()->FindTagGameObject<BcPNTBoneModelRenderer>(L"BcPNTBoneModelRenderer");
+				m_Renderer = shptr;
+			}
+			shptr->AddDrawObject(m_PtrObj);
 		}
-		shptr->AddDrawObject(m_PtrObj);
 	}
 
 	//--------------------------------------------------------------------------------------
@@ -2871,7 +2880,7 @@ namespace basecross {
 		m_my_Tag(Tag),
 		m_FrameCount(0.0f),
 		m_BulletTime(15.0f),
-		IsShoot(false)
+		m_isShoot(false)
 	{
 	}
 	BulletObject::~BulletObject()
@@ -2941,55 +2950,60 @@ namespace basecross {
 	}
 	void BulletObject::OnUpdate()
 	{
-		float ElapsedTime = App::GetApp()->GetElapsedTime();
-		if (m_FrameCount > m_BulletTime)
-		{
-			m_FrameCount = 0.0f;
-			IsShoot = false;
+		if (m_isShoot) {
+			float ElapsedTime = App::GetApp()->GetElapsedTime();
+			if (m_FrameCount > m_BulletTime)
+			{
+				m_FrameCount = 0.0f;
+				m_isShoot = false;
+			}
+			if (m_isShoot == true)
+			{
+				m_FrameCount += ElapsedTime;
+			}
 		}
-		if (IsShoot == true)
-		{
-			m_FrameCount += ElapsedTime;
-		}
-
 	}
 	void BulletObject::OnDrawShadowmap()
 	{
-		//行列の定義
-		Mat4x4 World;
-		World.affineTransformation(
-			m_Rigidbody->m_Scale,
-			Vec3(0, 0, 0),
-			m_Rigidbody->m_Quat,
-			m_Rigidbody->m_Pos
-		);
-		//描画データの行列をコピー
-		m_PtrShadowmapObj->m_WorldMatrix = World;
-		m_PtrShadowmapObj->m_Camera = GetStage<Stage>()->GetCamera();
-		auto shptr = m_ShadowmapRenderer.lock();
-		if (!shptr) {
-			shptr = GetStage<Stage>()->FindTagGameObject<ShadowmapRenderer>(L"ShadowmapRenderer");
-			m_ShadowmapRenderer = shptr;
+		if (m_isShoot) {
+			//行列の定義
+			Mat4x4 World;
+			World.affineTransformation(
+				m_Rigidbody->m_Scale,
+				Vec3(0, 0, 0),
+				m_Rigidbody->m_Quat,
+				m_Rigidbody->m_Pos
+			);
+			//描画データの行列をコピー
+			m_PtrShadowmapObj->m_WorldMatrix = World;
+			m_PtrShadowmapObj->m_Camera = GetStage<Stage>()->GetCamera();
+			auto shptr = m_ShadowmapRenderer.lock();
+			if (!shptr) {
+				shptr = GetStage<Stage>()->FindTagGameObject<ShadowmapRenderer>(L"ShadowmapRenderer");
+				m_ShadowmapRenderer = shptr;
+			}
+			shptr->AddDrawObject(m_PtrShadowmapObj);
 		}
-		shptr->AddDrawObject(m_PtrShadowmapObj);
 	}
 	void BulletObject::OnDraw()
 	{
-		Mat4x4 World;
-		World.affineTransformation(
-			m_Rigidbody->m_Scale,
-			Vec3(0, 0, 0),
-			m_Rigidbody->m_Quat,
-			m_Rigidbody->m_Pos
-		);
-		m_PtrObj->m_WorldMatrix = World;
-		m_PtrObj->m_Camera = GetStage<Stage>()->GetCamera();
-		auto shptr = m_Renderer.lock();
-		if (!shptr) {
-			shptr = GetStage<Stage>()->FindTagGameObject<SimplePNTStaticRenderer2>(L"SimplePNTStaticRenderer2");
-			m_Renderer = shptr;
+		if (m_isShoot) {
+			Mat4x4 World;
+			World.affineTransformation(
+				m_Rigidbody->m_Scale,
+				Vec3(0, 0, 0),
+				m_Rigidbody->m_Quat,
+				m_Rigidbody->m_Pos
+			);
+			m_PtrObj->m_WorldMatrix = World;
+			m_PtrObj->m_Camera = GetStage<Stage>()->GetCamera();
+			auto shptr = m_Renderer.lock();
+			if (!shptr) {
+				shptr = GetStage<Stage>()->FindTagGameObject<SimplePNTStaticRenderer2>(L"SimplePNTStaticRenderer2");
+				m_Renderer = shptr;
+			}
+			shptr->AddDrawObject(m_PtrObj);
 		}
-		shptr->AddDrawObject(m_PtrObj);
 	}
 
 	void BulletObject::GetWorldMatrix(Mat4x4& m) const {
@@ -3018,7 +3032,7 @@ namespace basecross {
 	{
 		SetPosition(Position);
 		m_Rigidbody->m_Velocity = Velocity;
-		IsShoot = true;
+		m_isShoot = true;
 	}
 
 	//--------------------------------------------------------------------------------------
@@ -3100,6 +3114,7 @@ namespace basecross {
 
 		m_isDead = false;
 		m_UpdateActive = true;
+		m_isDraw = true;
 
 		m_PlayerPtr = GetStage()->FindTagGameObject<Player>(L"Player");
 
@@ -3277,26 +3292,28 @@ namespace basecross {
 	}
 
 	void CR_BossEnemy::OnDraw() {
-		//行列の定義
-		Mat4x4 World;
-		World.affineTransformation(
-			m_Rigidbody->m_Scale,
-			Vec3(0, 0, 0),
-			m_Rigidbody->m_Quat,
-			m_Rigidbody->m_Pos
-		);
+		if (m_isDraw) {
+			//行列の定義
+			Mat4x4 World;
+			World.affineTransformation(
+				m_Rigidbody->m_Scale,
+				Vec3(0, 0, 0),
+				m_Rigidbody->m_Quat,
+				m_Rigidbody->m_Pos
+			);
 
-		//差分を計算
-		World = m_MeshToTransformMatrix * World;
+			//差分を計算
+			World = m_MeshToTransformMatrix * World;
 
-		m_SimpleObj->m_WorldMatrix = World;
-		m_SimpleObj->m_Camera = GetStage<Stage>()->GetCamera();
-		auto shptr = m_StaticRenderer.lock();
-		if (!shptr) {
-			shptr = GetStage<Stage>()->FindTagGameObject<BcPNTStaticRenderer>(L"BcPNTStaticRenderer");
-			m_StaticRenderer = shptr;
+			m_SimpleObj->m_WorldMatrix = World;
+			m_SimpleObj->m_Camera = GetStage<Stage>()->GetCamera();
+			auto shptr = m_StaticRenderer.lock();
+			if (!shptr) {
+				shptr = GetStage<Stage>()->FindTagGameObject<BcPNTStaticRenderer>(L"BcPNTStaticRenderer");
+				m_StaticRenderer = shptr;
+			}
+			shptr->AddDrawObject(m_SimpleObj);
 		}
-		shptr->AddDrawObject(m_SimpleObj);
 	}
 
 
