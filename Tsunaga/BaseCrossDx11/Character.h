@@ -1802,7 +1802,7 @@ namespace basecross {
 
 		//親オブジェクト
 		weak_ptr<GameObject> m_ParentPtr;
-		//
+		
 		//Rigidbodyのshared_ptr
 		shared_ptr<Rigidbody> m_Rigidbody;
 
@@ -1814,6 +1814,7 @@ namespace basecross {
 		shared_ptr<ShadowmapObject> m_PtrShadowmapObj;
 		//シャドウマップ描画オブジェクト(weak_ptr)
 		weak_ptr<ShadowmapRenderer> m_ShadowmapRenderer;
+
 		bool m_OwnShadowActive;
 		
 		bool m_UpdateActive;

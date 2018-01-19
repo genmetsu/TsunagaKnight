@@ -2899,7 +2899,7 @@ namespace basecross {
 		body.m_Quat = m_Qt;
 		body.m_Pos = m_Pos;
 		body.m_CollType = CollType::typeSPHERE;
-		body.m_IsCollisionActive = true;
+		body.m_IsCollisionActive = false;
 		body.m_IsFixed = true;
 		//		body.m_IsDrawActive = true;
 		body.SetToBefore();
@@ -2956,6 +2956,7 @@ namespace basecross {
 			{
 				m_FrameCount = 0.0f;
 				m_isShoot = false;
+				m_Rigidbody->m_IsCollisionActive = false;
 			}
 			if (m_isShoot == true)
 			{
@@ -3033,6 +3034,7 @@ namespace basecross {
 		SetPosition(Position);
 		m_Rigidbody->m_Velocity = Velocity;
 		m_isShoot = true;
+		m_Rigidbody->m_IsCollisionActive = true;
 	}
 
 	//--------------------------------------------------------------------------------------
