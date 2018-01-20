@@ -25,7 +25,8 @@ namespace basecross {
 		m_AttackDis(1.7f),
 		m_FOV(0.707f),
 		m_NowCannonClass(3),
-		m_JumpLock(false)
+		m_JumpLock(false),
+		m_isInvincible(false)
 	{
 		//メッシュとトランスフォームの差分の設定
 		m_MeshToTransformMatrix.affineTransformation(
@@ -591,6 +592,7 @@ namespace basecross {
 		Obj->PlayerStepEffect();
 		Obj->InitVelocity();
 		Obj->SetStepVec(Obj->GetMoveVector());
+		Obj->SetInvincible(true);
 		auto sword = Obj->GetStage()->FindTagGameObject<Sword>(L"Sword");
 		sword->SetState(L"Default");
 	}
@@ -600,7 +602,7 @@ namespace basecross {
 	}
 
 	void StepState::Exit(const shared_ptr<Player>& Obj) {
-
+		Obj->SetInvincible(false);
 	}
 
 	//--------------------------------------------------------------------------------------
@@ -610,6 +612,7 @@ namespace basecross {
 
 	void DamagedState::Enter(const shared_ptr<Player>& Obj) {
 		frame_count = 0.0f;
+		Obj->SetInvincible(true);
 	}
 
 	void DamagedState::Execute(const shared_ptr<Player>& Obj) {
@@ -623,7 +626,7 @@ namespace basecross {
 	}
 
 	void DamagedState::Exit(const shared_ptr<Player>& Obj) {
-
+		Obj->SetInvincible(false);
 	}
 
 	//--------------------------------------------------------------------------------------

@@ -32,6 +32,8 @@ namespace basecross {
 		bool m_UpdateActive;
 		///ñCåÇÇµÇΩèÍçáÇÃbool
 		int m_NowCannonClass;
+		//ñ≥ìGÇ©Ç«Ç§Ç©
+		bool m_isInvincible;
 
 		shared_ptr<SoundObject> m_AttackSound;
 		shared_ptr<SoundObject> m_StepSound;
@@ -308,6 +310,14 @@ namespace basecross {
 		}
 		int GetIsCannon() {
 			return m_NowCannonClass;
+		}
+
+		void SetInvincible(bool value) {
+			m_isInvincible = value;
+		}
+
+		bool GetInvincible() {
+			return m_isInvincible;
 		}
 
 		void SetKnockBackVec(Vec3 vec) {

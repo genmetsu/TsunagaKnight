@@ -3014,10 +3014,8 @@ namespace basecross {
 			auto PlayerPtr = GetStage()->FindTagGameObject<Player>(L"Player");
 			Vec3 p_pos = PlayerPtr->GetPosition();
 			float p_dis = (p_pos - GetPosition()).length();
-			if (p_dis < PlayerPtr->GetScale() / 2.0f + m_Rigidbody->m_Scale.x / 2.0f) {
-				
+			if (PlayerPtr->GetInvincible() == false && p_dis < PlayerPtr->GetScale() / 2.0f + m_Rigidbody->m_Scale.x / 2.0f) {
 				PlayerPtr->DamagedStartBehaviour(GetPosition());
-
 				SetSleep();
 				return;
 			}
@@ -4214,7 +4212,7 @@ namespace basecross {
 							ToPosVec.normalize();
 
 							Vec3 ShootPos = m_Rigidbody->m_Pos;
-							ShootPos.y = 0.2f;
+							ShootPos.y = 0.4f;
 
 							Ptr->Wakeup(ShootPos, ToPosVec.normalize() * m_BulletSpeed);
 							m_NowAttackBulletNum++;
