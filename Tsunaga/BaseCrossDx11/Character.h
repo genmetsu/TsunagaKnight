@@ -1917,6 +1917,8 @@ namespace basecross {
 		//--------------------------------------------------------------------------------------
 		void Wakeup(const Vec3& Position, const Vec3& Velocity);
 
+		void SetSleep();
+
 		bool GetIsShoot()
 		{
 			return m_isShoot;

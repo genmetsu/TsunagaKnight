@@ -3018,9 +3018,7 @@ namespace basecross {
 				
 				PlayerPtr->DamagedStartBehaviour(GetPosition());
 
-				m_FrameCount = 0.0f;
-				m_isShoot = false;
-				m_Rigidbody->m_IsCollisionActive = false;
+				SetSleep();
 				return;
 			}
 
@@ -3063,9 +3061,7 @@ namespace basecross {
 							GetStage<GameStage>()->SetIsFail(true);
 						}
 
-						m_FrameCount = 0.0f;
-						m_isShoot = false;
-						m_Rigidbody->m_IsCollisionActive = false;
+						SetSleep();
 						return;
 					}
 				}
@@ -3099,9 +3095,42 @@ namespace basecross {
 							auto SparkPtr = GetStage<GameStage>()->FindTagGameObject<MultiFire>(L"MultiFire");
 							SparkPtr->InsertFire(Emitter, 1.0f);
 
-							m_FrameCount = 0.0f;
-							m_isShoot = false;
-							m_Rigidbody->m_IsCollisionActive = false;
+							SetSleep();
+
+							return;
+						}
+					}
+				}
+
+				//プレイヤーの球との当たり判定
+				vector<shared_ptr<GameObject>> BulletVec;
+				GetStage<GameStage>()->FindTagGameObjectVec(L"PlayerBullet", BulletVec);
+				for (auto bullet : BulletVec) {
+					if (bullet) {
+
+						auto PtrBullet = dynamic_pointer_cast<BulletObject>(bullet);
+
+						Vec3 BulletPos = PtrBullet->GetPosition();
+						float length = (BulletPos - m_Rigidbody->m_Pos).length();
+
+						float BulletRadius = PtrBullet->GetScale() / 2.0f;
+						float MyRadius = m_Rigidbody->m_Scale.x;
+
+						if (length <= BulletRadius + MyRadius) {
+
+							if (p_dis < 1.0f) {
+								p_dis = 1.0f;
+							}
+							//サウンドの発行
+							m_CollisionSound->Start(0, 0.5f / p_dis);
+
+							Vec3 Emitter = PtrBullet->GetPosition();
+							//Fireの送出
+							auto SparkPtr = GetStage<GameStage>()->FindTagGameObject<MultiFire>(L"MultiFire");
+							SparkPtr->InsertFire(Emitter, 1.0f);
+
+							PtrBullet->SetSleep();
+							SetSleep();
 
 							return;
 						}
@@ -3111,9 +3140,7 @@ namespace basecross {
 
 			if (m_FrameCount > m_BulletTime)
 			{
-				m_FrameCount = 0.0f;
-				m_isShoot = false;
-				m_Rigidbody->m_IsCollisionActive = false;
+				SetSleep();
 			}
 			if (m_isShoot == true)
 			{
@@ -3184,6 +3211,13 @@ namespace basecross {
 	void BulletObject::SetPosition(Vec3 pos)
 	{
 		m_Rigidbody->m_Pos = pos;	
+	}
+
+	void BulletObject::SetSleep()
+	{
+		m_FrameCount = 0.0f;
+		m_isShoot = false;
+		m_Rigidbody->m_IsCollisionActive = false;
 	}
 
 	void BulletObject::Wakeup(const Vec3 & Position, const Vec3 & Velocity)
