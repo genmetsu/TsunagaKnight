@@ -4008,7 +4008,7 @@ namespace basecross {
 				m_frame_count = 0.0f;
 			}
 
-			AttackMove();
+			AttackMove(now_num);
 
 			Vec3 Emitter = m_Rigidbody->m_Pos;
 			Emitter.x -= 3.0f;
@@ -4123,45 +4123,47 @@ namespace basecross {
 		}
 	}
 
-	void Boss::AttackMove() {
-		float ElapsedTime = App::GetApp()->GetElapsedTime();
-		m_now_barrior = 3;
-		if (m_Rigidbody->m_Pos.y > 8.0f) {
-			m_Rigidbody->m_Pos.y -= ElapsedTime;
-		}
-		else if(m_AttackFrameCount == 0.0f) {
-			//パーティクルの送出
-			auto FirePtr = GetStage<GameStage>()->FindTagGameObject<BossAttackSigns>(L"BossAttackSigns");
-			Vec3 Emitter = m_Rigidbody->m_Pos;
-			Emitter.z -= 3.0;
-			FirePtr->InsertSigns(Emitter);
-			m_AttackFrameCount += ElapsedTime;
-		}
-		else if (m_AttackFrameCount < m_BeforeAttackTime) {
-			m_AttackFrameCount += ElapsedTime;
-		}
-		else if (m_AttackFrameCount >= m_BeforeAttackTime) {
-			//球を飛ばす処理
-			vector<shared_ptr<GameObject>> ShootVec;
-			GetStage<GameStage>()->FindTagGameObjectVec(L"BossBullet", ShootVec);
-			for (auto v : ShootVec) {
-				if (v) {
-					auto Ptr = dynamic_pointer_cast<BulletObject>(v);
-					bool nowShooting = Ptr->GetIsShoot();
-					if (nowShooting == false)
-					{
-						int r = rand() % 3;
-						Vec3 to_pos = m_CannonPos[r];
-						Vec3 ToPosVec = to_pos - m_Rigidbody->m_Pos;
-						ToPosVec.y = 0;
-						ToPosVec.normalize();
+	void Boss::AttackMove(int player_num) {
+		if (player_num == 3) {
+			float ElapsedTime = App::GetApp()->GetElapsedTime();
+			m_now_barrior = 3;
+			if (m_Rigidbody->m_Pos.y > 8.0f) {
+				m_Rigidbody->m_Pos.y -= ElapsedTime;
+			}
+			else if (m_AttackFrameCount == 0.0f) {
+				//パーティクルの送出
+				auto FirePtr = GetStage<GameStage>()->FindTagGameObject<BossAttackSigns>(L"BossAttackSigns");
+				Vec3 Emitter = m_Rigidbody->m_Pos;
+				Emitter.z -= 3.0;
+				FirePtr->InsertSigns(Emitter);
+				m_AttackFrameCount += ElapsedTime;
+			}
+			else if (m_AttackFrameCount < m_BeforeAttackTime) {
+				m_AttackFrameCount += ElapsedTime;
+			}
+			else if (m_AttackFrameCount >= m_BeforeAttackTime) {
+				//球を飛ばす処理
+				vector<shared_ptr<GameObject>> ShootVec;
+				GetStage<GameStage>()->FindTagGameObjectVec(L"BossBullet", ShootVec);
+				for (auto v : ShootVec) {
+					if (v) {
+						auto Ptr = dynamic_pointer_cast<BulletObject>(v);
+						bool nowShooting = Ptr->GetIsShoot();
+						if (nowShooting == false)
+						{
+							int r = rand() % 3;
+							Vec3 to_pos = m_CannonPos[r];
+							Vec3 ToPosVec = to_pos - m_Rigidbody->m_Pos;
+							ToPosVec.y = 0;
+							ToPosVec.normalize();
 
-						Vec3 ShootPos = m_Rigidbody->m_Pos;
-						ShootPos.y = 0.2f;
+							Vec3 ShootPos = m_Rigidbody->m_Pos;
+							ShootPos.y = 0.2f;
 
-						Ptr->Wakeup(ShootPos, ToPosVec.normalize() * m_BulletSpeed);
-						m_AttackFrameCount = 0.0f;
-						return;
+							Ptr->Wakeup(ShootPos, ToPosVec.normalize() * m_BulletSpeed);
+							m_AttackFrameCount = 0.0f;
+							return;
+						}
 					}
 				}
 			}

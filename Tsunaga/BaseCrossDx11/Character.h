@@ -2409,7 +2409,7 @@ namespace basecross {
 			return m_isDamage;
 		}
 
-		void AttackMove();
+		void AttackMove(int player_num);
 
 		//--------------------------------------------------------------------------------------
 		/*!
