@@ -2990,9 +2990,8 @@ namespace basecross {
 		else if (m_my_Tag == L"BossBullet") {
 			m_PtrObj->m_Diffuse = Col4(0.2f, 0.0f, 0.2f, 1.0f);
 			m_PtrObj->m_Emissive = Col4(0.7f, 0.0f, 0.5f, 1.0f);
-			m_PtrObj->m_Specular = Col4(0.6f, 0.0f, 0.6f, 1.0f);
 
-			m_BulletTime = 30.0f;
+			m_BulletTime = 40.0f;
 		}
 		else {
 			m_PtrObj->m_Diffuse = Col4(0.0f, 0.3f, 1.0f, 1.0f);
@@ -3036,10 +3035,16 @@ namespace basecross {
 					float length = (CannonPos - m_Rigidbody->m_Pos).length();
 
 					float CannonRadius = PtrCannon->GetScale() / 2.0f;
+					//衝突の当たり判定を若干優しく
+					CannonRadius -= 1.0f;
 					float PlayerRadius = m_Rigidbody->m_Scale.x / 2.0f;
 
-					if (length < CannonRadius + PlayerRadius + 1.0f) {
-						Vec3 Emitter = m_Rigidbody->m_Pos;
+					if (length < CannonRadius + PlayerRadius) {
+
+						Vec3 MoveVec = m_Rigidbody->m_Pos - CannonPos;
+						MoveVec.normalize();
+
+						Vec3 Emitter = m_Rigidbody->m_Pos + MoveVec;
 						//Sparkの送出
 						auto SparkPtr = GetStage<GameStage>()->FindTagGameObject<AttackSpark>(L"AttackSpark");
 						SparkPtr->InsertSpark(Emitter);
@@ -3186,7 +3191,7 @@ namespace basecross {
 		SetPosition(Position);
 		m_Rigidbody->m_Velocity = Velocity;
 		m_isShoot = true;
-		m_Rigidbody->m_IsCollisionActive = true;
+		//m_Rigidbody->m_IsCollisionActive = true;
 	}
 
 	//--------------------------------------------------------------------------------------
@@ -3843,10 +3848,13 @@ namespace basecross {
 		m_Scale(Scale),
 		m_Qt(Qt),
 		m_Pos(Pos),
+		m_DefaultPos(Pos),
 		m_OwnShadowActive(OwnShadowActive),
 		m_SpawnTime(3.0f),
 		m_BulletSpeed(2.0f),
-		m_BeforeAttackTime(1.0f)
+		m_BeforeAttackTime(1.0f),
+		m_AttackRate(0.2f),
+		m_AttackBulletNum(30)
 	{}
 	Boss::~Boss() {}
 
@@ -3873,10 +3881,12 @@ namespace basecross {
 
 		m_frame_count = 0.0f;
 		m_SpawnCount = 0.0f;
+
 		m_AttackFrameCount = 0.0f;
 
 		m_DamageRate = 0.0f;
 		m_now_barrior = 0;
+		m_NowAttackBulletNum = 0;
 
 		m_HP = 75.0f;
 		m_DefaultHP = m_HP;
@@ -4004,11 +4014,13 @@ namespace basecross {
 				m_frame_count = 0.0f;
 			}
 			if (m_frame_count >= 20.0f && m_now_barrior == 2) {
-				m_now_barrior = 0;
+				m_now_barrior = 3;
 				m_frame_count = 0.0f;
 			}
 
-			AttackMove(now_num);
+			if (m_now_barrior == 3) {
+				AttackMove(now_num);
+			}
 
 			Vec3 Emitter = m_Rigidbody->m_Pos;
 			Emitter.x -= 3.0f;
@@ -4126,8 +4138,7 @@ namespace basecross {
 	void Boss::AttackMove(int player_num) {
 		if (player_num == 3) {
 			float ElapsedTime = App::GetApp()->GetElapsedTime();
-			m_now_barrior = 3;
-			if (m_Rigidbody->m_Pos.y > 8.0f) {
+			if (m_Rigidbody->m_Pos.y > 8.0f && m_NowAttackBulletNum == 0) {
 				m_Rigidbody->m_Pos.y -= ElapsedTime;
 			}
 			else if (m_AttackFrameCount == 0.0f) {
@@ -4141,6 +4152,15 @@ namespace basecross {
 			else if (m_AttackFrameCount < m_BeforeAttackTime) {
 				m_AttackFrameCount += ElapsedTime;
 			}
+			//射出した弾が設定数を超えたら元の位置に戻る
+			else if (m_NowAttackBulletNum >= m_AttackBulletNum && m_Rigidbody->m_Pos.y < m_DefaultPos.y) {
+				m_Rigidbody->m_Pos.y += ElapsedTime;
+			}
+			else if (m_Rigidbody->m_Pos.y >= m_DefaultPos.y && m_NowAttackBulletNum > 0) {
+				m_AttackFrameCount = 0.0f;
+				m_NowAttackBulletNum = 0;
+				m_now_barrior = 0;
+			}
 			else if (m_AttackFrameCount >= m_BeforeAttackTime) {
 				//球を飛ばす処理
 				vector<shared_ptr<GameObject>> ShootVec;
@@ -4153,6 +4173,8 @@ namespace basecross {
 						{
 							int r = rand() % 3;
 							Vec3 to_pos = m_CannonPos[r];
+							//ブレさせる
+							to_pos.x += rand() % 7 - 3;
 							Vec3 ToPosVec = to_pos - m_Rigidbody->m_Pos;
 							ToPosVec.y = 0;
 							ToPosVec.normalize();
@@ -4161,7 +4183,8 @@ namespace basecross {
 							ShootPos.y = 0.2f;
 
 							Ptr->Wakeup(ShootPos, ToPosVec.normalize() * m_BulletSpeed);
-							m_AttackFrameCount = 0.0f;
+							m_NowAttackBulletNum++;
+							m_AttackFrameCount = (m_BeforeAttackTime - m_AttackRate);
 							return;
 						}
 					}

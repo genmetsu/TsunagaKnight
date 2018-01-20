@@ -2281,6 +2281,8 @@ namespace basecross {
 		//Å‰‚ÌHP
 		float m_DefaultHP;
 
+		Vec3 m_DefaultPos;
+
 		bool m_isDead;
 
 		int m_now_barrior;
@@ -2298,9 +2300,14 @@ namespace basecross {
 		float m_SpawnTime;
 
 		float m_AttackFrameCount;
+		float m_AttackRate;
+
+		//
+		float m_AttackBulletNum;
+		//Œ»İ”ò‚Î‚µ‚½ƒoƒŒƒbƒg‚Ì”
+		float m_NowAttackBulletNum;
 
 		float m_BeforeAttackTime;
-
 		float m_BulletSpeed;
 
 		Vec3 m_CannonPos[3];
