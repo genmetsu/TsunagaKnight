@@ -1706,6 +1706,7 @@ namespace basecross {
 		m_FriendsSound = ObjectFactory::Create<SoundObject>(L"nakama");
 		m_CannonSound = ObjectFactory::Create<SoundObject>(L"cannon");
 		m_EyeFlashSound = ObjectFactory::Create<SoundObject>(L"eye_flash");
+		m_SawSound = ObjectFactory::Create<SoundObject>(L"chainsaw");
 
 		//行列の定義
 		Mat4x4 World;
@@ -3748,6 +3749,119 @@ namespace basecross {
 
 	LD_BossEnemy::~LD_BossEnemy()
 	{
+	}
+
+	void LD_BossEnemy::OppositionBehavior() {
+		//前回のターンからの経過時間を求める
+		float ElapsedTime = App::GetApp()->GetElapsedTime();
+		auto shptr = m_PlayerPtr.lock();
+		//親のワールド行列を取得する変数
+		Mat4x4 ParMat;
+		if (shptr) {
+			//行列取得用のインターフェイスを持ってるかどうか
+			auto matintptr = dynamic_pointer_cast<MatrixInterface>(shptr);
+			if (matintptr) {
+				matintptr->GetWorldMatrix(ParMat);
+			}
+
+			Mat4x4 World;
+			World.identity();
+			//行列の定義
+			World = m_PlayerLocalMatrix;
+			//スケーリングを1.0にした行列に変換
+			ParMat.scaleIdentity();
+			//行列の反映
+			World *= ParMat;
+			//この時点でWorldは目標となる位置
+			Vec3 toPos = World.transInMatrix();
+			Vec3 ToPosVec = toPos - m_Rigidbody->m_Pos;
+			//距離を求める
+			float dis = ToPosVec.length();
+
+			// 突進してしばらくたったら
+			if (m_FrameCount > m_StopTime + m_TackleTime)
+			{
+				m_Tackle = false;
+				m_FrameCount = 0.0f;
+				m_TargetPos = Vec3(0.0f, 0.0f, 0.0f);
+				m_Rigidbody->m_Velocity *= 0.01f;
+				m_StateMachine->ChangeState(EnemyAttackEndState::Instance());
+				return;
+			}
+			// 止まりはじめ
+			else if (m_FrameCount > m_StopTime && m_Tackle == false)
+			{
+				m_Tackle = true;
+				if (m_TargetPos == Vec3(0.0f, 0.0f, 0.0f)) {
+					m_TargetPos = toPos;
+					m_TackleStartPos = m_Rigidbody->m_Pos;
+				}
+			}
+
+			// 突進の処理
+			if (m_Tackle == true)
+			{
+				Vec3 Tag = m_TargetPos - m_TackleStartPos;
+				Tag.normalize();
+				Tag *= m_TackleSpeed;
+				m_Rigidbody->m_Pos.y = m_BaseY;
+				if (m_UpdateActive == false) {
+					Tag *= 0.0f;
+				}
+				else {
+					Vec3 Emitter = m_Rigidbody->m_Pos;
+					Emitter.y -= 0.125f;
+					//Sparkの送出
+					auto SparkPtr = GetStage<GameStage>()->FindTagGameObject<EnemyMoveEffect>(L"EnemyMoveEffect");
+					SparkPtr->InsertSpark(Emitter);
+					m_FrameCount += ElapsedTime;
+				}
+				m_Rigidbody->m_Velocity = Tag;
+			}
+			else if (m_Tackle == false)
+			{
+				if (m_FrameCount > 0.0f && m_UpdateActive)
+				{
+					ToPosVec.normalize();
+					ToPosVec *= 0.01f;
+					m_Rigidbody->m_Velocity = ToPosVec;
+					m_Rigidbody->m_Pos.y = m_BaseY;
+					m_FrameCount += ElapsedTime;
+				}
+				// プレイヤーとエネミーの距離が近くなった時の処理
+				else if (dis <= m_SearchDis && m_UpdateActive)
+				{
+					m_FrameCount += ElapsedTime;
+					if (dis < 1.0f) {
+						dis = 1.0f;
+					}
+					m_EyeFlashSound->Start(0, 0.2f / dis);
+					//fireの送出
+					auto FirePtr = GetStage<GameStage>()->FindTagGameObject<AttackSigns>(L"AttackSigns");
+					Vec3 Emitter = m_Rigidbody->m_Pos;
+					Emitter.y += 0.125f;
+					FirePtr->InsertSigns(Emitter, 0.5f);
+				}
+				// プレイヤーとエネミーの距離が遠くなったら再び大砲に向かう
+				else if (dis >= m_SearchDis * 3.0f && m_UpdateActive)
+				{
+					m_StateMachine->ChangeState(EnemyToCannonState::Instance());
+					return;
+				}
+				// プレイヤーに向かう処理
+				else
+				{
+					ToPosVec.normalize();
+					ToPosVec *= m_Speed;
+					if (m_UpdateActive == false) {
+						ToPosVec *= 0.0f;
+					}
+					m_Rigidbody->m_Velocity = ToPosVec;
+					m_Rigidbody->m_Pos.y = m_BaseY;
+				}
+			}
+		}
+		RotateToVelocity();
 	}
 
 	//--------------------------------------------------------------------------------------

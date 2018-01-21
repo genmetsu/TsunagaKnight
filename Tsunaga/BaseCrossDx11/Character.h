@@ -1271,6 +1271,7 @@ namespace basecross {
 		shared_ptr<SoundObject> m_FriendsSound;
 		shared_ptr<SoundObject> m_CannonSound;
 		shared_ptr<SoundObject> m_EyeFlashSound;
+		shared_ptr<SoundObject> m_SawSound;
 
 		//ï`âÊÉfÅ[É^
 		shared_ptr<BcDrawObject> m_PtrObj;
@@ -2249,7 +2250,7 @@ namespace basecross {
 		@return	Ç»Çµ
 		*/
 		//--------------------------------------------------------------------------------------
-		//virtual void OppositionBehavior() override;
+		virtual void OppositionBehavior() override;
 
 	};
 
