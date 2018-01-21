@@ -270,21 +270,21 @@ namespace basecross {
 	}
 
 	void MultiSpark::InsertSpark(const Vec3& Pos) {
-		auto ParticlePtr = InsertParticle(64);
+		auto ParticlePtr = InsertParticle(128);
 		ParticlePtr->m_EmitterPos = Pos;
-		ParticlePtr->SetTextureResource(L"SPARK_TX");
+		ParticlePtr->SetTextureResource(L"STAR_TX");
 		ParticlePtr->m_MaxTime = 0.5f;
 		vector<ParticleSprite>& pSpriteVec = ParticlePtr->GetParticleSpriteVec();
 		for (auto& rParticleSprite : ParticlePtr->GetParticleSpriteVec()) {
 			rParticleSprite.m_LocalPos.x = Util::RandZeroToOne() * 0.1f - 0.05f;
 			rParticleSprite.m_LocalPos.y = Util::RandZeroToOne() * 0.1f;
 			rParticleSprite.m_LocalPos.z = Util::RandZeroToOne() * 0.1f - 0.05f;
-			rParticleSprite.m_LocalScale = Vec2(0.2, 0.2);
+			rParticleSprite.m_LocalScale = Vec2(0.1, 0.1);
 			//各パーティクルの移動速度を指定
 			rParticleSprite.m_Velocity = Vec3(
-				rParticleSprite.m_LocalPos.x * 30.0f,
-				rParticleSprite.m_LocalPos.y * 30.0f,
-				rParticleSprite.m_LocalPos.z * 30.0f
+				rParticleSprite.m_LocalPos.x * 15.0f,
+				rParticleSprite.m_LocalPos.y * 20.0f,
+				rParticleSprite.m_LocalPos.z * 15.0f
 			);
 			//色の指定
 			int r = (int)((Util::RandZeroToOne() * 0.5f + 0.3f) * 256.0f);
@@ -299,14 +299,6 @@ namespace basecross {
 
 	void MultiSpark::OnUpdate() {
 		MultiParticle::OnUpdate();
-		/*float ElapsedTime = App::GetApp()->GetElapsedTime();
-
-		for (auto ParticlePtr : GetParticleVec()) {
-			for (auto& rParticleSprite : ParticlePtr->GetParticleSpriteVec()) {
-				if (rParticleSprite.m_Active) {
-				}
-			}
-		}*/
 	}
 
 	//--------------------------------------------------------------------------------------
@@ -404,13 +396,6 @@ namespace basecross {
 
 	void MultiGuardEffect::OnUpdate() {
 		MultiParticle::OnUpdate();
-		float ElapsedTime = App::GetApp()->GetElapsedTime();
-		/*for (auto ParticlePtr : GetParticleVec()) {
-			for (auto& rParticleSprite : ParticlePtr->GetParticleSpriteVec()) {
-				if (rParticleSprite.m_Active) {
-				}
-			}
-		}*/
 	}
 
 	//--------------------------------------------------------------------------------------
@@ -464,12 +449,6 @@ namespace basecross {
 	void BossEffect::OnUpdate() {
 		MultiParticle::OnUpdate();
 		float ElapsedTime = App::GetApp()->GetElapsedTime();
-		/*for (auto ParticlePtr : GetParticleVec()) {
-		for (auto& rParticleSprite : ParticlePtr->GetParticleSpriteVec()) {
-		if (rParticleSprite.m_Active) {
-		}
-		}
-		}*/
 	}
 
 	//--------------------------------------------------------------------------------------
@@ -515,14 +494,6 @@ namespace basecross {
 
 	void EnemyMoveEffect::OnUpdate() {
 		MultiParticle::OnUpdate();
-		/*float ElapsedTime = App::GetApp()->GetElapsedTime();
-
-		for (auto ParticlePtr : GetParticleVec()) {
-			for (auto& rParticleSprite : ParticlePtr->GetParticleSpriteVec()) {
-				if (rParticleSprite.m_Active) {
-				}
-			}
-		}*/
 	}
 
 	//--------------------------------------------------------------------------------------
@@ -1564,6 +1535,10 @@ namespace basecross {
 		m_PtrObj->m_Camera = GetStage<Stage>()->GetCamera();
 		m_PtrObj->m_OwnShadowmapActive = m_OwnShadowActive;
 		m_PtrObj->m_ShadowmapUse = true;
+		m_PtrObj->m_UsedModelColor = false;
+
+		m_PtrObj->m_Diffuse = Col4(1.0f, 1.0f, 1.0f, 1.0f);
+		m_PtrObj->m_Emissive = Col4(0.6f, 0.6f, 0.6f, 1.0f);
 
 		//シャドウマップ描画データの構築
 		m_PtrShadowmapObj = make_shared<ShadowmapObject>();
@@ -1763,6 +1738,9 @@ namespace basecross {
 		m_PtrObj->AddAnimation(L"30frame", 0, 30, true, 30.0f);
 		m_PtrObj->AddAnimation(L"NonMove", 0, 1, true, 30.0f);
 		m_PtrObj->AddAnimation(L"Attack", 8, 20, false, 45.0f);
+
+		m_PtrObj->AddAnimation(L"BossDamage", 30, 30, false, 30.0f);
+		m_PtrObj->AddAnimation(L"BossDead", 60, 30, false, 30.0f);
 		m_PtrObj->ChangeCurrentAnimation(m_DefaultAnimation);
 
 		//シャドウマップ描画データの構築
@@ -1819,6 +1797,10 @@ namespace basecross {
 					//体力を削る
 					m_HP--;
 
+					if (FindTag(L"SawBoss")) {
+						m_PtrObj->ChangeCurrentAnimation(L"BossDamage");
+					}
+
 					if (m_HP <= 0.0f) {
 						Vec3 p_pos = m_PlayerPtr.lock()->GetPosition();
 						float p_dis = (p_pos - GetPosition()).length();
@@ -1849,6 +1831,11 @@ namespace basecross {
 
 	void EnemyObject::OnUpdate() {
 		float ElapsedTime = App::GetApp()->GetElapsedTime();
+		if (FindTag(L"SawBoss") || FindTag(L"HandBoss")) {
+			if (m_PtrObj->m_CurrentAnimeName == L"BossDamage" && m_PtrObj->m_CurrentAnimeTime >= 0.999f) {
+				m_PtrObj->ChangeCurrentAnimation(L"30frame");
+			}
+		}
 		m_PtrObj->UpdateAnimation(ElapsedTime);
 		//ステートマシン更新
 		m_StateMachine->Update();
@@ -2148,7 +2135,7 @@ namespace basecross {
 			Vec3 PlayerPos = shptr->GetPosition();
 			float dis = (PlayerPos - m_Rigidbody->m_Pos).length();
 			// プレイヤーとエネミーの距離が近くなった時の処理
-			if (dis <= (m_SearchDis - 1.0f))
+			if (dis <= m_SearchDis)
 			{
 				m_StateMachine->ChangeState(EnemyOppositionState::Instance());
 				return;
@@ -2313,6 +2300,10 @@ namespace basecross {
 			m_StateMachine->ChangeState(EnemyWaitingState::Instance());
 			return;
 		}
+	}
+
+	void EnemyObject::ChangeAnimation(wstring name) {
+		m_PtrObj->ChangeCurrentAnimation(name);
 	}
 
 	void EnemyObject::Spawn() {
@@ -2541,7 +2532,9 @@ namespace basecross {
 	IMPLEMENT_SINGLETON_INSTANCE(EnemyDamageState)
 
 	void EnemyDamageState::Enter(const shared_ptr<EnemyObject>& Obj) {
-		
+		if (Obj->FindTag(L"HandBoss")) {
+			Obj->ChangeAnimation(L"BossDamage");
+		}
 	}
 
 	void EnemyDamageState::Execute(const shared_ptr<EnemyObject>& Obj) {
@@ -2550,6 +2543,9 @@ namespace basecross {
 
 	void EnemyDamageState::Exit(const shared_ptr<EnemyObject>& Obj) {
 		//何もしない
+		if (Obj->FindTag(L"HandBoss")) {
+			Obj->ChangeAnimation(L"30frame");
+		}
 	}
 
 	//--------------------------------------------------------------------------------------
@@ -3270,6 +3266,8 @@ namespace basecross {
 		m_HP = 20.0f;
 		m_DefaultHP = m_HP;
 		m_TackleSpeed = 0.0f;
+		m_BaseY = m_Scale.y / 2.0f + 0.4f;
+		m_SearchDis = 3.0f;
 		
 		AddTag(L"HandBoss");
 		//メッシュとトランスフォームの差分の設定
@@ -3277,103 +3275,12 @@ namespace basecross {
 			Vec3(0.8f, 0.8f, 0.8f),
 			Vec3(0.0f, 0.0f, 0.0f),
 			Vec3(0.0f, XM_PI, 0.0f),
-			Vec3(0.0f, -0.5f, 0.0f)
+			Vec3(0.0f, -0.6f, 0.0f)
 		);
 	}
 
 	CR_BossEnemy::~CR_BossEnemy()
 	{
-	}
-
-	void CR_BossEnemy::OnCreate() {
-		//タグの追加
-		AddTag(L"EnemyObject");
-
-		m_EyeFlashSound = ObjectFactory::Create<SoundObject>(L"eye_flash");
-
-		//Rigidbodyの初期化
-		auto PtrGameStage = GetStage<GameStage>();
-		Rigidbody body;
-		body.m_Owner = GetThis<GameObject>();
-		body.m_Mass = 1.0f;
-		body.m_Scale = m_Scale;
-		body.m_Quat = m_Qt;
-		body.m_Pos = m_Pos;
-		body.m_CollType = CollType::typeSPHERE;
-		body.m_IsCollisionActive = true;
-		//		body.m_IsDrawActive = true;
-		body.SetToBefore();
-		m_Rigidbody = PtrGameStage->AddRigidbody(body);
-
-		m_isDead = false;
-		m_UpdateActive = true;
-		m_isDraw = true;
-
-		m_PlayerPtr = GetStage()->FindTagGameObject<Player>(L"Player");
-
-		//メッシュの取得
-		auto MeshPtr = App::GetApp()->GetResource<MeshResource>(m_MeshResName);
-
-		//行列の定義
-		Mat4x4 World;
-		World.affineTransformation(
-			m_Scale,
-			Vec3(0, 0, 0),
-			m_Qt,
-			m_Pos
-		);
-		//ターゲット座標の初期化
-		m_TargetPos = Vec3(0.0f, 0.0f, 0.0f);
-
-		m_BaseY = m_Rigidbody->m_Scale.y / 2.0f + 0.6f;
-
-		//サウンドオブジェクトの初期化
-		m_DeadSound = ObjectFactory::Create<SoundObject>(L"Pan");
-		m_BossDamageSound = ObjectFactory::Create<SoundObject>(L"bossdamage");
-		m_FriendsSound = ObjectFactory::Create<SoundObject>(L"nakama");
-		m_CannonSound = ObjectFactory::Create<SoundObject>(L"cannon");
-		m_EyeFlashSound = ObjectFactory::Create<SoundObject>(L"eye_flash");
-
-		auto TexPtr = App::GetApp()->GetResource<TextureResource>(m_TextureResName);
-
-		//描画データの構築
-		m_SimpleObj = make_shared<BcDrawObject>();
-		m_SimpleObj->m_MeshRes = MeshPtr;
-		m_SimpleObj->m_TextureRes = TexPtr;
-		m_SimpleObj->m_WorldMatrix = World;
-		m_SimpleObj->m_Camera = GetStage<Stage>()->GetCamera();
-		m_SimpleObj->m_OwnShadowmapActive = m_OwnShadowActive;
-		m_SimpleObj->m_ShadowmapUse = true;
-		m_SimpleObj->m_FogEnabled = true;
-		m_SimpleObj->m_FogColor = Col4(0.07f, 0.0f, 0.09f, 1.0f);
-		m_SimpleObj->m_FogStart = -10.0f;
-		m_SimpleObj->m_FogEnd = -100.0f;
-
-		//シャドウマップ描画データの構築
-		m_PtrShadowmapObj = make_shared<ShadowmapObject>();
-		m_PtrShadowmapObj->m_MeshRes = App::GetApp()->GetResource<MeshResource>(L"DEFAULT_SPHERE");
-		//描画データの行列をコピー
-		m_PtrShadowmapObj->m_WorldMatrix = World;
-		m_PtrShadowmapObj->m_Camera = GetStage<Stage>()->GetCamera();
-		//ステートマシンの構築
-		m_StateMachine.reset(new StateMachine<EnemyObject>(GetThis<EnemyObject>()));
-		//ステート初期値設定
-		m_StateMachine->ChangeState(EnemyOppositionState::Instance());
-
-		vector<shared_ptr<GameObject>> CannonVec;
-		GetStage<GameStage>()->FindTagGameObjectVec(L"Cannon", CannonVec);
-		int num = rand() % 3;
-		for (auto cannon : CannonVec)
-		{
-			if (cannon)
-			{
-				auto Ptrcannon = dynamic_pointer_cast<Cannon>(cannon);
-				if (num == Ptrcannon->GetCannonClass()) {
-					m_CannonPos = Ptrcannon->GetPosition();
-					break;
-				}
-			}
-		}
 	}
 
 	void CR_BossEnemy::OppositionBehavior() {
@@ -3479,37 +3386,6 @@ namespace basecross {
 		RotateToVelocity();
 	}
 
-	void CR_BossEnemy::OnUpdate() {
-		//ステートマシン更新
-		m_StateMachine->Update();
-	}
-
-	void CR_BossEnemy::OnDraw() {
-		if (m_isDraw) {
-			//行列の定義
-			Mat4x4 World;
-			World.affineTransformation(
-				m_Rigidbody->m_Scale,
-				Vec3(0, 0, 0),
-				m_Rigidbody->m_Quat,
-				m_Rigidbody->m_Pos
-			);
-
-			//差分を計算
-			World = m_MeshToTransformMatrix * World;
-
-			m_SimpleObj->m_WorldMatrix = World;
-			m_SimpleObj->m_Camera = GetStage<Stage>()->GetCamera();
-			auto shptr = m_StaticRenderer.lock();
-			if (!shptr) {
-				shptr = GetStage<Stage>()->FindTagGameObject<BcPNTStaticRenderer>(L"BcPNTStaticRenderer");
-				m_StaticRenderer = shptr;
-			}
-			shptr->AddDrawObject(m_SimpleObj);
-		}
-	}
-
-
 	//--------------------------------------------------------------------------------------
 	/// ボスの手
 	//--------------------------------------------------------------------------------------
@@ -3525,9 +3401,9 @@ namespace basecross {
 		m_Qt(Qt),
 		m_Pos(Pos),
 		m_OwnShadowActive(OwnShadowActive),
-		m_BeforeAttackTime(1.0f),
+		m_BeforeAttackTime(0.5f),
 		m_AttackSetupTime(1.0f),
-		m_AttackTime(1.5f),
+		m_AttackTime(1.0f),
 		m_ReturnDefaultTime(0.5f),
 		m_LerpToParent(0.2f)
 	{
@@ -3889,7 +3765,7 @@ namespace basecross {
 		m_BeforeAttackTime(1.0f),
 		m_AttackRate(0.2f),
 		m_AttackBulletNum(30),
-		m_BarriorChangeTime(2.0f),
+		m_BarriorChangeTime(20.0f),
 		m_isLooked(false)
 	{}
 	Boss::~Boss() {}
