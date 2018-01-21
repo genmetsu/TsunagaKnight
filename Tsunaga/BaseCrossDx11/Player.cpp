@@ -311,9 +311,10 @@ namespace basecross {
 			if (isRunning != RunEnd) {
 				isRunning = RunEnd;
 				ChangeAnimation(L"RunEnd");
+				m_RunAnimationFrameCount = 0.0f;
 			}
 		}
-		else if (m_RunAnimationFrameCount > 0.333f) {
+		else if (m_RunAnimationFrameCount > 0.333f && m_PtrObj->m_CurrentAnimeName == L"RunStart") {
 			ChangeAnimation(L"Running");
 			isRunning = Running;
 			m_RunAnimationFrameCount = 0.0f;
@@ -324,6 +325,14 @@ namespace basecross {
 				ChangeAnimation(L"RunStart");
 				m_RunAnimationFrameCount = 0.0f;
 			}
+		}
+		if (m_PtrObj->m_CurrentAnimeName == L"RunEnd") {
+			if (m_RunAnimationFrameCount > 0.333f) {
+				ChangeAnimation(L"Default");
+				m_RunAnimationFrameCount = 0.0f;
+			}
+			else
+				m_RunAnimationFrameCount += ElapsedTime;
 		}
 		if (isRunning == RunStart) {
 			m_RunAnimationFrameCount += ElapsedTime;
