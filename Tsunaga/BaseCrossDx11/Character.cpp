@@ -2720,7 +2720,7 @@ namespace basecross {
 	{
 		m_Speed = 0.3f;
 		m_SearchDis = 5.0;
-		m_EnemyShootSpeed = 1.2f;
+		m_EnemyShootSpeed = 1.8f;
 		m_PlayerShootSpeed = 5.0f;
 		m_PlayerShootTime = 1.8f;
 		AddTag(L"Blue");
@@ -3888,7 +3888,9 @@ namespace basecross {
 		m_BulletSpeed(2.0f),
 		m_BeforeAttackTime(1.0f),
 		m_AttackRate(0.2f),
-		m_AttackBulletNum(30)
+		m_AttackBulletNum(30),
+		m_BarriorChangeTime(2.0f),
+		m_isLooked(false)
 	{}
 	Boss::~Boss() {}
 
@@ -4039,17 +4041,18 @@ namespace basecross {
 			}
 
 			//ˆê’èŠÔ–ˆ‚ÉƒoƒŠƒA‚ğ•Ï‚¦‚é
-			if (m_frame_count >= 20.0f && m_now_barrior == 0) {
+			if (m_frame_count >= m_BarriorChangeTime && m_now_barrior == 0) {
 				m_now_barrior = 1;
 				m_frame_count = 0.0f;
 			}
-			if (m_frame_count >= 20.0f && m_now_barrior == 1) {
+			if (m_frame_count >= m_BarriorChangeTime && m_now_barrior == 1) {
 				m_now_barrior = 2;
 				m_frame_count = 0.0f;
 			}
-			if (m_frame_count >= 20.0f && m_now_barrior == 2) {
+			if (m_frame_count >= m_BarriorChangeTime && m_now_barrior == 2) {
 				m_now_barrior = 3;
 				m_frame_count = 0.0f;
+				m_isLooked = true;
 			}
 
 			if (m_now_barrior == 3) {
@@ -4196,6 +4199,7 @@ namespace basecross {
 				m_now_barrior = 0;
 			}
 			else if (m_AttackFrameCount >= m_BeforeAttackTime) {
+				m_isLooked = false;
 				//‹…‚ğ”ò‚Î‚·ˆ—
 				vector<shared_ptr<GameObject>> ShootVec;
 				GetStage<GameStage>()->FindTagGameObjectVec(L"BossBullet", ShootVec);

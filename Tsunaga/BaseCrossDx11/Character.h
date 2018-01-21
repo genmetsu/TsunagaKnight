@@ -2293,10 +2293,16 @@ namespace basecross {
 		Vec3 m_Pos;
 		//HP
 		float m_HP;
+
+		//ƒJƒƒ‰‚ªƒ{ƒX‚É’–Ú‚·‚é‚©‚Ç‚¤‚©‚Ìflg
+		bool m_isLooked;
+
 		//Å‰‚ÌHP
 		float m_DefaultHP;
 
 		Vec3 m_DefaultPos;
+
+		float m_BarriorChangeTime;
 
 		bool m_isDead;
 
@@ -2425,10 +2431,17 @@ namespace basecross {
 
 		void SetIsDamage(bool value) {
 			m_isDamage = value;
-			
 		}
 		bool GetIsDamage() {
 			return m_isDamage;
+		}
+
+		void SetIsLooked(bool value) {
+			m_isLooked = value;
+		}
+
+		bool GetIsLooked() {
+			return m_isLooked;
 		}
 
 		void AttackMove(int player_num);

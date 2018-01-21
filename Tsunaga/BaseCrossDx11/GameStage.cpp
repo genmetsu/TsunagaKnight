@@ -476,42 +476,10 @@ namespace basecross {
 		auto CntlVec = App::GetApp()->GetInputDevice().GetControlerVec();
 		if (CntlVec[0].bConnected) {
 
-			if (!m_isClear) {
-				if (CntlVec[0].fThumbRX != 0) {
-					camera.m_CameraXZRad -= CntlVec[0].fThumbRX * 0.05f;
-					if (abs(camera.m_CameraXZRad) >= XM_2PI) {
-						camera.m_CameraXZRad = 0;
-					}
-				}
-				if (CntlVec[0].fThumbRY != 0) {
-					camera.m_CameraYRad += CntlVec[0].fThumbRY * 0.05f;
-					if (camera.m_CameraYRad >= 2.0f) {
-						camera.m_CameraYRad = 2.0f;
-					}
-					else if (camera.m_CameraYRad <= 0.5f) {
-						camera.m_CameraYRad = 0.5f;
-					}
-					if (camera.m_CameraYRad >= XM_PIDIV2 - 0.3f) {
-						if (CntlVec[0].fThumbRY > 0) {
-							camera.m_CameraArmLen -= CntlVec[0].fThumbRY * 0.1f;
-							if (GetCamera().m_CameraArmLen <= 1.5f) {
-								camera.m_CameraArmLen = 1.5f;
-							}
-						}
-						else if (CntlVec[0].fThumbRY < 0) {
-							camera.m_CameraArmLen -= CntlVec[0].fThumbRY * 0.1f;
-							if (GetCamera().m_CameraArmLen >= 50.0f) {
-								GetCamera().m_CameraArmLen = 50.0f;
-							}
-						}
-					}
-				}
-			}
-
 			auto GM = GameManager::getInstance();
 			GM->m_camera_length = camera.m_CameraArmLen;
 			auto PlayerPtr = FindTagGameObject<Player>(L"Player");
-
+			auto boss = FindTagGameObject<Boss>(L"BossEnemy");
 
 			//チェインがある程度長いときは移動しているときカメラを引く
 			int now_friends_num = GM->GetFriendsNum();
@@ -527,7 +495,6 @@ namespace basecross {
 
 			int now_cannon = PlayerPtr->GetIsCannon();
 			if (now_cannon < 3) {
-				auto boss = FindTagGameObject<Boss>(L"BossEnemy");
 				Vec3 boss_pos = boss->GetPosition();
 				if (now_cannon == 0) {
 					vector<shared_ptr<GameObject>> ShootedEnemyVec;
@@ -548,7 +515,6 @@ namespace basecross {
 						if (m_FrameCount > 1.0f) {
 							CannonStateEndBehaviour();
 							PlayerPtr->SetIsCannnon(3);
-							camera.m_CameraArmLen = 2.5f;
 							m_FrameCount = 0.0f;
 							if (boss->GetHP() > 0.0f) {
 								boss->ChangeAnimation(L"Default");
@@ -584,7 +550,6 @@ namespace basecross {
 						if (m_FrameCount > 1.0f) {
 							CannonStateEndBehaviour();
 							PlayerPtr->SetIsCannnon(3);
-							camera.m_CameraArmLen = 2.5f;
 							m_FrameCount = 0.0f;
 							if (boss->GetHP() > 0.0f) {
 								boss->ChangeAnimation(L"Default");
@@ -621,7 +586,6 @@ namespace basecross {
 						if (m_FrameCount > 1.0f) {
 							CannonStateEndBehaviour();
 							PlayerPtr->SetIsCannnon(3);
-							camera.m_CameraArmLen = 2.5f;
 							m_FrameCount = 0.0f;
 							if (boss->GetHP() > 0.0f) {
 								boss->ChangeAnimation(L"Default");
@@ -639,7 +603,53 @@ namespace basecross {
 					camera.m_CamerEye.z -= 7.0f;
 				}
 			}
+			else if (boss->GetIsLooked()) {
+
+				Vec3 boss_pos = boss->GetPosition();
+				camera.m_CamerAt = boss_pos;
+				camera.m_CameraArmLen = 30;
+				camera.m_CamerEye = Vec3(-5, 5, 40);
+				camera.m_CamerEye.x -= 4.0f;
+				camera.m_CamerEye.z -= 7.0f;
+
+			}
 			else {
+				if (camera.m_CameraArmLen > 20) {
+					camera.m_CameraArmLen = 2.6f;
+				}
+
+				if (!m_isClear) {
+					if (CntlVec[0].fThumbRX != 0) {
+						camera.m_CameraXZRad -= CntlVec[0].fThumbRX * 0.05f;
+						if (abs(camera.m_CameraXZRad) >= XM_2PI) {
+							camera.m_CameraXZRad = 0;
+						}
+					}
+					if (CntlVec[0].fThumbRY != 0) {
+						camera.m_CameraYRad += CntlVec[0].fThumbRY * 0.05f;
+						if (camera.m_CameraYRad >= 2.0f) {
+							camera.m_CameraYRad = 2.0f;
+						}
+						else if (camera.m_CameraYRad <= 0.5f) {
+							camera.m_CameraYRad = 0.5f;
+						}
+						if (camera.m_CameraYRad >= XM_PIDIV2 - 0.3f) {
+							if (CntlVec[0].fThumbRY > 0) {
+								camera.m_CameraArmLen -= CntlVec[0].fThumbRY * 0.1f;
+								if (GetCamera().m_CameraArmLen <= 1.5f) {
+									camera.m_CameraArmLen = 1.5f;
+								}
+							}
+							else if (CntlVec[0].fThumbRY < 0) {
+								camera.m_CameraArmLen -= CntlVec[0].fThumbRY * 0.1f;
+								if (GetCamera().m_CameraArmLen >= 50.0f) {
+									GetCamera().m_CameraArmLen = 50.0f;
+								}
+							}
+						}
+					}
+				}
+
 				camera.m_CamerAt = PlayerPtr->GetPosition();
 				camera.m_CamerAt.y += 0.5f;
 
@@ -691,6 +701,7 @@ namespace basecross {
 		m_RigidbodyManager->OnDraw();
 	}
 
+	//砲撃が始まったとき敵の動きを止める
 	void GameStage::CannonStateStartBehaviour() {
 		vector<shared_ptr<GameObject>> ZakoVec;
 		FindTagGameObjectVec(L"Zako", ZakoVec);
@@ -730,6 +741,7 @@ namespace basecross {
 		}
 	}
 
+	//砲撃が終わった後の呼ばれる関数
 	void GameStage::CannonStateEndBehaviour() {
 		vector<shared_ptr<GameObject>> ZakoVec;
 		FindTagGameObjectVec(L"Zako", ZakoVec);
@@ -769,6 +781,7 @@ namespace basecross {
 		}
 	}
 
+	//ゲームクリアしたあとによばれる
 	void GameStage::GameClearBehaviour() {
 		m_AudioObjectPtr->Stop(L"BGM_2");
 		vector<shared_ptr<GameObject>> ZakoVec;
@@ -888,6 +901,7 @@ namespace basecross {
 			);
 	}
 
+	//ゲームおーばーしたとき
 	void GameStage::GameOverBehaviour() {
 		m_AudioObjectPtr->Stop(L"BGM_2");
 
