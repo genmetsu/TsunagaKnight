@@ -399,7 +399,7 @@ namespace basecross {
 
 		m_AudioObjectPtr = ObjectFactory::Create<MultiAudioObject>();
 		m_AudioObjectPtr->AddAudioResource(L"BGM_2");
-		m_AudioObjectPtr->Start(L"BGM_2", XAUDIO2_LOOP_INFINITE, 0.6f);
+		m_AudioObjectPtr->Start(L"BGM_2", XAUDIO2_LOOP_INFINITE, 0.1f);
 
 	}
 
@@ -700,6 +700,14 @@ namespace basecross {
 				PtrZako->SetUpdateActive(false);
 			}
 		}
+		vector<shared_ptr<GameObject>> BulletVec;
+		FindTagGameObjectVec(L"AllBullet", BulletVec);
+		for (auto bullet : BulletVec) {
+			if (bullet) {
+				auto PtrBullet = dynamic_pointer_cast<BulletObject>(bullet);
+				PtrBullet->SetActive(false);
+			}
+		}
 		auto s_boss = FindTagGameObject<EnemyObject>(L"SawBoss");
 		if (s_boss) {
 			s_boss->SetUpdateActive(false);
@@ -729,6 +737,14 @@ namespace basecross {
 			if (zako) {
 				auto PtrZako = dynamic_pointer_cast<EnemyObject>(zako);
 				PtrZako->SetUpdateActive(true);
+			}
+		}
+		vector<shared_ptr<GameObject>> BulletVec;
+		FindTagGameObjectVec(L"AllBullet", BulletVec);
+		for (auto bullet : BulletVec) {
+			if (bullet) {
+				auto PtrBullet = dynamic_pointer_cast<BulletObject>(bullet);
+				PtrBullet->SetActive(true);
 			}
 		}
 		auto s_boss = FindTagGameObject<EnemyObject>(L"SawBoss");
@@ -761,6 +777,14 @@ namespace basecross {
 			if (zako) {
 				auto PtrZako = dynamic_pointer_cast<EnemyObject>(zako);
 				PtrZako->SetUpdateActive(false);
+			}
+		}
+		vector<shared_ptr<GameObject>> BulletVec;
+		FindTagGameObjectVec(L"AllBullet", BulletVec);
+		for (auto bullet : BulletVec) {
+			if (bullet) {
+				auto PtrBullet = dynamic_pointer_cast<BulletObject>(bullet);
+				PtrBullet->SetActive(false);
 			}
 		}
 		auto s_boss = FindTagGameObject<EnemyObject>(L"SawBoss");
@@ -873,6 +897,14 @@ namespace basecross {
 			if (zako) {
 				auto PtrZako = dynamic_pointer_cast<EnemyObject>(zako);
 				PtrZako->SetUpdateActive(false);
+			}
+		}
+		vector<shared_ptr<GameObject>> BulletVec;
+		FindTagGameObjectVec(L"AllBullet", BulletVec);
+		for (auto bullet : BulletVec) {
+			if (bullet) {
+				auto PtrBullet = dynamic_pointer_cast<BulletObject>(bullet);
+				PtrBullet->SetActive(false);
 			}
 		}
 		auto s_boss = FindTagGameObject<EnemyObject>(L"SawBoss");

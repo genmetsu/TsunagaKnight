@@ -2932,7 +2932,8 @@ namespace basecross {
 		m_my_Tag(Tag),
 		m_FrameCount(0.0f),
 		m_BulletTime(15.0f),
-		m_isShoot(false)
+		m_isShoot(false),
+		m_NowVelocity(Vec3(0))
 	{
 	}
 	BulletObject::~BulletObject()
@@ -2941,6 +2942,7 @@ namespace basecross {
 	void BulletObject::OnCreate()
 	{
 		AddTag(m_my_Tag);
+		AddTag(L"AllBullet");
 
 		//RigidbodyÇÃèâä˙âª
 		auto PtrGameStage = GetStage<GameStage>();

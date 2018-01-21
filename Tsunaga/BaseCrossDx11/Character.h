@@ -1814,6 +1814,9 @@ namespace basecross {
 		//フレームカウント
 		float m_FrameCount;
 
+		//現在の速度を保存しておく
+		Vec3 m_NowVelocity;
+
 		wstring m_my_Tag;
 
 		//サウンドオブジェクト
@@ -1907,6 +1910,16 @@ namespace basecross {
 
 		float GetScale(){
 			return m_Scale.x;
+		}
+
+		void SetActive(bool value) {
+			if (value == false) {
+				m_NowVelocity = m_Rigidbody->m_Velocity;
+				m_Rigidbody->m_Velocity = Vec3(0);
+			}
+			else {
+				m_Rigidbody->m_Velocity = m_NowVelocity;
+			}
 		}
 
 		//--------------------------------------------------------------------------------------
