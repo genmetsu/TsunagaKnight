@@ -149,6 +149,7 @@ namespace basecross {
 		m_PtrObj->AddAnimation(L"Attack", 120, 50, false, 90.0f);
 		m_PtrObj->AddAnimation(L"Damage", 170, 30, false, 60.0f);
 		m_PtrObj->AddAnimation(L"Step", 200, 30, false, 90.0f);
+		m_PtrObj->AddAnimation(L"CannonStart", 230, 60, false, 60.0f);
 
 		//シャドウマップ描画データの構築
 		m_PtrShadowmapObj = make_shared<ShadowmapObject>();
@@ -393,6 +394,7 @@ namespace basecross {
 						MoveVec.normalize();
 						float MoveLength = PtrCannon->GetScale() / 2.0f + GetScale() / 2.0f;
 						SetPosition(MoveVec * MoveLength * 1.5f + PtrCannon->GetPosition());
+						ChangeAnimation(L"CannonStart");
 					}
 					if (PtrCannon->GetCannonClass() == 1) {
 						auto s = GetStage()->FindTagGameObject<Sword>(L"Sword");
@@ -404,6 +406,7 @@ namespace basecross {
 						MoveVec.normalize();
 						float MoveLength = PtrCannon->GetScale() / 2.0f + GetScale() / 2.0f;
 						SetPosition(MoveVec * MoveLength* 1.5f + PtrCannon->GetPosition());
+						ChangeAnimation(L"CannonStart");
 					}
 					if (PtrCannon->GetCannonClass() == 2) {
 						auto s = GetStage()->FindTagGameObject<Sword>(L"Sword");
@@ -415,6 +418,7 @@ namespace basecross {
 						MoveVec.normalize();
 						float MoveLength = PtrCannon->GetScale() / 2.0f + GetScale() / 2.0f;
 						SetPosition(MoveVec * MoveLength * 1.5f + PtrCannon->GetPosition());
+						ChangeAnimation(L"CannonStart");
 					}
 					
 				}
