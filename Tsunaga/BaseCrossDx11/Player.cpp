@@ -497,8 +497,6 @@ namespace basecross {
 		auto sword = GetStage()->FindTagGameObject<Sword>(L"Sword");
 		sword->SetState(L"Attack");
 
-		//m_AttackSound->Start(0, 0.4f);
-
 		//攻撃中の移動の補正
 		vector<shared_ptr<GameObject>> EnemyVec;
 		GetStage<GameStage>()->FindTagGameObjectVec(L"Zako", EnemyVec);
@@ -574,6 +572,7 @@ namespace basecross {
 	void PlayerAttackState::Enter(const shared_ptr<Player>& Obj) {
 		Obj->ChangeAnimation(L"Attack");
 		Obj->AttackBehaviour();
+		Obj->SetInvincible(true);
 	}
 
 	void PlayerAttackState::Execute(const shared_ptr<Player>& Obj) {
@@ -588,7 +587,7 @@ namespace basecross {
 	}
 
 	void PlayerAttackState::Exit(const shared_ptr<Player>& Obj) {
-
+		Obj->SetInvincible(false);
 	}
 
 	//--------------------------------------------------------------------------------------
@@ -702,7 +701,6 @@ namespace basecross {
 		m_PtrObj->m_ShadowmapUse = false;
 		m_PtrObj->m_BlendState = BlendState::AlphaBlend;
 		m_PtrObj->m_RasterizerState = RasterizerState::DoubleDraw;
-		//m_PtrObj->m_Alpha = 0.0f;
 
 		m_AttackSound = ObjectFactory::Create<SoundObject>(L"buki");
 
@@ -1075,16 +1073,6 @@ namespace basecross {
 
 	void NonAttackState::Execute(const shared_ptr<Sword>& Obj) {
 		Obj->UpdateBehavior();
-
-		////コントローラの取得
-		//auto CntlVec = App::GetApp()->GetInputDevice().GetControlerVec();
-		//if (CntlVec[0].bConnected) {
-		//	//Xボタン
-		//	if (CntlVec[0].wPressedButtons & XINPUT_GAMEPAD_X) {
-		//		Obj->GetStateMachine()->ChangeState(Attack1State::Instance());
-		//	}
-		//}
-
 	}
 
 	void NonAttackState::Exit(const shared_ptr<Sword>& Obj) {
