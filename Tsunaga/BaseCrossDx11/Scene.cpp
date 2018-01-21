@@ -306,7 +306,7 @@ namespace basecross {
 
 		// BGM
 		wstring strMusic = DataDir + L"BGM1.wav";
-		App::GetApp()->RegisterWav(L"Nanika", strMusic);
+		App::GetApp()->RegisterWav(L"BGM_1", strMusic);
 
 		wstring strMusic2 = DataDir + L"BGM2.wav";
 		App::GetApp()->RegisterWav(L"BGM_2", strMusic2);

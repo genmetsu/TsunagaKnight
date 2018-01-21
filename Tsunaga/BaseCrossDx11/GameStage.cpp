@@ -32,6 +32,11 @@ namespace basecross {
 		m_FrameCount = 0.0f;
 		m_isClear = false;
 		m_isFail = false;
+		m_isGameStart = false;
+		m_FogActive = false;
+		m_CameraPos = Vec3(50, 10, 150);
+		m_StartCameraY = 6.0f;
+		
 		//シャドウマップの描画デバイスの取得
 		auto Dev = App::GetApp()->GetDeviceResources();
 		Dev->GetShadowMapRenderTarget(2048.0f);
@@ -118,7 +123,7 @@ namespace basecross {
 			AddGameObject<Player>(
 				L"KUREHA_TX",
 				true,
-				Vec3(0.0f, 0.5f, 10.0f)
+				Vec3(0.0f, 0.5f, 11.0f)
 				);
 
 		//剣の作成
@@ -292,24 +297,6 @@ namespace basecross {
 		//描画オブジェクトの追加
 		CreateDrawObjects();
 
-
-		//回転するスプライトの作成
-		/*AddGameObject<RotateSprite>(
-			L"TRACE_TX",
-			Vec2(160, 160),
-			0.0f,
-			Vec2(-480, 260),
-			4, 4
-			);*/
-			//メッセージを表示するスプライトの作成
-		/*AddGameObject<MessageSprite>(
-			L"MESSAGE_TX",
-			Vec2(256, 64),
-			0.0f,
-			Vec2(480, 260),
-			1, 1
-			);*/
-
 		AddGameObject<BossHPGauge>(
 			L"BOSS_BAR_TX",
 			Vec2(960, 24),
@@ -393,13 +380,13 @@ namespace basecross {
 			}
 		}
 
-
+		SetActiveObjects(false);
 		//文字列描画オブジェクトの作成
 		AddGameObject<StringDrawObject>();
 
 		m_AudioObjectPtr = ObjectFactory::Create<MultiAudioObject>();
-		m_AudioObjectPtr->AddAudioResource(L"BGM_2");
-		m_AudioObjectPtr->Start(L"BGM_2", XAUDIO2_LOOP_INFINITE, 0.1f);
+		m_AudioObjectPtr->AddAudioResource(L"BGM_1");
+		m_AudioObjectPtr->Start(L"BGM_1", XAUDIO2_LOOP_INFINITE, 0.1f);
 
 	}
 
@@ -613,6 +600,37 @@ namespace basecross {
 				camera.m_CamerEye.z -= 7.0f;
 
 			}
+			else if (m_isGameStart == false) {
+				//最初のカメラワーク
+				if (m_CameraPos.z > -150) {
+					camera.m_CamerAt = Vec3(0, 0, 30);
+					camera.m_CameraArmLen = 100;
+					m_CameraPos.z -= ElapsedTime * 50.0f;
+					camera.m_CamerEye = m_CameraPos;
+				}
+				else if (m_CameraPos.z <= -150) {
+					m_FogActive = true;
+					camera.m_CameraArmLen = 2.6f;
+					
+					camera.m_CamerAt = PlayerPtr->GetPosition();
+					camera.m_CamerAt.y += m_StartCameraY;
+					if (m_StartCameraY > 0.5f) {
+						m_StartCameraY -= ElapsedTime * 5.0f;
+					}
+					else {
+						m_isGameStart = true;
+						SetActiveObjects(true);
+					}
+
+					Vec3 CameraLocalEye =
+						Vec3(
+							sin(camera.m_CameraXZRad) * camera.m_CameraArmLen * sin(camera.m_CameraYRad),
+							cos(camera.m_CameraYRad) * camera.m_CameraArmLen,
+							-cos(camera.m_CameraXZRad) * camera.m_CameraArmLen * sin(camera.m_CameraYRad)
+						);
+					camera.m_CamerEye = camera.m_CamerAt + CameraLocalEye;
+				}
+			}
 			else {
 				if (camera.m_CameraArmLen > 20) {
 					camera.m_CameraArmLen = 2.6f;
@@ -703,7 +721,7 @@ namespace basecross {
 
 	void GameStage::SetActiveObjects(bool value) {
 		vector<shared_ptr<GameObject>> ZakoVec;
-		FindTagGameObjectVec(L"Zako", ZakoVec);
+		FindTagGameObjectVec(L"EnemyObject", ZakoVec);
 		for (auto zako : ZakoVec) {
 			if (zako) {
 				auto PtrZako = dynamic_pointer_cast<EnemyObject>(zako);
@@ -717,14 +735,6 @@ namespace basecross {
 				auto PtrBullet = dynamic_pointer_cast<BulletObject>(bullet);
 				PtrBullet->SetActive(value);
 			}
-		}
-		auto s_boss = FindTagGameObject<EnemyObject>(L"SawBoss");
-		if (s_boss) {
-			s_boss->SetUpdateActive(value);
-		}
-		auto h_boss = FindTagGameObject<EnemyObject>(L"HandBoss");
-		if (h_boss) {
-			h_boss->SetUpdateActive(value);
 		}
 		vector<shared_ptr<GameObject>> HandVec;
 		FindTagGameObjectVec(L"BossHand", HandVec);
@@ -752,7 +762,7 @@ namespace basecross {
 
 	//ゲームクリアしたあとによばれる
 	void GameStage::GameClearBehaviour() {
-		m_AudioObjectPtr->Stop(L"BGM_2");
+		m_AudioObjectPtr->Stop(L"BGM_1");
 		
 		SetActiveObjects(false);
 
@@ -837,7 +847,7 @@ namespace basecross {
 
 	//ゲームおーばーしたとき
 	void GameStage::GameOverBehaviour() {
-		m_AudioObjectPtr->Stop(L"BGM_2");
+		m_AudioObjectPtr->Stop(L"BGM_1");
 
 		SetActiveObjects(false);
 

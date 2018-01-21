@@ -147,7 +147,7 @@ namespace basecross {
 		m_PtrObj->m_OwnShadowmapActive = m_OwnShadowActive;
 		m_PtrObj->m_ShadowmapUse = true;
 
-		m_PtrObj->m_FogEnabled = true;
+		m_PtrObj->m_FogEnabled = false;
 		m_PtrObj->m_FogColor = Col4(0.07f, 0.0f, 0.09f, 1.0f);
 		m_PtrObj->m_FogStart = -3.0f;
 		m_PtrObj->m_FogEnd = -100.0f;
@@ -162,7 +162,9 @@ namespace basecross {
 	}
 
 	void YamatoStage::OnUpdate() {
-
+		if (m_PtrObj->m_FogEnabled == false && GetStage<GameStage>()->GetFogActive() == true) {
+			m_PtrObj->m_FogEnabled = true;
+		}
 	}
 
 	void YamatoStage::OnDrawShadowmap() {
@@ -2854,34 +2856,36 @@ namespace basecross {
 				Vec3(0.0f, 0.0f, 0.0f)
 			);
 
-			if (m_FrameCount > m_PlayerShootTime) {
-				vector<shared_ptr<GameObject>> ShootVec;
-				GetStage<GameStage>()->FindTagGameObjectVec(L"PlayerBullet", ShootVec);
-				for (auto v : ShootVec) {
-					if (v) {
-						auto Ptr = dynamic_pointer_cast<BulletObject>(v);
-						bool nowShooting = Ptr->GetIsShoot();
-						if (nowShooting == false)
-						{
-							m_PtrObj->ChangeCurrentAnimation(L"Attack");
-							Vec3 p_pos = m_PlayerPtr.lock()->GetPosition();
-							float p_dis = (p_pos - GetPosition()).length();
-							if (p_dis < 1.0f) {
-								p_dis = 1.0f;
+			if (m_UpdateActive) {
+				if (m_FrameCount > m_PlayerShootTime) {
+					vector<shared_ptr<GameObject>> ShootVec;
+					GetStage<GameStage>()->FindTagGameObjectVec(L"PlayerBullet", ShootVec);
+					for (auto v : ShootVec) {
+						if (v) {
+							auto Ptr = dynamic_pointer_cast<BulletObject>(v);
+							bool nowShooting = Ptr->GetIsShoot();
+							if (nowShooting == false)
+							{
+								m_PtrObj->ChangeCurrentAnimation(L"Attack");
+								Vec3 p_pos = m_PlayerPtr.lock()->GetPosition();
+								float p_dis = (p_pos - GetPosition()).length();
+								if (p_dis < 1.0f) {
+									p_dis = 1.0f;
+								}
+								//サウンドの発行
+								m_ShootSound->Start(0, 0.1f / p_dis);
+								Vec3 ShootPos = m_Rigidbody->m_Pos + force * 0.1f;
+								ShootPos.y += 0.1f;
+								Ptr->Wakeup(ShootPos, force * m_PlayerShootSpeed);
+								m_FrameCount = 0.0f;
+								break;
 							}
-							//サウンドの発行
-							m_ShootSound->Start(0, 0.1f / p_dis);
-							Vec3 ShootPos = m_Rigidbody->m_Pos + force * 0.1f;
-							ShootPos.y += 0.1f;
-							Ptr->Wakeup(ShootPos, force * m_PlayerShootSpeed);
-							m_FrameCount = 0.0f;
-							break;
 						}
 					}
 				}
+				m_FrameCount += ElapsedTime;
 			}
 		}
-		m_FrameCount += ElapsedTime;
 	}
 
 	void ShootEnemy::OnDraw() {
@@ -4052,7 +4056,7 @@ namespace basecross {
 		if (player_num == 3) {
 			float ElapsedTime = App::GetApp()->GetElapsedTime();
 			if (m_Rigidbody->m_Pos.y > 8.0f && m_NowAttackBulletNum == 0) {
-				m_Rigidbody->m_Pos.y -= ElapsedTime;
+				m_Rigidbody->m_Pos.y -= ElapsedTime * 2.0f;
 			}
 			else if (m_AttackFrameCount == 0.0f) {
 				//パーティクルの送出
@@ -4067,7 +4071,7 @@ namespace basecross {
 			}
 			//射出した弾が設定数を超えたら元の位置に戻る
 			else if (m_NowAttackBulletNum >= m_AttackBulletNum && m_Rigidbody->m_Pos.y < m_DefaultPos.y) {
-				m_Rigidbody->m_Pos.y += ElapsedTime;
+				m_Rigidbody->m_Pos.y += ElapsedTime * 2.0f;
 			}
 			else if (m_Rigidbody->m_Pos.y >= m_DefaultPos.y && m_NowAttackBulletNum > 0) {
 				m_AttackFrameCount = 0.0f;

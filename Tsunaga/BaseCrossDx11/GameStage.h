@@ -23,9 +23,15 @@ namespace basecross {
 		void RegisterDefaultSphere();
 		weak_ptr<Player> m_PtrPlayer;
 		shared_ptr<MultiAudioObject> m_AudioObjectPtr;
+
+		Vec3 m_CameraPos;
+
 		float m_FrameCount;
+		float m_StartCameraY;
+		bool m_FogActive;
 		bool m_isClear;
 		bool m_isFail;
+		bool m_isGameStart;
 	public:
 		//--------------------------------------------------------------------------------------
 		/*!
@@ -87,6 +93,10 @@ namespace basecross {
 		}
 		bool GetIsClear() {
 			return m_isClear;
+		}
+
+		bool GetFogActive() {
+			return m_FogActive;
 		}
 
 		void SetIsFail(bool value) {
