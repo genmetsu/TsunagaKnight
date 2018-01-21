@@ -97,6 +97,8 @@ namespace basecross {
 			return m_isFail;
 		}
 
+		void SetActiveObjects(bool value);
+
 
 		shared_ptr<Player> GetPlayerPtr()const {
 			auto shptr = m_PtrPlayer.lock();

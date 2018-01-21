@@ -701,14 +701,13 @@ namespace basecross {
 		m_RigidbodyManager->OnDraw();
 	}
 
-	//ñCåÇÇ™énÇ‹Ç¡ÇΩÇ∆Ç´ìGÇÃìÆÇ´Çé~ÇﬂÇÈ
-	void GameStage::CannonStateStartBehaviour() {
+	void GameStage::SetActiveObjects(bool value) {
 		vector<shared_ptr<GameObject>> ZakoVec;
 		FindTagGameObjectVec(L"Zako", ZakoVec);
 		for (auto zako : ZakoVec) {
 			if (zako) {
 				auto PtrZako = dynamic_pointer_cast<EnemyObject>(zako);
-				PtrZako->SetUpdateActive(false);
+				PtrZako->SetUpdateActive(value);
 			}
 		}
 		vector<shared_ptr<GameObject>> BulletVec;
@@ -716,111 +715,46 @@ namespace basecross {
 		for (auto bullet : BulletVec) {
 			if (bullet) {
 				auto PtrBullet = dynamic_pointer_cast<BulletObject>(bullet);
-				PtrBullet->SetActive(false);
+				PtrBullet->SetActive(value);
 			}
 		}
 		auto s_boss = FindTagGameObject<EnemyObject>(L"SawBoss");
 		if (s_boss) {
-			s_boss->SetUpdateActive(false);
+			s_boss->SetUpdateActive(value);
 		}
 		auto h_boss = FindTagGameObject<EnemyObject>(L"HandBoss");
 		if (h_boss) {
-			h_boss->SetUpdateActive(false);
+			h_boss->SetUpdateActive(value);
 		}
 		vector<shared_ptr<GameObject>> HandVec;
 		FindTagGameObjectVec(L"BossHand", HandVec);
 		for (auto hand : HandVec) {
 			if (hand) {
 				auto PtrHand = dynamic_pointer_cast<BossHand>(hand);
-				PtrHand->SetUpdateActive(false);
+				PtrHand->SetUpdateActive(value);
 			}
 		}
 		auto player = FindTagGameObject<Player>(L"Player");
 		if (player) {
-			player->SetUpdateActive(false);
+			player->SetUpdateActive(value);
 		}
+	}
+
+	//ñCåÇÇ™énÇ‹Ç¡ÇΩÇ∆Ç´ìGÇÃìÆÇ´Çé~ÇﬂÇÈ
+	void GameStage::CannonStateStartBehaviour() {
+		SetActiveObjects(false);
 	}
 
 	//ñCåÇÇ™èIÇÌÇ¡ÇΩå„ÇÃåƒÇŒÇÍÇÈä÷êî
 	void GameStage::CannonStateEndBehaviour() {
-		vector<shared_ptr<GameObject>> ZakoVec;
-		FindTagGameObjectVec(L"Zako", ZakoVec);
-		for (auto zako : ZakoVec) {
-			if (zako) {
-				auto PtrZako = dynamic_pointer_cast<EnemyObject>(zako);
-				PtrZako->SetUpdateActive(true);
-			}
-		}
-		vector<shared_ptr<GameObject>> BulletVec;
-		FindTagGameObjectVec(L"AllBullet", BulletVec);
-		for (auto bullet : BulletVec) {
-			if (bullet) {
-				auto PtrBullet = dynamic_pointer_cast<BulletObject>(bullet);
-				PtrBullet->SetActive(true);
-			}
-		}
-		auto s_boss = FindTagGameObject<EnemyObject>(L"SawBoss");
-		if (s_boss) {
-			s_boss->SetUpdateActive(true);
-		}
-		auto h_boss = FindTagGameObject<EnemyObject>(L"HandBoss");
-		if (h_boss) {
-			h_boss->SetUpdateActive(true);
-		}
-		vector<shared_ptr<GameObject>> HandVec;
-		FindTagGameObjectVec(L"BossHand", HandVec);
-		for (auto hand : HandVec) {
-			if (hand) {
-				auto PtrHand = dynamic_pointer_cast<BossHand>(hand);
-				PtrHand->SetUpdateActive(true);
-			}
-		}
-		auto player = FindTagGameObject<Player>(L"Player");
-		if (player) {
-			player->SetUpdateActive(true);
-		}
+		SetActiveObjects(true);
 	}
 
 	//ÉQÅ[ÉÄÉNÉäÉAÇµÇΩÇ†Ç∆Ç…ÇÊÇŒÇÍÇÈ
 	void GameStage::GameClearBehaviour() {
 		m_AudioObjectPtr->Stop(L"BGM_2");
-		vector<shared_ptr<GameObject>> ZakoVec;
-		FindTagGameObjectVec(L"Zako", ZakoVec);
-		for (auto zako : ZakoVec) {
-			if (zako) {
-				auto PtrZako = dynamic_pointer_cast<EnemyObject>(zako);
-				PtrZako->SetUpdateActive(false);
-			}
-		}
-		vector<shared_ptr<GameObject>> BulletVec;
-		FindTagGameObjectVec(L"AllBullet", BulletVec);
-		for (auto bullet : BulletVec) {
-			if (bullet) {
-				auto PtrBullet = dynamic_pointer_cast<BulletObject>(bullet);
-				PtrBullet->SetActive(false);
-			}
-		}
-		auto s_boss = FindTagGameObject<EnemyObject>(L"SawBoss");
-		if (s_boss) {
-			s_boss->SetUpdateActive(false);
-		}
-		auto h_boss = FindTagGameObject<EnemyObject>(L"HandBoss");
-		if (h_boss) {
-			h_boss->SetUpdateActive(false);
-		}
-		vector<shared_ptr<GameObject>> HandVec;
-		FindTagGameObjectVec(L"BossHand", HandVec);
-		for (auto hand : HandVec) {
-			if (hand) {
-				auto PtrHand = dynamic_pointer_cast<BossHand>(hand);
-				PtrHand->SetUpdateActive(false);
-			}
-		}
-		auto player = FindTagGameObject<Player>(L"Player");
-		if (player) {
-			player->SetUpdateActive(false);
-		}
-
+		
+		SetActiveObjects(false);
 
 		AddGameObject<ResultSprite>(
 			L"RESULT_BACK",
@@ -905,43 +839,7 @@ namespace basecross {
 	void GameStage::GameOverBehaviour() {
 		m_AudioObjectPtr->Stop(L"BGM_2");
 
-		vector<shared_ptr<GameObject>> ZakoVec;
-		FindTagGameObjectVec(L"Zako", ZakoVec);
-		for (auto zako : ZakoVec) {
-			if (zako) {
-				auto PtrZako = dynamic_pointer_cast<EnemyObject>(zako);
-				PtrZako->SetUpdateActive(false);
-			}
-		}
-		vector<shared_ptr<GameObject>> BulletVec;
-		FindTagGameObjectVec(L"AllBullet", BulletVec);
-		for (auto bullet : BulletVec) {
-			if (bullet) {
-				auto PtrBullet = dynamic_pointer_cast<BulletObject>(bullet);
-				PtrBullet->SetActive(false);
-			}
-		}
-		auto s_boss = FindTagGameObject<EnemyObject>(L"SawBoss");
-		if (s_boss) {
-			s_boss->SetUpdateActive(false);
-		}
-		auto h_boss = FindTagGameObject<EnemyObject>(L"HandBoss");
-		if (h_boss) {
-			h_boss->SetUpdateActive(false);
-		}
-		vector<shared_ptr<GameObject>> HandVec;
-		FindTagGameObjectVec(L"BossHand", HandVec);
-		for (auto hand : HandVec) {
-			if (hand) {
-				auto PtrHand = dynamic_pointer_cast<BossHand>(hand);
-				PtrHand->SetUpdateActive(false);
-			}
-		}
-		auto player = FindTagGameObject<Player>(L"Player");
-		if (player) {
-			player->SetUpdateActive(false);
-		}
-
+		SetActiveObjects(false);
 
 		AddGameObject<ResultSprite>(
 			L"RESULT_BACK",

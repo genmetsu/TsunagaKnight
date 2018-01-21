@@ -4017,7 +4017,6 @@ namespace basecross {
 
 		//ƒ{ƒX‚ª¶‚«‚Ä‚¢‚é‚Æ‚«‚Ìˆ—
 		if (m_HP > 0.0f) {
-
 			if (m_SpawnCount > m_SpawnTime) {
 				int num = rand() % 3;
 				if (num == 0) {
@@ -4053,6 +4052,7 @@ namespace basecross {
 				m_now_barrior = 3;
 				m_frame_count = 0.0f;
 				m_isLooked = true;
+				GetStage<GameStage>()->SetActiveObjects(false);
 			}
 
 			if (m_now_barrior == 3) {
@@ -4199,7 +4199,10 @@ namespace basecross {
 				m_now_barrior = 0;
 			}
 			else if (m_AttackFrameCount >= m_BeforeAttackTime) {
-				m_isLooked = false;
+				if (m_isLooked == true) {
+					m_isLooked = false;
+					GetStage<GameStage>()->SetActiveObjects(true);
+				}
 				//‹…‚ğ”ò‚Î‚·ˆ—
 				vector<shared_ptr<GameObject>> ShootVec;
 				GetStage<GameStage>()->FindTagGameObjectVec(L"BossBullet", ShootVec);
@@ -4230,7 +4233,5 @@ namespace basecross {
 			}
 		}
 	}
-	
-
 }
 //end basecross
