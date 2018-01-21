@@ -279,10 +279,12 @@ namespace basecross {
 		App::GetApp()->RegisterResource(L"ANGEL_MESH", ModelMesh);
 		ModelMesh = MeshResource::CreateBoneModelMesh(DataDir, L"Large_Cannon_Blue_Blast.bmf");
 		App::GetApp()->RegisterResource(L"CANNON_MESH", ModelMesh);
-		ModelMesh = MeshResource::CreateBoneModelMesh(DataDir, L"Medium_Boss_Thor_Move.bmf");
+		ModelMesh = MeshResource::CreateBoneModelMesh(DataDir, L"Medium_Boss_Thor_AnimeAll.bmf");
 		App::GetApp()->RegisterResource(L"THOR_BOSS_MESH", ModelMesh);
 		ModelMesh = MeshResource::CreateBoneModelMesh(DataDir, L"Boss_Fbx_v02.bmf");
 		App::GetApp()->RegisterResource(L"BOSS_MESH", ModelMesh);
+		ModelMesh = MeshResource::CreateBoneModelMesh(DataDir, L"Yamato_Fbx_v04.bmf");
+		App::GetApp()->RegisterResource(L"YAMATO_MESH", ModelMesh);
 
 
 		//スタティックモデルのリソースとして読み込み
@@ -292,8 +294,7 @@ namespace basecross {
 		App::GetApp()->RegisterResource(L"RIGHT_HAND_MESH", StaticModelMesh);
 		StaticModelMesh = MeshResource::CreateStaticModelMesh(DataDir, L"Medium_Boss_Hand_Main.bmf");
 		App::GetApp()->RegisterResource(L"HAND_BOSS_MESH", StaticModelMesh);
-		StaticModelMesh = MeshResource::CreateStaticModelMesh(DataDir, L"Yamato_Fbx_v03.bmf");
-		App::GetApp()->RegisterResource(L"YAMATO_MESH", StaticModelMesh);
+		
 
 		//エフェクト
 		strTexture = DataDir + L"spark.png";
