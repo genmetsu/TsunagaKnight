@@ -40,7 +40,13 @@ namespace basecross {
 			Vec2(0, 100),
 			1, 1
 			);
-
+		AddGameObject<ScoreSprite>(
+			L"number_TX",
+			Vec2(512, 60),
+			0.0f,
+			Vec2(0, 0),
+			1, 1
+			);
 		//背景スプライトの作成
 		AddGameObject<MessageSprite>(
 			L"PresAnyButton_TX",
@@ -58,6 +64,7 @@ namespace basecross {
 			1, 1
 			);
 
+		
 
 	}
 	void TitleScene::OnDraw() {
