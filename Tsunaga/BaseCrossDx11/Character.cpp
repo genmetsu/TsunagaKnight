@@ -2310,14 +2310,11 @@ namespace basecross {
 
 	void EnemyObject::DamageBehaviour() {
 		float ElapsedTime = App::GetApp()->GetElapsedTime();
-
-		if (m_FrameCount > 1.0f) {
+		if (m_FrameCount > 0.3f) {
+			m_Rigidbody->m_Velocity = Vec3(0);
 			m_FrameCount = 0;
 			m_StateMachine->ChangeState(EnemyOppositionState::Instance());
 			return;
-		}
-		else if (m_FrameCount > 0.3f) {
-			m_Rigidbody->m_Velocity = Vec3(0);
 		}
 		else if (m_FrameCount < 0.3f) {
 			auto player = dynamic_pointer_cast<Player>(m_PlayerPtr.lock());
@@ -2780,32 +2777,33 @@ namespace basecross {
 				if (length < Radius + PlayerRadius) {
 
 					auto PtrBoss = GetStage()->FindTagGameObject<EnemyObject>(L"HandBoss");
-				
-					Vec3 Emitter = m_Rigidbody->m_Pos;
-					//Sparkの送出
-					auto SparkPtr = GetStage<GameStage>()->FindTagGameObject<AttackSpark>(L"AttackSpark");
-					SparkPtr->InsertSpark(Emitter);
+					if (PtrBoss->m_PtrObj->m_CurrentAnimeName == L"30frame") {
+						Vec3 Emitter = m_Rigidbody->m_Pos;
+						//Sparkの送出
+						auto SparkPtr = GetStage<GameStage>()->FindTagGameObject<AttackSpark>(L"AttackSpark");
+						SparkPtr->InsertSpark(Emitter);
 
-					PtrBoss->Damage(0.1f);
-					PtrBoss->ChangeState(L"Damage");
-					if (PtrBoss->GetHP() <= 0.0f) {
-						Vec3 p_pos = m_PlayerPtr.lock()->GetPosition();
-						float p_dis = (p_pos - GetPosition()).length();
-						if (p_dis < 1.0f) {
-							p_dis = 1.0f;
+						PtrBoss->Damage(1.0f);
+						PtrBoss->ChangeState(L"Damage");
+						if (PtrBoss->GetHP() <= 0.0f) {
+							Vec3 p_pos = m_PlayerPtr.lock()->GetPosition();
+							float p_dis = (p_pos - GetPosition()).length();
+							if (p_dis < 1.0f) {
+								p_dis = 1.0f;
+							}
+
+							m_CannonSound->Start(0, 1.0f / p_dis);
+
+							Vec3 Emitter = PtrBoss->GetPosition();
+							//Fireの送出
+							auto FirePtr = GetStage<GameStage>()->FindTagGameObject<MultiFire>(L"MultiFire");
+							FirePtr->InsertFire(Emitter, PtrBoss->GetScale() * 3.0f);
+
+							PtrBoss->ChangeState(L"Waiting");
+							//ノックバック方向の設定
+							break;
 						}
-						
-						m_CannonSound->Start(0, 1.0f / p_dis);
-						
-						Vec3 Emitter = PtrBoss->GetPosition();
-						//Fireの送出
-						auto FirePtr = GetStage<GameStage>()->FindTagGameObject<MultiFire>(L"MultiFire");
-						FirePtr->InsertFire(Emitter, PtrBoss->GetScale() * 3.0f);
-						
-						PtrBoss->ChangeState(L"Waiting");
 					}
-					//ノックバック方向の設定
-					return;
 				}
 			}
 		}
@@ -3376,7 +3374,7 @@ namespace basecross {
 		EnemyObject(StagePtr, ParentPtr, MeshResName, TextureResName, DefaultAnimation, Scale, Qt, Pos, OwnShadowActive)
 	{
 		m_Speed = 1.5f;
-		m_HP = 20.0f;
+		m_HP = 5.0f;
 		m_DefaultHP = m_HP;
 		m_TackleSpeed = 0.0f;
 		m_BaseY = m_Scale.y / 2.0f + 0.4f;
@@ -3992,7 +3990,8 @@ namespace basecross {
 		m_AttackRate(0.2f),
 		m_AttackBulletNum(30),
 		m_BarriorChangeTime(20.0f),
-		m_isLooked(false)
+		m_isLooked(false),
+		m_TotalTime(0)
 	{}
 	Boss::~Boss() {}
 

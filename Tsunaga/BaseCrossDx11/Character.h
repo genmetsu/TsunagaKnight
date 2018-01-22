@@ -1337,8 +1337,6 @@ namespace basecross {
 		shared_ptr<SoundObject> m_EyeFlashSound;
 		shared_ptr<SoundObject> m_SawSound;
 
-		//描画データ
-		shared_ptr<BcDrawObject> m_PtrObj;
 		//描画オブジェクト(weak_ptr)
 		weak_ptr<BcPNTBoneModelRenderer> m_Renderer;
 		//シャドウマップ用描画データ
@@ -1381,6 +1379,8 @@ namespace basecross {
 		*/
 		//--------------------------------------------------------------------------------------
 		virtual ~EnemyObject();
+		//描画データ
+		shared_ptr<BcDrawObject> m_PtrObj;
 		//--------------------------------------------------------------------------------------
 		/*!
 		@brief 初期化
@@ -2371,6 +2371,8 @@ namespace basecross {
 
 		float m_BeforeAttackTime;
 		float m_BulletSpeed;
+
+		float m_TotalTime;
 
 		Vec3 m_CannonPos[3];
 
