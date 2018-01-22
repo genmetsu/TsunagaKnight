@@ -67,7 +67,7 @@ namespace basecross {
 			L"YAMATO_TX",
 			Vec3(4.0f, 4.0f, 4.0f),
 			Quat(),
-			Vec3(0.0f, -12.74f, -20.0f),
+			Vec3(0.0f, -12.74f, -18.2f - 1.5f),
 			true);
 
 		AddGameObject<TransparentWall>(
@@ -84,26 +84,26 @@ namespace basecross {
 
 		AddGameObject<TransparentWall>(
 			Vec3(0.5f, 0.5f, 40.0f),
-			Quat(Vec3(0, 1.0f, 0), -XM_PI / 180.0f * 16.0f),
-			Vec3(9.75f, 0.25f, 54.0f)
+			Quat(Vec3(0, 1.0f, 0), -XM_PI / 180.0f * 17.0f),
+			Vec3(10.0f, 0.25f, 54.0f - 1.5f)
 			);
 
 		AddGameObject<TransparentWall>(
 			Vec3(0.5f, 0.5f, 40.0f),
-			Quat(Vec3(0, 1.0f, 0), XM_PI / 180.0f * 16.0f),
-			Vec3(-9.75f, 0.25f, 54.0f)
+			Quat(Vec3(0, 1.0f, 0), XM_PI / 180.0f * 17.0f),
+			Vec3(-10.0f, 0.25f, 54.0f - 1.5f)
 			);
 
 		AddGameObject<TransparentWall>(
 			Vec3(0.5f, 0.5f, 10.0f),
 			Quat(Vec3(0, 1.0f, 0), -XM_PI / 180.0f * 62.0f),
-			Vec3(3.0f, 0.25f, 72.9f)
+			Vec3(3.0f, 0.25f, 72.9f - 1.5f)
 			);
 
 		AddGameObject<TransparentWall>(
 			Vec3(0.5f, 0.5f, 10.0f),
 			Quat(Vec3(0, 1.0f, 0), XM_PI / 180.0f * 62.0f),
-			Vec3(-3.0f, 0.25f, 72.9f)
+			Vec3(-3.0f, 0.25f, 72.9f - 1.5f)
 			);
 
 		AddGameObject<TransparentWall>(
