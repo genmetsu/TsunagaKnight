@@ -1926,6 +1926,19 @@ namespace basecross {
 		m_PtrObj->m_FogStart = -10.0f;
 		m_PtrObj->m_FogEnd = -100.0f;
 
+		//仲間になった時の色
+		if (FindTag(L"Red")) {
+			m_PtrObj->m_Emissive = Col4(1.0f, 0.0f, 0.0f, 1.0f);
+		}
+		if (FindTag(L"Green")) {
+			m_PtrObj->m_Emissive = Col4(0.0f, 0.3f, 0.0f, 1.0f);
+		}
+		if (FindTag(L"Blue")) {
+			m_PtrObj->m_Emissive = Col4(0.0f, 0.0f, 1.0f, 1.0f);
+		}
+
+		m_PtrObj->m_UsedModelColor = true;
+
 		m_PtrObj->BoneInit();
 		m_PtrObj->AddAnimation(L"30frame", 0, 30, true, 30.0f);
 		m_PtrObj->AddAnimation(L"NonMove", 0, 1, true, 30.0f);
@@ -2439,6 +2452,7 @@ namespace basecross {
 		m_LerpToParent = m_LerpToChild = 0.2f;
 		m_Rigidbody->m_CollType = CollType::typeCAPSULE;
 		m_FriendsSound->Start(0, 0.15f);
+		m_PtrObj->m_UsedModelColor = false;
 	}
 
 	//攻撃１行動の開始
@@ -2503,6 +2517,7 @@ namespace basecross {
 		m_FrameCount = 0.0f;
 		m_ShootNumber = 0;
 		m_Rigidbody->m_CollType = CollType::typeSPHERE;
+		m_PtrObj->m_UsedModelColor = true;
 
 		if (FindTag(L"Blue")) {
 			//メッシュとトランスフォームの差分の設定
