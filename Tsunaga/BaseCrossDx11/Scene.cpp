@@ -264,12 +264,8 @@ namespace basecross {
 		strTexture = DataDir + L"UI_Round_5.png";
 		App::GetApp()->RegisterTexture(L"UI_Round_5_TX", strTexture);
 
-		strTexture = DataDir + L"UI_Star.png";
-		App::GetApp()->RegisterTexture(L"UI_Star_TX", strTexture);
-
 		strTexture = DataDir + L"number.png";
 		App::GetApp()->RegisterTexture(L"number_TX", strTexture);
-
 
 		//ボーンモデルのリソース
 		auto ModelMesh = MeshResource::CreateBoneModelMesh(DataDir, L"Kureha_fbx_v2.bmf");
@@ -282,10 +278,14 @@ namespace basecross {
 		App::GetApp()->RegisterResource(L"ANGEL_MESH", ModelMesh);
 		ModelMesh = MeshResource::CreateBoneModelMesh(DataDir, L"Large_Cannon_Blue_Blast.bmf");
 		App::GetApp()->RegisterResource(L"CANNON_MESH", ModelMesh);
-		ModelMesh = MeshResource::CreateBoneModelMesh(DataDir, L"Medium_Boss_Thor_Move.bmf");
+		ModelMesh = MeshResource::CreateBoneModelMesh(DataDir, L"Medium_Boss_Thor_AnimeAll.bmf");
 		App::GetApp()->RegisterResource(L"THOR_BOSS_MESH", ModelMesh);
 		ModelMesh = MeshResource::CreateBoneModelMesh(DataDir, L"Boss_Fbx_v02.bmf");
 		App::GetApp()->RegisterResource(L"BOSS_MESH", ModelMesh);
+		ModelMesh = MeshResource::CreateBoneModelMesh(DataDir, L"Yamato_Fbx_v04.bmf");
+		App::GetApp()->RegisterResource(L"YAMATO_MESH", ModelMesh);
+		ModelMesh = MeshResource::CreateBoneModelMesh(DataDir, L"Medium_Boss_Hand_Main.bmf");
+		App::GetApp()->RegisterResource(L"HAND_BOSS_MESH", ModelMesh);
 
 
 		//スタティックモデルのリソースとして読み込み
@@ -293,10 +293,8 @@ namespace basecross {
 		App::GetApp()->RegisterResource(L"LEFT_HAND_MESH", StaticModelMesh);
 		StaticModelMesh = MeshResource::CreateStaticModelMesh(DataDir, L"Medium_Boss_Hand_Right.bmf");
 		App::GetApp()->RegisterResource(L"RIGHT_HAND_MESH", StaticModelMesh);
-		StaticModelMesh = MeshResource::CreateStaticModelMesh(DataDir, L"Medium_Boss_Hand_Main.bmf");
-		App::GetApp()->RegisterResource(L"HAND_BOSS_MESH", StaticModelMesh);
-		StaticModelMesh = MeshResource::CreateStaticModelMesh(DataDir, L"Yamato_Fbx_v03.bmf");
-		App::GetApp()->RegisterResource(L"YAMATO_MESH", StaticModelMesh);
+		
+		
 
 		//エフェクト
 		strTexture = DataDir + L"spark.png";
@@ -305,10 +303,12 @@ namespace basecross {
 		App::GetApp()->RegisterTexture(L"FIRE_TX", strTexture);
 		strTexture = DataDir + L"step.png";
 		App::GetApp()->RegisterTexture(L"STEP_TX", strTexture);
+		strTexture = DataDir + L"UI_Star.png";
+		App::GetApp()->RegisterTexture(L"STAR_TX", strTexture);
 
 		// BGM
 		wstring strMusic = DataDir + L"BGM1.wav";
-		App::GetApp()->RegisterWav(L"Nanika", strMusic);
+		App::GetApp()->RegisterWav(L"BGM_1", strMusic);
 
 		wstring strMusic2 = DataDir + L"BGM2.wav";
 		App::GetApp()->RegisterWav(L"BGM_2", strMusic2);

@@ -32,6 +32,11 @@ namespace basecross {
 		m_FrameCount = 0.0f;
 		m_isClear = false;
 		m_isFail = false;
+		m_isGameStart = false;
+		m_FogActive = false;
+		m_CameraPos = Vec3(50, 10, 150);
+		m_StartCameraY = 6.0f;
+		
 		//シャドウマップの描画デバイスの取得
 		auto Dev = App::GetApp()->GetDeviceResources();
 		Dev->GetShadowMapRenderTarget(2048.0f);
@@ -118,7 +123,7 @@ namespace basecross {
 			AddGameObject<Player>(
 				L"KUREHA_TX",
 				true,
-				Vec3(0.0f, 0.5f, 10.0f)
+				Vec3(0.0f, 0.5f, 11.0f)
 				);
 
 		//剣の作成
@@ -209,7 +214,7 @@ namespace basecross {
 		for (int i = 0; i < 200; i++) {
 			AddGameObject<BulletObject>(
 				L"SPARK_TX",
-				Vec3(0.25f, 0.25f, 0.25f),
+				Vec3(0.5f, 0.5f, 0.5f),
 				Quat(),
 				Vec3(0.0f, -10.0f, 0.0f),
 				false,
@@ -291,24 +296,6 @@ namespace basecross {
 
 		//描画オブジェクトの追加
 		CreateDrawObjects();
-
-
-		//回転するスプライトの作成
-		/*AddGameObject<RotateSprite>(
-			L"TRACE_TX",
-			Vec2(160, 160),
-			0.0f,
-			Vec2(-480, 260),
-			4, 4
-			);*/
-			//メッセージを表示するスプライトの作成
-		/*AddGameObject<MessageSprite>(
-			L"MESSAGE_TX",
-			Vec2(256, 64),
-			0.0f,
-			Vec2(480, 260),
-			1, 1
-			);*/
 
 		AddGameObject<BossHPGauge>(
 			L"BOSS_BAR_TX",
@@ -393,13 +380,13 @@ namespace basecross {
 			}
 		}
 
-
+		SetActiveObjects(false);
 		//文字列描画オブジェクトの作成
 		AddGameObject<StringDrawObject>();
 
 		m_AudioObjectPtr = ObjectFactory::Create<MultiAudioObject>();
-		m_AudioObjectPtr->AddAudioResource(L"BGM_2");
-		m_AudioObjectPtr->Start(L"BGM_2", XAUDIO2_LOOP_INFINITE, 0.6f);
+		m_AudioObjectPtr->AddAudioResource(L"BGM_1");
+		m_AudioObjectPtr->Start(L"BGM_1", XAUDIO2_LOOP_INFINITE, 0.1f);
 
 	}
 
@@ -476,42 +463,10 @@ namespace basecross {
 		auto CntlVec = App::GetApp()->GetInputDevice().GetControlerVec();
 		if (CntlVec[0].bConnected) {
 
-			if (!m_isClear) {
-				if (CntlVec[0].fThumbRX != 0) {
-					camera.m_CameraXZRad -= CntlVec[0].fThumbRX * 0.05f;
-					if (abs(camera.m_CameraXZRad) >= XM_2PI) {
-						camera.m_CameraXZRad = 0;
-					}
-				}
-				if (CntlVec[0].fThumbRY != 0) {
-					camera.m_CameraYRad += CntlVec[0].fThumbRY * 0.05f;
-					if (camera.m_CameraYRad >= 2.0f) {
-						camera.m_CameraYRad = 2.0f;
-					}
-					else if (camera.m_CameraYRad <= 0.5f) {
-						camera.m_CameraYRad = 0.5f;
-					}
-					if (camera.m_CameraYRad >= XM_PIDIV2 - 0.3f) {
-						if (CntlVec[0].fThumbRY > 0) {
-							camera.m_CameraArmLen -= CntlVec[0].fThumbRY * 0.1f;
-							if (GetCamera().m_CameraArmLen <= 1.5f) {
-								camera.m_CameraArmLen = 1.5f;
-							}
-						}
-						else if (CntlVec[0].fThumbRY < 0) {
-							camera.m_CameraArmLen -= CntlVec[0].fThumbRY * 0.1f;
-							if (GetCamera().m_CameraArmLen >= 50.0f) {
-								GetCamera().m_CameraArmLen = 50.0f;
-							}
-						}
-					}
-				}
-			}
-
 			auto GM = GameManager::getInstance();
 			GM->m_camera_length = camera.m_CameraArmLen;
 			auto PlayerPtr = FindTagGameObject<Player>(L"Player");
-
+			auto boss = FindTagGameObject<Boss>(L"BossEnemy");
 
 			//チェインがある程度長いときは移動しているときカメラを引く
 			int now_friends_num = GM->GetFriendsNum();
@@ -527,7 +482,6 @@ namespace basecross {
 
 			int now_cannon = PlayerPtr->GetIsCannon();
 			if (now_cannon < 3) {
-				auto boss = FindTagGameObject<Boss>(L"BossEnemy");
 				Vec3 boss_pos = boss->GetPosition();
 				if (now_cannon == 0) {
 					vector<shared_ptr<GameObject>> ShootedEnemyVec;
@@ -548,7 +502,6 @@ namespace basecross {
 						if (m_FrameCount > 1.0f) {
 							CannonStateEndBehaviour();
 							PlayerPtr->SetIsCannnon(3);
-							camera.m_CameraArmLen = 2.5f;
 							m_FrameCount = 0.0f;
 							if (boss->GetHP() > 0.0f) {
 								boss->ChangeAnimation(L"Default");
@@ -584,7 +537,6 @@ namespace basecross {
 						if (m_FrameCount > 1.0f) {
 							CannonStateEndBehaviour();
 							PlayerPtr->SetIsCannnon(3);
-							camera.m_CameraArmLen = 2.5f;
 							m_FrameCount = 0.0f;
 							if (boss->GetHP() > 0.0f) {
 								boss->ChangeAnimation(L"Default");
@@ -621,7 +573,6 @@ namespace basecross {
 						if (m_FrameCount > 1.0f) {
 							CannonStateEndBehaviour();
 							PlayerPtr->SetIsCannnon(3);
-							camera.m_CameraArmLen = 2.5f;
 							m_FrameCount = 0.0f;
 							if (boss->GetHP() > 0.0f) {
 								boss->ChangeAnimation(L"Default");
@@ -639,7 +590,84 @@ namespace basecross {
 					camera.m_CamerEye.z -= 7.0f;
 				}
 			}
+			else if (boss->GetIsLooked()) {
+
+				Vec3 boss_pos = boss->GetPosition();
+				camera.m_CamerAt = boss_pos;
+				camera.m_CameraArmLen = 30;
+				camera.m_CamerEye = Vec3(-5, 5, 40);
+				camera.m_CamerEye.x -= 4.0f;
+				camera.m_CamerEye.z -= 7.0f;
+
+			}
+			else if (m_isGameStart == false) {
+				//最初のカメラワーク
+				if (m_CameraPos.z > -150) {
+					camera.m_CamerAt = Vec3(0, 0, 30);
+					camera.m_CameraArmLen = 100;
+					m_CameraPos.z -= ElapsedTime * 50.0f;
+					camera.m_CamerEye = m_CameraPos;
+				}
+				else if (m_CameraPos.z <= -150) {
+					m_FogActive = true;
+					camera.m_CameraArmLen = 2.6f;
+					
+					camera.m_CamerAt = PlayerPtr->GetPosition();
+					camera.m_CamerAt.y += m_StartCameraY;
+					if (m_StartCameraY > 0.5f) {
+						m_StartCameraY -= ElapsedTime * 5.0f;
+					}
+					else {
+						m_isGameStart = true;
+						SetActiveObjects(true);
+					}
+
+					Vec3 CameraLocalEye =
+						Vec3(
+							sin(camera.m_CameraXZRad) * camera.m_CameraArmLen * sin(camera.m_CameraYRad),
+							cos(camera.m_CameraYRad) * camera.m_CameraArmLen,
+							-cos(camera.m_CameraXZRad) * camera.m_CameraArmLen * sin(camera.m_CameraYRad)
+						);
+					camera.m_CamerEye = camera.m_CamerAt + CameraLocalEye;
+				}
+			}
 			else {
+				if (camera.m_CameraArmLen > 20) {
+					camera.m_CameraArmLen = 2.6f;
+				}
+
+				if (!m_isClear) {
+					if (CntlVec[0].fThumbRX != 0) {
+						camera.m_CameraXZRad -= CntlVec[0].fThumbRX * 0.05f;
+						if (abs(camera.m_CameraXZRad) >= XM_2PI) {
+							camera.m_CameraXZRad = 0;
+						}
+					}
+					if (CntlVec[0].fThumbRY != 0) {
+						camera.m_CameraYRad += CntlVec[0].fThumbRY * 0.05f;
+						if (camera.m_CameraYRad >= 2.0f) {
+							camera.m_CameraYRad = 2.0f;
+						}
+						else if (camera.m_CameraYRad <= 0.5f) {
+							camera.m_CameraYRad = 0.5f;
+						}
+						if (camera.m_CameraYRad >= XM_PIDIV2 - 0.3f) {
+							if (CntlVec[0].fThumbRY > 0) {
+								camera.m_CameraArmLen -= CntlVec[0].fThumbRY * 0.1f;
+								if (GetCamera().m_CameraArmLen <= 1.5f) {
+									camera.m_CameraArmLen = 1.5f;
+								}
+							}
+							else if (CntlVec[0].fThumbRY < 0) {
+								camera.m_CameraArmLen -= CntlVec[0].fThumbRY * 0.1f;
+								if (GetCamera().m_CameraArmLen >= 50.0f) {
+									GetCamera().m_CameraArmLen = 50.0f;
+								}
+							}
+						}
+					}
+				}
+
 				camera.m_CamerAt = PlayerPtr->GetPosition();
 				camera.m_CamerAt.y += 0.5f;
 
@@ -691,99 +719,52 @@ namespace basecross {
 		m_RigidbodyManager->OnDraw();
 	}
 
+	void GameStage::SetActiveObjects(bool value) {
+		vector<shared_ptr<GameObject>> ZakoVec;
+		FindTagGameObjectVec(L"EnemyObject", ZakoVec);
+		for (auto zako : ZakoVec) {
+			if (zako) {
+				auto PtrZako = dynamic_pointer_cast<EnemyObject>(zako);
+				PtrZako->SetUpdateActive(value);
+			}
+		}
+		vector<shared_ptr<GameObject>> BulletVec;
+		FindTagGameObjectVec(L"AllBullet", BulletVec);
+		for (auto bullet : BulletVec) {
+			if (bullet) {
+				auto PtrBullet = dynamic_pointer_cast<BulletObject>(bullet);
+				PtrBullet->SetActive(value);
+			}
+		}
+		vector<shared_ptr<GameObject>> HandVec;
+		FindTagGameObjectVec(L"BossHand", HandVec);
+		for (auto hand : HandVec) {
+			if (hand) {
+				auto PtrHand = dynamic_pointer_cast<BossHand>(hand);
+				PtrHand->SetUpdateActive(value);
+			}
+		}
+		auto player = FindTagGameObject<Player>(L"Player");
+		if (player) {
+			player->SetUpdateActive(value);
+		}
+	}
+
+	//砲撃が始まったとき敵の動きを止める
 	void GameStage::CannonStateStartBehaviour() {
-		vector<shared_ptr<GameObject>> ZakoVec;
-		FindTagGameObjectVec(L"Zako", ZakoVec);
-		for (auto zako : ZakoVec) {
-			if (zako) {
-				auto PtrZako = dynamic_pointer_cast<EnemyObject>(zako);
-				PtrZako->SetUpdateActive(false);
-			}
-		}
-		auto s_boss = FindTagGameObject<EnemyObject>(L"SawBoss");
-		if (s_boss) {
-			s_boss->SetUpdateActive(false);
-		}
-		auto h_boss = FindTagGameObject<EnemyObject>(L"HandBoss");
-		if (h_boss) {
-			h_boss->SetUpdateActive(false);
-		}
-		vector<shared_ptr<GameObject>> HandVec;
-		FindTagGameObjectVec(L"BossHand", HandVec);
-		for (auto hand : HandVec) {
-			if (hand) {
-				auto PtrHand = dynamic_pointer_cast<BossHand>(hand);
-				PtrHand->SetUpdateActive(false);
-			}
-		}
-		auto player = FindTagGameObject<Player>(L"Player");
-		if (player) {
-			player->SetUpdateActive(false);
-		}
+		SetActiveObjects(false);
 	}
 
+	//砲撃が終わった後の呼ばれる関数
 	void GameStage::CannonStateEndBehaviour() {
-		vector<shared_ptr<GameObject>> ZakoVec;
-		FindTagGameObjectVec(L"Zako", ZakoVec);
-		for (auto zako : ZakoVec) {
-			if (zako) {
-				auto PtrZako = dynamic_pointer_cast<EnemyObject>(zako);
-				PtrZako->SetUpdateActive(true);
-			}
-		}
-		auto s_boss = FindTagGameObject<EnemyObject>(L"SawBoss");
-		if (s_boss) {
-			s_boss->SetUpdateActive(true);
-		}
-		auto h_boss = FindTagGameObject<EnemyObject>(L"HandBoss");
-		if (h_boss) {
-			h_boss->SetUpdateActive(true);
-		}
-		vector<shared_ptr<GameObject>> HandVec;
-		FindTagGameObjectVec(L"BossHand", HandVec);
-		for (auto hand : HandVec) {
-			if (hand) {
-				auto PtrHand = dynamic_pointer_cast<BossHand>(hand);
-				PtrHand->SetUpdateActive(true);
-			}
-		}
-		auto player = FindTagGameObject<Player>(L"Player");
-		if (player) {
-			player->SetUpdateActive(true);
-		}
+		SetActiveObjects(true);
 	}
 
+	//ゲームクリアしたあとによばれる
 	void GameStage::GameClearBehaviour() {
-		m_AudioObjectPtr->Stop(L"BGM_2");
-		vector<shared_ptr<GameObject>> ZakoVec;
-		FindTagGameObjectVec(L"Zako", ZakoVec);
-		for (auto zako : ZakoVec) {
-			if (zako) {
-				auto PtrZako = dynamic_pointer_cast<EnemyObject>(zako);
-				PtrZako->SetUpdateActive(false);
-			}
-		}
-		auto s_boss = FindTagGameObject<EnemyObject>(L"SawBoss");
-		if (s_boss) {
-			s_boss->SetUpdateActive(false);
-		}
-		auto h_boss = FindTagGameObject<EnemyObject>(L"HandBoss");
-		if (h_boss) {
-			h_boss->SetUpdateActive(false);
-		}
-		vector<shared_ptr<GameObject>> HandVec;
-		FindTagGameObjectVec(L"BossHand", HandVec);
-		for (auto hand : HandVec) {
-			if (hand) {
-				auto PtrHand = dynamic_pointer_cast<BossHand>(hand);
-				PtrHand->SetUpdateActive(false);
-			}
-		}
-		auto player = FindTagGameObject<Player>(L"Player");
-		if (player) {
-			player->SetUpdateActive(false);
-		}
-
+		m_AudioObjectPtr->Stop(L"BGM_1");
+		
+		SetActiveObjects(false);
 
 		AddGameObject<ResultSprite>(
 			L"RESULT_BACK",
@@ -864,38 +845,11 @@ namespace basecross {
 			);
 	}
 
+	//ゲームおーばーしたとき
 	void GameStage::GameOverBehaviour() {
-		m_AudioObjectPtr->Stop(L"BGM_2");
+		m_AudioObjectPtr->Stop(L"BGM_1");
 
-		vector<shared_ptr<GameObject>> ZakoVec;
-		FindTagGameObjectVec(L"Zako", ZakoVec);
-		for (auto zako : ZakoVec) {
-			if (zako) {
-				auto PtrZako = dynamic_pointer_cast<EnemyObject>(zako);
-				PtrZako->SetUpdateActive(false);
-			}
-		}
-		auto s_boss = FindTagGameObject<EnemyObject>(L"SawBoss");
-		if (s_boss) {
-			s_boss->SetUpdateActive(false);
-		}
-		auto h_boss = FindTagGameObject<EnemyObject>(L"HandBoss");
-		if (h_boss) {
-			h_boss->SetUpdateActive(false);
-		}
-		vector<shared_ptr<GameObject>> HandVec;
-		FindTagGameObjectVec(L"BossHand", HandVec);
-		for (auto hand : HandVec) {
-			if (hand) {
-				auto PtrHand = dynamic_pointer_cast<BossHand>(hand);
-				PtrHand->SetUpdateActive(false);
-			}
-		}
-		auto player = FindTagGameObject<Player>(L"Player");
-		if (player) {
-			player->SetUpdateActive(false);
-		}
-
+		SetActiveObjects(false);
 
 		AddGameObject<ResultSprite>(
 			L"RESULT_BACK",

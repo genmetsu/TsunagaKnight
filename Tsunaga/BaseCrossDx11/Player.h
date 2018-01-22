@@ -32,6 +32,8 @@ namespace basecross {
 		bool m_UpdateActive;
 		///砲撃した場合のbool
 		int m_NowCannonClass;
+		//無敵かどうか
+		bool m_isInvincible;
 
 		shared_ptr<SoundObject> m_AttackSound;
 		shared_ptr<SoundObject> m_StepSound;
@@ -251,6 +253,14 @@ namespace basecross {
 
 		//--------------------------------------------------------------------------------------
 		/*!
+		@brief ダメージを受けた時最初のふるまい
+		@return	なし
+		*/
+		//--------------------------------------------------------------------------------------
+		void DamagedStartBehaviour(Vec3 StartPos);
+
+		//--------------------------------------------------------------------------------------
+		/*!
 		@brief ダメージを受けた時のふるまい
 		@return	なし
 		*/
@@ -300,6 +310,18 @@ namespace basecross {
 		}
 		int GetIsCannon() {
 			return m_NowCannonClass;
+		}
+
+		void SetInvincible(bool value) {
+			m_isInvincible = value;
+		}
+
+		bool GetInvincible() {
+			return m_isInvincible;
+		}
+
+		void SetKnockBackVec(Vec3 vec) {
+			m_KnockBackVec = vec;
 		}
 
 		float GetDefaultBossHP() {

@@ -1335,6 +1335,7 @@ namespace basecross {
 		shared_ptr<SoundObject> m_FriendsSound;
 		shared_ptr<SoundObject> m_CannonSound;
 		shared_ptr<SoundObject> m_EyeFlashSound;
+		shared_ptr<SoundObject> m_SawSound;
 
 		//描画データ
 		shared_ptr<BcDrawObject> m_PtrObj;
@@ -1585,6 +1586,8 @@ namespace basecross {
 		void RotateToVelocity();
 		
 		void ChangeState(wstring name);
+
+		void ChangeAnimation(wstring name);
 
 		float GetHP(){
 			return m_HP;
@@ -1878,7 +1881,13 @@ namespace basecross {
 		//フレームカウント
 		float m_FrameCount;
 
+		//現在の速度を保存しておく
+		Vec3 m_NowVelocity;
+
 		wstring m_my_Tag;
+
+		//サウンドオブジェクト
+		shared_ptr<SoundObject> m_CollisionSound;
 
 		//親オブジェクト
 		weak_ptr<GameObject> m_ParentPtr;
@@ -1970,6 +1979,16 @@ namespace basecross {
 			return m_Scale.x;
 		}
 
+		void SetActive(bool value) {
+			if (value == false) {
+				m_NowVelocity = m_Rigidbody->m_Velocity;
+				m_Rigidbody->m_Velocity = Vec3(0);
+			}
+			else {
+				m_Rigidbody->m_Velocity = m_NowVelocity;
+			}
+		}
+
 		//--------------------------------------------------------------------------------------
 		/*!
 		@brief	弾を打ち出す処理
@@ -1977,6 +1996,8 @@ namespace basecross {
 		*/
 		//--------------------------------------------------------------------------------------
 		void Wakeup(const Vec3& Position, const Vec3& Velocity);
+
+		void SetSleep();
 
 		bool GetIsShoot()
 		{
@@ -2022,11 +2043,6 @@ namespace basecross {
 
 	class CR_BossEnemy : public EnemyObject
 	{
-		//描画データ
-		shared_ptr<BcDrawObject> m_SimpleObj;
-		//描画オブジェクト(weak_ptr)
-		weak_ptr<BcPNTStaticRenderer> m_StaticRenderer;
-
 	public:
 		//--------------------------------------------------------------------------------------
 		/*!
@@ -2057,27 +2073,6 @@ namespace basecross {
 		*/
 		//--------------------------------------------------------------------------------------
 		virtual void OppositionBehavior() override;
-		//--------------------------------------------------------------------------------------
-		/*!
-		@brief 更新
-		@return	なし
-		*/
-		//--------------------------------------------------------------------------------------
-		virtual void OnUpdate()override;
-		//--------------------------------------------------------------------------------------
-		/*!
-		@brief 初期化
-		@return	なし
-		*/
-		//--------------------------------------------------------------------------------------
-		virtual void OnCreate() override;
-		//--------------------------------------------------------------------------------------
-		/*!
-		@brief 描画
-		@return	なし
-		*/
-		//--------------------------------------------------------------------------------------
-		virtual void OnDraw() override;
 	};
 
 	//--------------------------------------------------------------------------------------
@@ -2319,7 +2314,7 @@ namespace basecross {
 		@return	なし
 		*/
 		//--------------------------------------------------------------------------------------
-		//virtual void OppositionBehavior() override;
+		virtual void OppositionBehavior() override;
 
 	};
 
@@ -2339,8 +2334,16 @@ namespace basecross {
 		Vec3 m_Pos;
 		//HP
 		float m_HP;
+
+		//カメラがボスに注目するかどうかのflg
+		bool m_isLooked;
+
 		//最初のHP
 		float m_DefaultHP;
+
+		Vec3 m_DefaultPos;
+
+		float m_BarriorChangeTime;
 
 		bool m_isDead;
 
@@ -2359,6 +2362,15 @@ namespace basecross {
 		float m_SpawnTime;
 
 		float m_AttackFrameCount;
+		float m_AttackRate;
+
+		//
+		float m_AttackBulletNum;
+		//現在飛ばしたバレットの数
+		float m_NowAttackBulletNum;
+
+		float m_BeforeAttackTime;
+		float m_BulletSpeed;
 
 		Vec3 m_CannonPos[3];
 
@@ -2460,13 +2472,20 @@ namespace basecross {
 
 		void SetIsDamage(bool value) {
 			m_isDamage = value;
-			
 		}
 		bool GetIsDamage() {
 			return m_isDamage;
 		}
 
-		void AttackMove();
+		void SetIsLooked(bool value) {
+			m_isLooked = value;
+		}
+
+		bool GetIsLooked() {
+			return m_isLooked;
+		}
+
+		void AttackMove(int player_num);
 
 		//--------------------------------------------------------------------------------------
 		/*!

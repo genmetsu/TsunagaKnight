@@ -25,7 +25,8 @@ namespace basecross {
 		m_AttackDis(1.7f),
 		m_FOV(0.707f),
 		m_NowCannonClass(3),
-		m_JumpLock(false)
+		m_JumpLock(false),
+		m_isInvincible(false)
 	{
 		//メッシュとトランスフォームの差分の設定
 		m_MeshToTransformMatrix.affineTransformation(
@@ -148,6 +149,7 @@ namespace basecross {
 		m_PtrObj->AddAnimation(L"Attack", 120, 50, false, 90.0f);
 		m_PtrObj->AddAnimation(L"Damage", 170, 30, false, 60.0f);
 		m_PtrObj->AddAnimation(L"Step", 200, 30, false, 90.0f);
+		m_PtrObj->AddAnimation(L"CannonStart", 230, 60, false, 60.0f);
 
 		//シャドウマップ描画データの構築
 		m_PtrShadowmapObj = make_shared<ShadowmapObject>();
@@ -310,9 +312,10 @@ namespace basecross {
 			if (isRunning != RunEnd) {
 				isRunning = RunEnd;
 				ChangeAnimation(L"RunEnd");
+				m_RunAnimationFrameCount = 0.0f;
 			}
 		}
-		else if (m_RunAnimationFrameCount > 0.333f) {
+		else if (m_RunAnimationFrameCount > 0.333f && m_PtrObj->m_CurrentAnimeName == L"RunStart") {
 			ChangeAnimation(L"Running");
 			isRunning = Running;
 			m_RunAnimationFrameCount = 0.0f;
@@ -323,6 +326,14 @@ namespace basecross {
 				ChangeAnimation(L"RunStart");
 				m_RunAnimationFrameCount = 0.0f;
 			}
+		}
+		if (m_PtrObj->m_CurrentAnimeName == L"RunEnd") {
+			if (m_RunAnimationFrameCount > 0.333f) {
+				ChangeAnimation(L"Default");
+				m_RunAnimationFrameCount = 0.0f;
+			}
+			else
+				m_RunAnimationFrameCount += ElapsedTime;
 		}
 		if (isRunning == RunStart) {
 			m_RunAnimationFrameCount += ElapsedTime;
@@ -353,23 +364,7 @@ namespace basecross {
 
 				if (length <= EnemyRadius + PlayerRadius) {
 					if (PtrEnemy->GetHP() > 0) {
-						Vec3 Emitter = m_Rigidbody->m_Pos;
-						//Sparkの送出
-						auto SparkPtr = GetStage<GameStage>()->FindTagGameObject<AttackSpark>(L"AttackSpark");
-						SparkPtr->InsertSpark(Emitter);
-
-						m_DamageSound->Start(0, 0.4f);
-						m_BombSound->Start(0, 0.5f);
-
-						//ノックバック方向の設定
-						m_KnockBackVec = m_Rigidbody->m_Pos - EnemyPos;
-						m_KnockBackVec.y = 0.0f;
-						m_KnockBackVec.normalize();
-						//つながりを消す
-						auto s = GetStage()->FindTagGameObject<Sword>(L"Sword");
-						s->DeleteChains(3);
-						//ダメージステートに変更
-						m_StateMachine->ChangeState(DamagedState::Instance());
+						DamagedStartBehaviour(EnemyPos);
 						return;
 					}
 				}
@@ -399,6 +394,7 @@ namespace basecross {
 						MoveVec.normalize();
 						float MoveLength = PtrCannon->GetScale() / 2.0f + GetScale() / 2.0f;
 						SetPosition(MoveVec * MoveLength * 1.5f + PtrCannon->GetPosition());
+						ChangeAnimation(L"CannonStart");
 					}
 					if (PtrCannon->GetCannonClass() == 1) {
 						auto s = GetStage()->FindTagGameObject<Sword>(L"Sword");
@@ -410,6 +406,7 @@ namespace basecross {
 						MoveVec.normalize();
 						float MoveLength = PtrCannon->GetScale() / 2.0f + GetScale() / 2.0f;
 						SetPosition(MoveVec * MoveLength* 1.5f + PtrCannon->GetPosition());
+						ChangeAnimation(L"CannonStart");
 					}
 					if (PtrCannon->GetCannonClass() == 2) {
 						auto s = GetStage()->FindTagGameObject<Sword>(L"Sword");
@@ -421,47 +418,12 @@ namespace basecross {
 						MoveVec.normalize();
 						float MoveLength = PtrCannon->GetScale() / 2.0f + GetScale() / 2.0f;
 						SetPosition(MoveVec * MoveLength * 1.5f + PtrCannon->GetPosition());
+						ChangeAnimation(L"CannonStart");
 					}
 					
 				}
 			}
-		}
-		//弾との衝突判定
-		vector<shared_ptr<GameObject>> BulletVec;
-		GetStage<GameStage>()->FindTagGameObjectVec(L"Bullet", BulletVec);
-		for (auto bullet : BulletVec) {
-			if (bullet) {
-				auto PtrBullet = dynamic_pointer_cast<BulletObject>(bullet);
-
-				Vec3 BulletPos = PtrBullet->GetPosition();
-				float length = (BulletPos - m_Rigidbody->m_Pos).length();
-
-				float Radius = PtrBullet->GetScale() / 2.0f;
-				float PlayerRadius = m_Rigidbody->m_Scale.x / 2.0f;
-
-				if (length < Radius + PlayerRadius) {
-					PtrBullet->SetPosition(Vec3(0, -100, 0));
-					Vec3 Emitter = m_Rigidbody->m_Pos;
-					//Sparkの送出
-					auto SparkPtr = GetStage<GameStage>()->FindTagGameObject<AttackSpark>(L"AttackSpark");
-					SparkPtr->InsertSpark(Emitter);
-
-					m_DamageSound->Start(0, 0.4f);
-					m_BombSound->Start(0, 0.5f);
-
-					//ノックバック方向の設定
-					m_KnockBackVec = m_Rigidbody->m_Pos - BulletPos;
-					m_KnockBackVec.y = 0.0f;
-					m_KnockBackVec.normalize();
-					//つながりを消す
-					auto s = GetStage()->FindTagGameObject<Sword>(L"Sword");
-					s->DeleteChains(3);
-					//ダメージステートに変更
-					m_StateMachine->ChangeState(DamagedState::Instance());
-					return;
-				}
-			}
-		}
+		}	
 		//ボスハンドとの衝突判定
 		vector<shared_ptr<GameObject>> HandVec;
 		GetStage<GameStage>()->FindTagGameObjectVec(L"BossHand", HandVec);
@@ -476,27 +438,31 @@ namespace basecross {
 				float PlayerRadius = m_Rigidbody->m_Scale.x / 2.0f;
 
 				if (length < Radius + PlayerRadius) {
-					Vec3 Emitter = m_Rigidbody->m_Pos;
-					//Sparkの送出
-					auto SparkPtr = GetStage<GameStage>()->FindTagGameObject<AttackSpark>(L"AttackSpark");
-					SparkPtr->InsertSpark(Emitter);
-
-					m_DamageSound->Start(0, 0.4f);
-					m_BombSound->Start(0, 0.5f);
-
-					//ノックバック方向の設定
-					m_KnockBackVec = m_Rigidbody->m_Pos - HandPos;
-					m_KnockBackVec.y = 0.0f;
-					m_KnockBackVec.normalize();
-					//つながりを消す
-					auto s = GetStage()->FindTagGameObject<Sword>(L"Sword");
-					s->DeleteChains(3);
-					//ダメージステートに変更
-					m_StateMachine->ChangeState(DamagedState::Instance());
+					DamagedStartBehaviour(HandPos);
 					return;
 				}
 			}
 		}
+	}
+
+	void Player::DamagedStartBehaviour(Vec3 StartPos) {
+		Vec3 Emitter = m_Rigidbody->m_Pos;
+		//Sparkの送出
+		auto SparkPtr = GetStage<GameStage>()->FindTagGameObject<AttackSpark>(L"AttackSpark");
+		SparkPtr->InsertSpark(Emitter);
+
+		m_DamageSound->Start(0, 0.4f);
+		m_BombSound->Start(0, 0.5f);
+
+		//ノックバック方向の設定
+		m_KnockBackVec = m_Rigidbody->m_Pos - StartPos;
+		m_KnockBackVec.y = 0.0f;
+		m_KnockBackVec.normalize();
+		//つながりを消す
+		auto s = GetStage()->FindTagGameObject<Sword>(L"Sword");
+		s->DeleteChains(3);
+		//ダメージステートに変更
+		m_StateMachine->ChangeState(DamagedState::Instance());
 	}
 
 	void Player::DamagedBehaviour() {
@@ -534,8 +500,6 @@ namespace basecross {
 	void Player::AttackBehaviour() {
 		auto sword = GetStage()->FindTagGameObject<Sword>(L"Sword");
 		sword->SetState(L"Attack");
-
-		//m_AttackSound->Start(0, 0.4f);
 
 		//攻撃中の移動の補正
 		vector<shared_ptr<GameObject>> EnemyVec;
@@ -612,6 +576,7 @@ namespace basecross {
 	void PlayerAttackState::Enter(const shared_ptr<Player>& Obj) {
 		Obj->ChangeAnimation(L"Attack");
 		Obj->AttackBehaviour();
+		Obj->SetInvincible(true);
 	}
 
 	void PlayerAttackState::Execute(const shared_ptr<Player>& Obj) {
@@ -626,7 +591,7 @@ namespace basecross {
 	}
 
 	void PlayerAttackState::Exit(const shared_ptr<Player>& Obj) {
-
+		Obj->SetInvincible(false);
 	}
 
 	//--------------------------------------------------------------------------------------
@@ -639,6 +604,7 @@ namespace basecross {
 		Obj->PlayerStepEffect();
 		Obj->InitVelocity();
 		Obj->SetStepVec(Obj->GetMoveVector());
+		Obj->SetInvincible(true);
 		auto sword = Obj->GetStage()->FindTagGameObject<Sword>(L"Sword");
 		sword->SetState(L"Default");
 	}
@@ -648,7 +614,7 @@ namespace basecross {
 	}
 
 	void StepState::Exit(const shared_ptr<Player>& Obj) {
-
+		Obj->SetInvincible(false);
 	}
 
 	//--------------------------------------------------------------------------------------
@@ -658,6 +624,7 @@ namespace basecross {
 
 	void DamagedState::Enter(const shared_ptr<Player>& Obj) {
 		frame_count = 0.0f;
+		Obj->SetInvincible(true);
 	}
 
 	void DamagedState::Execute(const shared_ptr<Player>& Obj) {
@@ -671,7 +638,7 @@ namespace basecross {
 	}
 
 	void DamagedState::Exit(const shared_ptr<Player>& Obj) {
-
+		Obj->SetInvincible(false);
 	}
 
 	//--------------------------------------------------------------------------------------
@@ -738,7 +705,6 @@ namespace basecross {
 		m_PtrObj->m_ShadowmapUse = false;
 		m_PtrObj->m_BlendState = BlendState::AlphaBlend;
 		m_PtrObj->m_RasterizerState = RasterizerState::DoubleDraw;
-		//m_PtrObj->m_Alpha = 0.0f;
 
 		m_AttackSound = ObjectFactory::Create<SoundObject>(L"buki");
 
@@ -1111,16 +1077,6 @@ namespace basecross {
 
 	void NonAttackState::Execute(const shared_ptr<Sword>& Obj) {
 		Obj->UpdateBehavior();
-
-		////コントローラの取得
-		//auto CntlVec = App::GetApp()->GetInputDevice().GetControlerVec();
-		//if (CntlVec[0].bConnected) {
-		//	//Xボタン
-		//	if (CntlVec[0].wPressedButtons & XINPUT_GAMEPAD_X) {
-		//		Obj->GetStateMachine()->ChangeState(Attack1State::Instance());
-		//	}
-		//}
-
 	}
 
 	void NonAttackState::Exit(const shared_ptr<Sword>& Obj) {
