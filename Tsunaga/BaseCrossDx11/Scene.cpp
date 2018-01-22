@@ -267,8 +267,12 @@ namespace basecross {
 		strTexture = DataDir + L"number.png";
 		App::GetApp()->RegisterTexture(L"number_TX", strTexture);
 
+		strTexture = DataDir + L"Transparent.png";
+		App::GetApp()->RegisterTexture(L"TRANS_TX", strTexture);
+		
+
 		//ボーンモデルのリソース
-		auto ModelMesh = MeshResource::CreateBoneModelMesh(DataDir, L"Kureha_fbx_v2.bmf");
+		auto ModelMesh = MeshResource::CreateBoneModelMesh(DataDir, L"Kureha_fbx_v5.bmf");
 		App::GetApp()->RegisterResource(L"KUREHA_MESH", ModelMesh);
 		ModelMesh = MeshResource::CreateBoneModelMesh(DataDir, L"E_Needle.bmf");
 		App::GetApp()->RegisterResource(L"NEEDLE_MESH", ModelMesh);

@@ -1532,7 +1532,41 @@ namespace basecross {
 				m_BackupVertices[i].textureCoordinate
 			);
 		}
+	}
 
+	//--------------------------------------------------------------------------------------
+	///	チェインスプライト
+	//--------------------------------------------------------------------------------------
+	ChainUISprite::ChainUISprite(const shared_ptr<Stage>& StagePtr,
+		const wstring& TextureResName,
+		const Vec2& StartScale,
+		float StartRot,
+		const Vec2& StartPos,
+		UINT XWrap, UINT YWrap,
+		int MyNum) :
+		SpriteBase(StagePtr, TextureResName, StartScale, StartRot, StartPos, XWrap, YWrap),
+		m_TotalTime(0),
+		m_MyNumber(MyNum)
+	{
+		SetBlendState(BlendState::Trace);
+	}
+
+	void ChainUISprite::AdjustVertex() {
+
+	}
+
+	void ChainUISprite::UpdateVertex(float ElapsedTime, VertexPositionColorTexture* vertices) {
+		auto SwordPtr = GetStage()->FindTagGameObject<Sword>(L"Sword");
+		m_TextureResName = SwordPtr->GetChainTX(m_MyNumber);
+
+		Col4 UpdateCol(1.0f, 1.0f, 1.0f, 1.0f);
+		for (size_t i = 0; i < m_SquareMesh->GetNumVertices(); i++) {
+			vertices[i] = VertexPositionColorTexture(
+				m_BackupVertices[i].position,
+				UpdateCol,
+				m_BackupVertices[i].textureCoordinate
+			);
+		}
 	}
 
 	//--------------------------------------------------------------------------------------

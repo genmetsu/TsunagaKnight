@@ -619,6 +619,8 @@ namespace basecross {
 		//--------------------------------------------------------------------------------------
 		void SetState(wstring state_name);
 
+		wstring GetChainTX(int num);
+
 		float GetScale() {
 			return m_Scale.x;
 		}

@@ -358,35 +358,14 @@ namespace basecross {
 			1, 1
 			);
 
-
 		for (int i = 0; i < 20; i++) {
-			if (i % 3 == 0) {
-				AddGameObject<MultiSprite>(
-					L"ANGEL_ICON_TX",
-					Vec2(30, 30),
-					0.0f,
-					Vec2(-600, 270 - i * 30),
-					1, 1
-					);
-			}
-			else if (i % 3 == 1) {
-				AddGameObject<MultiSprite>(
-					L"GUN_ICON_TX",
-					Vec2(30, 30),
-					0.0f,
-					Vec2(-600, 270 - i * 30),
-					1, 1
-					);
-			}
-			else if (i % 3 == 2) {
-				AddGameObject<MultiSprite>(
-					L"NEEDLE_ICON_TX",
-					Vec2(30, 30),
-					0.0f,
-					Vec2(-600, 270 - i * 30),
-					1, 1
-					);
-			}
+			AddGameObject<ChainUISprite>(
+				L"TRANS_TX",
+				Vec2(30, 30),
+				0.0f,
+				Vec2(-600, 270 - i * 30),
+				1, 1,
+				i);
 		}
 
 		SetActiveObjects(false);

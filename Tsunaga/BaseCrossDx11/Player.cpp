@@ -895,7 +895,6 @@ namespace basecross {
 						PtrEnemy->CheckHealth();
 						break;
 					}
-
 				}
 			}
 		}
@@ -1064,6 +1063,24 @@ namespace basecross {
 		}
 	}
 
+	wstring Sword::GetChainTX(int num) {
+		if (num >= m_friends_num) {
+			return L"TRANS_TX";
+		}
+		auto shptr = m_friends[num].lock();
+		if (shptr->FindTag(L"Red")) {
+			return L"NEEDLE_ICON_TX";
+		}
+		if (shptr->FindTag(L"Green")) {
+			return L"ANGEL_ICON_TX";
+		}
+		if (shptr->FindTag(L"Blue")) {
+			return L"GUN_ICON_TX";
+		}
+		else {
+			return L"TRANS_TX";
+		}
+	}
 
 	//--------------------------------------------------------------------------------------
 	///	追従ステート（Sword）
