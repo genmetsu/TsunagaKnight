@@ -59,7 +59,7 @@ namespace basecross {
 			L"YAMATO_TX",
 			Vec3(4.0f, 4.0f, 4.0f),
 			Quat(),
-			Vec3(0.0f, -12.772f, -20.0f),
+			Vec3(0.0f, -12.74f, -20.0f),
 			true);
 
 		AddGameObject<TransparentWall>(

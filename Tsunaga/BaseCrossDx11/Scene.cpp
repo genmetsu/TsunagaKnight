@@ -280,7 +280,7 @@ namespace basecross {
 		App::GetApp()->RegisterResource(L"THOR_BOSS_MESH", ModelMesh);
 		ModelMesh = MeshResource::CreateBoneModelMesh(DataDir, L"Boss_Fbx_v02.bmf");
 		App::GetApp()->RegisterResource(L"BOSS_MESH", ModelMesh);
-		ModelMesh = MeshResource::CreateBoneModelMesh(DataDir, L"Yamato_Fbx_v04.bmf");
+		ModelMesh = MeshResource::CreateBoneModelMesh(DataDir, L"Yamato_Fbx_v05.bmf");
 		App::GetApp()->RegisterResource(L"YAMATO_MESH", ModelMesh);
 		ModelMesh = MeshResource::CreateBoneModelMesh(DataDir, L"Medium_Boss_Hand_Main.bmf");
 		App::GetApp()->RegisterResource(L"HAND_BOSS_MESH", ModelMesh);
