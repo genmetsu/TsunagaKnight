@@ -1557,7 +1557,9 @@ namespace basecross {
 
 	void ChainUISprite::UpdateVertex(float ElapsedTime, VertexPositionColorTexture* vertices) {
 		auto SwordPtr = GetStage()->FindTagGameObject<Sword>(L"Sword");
-		m_TextureResName = SwordPtr->GetChainTX(m_MyNumber);
+		if (m_TextureResName != SwordPtr->GetChainTX(m_MyNumber)) {
+			m_TextureResName = SwordPtr->GetChainTX(m_MyNumber);
+		}
 
 		Col4 UpdateCol(1.0f, 1.0f, 1.0f, 1.0f);
 		for (size_t i = 0; i < m_SquareMesh->GetNumVertices(); i++) {
