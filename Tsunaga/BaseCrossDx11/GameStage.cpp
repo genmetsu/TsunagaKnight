@@ -26,6 +26,14 @@ namespace basecross {
 			App::GetApp()->RegisterResource(L"DEFAULT_SPHERE",
 				MeshResource::CreateMeshResource(vertices, indices, false));
 		}
+		if (!App::GetApp()->CheckResource<MeshResource>(L"BOSS_BULLET")) {
+			//ÉÅÉbÉVÉÖÇ™ìoò^Ç≥ÇÍÇƒÇ»ÇØÇÍÇŒìoò^
+			vector<VertexPositionNormalTexture> vertices;
+			vector<uint16_t> indices;
+			MeshUtill::CreateSphere(1.0f, 3, vertices, indices);
+			App::GetApp()->RegisterResource(L"BOSS_BULLET",
+				MeshResource::CreateMeshResource(vertices, indices, false));
+		}
 	}
 
 	void GameStage::OnCreate() {
@@ -291,6 +299,7 @@ namespace basecross {
 		AddGameObject<ShootingEffect>();
 		AddGameObject<CannonEffect>();
 		AddGameObject<BossEffect>();
+		AddGameObject<BossBulletEffect>();
 		AddGameObject<MultiGuardEffect>();
 		AddGameObject<EnemyMoveEffect>();
 
@@ -386,7 +395,7 @@ namespace basecross {
 
 		m_AudioObjectPtr = ObjectFactory::Create<MultiAudioObject>();
 		m_AudioObjectPtr->AddAudioResource(L"BGM_1");
-		m_AudioObjectPtr->Start(L"BGM_1", XAUDIO2_LOOP_INFINITE, 0.1f);
+		m_AudioObjectPtr->Start(L"BGM_1", XAUDIO2_LOOP_INFINITE, 0.5f);
 
 	}
 

@@ -349,6 +349,21 @@ namespace basecross {
 	};
 
 	//--------------------------------------------------------------------------------------
+	//class BossBulletEffect : public MultiParticle;
+	//用途: ボスエネミーの弾のエフェクト
+	//--------------------------------------------------------------------------------------
+	class BossBulletEffect : public MultiParticle {
+	public:
+		//構築と破棄
+		BossBulletEffect(shared_ptr<Stage>& StagePtr);
+		virtual ~BossBulletEffect();
+		//初期化
+		virtual void OnCreate() override;
+		void InsertSpark(const Vec3& Pos);
+		virtual void OnUpdate() override;
+	};
+
+	//--------------------------------------------------------------------------------------
 	//class EnemyMoveEffect : public MultiParticle;
 	//用途: エネミーの移動エフェクト
 	//--------------------------------------------------------------------------------------

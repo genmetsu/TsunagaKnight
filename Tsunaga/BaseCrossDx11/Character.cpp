@@ -375,7 +375,7 @@ namespace basecross {
 	}
 
 	void MultiGuardEffect::InsertSpark(const Vec3& Pos) {
-		auto ParticlePtr = InsertParticle(8);
+		auto ParticlePtr = InsertParticle(5);
 		ParticlePtr->m_EmitterPos = Pos;
 		ParticlePtr->SetTextureResource(L"SPARK_TX");
 		ParticlePtr->m_MaxTime = 0.08f;
@@ -392,7 +392,7 @@ namespace basecross {
 				rParticleSprite.m_LocalPos.z * 10.0f
 			);
 			//色の指定
-			rParticleSprite.m_Color = Col4(0.0f, 1.0f, 0.0f, 0.1f);
+			rParticleSprite.m_Color = Col4(0.0f, 1.0f, 0.0f, 0.2f);
 		}
 	}
 
@@ -419,7 +419,7 @@ namespace basecross {
 	}
 
 	void BossEffect::InsertSpark(const Vec3& Pos,wstring name) {
-		auto ParticlePtr = InsertParticle(8);
+		auto ParticlePtr = InsertParticle(5);
 		ParticlePtr->m_EmitterPos = Pos;
 		ParticlePtr->SetTextureResource(L"SPARK_TX");
 		ParticlePtr->m_MaxTime = 0.08f;
@@ -437,13 +437,13 @@ namespace basecross {
 			);
 			//色の指定
 			if (name == L"Red") {
-				rParticleSprite.m_Color = Col4(1.0f, 0.0f, 0.0f, 0.1f);
+				rParticleSprite.m_Color = Col4(1.0f, 0.0f, 0.0f, 0.2f);
 			}
 			if (name == L"Green") {
-				rParticleSprite.m_Color = Col4(0.0f, 1.0f, 0.0f, 0.1f);
+				rParticleSprite.m_Color = Col4(0.0f, 1.0f, 0.0f, 0.2f);
 			}
 			if (name == L"Blue") {
-				rParticleSprite.m_Color = Col4(0.0f, 0.0f, 1.0f, 0.1f);
+				rParticleSprite.m_Color = Col4(0.0f, 0.0f, 1.0f, 0.2f);
 			}
 		}
 	}
@@ -452,6 +452,51 @@ namespace basecross {
 		MultiParticle::OnUpdate();
 		float ElapsedTime = App::GetApp()->GetElapsedTime();
 	}
+
+	//--------------------------------------------------------------------------------------
+	//class BossBulletEffect : public MultiParticle;
+	//用途: ボスの弾エフェクト
+	//--------------------------------------------------------------------------------------
+	//構築と破棄
+	BossBulletEffect::BossBulletEffect(shared_ptr<Stage>& StagePtr) :
+		MultiParticle(StagePtr)
+	{}
+	BossBulletEffect::~BossBulletEffect() {}
+
+	//初期化
+	void BossBulletEffect::OnCreate() {
+		//加算描画処理をする
+		SetAddType(true);
+		//タグの追加
+		AddTag(L"BossBulletEffect");
+	}
+
+	void BossBulletEffect::InsertSpark(const Vec3& Pos) {
+		auto ParticlePtr = InsertParticle(3);
+		ParticlePtr->m_EmitterPos = Pos;
+		ParticlePtr->SetTextureResource(L"SPARK_TX");
+		ParticlePtr->m_MaxTime = 0.08f;
+		vector<ParticleSprite>& pSpriteVec = ParticlePtr->GetParticleSpriteVec();
+		for (auto& rParticleSprite : ParticlePtr->GetParticleSpriteVec()) {
+			rParticleSprite.m_LocalPos.x = Util::RandZeroToOne() * 0.1f - 0.05f;
+			rParticleSprite.m_LocalPos.y = Util::RandZeroToOne() * 0.1f;
+			rParticleSprite.m_LocalPos.z = Util::RandZeroToOne() * 0.1f - 0.05f;
+			rParticleSprite.m_LocalScale = Vec2(0.9, 0.9);
+			//各パーティクルの移動速度を指定
+			rParticleSprite.m_Velocity = Vec3(
+				rParticleSprite.m_LocalPos.x * 10.0f,
+				rParticleSprite.m_LocalPos.y * 10.0f,
+				rParticleSprite.m_LocalPos.z * 10.0f
+			);
+			//色の指定
+			rParticleSprite.m_Color = Col4(0.8f, 0.0f, 1.0f, 0.3f);
+		}
+	}
+
+	void BossBulletEffect::OnUpdate() {
+		MultiParticle::OnUpdate();
+	}
+
 
 	//--------------------------------------------------------------------------------------
 	//class EnemyMoveEffect : public MultiParticle;
@@ -3066,9 +3111,12 @@ namespace basecross {
 		body.SetToBefore();
 		m_Rigidbody = PtrGameStage->AddRigidbody(body);
 
-		//メッシュの取得
 		auto MeshPtr = App::GetApp()->GetResource<MeshResource>(L"DEFAULT_SPHERE");
-
+		//メッシュの取得
+		if (m_my_Tag == L"BossBullet"){
+			MeshPtr = App::GetApp()->GetResource<MeshResource>(L"BOSS_BULLET");
+		}
+			
 		//サウンドオブジェクトの初期化
 		m_CollisionSound = ObjectFactory::Create<SoundObject>(L"Pan");
 
@@ -3175,6 +3223,12 @@ namespace basecross {
 			}
 
 			if (m_my_Tag == L"BossBullet") {
+				Vec3 Emitter = m_Rigidbody->m_Pos;
+				//Sparkの送出
+				auto SparkPtr = GetStage<GameStage>()->FindTagGameObject<BossBulletEffect>(L"BossBulletEffect");
+				SparkPtr->InsertSpark(Emitter);
+
+
 				//チェインとの当たり判定
 				vector<shared_ptr<GameObject>> EnemyVec;
 				GetStage<GameStage>()->FindTagGameObjectVec(L"Chain", EnemyVec);
