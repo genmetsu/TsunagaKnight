@@ -3146,7 +3146,7 @@ namespace basecross {
 		}
 		else if (m_my_Tag == L"BossBullet") {
 			m_PtrObj->m_Diffuse = Col4(0.2f, 0.0f, 0.2f, 1.0f);
-			m_PtrObj->m_Emissive = Col4(0.7f, 0.0f, 0.5f, 1.0f);
+			m_PtrObj->m_Emissive = Col4(0.4f, 0.0f, 0.2f, 1.0f);
 
 			m_BulletTime = 40.0f;
 		}
