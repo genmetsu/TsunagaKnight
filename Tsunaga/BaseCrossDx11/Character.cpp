@@ -4334,12 +4334,5 @@ namespace basecross {
 			}
 		}
 	}
-<<<<<<< HEAD
-	
-
-	
-
-=======
->>>>>>> 96e3bd867cc1087dc80a991a8ca53bae3c54980a
 }
 //end basecross
