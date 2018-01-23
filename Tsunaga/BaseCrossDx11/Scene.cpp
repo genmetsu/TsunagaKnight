@@ -274,9 +274,9 @@ namespace basecross {
 		//ボーンモデルのリソース
 		auto ModelMesh = MeshResource::CreateBoneModelMesh(DataDir, L"Kureha_fbx_v5.bmf");
 		App::GetApp()->RegisterResource(L"KUREHA_MESH", ModelMesh);
-		ModelMesh = MeshResource::CreateBoneModelMesh(DataDir, L"E_Needle.bmf");
+		ModelMesh = MeshResource::CreateBoneModelMesh(DataDir, L"E_NeedleV2.bmf");
 		App::GetApp()->RegisterResource(L"NEEDLE_MESH", ModelMesh);
-		ModelMesh = MeshResource::CreateBoneModelMesh(DataDir, L"E_Gun.bmf");
+		ModelMesh = MeshResource::CreateBoneModelMesh(DataDir, L"E_GunV2.bmf");
 		App::GetApp()->RegisterResource(L"GUN_MESH", ModelMesh);
 		ModelMesh = MeshResource::CreateBoneModelMesh(DataDir, L"E_Angel.bmf");
 		App::GetApp()->RegisterResource(L"ANGEL_MESH", ModelMesh);

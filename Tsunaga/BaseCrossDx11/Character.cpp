@@ -1913,6 +1913,8 @@ namespace basecross {
 		auto TexPtr = App::GetApp()->GetResource<TextureResource>(m_TextureResName);
 		//描画データの構築
 		m_PtrObj = make_shared<BcDrawObject>();
+		m_PtrObj->m_UsedModelTextre = false;
+
 		m_PtrObj->m_MeshRes = MeshPtr;
 		m_PtrObj->m_TextureRes = TexPtr;
 		m_PtrObj->m_WorldMatrix = World;
