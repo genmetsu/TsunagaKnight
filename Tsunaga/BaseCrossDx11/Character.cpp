@@ -2605,6 +2605,10 @@ namespace basecross {
 			m_StateMachine->ChangeState(EnemyWaitingState::Instance());
 			return;
 		}
+		else if (name == L"Bullet") {
+			m_StateMachine->ChangeState(EnemyBulletState::Instance());
+			return;
+		}
 	}
 
 	void EnemyObject::ChangeAnimation(wstring name) {
@@ -2649,9 +2653,41 @@ namespace basecross {
 		return false;
 	}
 
+	void EnemyObject::BulletPrepareStartBehavior() {
+		AddTag(L"Shooted");
+		m_FrameCount = 0.0f;
+		if (FindTag(L"Green")) {
+			auto PtrCannon = GetStage()->FindTagGameObject<Cannon>(L"GREEN_CANNON");
+			Vec3 new_pos = PtrCannon->GetPosition();
+			new_pos.y += 5.0f;
+			SetPosition(new_pos);
+		}
+		if (FindTag(L"Red")) {
+			auto PtrCannon = GetStage()->FindTagGameObject<Cannon>(L"RED_CANNON");
+			Vec3 new_pos = PtrCannon->GetPosition();
+			new_pos.y += 5.0f;
+			SetPosition(new_pos);
+		}
+		if (FindTag(L"Blue")) {
+			auto PtrCannon = GetStage()->FindTagGameObject<Cannon>(L"BLUE_CANNON");
+			Vec3 new_pos = PtrCannon->GetPosition();
+			new_pos.y += 5.0f;
+			SetPosition(new_pos);
+		}
+		m_Rigidbody->m_Velocity = Vec3(0);
+
+	}
+
+	void EnemyObject::BulletPrepareExcuteBehavior() {
+		float ElapsedTime = App::GetApp()->GetElapsedTime();
+		if (m_FrameCount > m_ShootNumber) {
+			m_Rigidbody->m_Pos.y -= ElapsedTime * 7.0f;
+		}
+		m_FrameCount += ElapsedTime * 7.0f;
+	}
+
 	void EnemyObject::BulletStartBehavior() {
 		m_FrameCount = 0.0f;
-		AddTag(L"Shooted");
 
 		if (FindTag(L"Green")) {
 			auto PtrCannon = GetStage()->FindTagGameObject<Cannon>(L"GREEN_CANNON");
@@ -2793,6 +2829,24 @@ namespace basecross {
 	void EnemyComplianceState::Exit(const shared_ptr<EnemyObject>& Obj) {
 		Obj->RemoveTag(L"Chain");
 	}
+
+	//--------------------------------------------------------------------------------------
+	///	大砲で撃たれる前の準備のステート（EnemyObject）
+	//--------------------------------------------------------------------------------------
+	IMPLEMENT_SINGLETON_INSTANCE(EnemyBulletPrepareState)
+
+	void EnemyBulletPrepareState::Enter(const shared_ptr<EnemyObject>& Obj) {
+		Obj->BulletPrepareStartBehavior();
+	}
+
+	void EnemyBulletPrepareState::Execute(const shared_ptr<EnemyObject>& Obj) {
+		Obj->BulletPrepareExcuteBehavior();
+	}
+
+	void EnemyBulletPrepareState::Exit(const shared_ptr<EnemyObject>& Obj) {
+
+	}
+
 
 	//--------------------------------------------------------------------------------------
 	///	大砲で撃たれてる時のステート（EnemyObject）

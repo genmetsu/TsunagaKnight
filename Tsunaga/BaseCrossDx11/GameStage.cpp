@@ -375,7 +375,7 @@ namespace basecross {
 
 		m_AudioObjectPtr = ObjectFactory::Create<MultiAudioObject>();
 		m_AudioObjectPtr->AddAudioResource(L"BGM_1");
-		m_AudioObjectPtr->Start(L"BGM_1", XAUDIO2_LOOP_INFINITE, 0.5f);
+		m_AudioObjectPtr->Start(L"BGM_1", XAUDIO2_LOOP_INFINITE, 0.1f);
 
 	}
 
@@ -472,111 +472,123 @@ namespace basecross {
 			int now_cannon = PlayerPtr->GetIsCannon();
 			if (now_cannon < 3) {
 				Vec3 boss_pos = boss->GetPosition();
-				if (now_cannon == 0) {
-					vector<shared_ptr<GameObject>> ShootedEnemyVec;
-					FindTagGameObjectVec(L"Shooted", ShootedEnemyVec);
-					auto c = FindTagGameObject<Cannon>(L"GREEN_CANNON");
-					int max_num = 0;
-					Vec3 ShootPos;
-					for (auto enemy : ShootedEnemyVec) {
-						if (enemy) {
-							auto PtrEnemy = dynamic_pointer_cast<EnemyObject>(enemy);
-							if (PtrEnemy->GetShootNumber() > max_num) {
-								max_num = PtrEnemy->GetShootNumber();
-								ShootPos = PtrEnemy->GetPosition();
-							}
-						}
-					}
-					if (max_num == 0) {
-						if (m_FrameCount > 1.0f) {
-							CannonStateEndBehaviour();
-							PlayerPtr->SetIsCannnon(3);
-							m_FrameCount = 0.0f;
-							if (boss->GetHP() > 0.0f) {
-								boss->ChangeAnimation(L"Default");
-							}
-							return;
-						}
-						m_FrameCount += ElapsedTime;
-						return;
-					}
-					c->Rotation(boss_pos);
-					camera.m_CamerAt = boss_pos;
-					camera.m_CameraArmLen = 30;
-					camera.m_CamerEye = ShootPos;
-					camera.m_CamerEye.x -= 4.0f;
-					camera.m_CamerEye.z -= 7.0f;
+
+				if (PlayerPtr->GetCannonAnimation()) {
+					camera.m_CamerAt = PlayerPtr->GetPosition();
+					camera.m_CamerAt.y += 0.7f;
+					camera.m_CamerAt.z += 0.5f;
+					camera.m_CamerEye = PlayerPtr->GetPosition();
+					camera.m_CamerEye.x -= 1.8f;
+					camera.m_CamerEye.z += 2.0f;
+					camera.m_CamerEye.y += 0.5f;
 				}
-				if (now_cannon == 1) {
-					vector<shared_ptr<GameObject>> ShootedEnemyVec;
-					FindTagGameObjectVec(L"Shooted", ShootedEnemyVec);
-					auto c = FindTagGameObject<Cannon>(L"RED_CANNON");
-					int max_num = 0;
-					Vec3 ShootPos;
-					for (auto enemy : ShootedEnemyVec) {
-						if (enemy) {
-							auto PtrEnemy = dynamic_pointer_cast<EnemyObject>(enemy);
-							if (PtrEnemy->GetShootNumber() > max_num) {
-								max_num = PtrEnemy->GetShootNumber();
-								ShootPos = PtrEnemy->GetPosition();
+				else {
+					if (now_cannon == 0) {
+						vector<shared_ptr<GameObject>> ShootedEnemyVec;
+						FindTagGameObjectVec(L"Shooted", ShootedEnemyVec);
+						auto c = FindTagGameObject<Cannon>(L"GREEN_CANNON");
+						int max_num = 0;
+						Vec3 ShootPos;
+						for (auto enemy : ShootedEnemyVec) {
+							if (enemy) {
+								auto PtrEnemy = dynamic_pointer_cast<EnemyObject>(enemy);
+								if (PtrEnemy->GetShootNumber() > max_num) {
+									max_num = PtrEnemy->GetShootNumber();
+									ShootPos = PtrEnemy->GetPosition();
+								}
 							}
 						}
-					}
-					if (max_num == 0) {
-						if (m_FrameCount > 1.0f) {
-							CannonStateEndBehaviour();
-							PlayerPtr->SetIsCannnon(3);
-							m_FrameCount = 0.0f;
-							if (boss->GetHP() > 0.0f) {
-								boss->ChangeAnimation(L"Default");
+						if (max_num == 0) {
+							if (m_FrameCount > 1.0f) {
+								CannonStateEndBehaviour();
+								PlayerPtr->SetIsCannnon(3);
+								m_FrameCount = 0.0f;
+								if (boss->GetHP() > 0.0f) {
+									boss->ChangeAnimation(L"Default");
+								}
+								return;
 							}
+							m_FrameCount += ElapsedTime;
 							return;
 						}
-						m_FrameCount += ElapsedTime;
-						return;
+						c->Rotation(boss_pos);
+						camera.m_CamerAt = boss_pos;
+						camera.m_CameraArmLen = 30;
+						camera.m_CamerEye = ShootPos;
+						camera.m_CamerEye.x -= 4.0f;
+						camera.m_CamerEye.z -= 7.0f;
 					}
-					
-					c->Rotation(boss_pos);
-					camera.m_CamerAt = boss_pos;
-					camera.m_CameraArmLen = 30;
-					camera.m_CamerEye = ShootPos;
-					camera.m_CamerEye.x -= 3.0f;
-					camera.m_CamerEye.z -= 7.0f;
-				}
-				if (now_cannon == 2) {
-					vector<shared_ptr<GameObject>> ShootedEnemyVec;
-					FindTagGameObjectVec(L"Shooted", ShootedEnemyVec);
-					auto c = FindTagGameObject<Cannon>(L"BLUE_CANNON");
-					int max_num = 0;
-					Vec3 ShootPos;
-					for (auto enemy : ShootedEnemyVec) {
-						if (enemy) {
-							auto PtrEnemy = dynamic_pointer_cast<EnemyObject>(enemy);
-							if (PtrEnemy->GetShootNumber() > max_num) {
-								max_num = PtrEnemy->GetShootNumber();
-								ShootPos = PtrEnemy->GetPosition();
+					if (now_cannon == 1) {
+						vector<shared_ptr<GameObject>> ShootedEnemyVec;
+						FindTagGameObjectVec(L"Shooted", ShootedEnemyVec);
+						auto c = FindTagGameObject<Cannon>(L"RED_CANNON");
+						int max_num = 0;
+						Vec3 ShootPos;
+						for (auto enemy : ShootedEnemyVec) {
+							if (enemy) {
+								auto PtrEnemy = dynamic_pointer_cast<EnemyObject>(enemy);
+								if (PtrEnemy->GetShootNumber() > max_num) {
+									max_num = PtrEnemy->GetShootNumber();
+									ShootPos = PtrEnemy->GetPosition();
+								}
 							}
 						}
-					}
-					if (max_num == 0) {
-						if (m_FrameCount > 1.0f) {
-							CannonStateEndBehaviour();
-							PlayerPtr->SetIsCannnon(3);
-							m_FrameCount = 0.0f;
-							if (boss->GetHP() > 0.0f) {
-								boss->ChangeAnimation(L"Default");
+						if (max_num == 0) {
+							if (m_FrameCount > 1.0f) {
+								CannonStateEndBehaviour();
+								PlayerPtr->SetIsCannnon(3);
+								m_FrameCount = 0.0f;
+								if (boss->GetHP() > 0.0f) {
+									boss->ChangeAnimation(L"Default");
+								}
+								return;
 							}
+							m_FrameCount += ElapsedTime;
 							return;
 						}
-						m_FrameCount += ElapsedTime;
-						return;
+
+						c->Rotation(boss_pos);
+						camera.m_CamerAt = boss_pos;
+						camera.m_CameraArmLen = 30;
+						camera.m_CamerEye = ShootPos;
+						camera.m_CamerEye.x -= 3.0f;
+						camera.m_CamerEye.z -= 7.0f;
 					}
-					c->Rotation(boss_pos);
-					camera.m_CamerAt = boss_pos;
-					camera.m_CameraArmLen = 30;
-					camera.m_CamerEye = ShootPos;
-					camera.m_CamerEye.x -= 2.0f;
-					camera.m_CamerEye.z -= 7.0f;
+					if (now_cannon == 2) {
+						vector<shared_ptr<GameObject>> ShootedEnemyVec;
+						FindTagGameObjectVec(L"Shooted", ShootedEnemyVec);
+						auto c = FindTagGameObject<Cannon>(L"BLUE_CANNON");
+						int max_num = 0;
+						Vec3 ShootPos;
+						for (auto enemy : ShootedEnemyVec) {
+							if (enemy) {
+								auto PtrEnemy = dynamic_pointer_cast<EnemyObject>(enemy);
+								if (PtrEnemy->GetShootNumber() > max_num) {
+									max_num = PtrEnemy->GetShootNumber();
+									ShootPos = PtrEnemy->GetPosition();
+								}
+							}
+						}
+						if (max_num == 0) {
+							if (m_FrameCount > 1.0f) {
+								CannonStateEndBehaviour();
+								PlayerPtr->SetIsCannnon(3);
+								m_FrameCount = 0.0f;
+								if (boss->GetHP() > 0.0f) {
+									boss->ChangeAnimation(L"Default");
+								}
+								return;
+							}
+							m_FrameCount += ElapsedTime;
+							return;
+						}
+						c->Rotation(boss_pos);
+						camera.m_CamerAt = boss_pos;
+						camera.m_CameraArmLen = 30;
+						camera.m_CamerEye = ShootPos;
+						camera.m_CamerEye.x -= 2.0f;
+						camera.m_CamerEye.z -= 7.0f;
+					}
 				}
 			}
 			else if (boss->GetIsLooked()) {
@@ -594,7 +606,8 @@ namespace basecross {
 				if (m_CameraPos.z > -150) {
 					camera.m_CamerAt = Vec3(0, 0, 30);
 					camera.m_CameraArmLen = 100;
-					m_CameraPos.z -= ElapsedTime * 50.0f;
+					//‚±‚±
+					m_CameraPos.z -= ElapsedTime * 500.0f;
 					camera.m_CamerEye = m_CameraPos;
 				}
 				else if (m_CameraPos.z <= -150) {

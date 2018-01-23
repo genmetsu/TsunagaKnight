@@ -141,6 +141,10 @@ namespace basecross {
 		m_PtrObj->m_BlendState = BlendState::AlphaBlend;
 		m_PtrObj->m_RasterizerState = RasterizerState::DoubleDraw;
 
+		m_PtrObj->m_Emissive = Col4(0.5f, 0.5f, 0.9f, 1.0f);
+
+		m_PtrObj->m_UsedModelColor = true;
+
 		m_PtrObj->BoneInit();
 		m_PtrObj->AddAnimation(L"Default", 0, 30, true, 40.0f);
 		m_PtrObj->AddAnimation(L"RunStart", 30, 20, false, 60.0f);
@@ -149,7 +153,7 @@ namespace basecross {
 		m_PtrObj->AddAnimation(L"Attack", 120, 50, false, 90.0f);
 		m_PtrObj->AddAnimation(L"Damage", 170, 30, false, 60.0f);
 		m_PtrObj->AddAnimation(L"Step", 200, 30, false, 90.0f);
-		m_PtrObj->AddAnimation(L"CannonStart", 230, 60, false, 60.0f);
+		m_PtrObj->AddAnimation(L"CannonStart", 230, 60, false, 45.0f);
 
 		//シャドウマップ描画データの構築
 		m_PtrShadowmapObj = make_shared<ShadowmapObject>();
@@ -168,6 +172,20 @@ namespace basecross {
 		m_PtrObj->UpdateAnimation(ElapsedTime);
 		m_StateMachine->Update();
 		CollisionWithCannon();
+
+
+		if (m_PtrObj->m_CurrentAnimeName == L"CannonStart" && m_PtrObj->m_CurrentAnimeTime > 0.99f) {
+			ChangeAnimation(L"Default");
+			m_CannonAnimation = false;
+			vector<shared_ptr<GameObject>> ShootedEnemyVec;
+			GetStage()->FindTagGameObjectVec(L"Shooted", ShootedEnemyVec);
+			for (auto enemy : ShootedEnemyVec) {
+				if (enemy) {
+					auto PtrEnemy = dynamic_pointer_cast<EnemyObject>(enemy);
+					PtrEnemy->ChangeState(L"Bullet");
+				}
+			}
+		}
 	}
 
 	void Player::OnUpdate2() {
@@ -194,8 +212,8 @@ namespace basecross {
 		Qt.normalize();
 		//現在と目標を補間
 		//移動しないときは回転しない
-		if (m_Rigidbody->m_Velocity.length() > 0.01f) {
-			m_Rigidbody->m_Quat = XMQuaternionSlerp(m_Rigidbody->m_Quat, Qt, 0.1f);
+		if (m_Rigidbody->m_Velocity.length() > 0.0f) {
+			m_Rigidbody->m_Quat = XMQuaternionSlerp(m_Rigidbody->m_Quat, Qt, 0.3f);
 		}
 	}
 
@@ -309,35 +327,37 @@ namespace basecross {
 		Vec3 Direction = GetMoveVector();
 		//前回のターンからの経過時間を求める
 		float ElapsedTime = App::GetApp()->GetElapsedTime();
-		if (Direction.length() < 0.1f) {
-			if (isRunning != RunEnd) {
-				isRunning = RunEnd;
-				ChangeAnimation(L"RunEnd");
+		if (m_PtrObj->m_CurrentAnimeName != L"CannonStart") {
+			if (Direction.length() < 0.1f) {
+				if (isRunning != RunEnd) {
+					isRunning = RunEnd;
+					ChangeAnimation(L"RunEnd");
+					m_RunAnimationFrameCount = 0.0f;
+				}
+			}
+			else if (m_RunAnimationFrameCount > 0.333f && m_PtrObj->m_CurrentAnimeName == L"RunStart") {
+				ChangeAnimation(L"Running");
+				isRunning = Running;
 				m_RunAnimationFrameCount = 0.0f;
 			}
-		}
-		else if (m_RunAnimationFrameCount > 0.333f && m_PtrObj->m_CurrentAnimeName == L"RunStart") {
-			ChangeAnimation(L"Running");
-			isRunning = Running;
-			m_RunAnimationFrameCount = 0.0f;
-		}
-		else {
-			if (isRunning == RunEnd) {
-				isRunning = RunStart;
-				ChangeAnimation(L"RunStart");
-				m_RunAnimationFrameCount = 0.0f;
+			else {
+				if (isRunning == RunEnd) {
+					isRunning = RunStart;
+					ChangeAnimation(L"RunStart");
+					m_RunAnimationFrameCount = 0.0f;
+				}
 			}
-		}
-		if (m_PtrObj->m_CurrentAnimeName == L"RunEnd") {
-			if (m_RunAnimationFrameCount > 0.333f) {
-				ChangeAnimation(L"Default");
-				m_RunAnimationFrameCount = 0.0f;
+			if (m_PtrObj->m_CurrentAnimeName == L"RunEnd") {
+				if (m_RunAnimationFrameCount > 0.333f) {
+					ChangeAnimation(L"Default");
+					m_RunAnimationFrameCount = 0.0f;
+				}
+				else
+					m_RunAnimationFrameCount += ElapsedTime;
 			}
-			else
+			if (isRunning == RunStart) {
 				m_RunAnimationFrameCount += ElapsedTime;
-		}
-		if (isRunning == RunStart) {
-			m_RunAnimationFrameCount += ElapsedTime;
+			}
 		}
 	}
 
@@ -457,14 +477,16 @@ namespace basecross {
 							return;
 						}
 						else {
+							ChangeAnimation(L"CannonStart");
+							m_CannonAnimation = true;
 							GetStage<GameStage>()->CannonStateStartBehaviour();
 							m_NowCannonClass = 0;
-							Vec3 MoveVec = m_Rigidbody->m_Pos - CannonPos;
-							MoveVec.y = 0.0f;
-							MoveVec.normalize();
-							float MoveLength = PtrCannon->GetScale() / 2.0f + GetScale() / 2.0f;
-							SetPosition(MoveVec * MoveLength * 1.5f + PtrCannon->GetPosition());
-							ChangeAnimation(L"CannonStart");
+							Vec3 NewPos = PtrCannon->GetPosition();
+							NewPos.x -= 3.0f;
+							NewPos.z += 3.0f;
+							SetPosition(NewPos);
+							m_Rigidbody->m_Velocity = Vec3(0);
+							m_Rigidbody->m_Velocity.z += 0.1f;
 							return;
 						}
 					}
@@ -480,14 +502,16 @@ namespace basecross {
 							return;
 						}
 						else {
+							ChangeAnimation(L"CannonStart");
+							m_CannonAnimation = true;
 							GetStage<GameStage>()->CannonStateStartBehaviour();
 							m_NowCannonClass = 1;
-							Vec3 MoveVec = m_Rigidbody->m_Pos - CannonPos;
-							MoveVec.y = 0.0f;
-							MoveVec.normalize();
-							float MoveLength = PtrCannon->GetScale() / 2.0f + GetScale() / 2.0f;
-							SetPosition(MoveVec * MoveLength* 1.5f + PtrCannon->GetPosition());
-							ChangeAnimation(L"CannonStart");
+							Vec3 NewPos = PtrCannon->GetPosition();
+							NewPos.x -= 3.0f;
+							NewPos.z += 3.0f;
+							SetPosition(NewPos);
+							m_Rigidbody->m_Velocity = Vec3(0);
+							m_Rigidbody->m_Velocity.z += 0.1f;
 							return;
 						}
 					}
@@ -503,14 +527,16 @@ namespace basecross {
 							return;
 						}
 						else {
+							ChangeAnimation(L"CannonStart");
+							m_CannonAnimation = true;
 							GetStage<GameStage>()->CannonStateStartBehaviour();
 							m_NowCannonClass = 2;
-							Vec3 MoveVec = m_Rigidbody->m_Pos - CannonPos;
-							MoveVec.y = 0.0f;
-							MoveVec.normalize();
-							float MoveLength = PtrCannon->GetScale() / 2.0f + GetScale() / 2.0f;
-							SetPosition(MoveVec * MoveLength * 1.5f + PtrCannon->GetPosition());
-							ChangeAnimation(L"CannonStart");
+							Vec3 NewPos = PtrCannon->GetPosition();
+							NewPos.x -= 3.0f;
+							NewPos.z += 3.0f;
+							SetPosition(NewPos);
+							m_Rigidbody->m_Velocity = Vec3(0);
+							m_Rigidbody->m_Velocity.z += 0.1f;
 							return;
 						}
 					}
@@ -529,8 +555,17 @@ namespace basecross {
 		if (m_FrameCount >= 0.3f) {
 			m_StateMachine->ChangeState(DefaultState::Instance());
 			m_FrameCount = 0.0f;
+			return;
 		}
 		m_Rigidbody->m_Force += m_Rigidbody->m_Gravity * m_Rigidbody->m_Mass;
+
+		//色を点滅させる
+		if (m_PtrObj->m_UsedModelColor == true) {
+			m_PtrObj->m_UsedModelColor = false;
+		}
+		else if (m_PtrObj->m_UsedModelColor == false) {
+			m_PtrObj->m_UsedModelColor = true;
+		}
 	}
 
 	void Player::AttackBehaviour() {
@@ -651,6 +686,7 @@ namespace basecross {
 
 	void StepState::Exit(const shared_ptr<Player>& Obj) {
 		Obj->SetInvincible(false);
+		Obj->m_PtrObj->m_UsedModelColor = true;
 	}
 
 	//--------------------------------------------------------------------------------------
@@ -943,7 +979,7 @@ namespace basecross {
 			auto f_pointer = dynamic_pointer_cast<EnemyObject>(m_friends[i].lock());
 			if (f_pointer->FindTag(tag_name)) {
 				//つながり消す
-				f_pointer->GetStateMachine()->ChangeState(EnemyBulletState::Instance());
+				f_pointer->GetStateMachine()->ChangeState(EnemyBulletPrepareState::Instance());
 				//配列を消し、つながりの数を再計算
 				m_friends.erase(m_friends.begin() + i);
 				m_friends_num = m_friends.size();

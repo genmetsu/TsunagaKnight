@@ -30,6 +30,8 @@ namespace basecross {
 		bool m_isStep;
 
 		bool m_UpdateActive;
+
+		bool m_CannonAnimation;
 		///砲撃した場合のbool
 		int m_NowCannonClass;
 		//無敵かどうか
@@ -62,8 +64,7 @@ namespace basecross {
 		float m_RunAnimationFrameCount;
 		//Rigidbodyのshared_ptr
 		shared_ptr<Rigidbody> m_Rigidbody;
-		///描画データ
-		shared_ptr<BcDrawObject> m_PtrObj;
+		
 		//描画オブジェクト(weak_ptr)
 		weak_ptr<BcPNTBoneModelRenderer> m_Renderer;
 		///シャドウマップ用描画データ
@@ -93,6 +94,8 @@ namespace basecross {
 		*/
 		//--------------------------------------------------------------------------------------
 		virtual ~Player();
+		///描画データ
+		shared_ptr<BcDrawObject> m_PtrObj;
 		//--------------------------------------------------------------------------------------
 		/*!
 		@brief 位置を得る
@@ -213,6 +216,7 @@ namespace basecross {
 		*/
 		//--------------------------------------------------------------------------------------
 		void SetStepVec(Vec3 step_vec) {
+			m_FrameCount = 0.0f;
 			m_StepVec = step_vec;
 			m_StepVec.normalize();
 		}
@@ -350,6 +354,10 @@ namespace basecross {
 		}
 		void CannonDamage(float value) {
 			m_CannonHP -= value;
+		}
+
+		bool GetCannonAnimation() {
+			return m_CannonAnimation;
 		}
 
 		//--------------------------------------------------------------------------------------

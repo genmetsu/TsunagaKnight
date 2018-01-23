@@ -1544,6 +1544,23 @@ namespace basecross {
 		bool Attack1ExcuteBehavior();
 		//--------------------------------------------------------------------------------------
 		/*!
+		@brief 大砲に込められるときの準備処理
+		@return	なし
+		*/
+		//--------------------------------------------------------------------------------------
+		void BulletPrepareStartBehavior();
+		//--------------------------------------------------------------------------------------
+		/*!
+		@brief 大砲に込めらていく処理
+		@return	なし
+		*/
+		//--------------------------------------------------------------------------------------
+		void BulletPrepareExcuteBehavior();
+
+
+
+		//--------------------------------------------------------------------------------------
+		/*!
 		@brief 大砲に込められてボスに向かっていく最初に呼ばれる準備処理
 		@return	なし
 		*/
@@ -1772,6 +1789,20 @@ namespace basecross {
 	public:
 		//ステートのインスタンス取得
 		DECLARE_SINGLETON_INSTANCE(EnemyComplianceState)
+		virtual void Enter(const shared_ptr<EnemyObject>& Obj)override;
+		virtual void Execute(const shared_ptr<EnemyObject>& Obj)override;
+		virtual void Exit(const shared_ptr<EnemyObject>& Obj)override;
+	};
+
+	//--------------------------------------------------------------------------------------
+	///	大砲で撃たれる前の準備ステート
+	//--------------------------------------------------------------------------------------
+	class EnemyBulletPrepareState : public ObjState<EnemyObject>
+	{
+		EnemyBulletPrepareState() {}
+	public:
+		//ステートのインスタンス取得
+		DECLARE_SINGLETON_INSTANCE(EnemyBulletPrepareState)
 		virtual void Enter(const shared_ptr<EnemyObject>& Obj)override;
 		virtual void Execute(const shared_ptr<EnemyObject>& Obj)override;
 		virtual void Exit(const shared_ptr<EnemyObject>& Obj)override;
