@@ -1932,11 +1932,16 @@ namespace basecross {
 		if (FindTag(L"Red")) {
 			m_PtrObj->m_Emissive = Col4(1.0f, 0.0f, 0.0f, 1.0f);
 		}
-		if (FindTag(L"Green")) {
+		else if (FindTag(L"Green")) {
 			m_PtrObj->m_Emissive = Col4(0.0f, 0.3f, 0.0f, 1.0f);
 		}
-		if (FindTag(L"Blue")) {
+		else if (FindTag(L"Blue")) {
 			m_PtrObj->m_Emissive = Col4(0.0f, 0.0f, 1.0f, 1.0f);
+		}
+		//ボスがダメージ受けたときの色
+		else {
+			m_PtrObj->m_Emissive = Col4(1.0f, 0.0f, 0.0f, 1.0f);
+			m_PtrObj->m_Diffuse = Col4(1.0f, 0.0f, 0.0f, 1.0f);
 		}
 
 		m_PtrObj->m_UsedModelColor = true;
@@ -2005,7 +2010,7 @@ namespace basecross {
 					m_HP--;
 
 					if (FindTag(L"SawBoss")) {
-						m_PtrObj->ChangeCurrentAnimation(L"BossDamage");
+						ChangeState(L"Damage");
 					}
 
 					if (m_HP <= 0.0f) {
@@ -2406,20 +2411,30 @@ namespace basecross {
 
 	void EnemyObject::DamageBehaviour() {
 		float ElapsedTime = App::GetApp()->GetElapsedTime();
-		if (m_FrameCount > 0.3f) {
-			m_Rigidbody->m_Velocity = Vec3(0);
+		if (m_FrameCount > 1.0f) {
 			m_FrameCount = 0;
+			m_PtrObj->m_UsedModelColor = true;
 			m_StateMachine->ChangeState(EnemyOppositionState::Instance());
 			return;
+		}
+		if (m_FrameCount > 0.3f) {
+			m_Rigidbody->m_Velocity = Vec3(0);
 		}
 		else if (m_FrameCount < 0.3f) {
 			auto player = dynamic_pointer_cast<Player>(m_PlayerPtr.lock());
 			Vec3 MoveVec = m_Rigidbody->m_Pos - player->GetPosition();
 			MoveVec.y = 0.0f;
 			MoveVec.normalize();
-			m_Rigidbody->m_Velocity = MoveVec * 4.0f;
+			m_Rigidbody->m_Velocity = MoveVec * 3.0f;
 		}
-
+		//色を赤く点滅させる
+		if (m_PtrObj->m_UsedModelColor == true) {
+			m_PtrObj->m_UsedModelColor = false;
+		}
+		else if (m_PtrObj->m_UsedModelColor == false) {
+			m_PtrObj->m_UsedModelColor = true;
+		}
+		m_Rigidbody->m_Pos.y = m_BaseY;
 		m_FrameCount += ElapsedTime;
 	}
 
@@ -2738,9 +2753,9 @@ namespace basecross {
 	IMPLEMENT_SINGLETON_INSTANCE(EnemyDamageState)
 
 	void EnemyDamageState::Enter(const shared_ptr<EnemyObject>& Obj) {
-		if (Obj->FindTag(L"HandBoss")) {
-			Obj->ChangeAnimation(L"BossDamage");
-		}
+
+		Obj->ChangeAnimation(L"BossDamage");
+
 	}
 
 	void EnemyDamageState::Execute(const shared_ptr<EnemyObject>& Obj) {
@@ -2748,10 +2763,9 @@ namespace basecross {
 	}
 
 	void EnemyDamageState::Exit(const shared_ptr<EnemyObject>& Obj) {
-		//何もしない
-		if (Obj->FindTag(L"HandBoss")) {
-			Obj->ChangeAnimation(L"30frame");
-		}
+
+		Obj->ChangeAnimation(L"30frame");
+
 	}
 
 	//--------------------------------------------------------------------------------------
@@ -3224,53 +3238,56 @@ namespace basecross {
 			auto PlayerPtr = GetStage()->FindTagGameObject<Player>(L"Player");
 			Vec3 p_pos = PlayerPtr->GetPosition();
 			float p_dis = (p_pos - GetPosition()).length();
-			if (PlayerPtr->GetInvincible() == false && p_dis < PlayerPtr->GetScale() / 2.0f + m_Rigidbody->m_Scale.x / 2.0f) {
-				PlayerPtr->DamagedStartBehaviour(GetPosition());
-				SetSleep();
-				return;
-			}
 
-			//大砲との衝突
-			vector<shared_ptr<GameObject>> CannonVec;
-			GetStage<GameStage>()->FindTagGameObjectVec(L"Cannon", CannonVec);
-			for (auto cannon : CannonVec) {
-				if (cannon) {
-					auto PtrCannon = dynamic_pointer_cast<Cannon>(cannon);
+			if (m_my_Tag != L"PlayerBullet") {
+				if (PlayerPtr->GetInvincible() == false && p_dis < PlayerPtr->GetScale() / 2.0f + m_Rigidbody->m_Scale.x / 2.0f) {
+					PlayerPtr->DamagedStartBehaviour(GetPosition());
+					SetSleep();
+					return;
+				}
 
-					Vec3 CannonPos = PtrCannon->GetPosition();
-					float length = (CannonPos - m_Rigidbody->m_Pos).length();
+				//大砲との衝突
+				vector<shared_ptr<GameObject>> CannonVec;
+				GetStage<GameStage>()->FindTagGameObjectVec(L"Cannon", CannonVec);
+				for (auto cannon : CannonVec) {
+					if (cannon) {
+						auto PtrCannon = dynamic_pointer_cast<Cannon>(cannon);
 
-					float CannonRadius = PtrCannon->GetScale() / 2.0f;
-					//衝突の当たり判定を若干優しく
-					CannonRadius -= 1.0f;
-					float PlayerRadius = m_Rigidbody->m_Scale.x / 2.0f;
+						Vec3 CannonPos = PtrCannon->GetPosition();
+						float length = (CannonPos - m_Rigidbody->m_Pos).length();
 
-					if (length < CannonRadius + PlayerRadius) {
+						float CannonRadius = PtrCannon->GetScale() / 2.0f;
+						//衝突の当たり判定を若干優しく
+						CannonRadius -= 1.0f;
+						float PlayerRadius = m_Rigidbody->m_Scale.x / 2.0f;
 
-						Vec3 MoveVec = m_Rigidbody->m_Pos - CannonPos;
-						MoveVec.normalize();
+						if (length < CannonRadius + PlayerRadius) {
 
-						Vec3 Emitter = m_Rigidbody->m_Pos + MoveVec;
-						//Sparkの送出
-						auto SparkPtr = GetStage<GameStage>()->FindTagGameObject<AttackSpark>(L"AttackSpark");
-						SparkPtr->InsertSpark(Emitter);
-						//Fireの送出
-						auto FirePtr = GetStage<GameStage>()->FindTagGameObject<MultiFire>(L"MultiFire");
-						FirePtr->InsertFire(Emitter, 1.0f);
+							Vec3 MoveVec = m_Rigidbody->m_Pos - CannonPos;
+							MoveVec.normalize();
 
-						if (p_dis < 1.0f) {
-							p_dis = 1.0f;
+							Vec3 Emitter = m_Rigidbody->m_Pos + MoveVec;
+							//Sparkの送出
+							auto SparkPtr = GetStage<GameStage>()->FindTagGameObject<AttackSpark>(L"AttackSpark");
+							SparkPtr->InsertSpark(Emitter);
+							//Fireの送出
+							auto FirePtr = GetStage<GameStage>()->FindTagGameObject<MultiFire>(L"MultiFire");
+							FirePtr->InsertFire(Emitter, 1.0f);
+
+							if (p_dis < 1.0f) {
+								p_dis = 1.0f;
+							}
+							//サウンドの発行
+							m_CollisionSound->Start(0, (0.7f / p_dis) + 0.3f);
+
+							PlayerPtr->CannonDamage(1.0f);
+							if (PlayerPtr->GetCannonHP() <= 0.0f) {
+								GetStage<GameStage>()->SetIsFail(true);
+							}
+
+							SetSleep();
+							return;
 						}
-						//サウンドの発行
-						m_CollisionSound->Start(0, (0.7f / p_dis) + 0.3f);
-						
-						PlayerPtr->CannonDamage(1.0f);
-						if (PlayerPtr->GetCannonHP() <= 0.0f) {
-							GetStage<GameStage>()->SetIsFail(true);
-						}
-
-						SetSleep();
-						return;
 					}
 				}
 			}
@@ -3556,12 +3573,12 @@ namespace basecross {
 			// エネミー移動処理
 			else if (m_Tackle == false)
 			{
+				RotateToVelocity();
 				if (m_FrameCount > 0.0f && m_UpdateActive)
 				{
 					ToPosVec.normalize();
 					ToPosVec *= 0.01f;
 					m_Rigidbody->m_Velocity = ToPosVec;
-					m_Rigidbody->m_Pos.y = m_BaseY;
 					m_FrameCount += ElapsedTime;
 				}
 				// プレイヤーとエネミーの距離が近くなった時の処理
@@ -3597,11 +3614,10 @@ namespace basecross {
 						ToPosVec *= 0.0f;
 					}
 					m_Rigidbody->m_Velocity = ToPosVec;
-					m_Rigidbody->m_Pos.y = m_BaseY;
 				}
 			}
 		}
-		RotateToVelocity();
+		m_Rigidbody->m_Pos.y = m_BaseY;
 	}
 
 	//--------------------------------------------------------------------------------------
