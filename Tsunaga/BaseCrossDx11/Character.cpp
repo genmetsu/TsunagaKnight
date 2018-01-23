@@ -2490,6 +2490,10 @@ namespace basecross {
 		RotateToVelocity();
 	}
 
+	void EnemyObject::DamageStartBehaviour() {
+		m_FrameCount = 0.0f;
+	}
+
 	void EnemyObject::DamageBehaviour() {
 		float ElapsedTime = App::GetApp()->GetElapsedTime();
 		if (m_FrameCount > 1.0f) {
@@ -2834,9 +2838,8 @@ namespace basecross {
 	IMPLEMENT_SINGLETON_INSTANCE(EnemyDamageState)
 
 	void EnemyDamageState::Enter(const shared_ptr<EnemyObject>& Obj) {
-
+		Obj->DamageStartBehaviour();
 		Obj->ChangeAnimation(L"BossDamage");
-
 	}
 
 	void EnemyDamageState::Execute(const shared_ptr<EnemyObject>& Obj) {
@@ -2844,9 +2847,7 @@ namespace basecross {
 	}
 
 	void EnemyDamageState::Exit(const shared_ptr<EnemyObject>& Obj) {
-
 		Obj->ChangeAnimation(L"30frame");
-
 	}
 
 	//--------------------------------------------------------------------------------------
