@@ -2260,6 +2260,31 @@ namespace basecross {
 			auto SparkPtr = GetStage<GameStage>()->FindTagGameObject<EnemyMoveEffect>(L"EnemyMoveEffect");
 			SparkPtr->InsertSpark(Emitter);
 		}
+
+		//‘å–C‚Æ‚ÌÕ“Ë”»’è
+		vector<shared_ptr<GameObject>> CannonVec;
+		GetStage<GameStage>()->FindTagGameObjectVec(L"Cannon", CannonVec);
+		for (auto cannon : CannonVec) {
+			if (cannon) {
+				auto PtrCannon = dynamic_pointer_cast<Cannon>(cannon);
+
+				Vec3 CannonPos = PtrCannon->GetPosition();
+				float length = (CannonPos - m_Rigidbody->m_Pos).length();
+
+				float CannonRadius = PtrCannon->GetScale() / 2.0f;
+				float PlayerRadius = m_Rigidbody->m_Scale.x / 2.0f;
+
+				if (length < CannonRadius + PlayerRadius) {
+
+					Vec3 MoveVec = m_Rigidbody->m_Pos - CannonPos;
+					MoveVec.y = 0.0f;
+					MoveVec.normalize();
+					float MoveLength = PtrCannon->GetScale() / 2.0f + GetScale() / 2.0f;
+					SetPosition(MoveVec * MoveLength + PtrCannon->GetPosition());
+					break;
+				}
+			}
+		}
 	}
 
 	void EnemyObject::UpdateBehavior() {
