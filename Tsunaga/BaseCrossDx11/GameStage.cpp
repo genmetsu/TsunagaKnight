@@ -293,6 +293,7 @@ namespace basecross {
 		//ファイアエフェクト
 		AddGameObject<MultiFire>();
 		AddGameObject<AttackSigns>();
+		AddGameObject<HandBossSpark>();
 		AddGameObject<BossAttackSigns>();
 		AddGameObject<MiddleBossAttackSigns>();
 		AddGameObject<StepEffect>();

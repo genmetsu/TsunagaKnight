@@ -319,6 +319,21 @@ namespace basecross {
 	};
 
 	//--------------------------------------------------------------------------------------
+	//class HandBossSpark : public MultiParticle;
+	//用途: HandBossの振り下ろした拳のパーティクル
+	//--------------------------------------------------------------------------------------
+	class HandBossSpark : public MultiParticle {
+	public:
+		//構築と破棄
+		HandBossSpark(shared_ptr<Stage>& StagePtr);
+		virtual ~HandBossSpark();
+		//初期化
+		virtual void OnCreate() override;
+		void InsertSpark(const Vec3& Pos);
+		virtual void OnUpdate() override;
+	};
+
+	//--------------------------------------------------------------------------------------
 	//class MultiGuardEffect : public MultiParticle;
 	//用途: エンジェルエネミーの防御エフェクト
 	//--------------------------------------------------------------------------------------
@@ -2165,6 +2180,8 @@ namespace basecross {
 		Vec3 m_AttackPos;
 		Vec3 m_DefaultPos;
 		Vec3 m_BeforePos;
+
+		bool m_AttackEnd;
 
 		bool m_UpdateActive;
 		//親オブジェクト

@@ -357,6 +357,59 @@ namespace basecross {
 	}
 
 	//--------------------------------------------------------------------------------------
+	//class HandBossSpark : public MultiParticle;
+	//用途: HandBossの振り下ろした拳のパーティクル
+	//--------------------------------------------------------------------------------------
+	//構築と破棄
+	HandBossSpark::HandBossSpark(shared_ptr<Stage>& StagePtr) :
+		MultiParticle(StagePtr)
+	{}
+	HandBossSpark::~HandBossSpark() {}
+
+	//初期化
+	void HandBossSpark::OnCreate() {
+		//加算描画処理をする
+		SetAddType(true);
+		//タグの追加
+		AddTag(L"HandBossSpark");
+	}
+
+	void HandBossSpark::InsertSpark(const Vec3& Pos) {
+		auto ParticlePtr = InsertParticle(128);
+		ParticlePtr->m_EmitterPos = Pos;
+		ParticlePtr->SetTextureResource(L"SPARK_TX");
+		ParticlePtr->m_MaxTime = 0.3f;
+		vector<ParticleSprite>& pSpriteVec = ParticlePtr->GetParticleSpriteVec();
+		for (auto& rParticleSprite : ParticlePtr->GetParticleSpriteVec()) {
+			rParticleSprite.m_LocalPos.x = Util::RandZeroToOne() * 0.1f - 0.05f;
+			rParticleSprite.m_LocalPos.y = Util::RandZeroToOne() * 0.1f;
+			rParticleSprite.m_LocalPos.z = Util::RandZeroToOne() * 0.1f - 0.05f;
+			rParticleSprite.m_LocalScale = Vec2(0.2, 0.2);
+			//各パーティクルの移動速度を指定
+			rParticleSprite.m_Velocity = Vec3(
+				rParticleSprite.m_LocalPos.x * 60.0f,
+				rParticleSprite.m_LocalPos.y * 20.0f,
+				rParticleSprite.m_LocalPos.z * 60.0f
+			);
+			//色の指定
+			rParticleSprite.m_Color = Col4(1.0f, 0.4f, 0.0f, 1.0f);
+		}
+	}
+
+	void HandBossSpark::OnUpdate() {
+		MultiParticle::OnUpdate();
+		float ElapsedTime = App::GetApp()->GetElapsedTime();
+
+		for (auto ParticlePtr : GetParticleVec()) {
+			for (auto& rParticleSprite : ParticlePtr->GetParticleSpriteVec()) {
+				if (rParticleSprite.m_Active) {
+					rParticleSprite.m_Color.w -= 0.06f;
+				}
+			}
+		}
+	}
+
+	//--------------------------------------------------------------------------------------
 	//class MultiGuardEffect : public MultiParticle;
 	//用途: エンジェルエネミーの防御エフェクト
 	//--------------------------------------------------------------------------------------
@@ -645,6 +698,9 @@ namespace basecross {
 			}
 		}
 	}
+
+
+
 	//--------------------------------------------------------------------------------------
 	//class MiddleBossAttackSigns : public MultiParticle;
 	//用途:中ボスの攻撃する前兆エフェクト
@@ -3639,7 +3695,8 @@ namespace basecross {
 		m_AttackSetupTime(1.0f),
 		m_AttackTime(1.0f),
 		m_ReturnDefaultTime(0.5f),
-		m_LerpToParent(0.2f)
+		m_LerpToParent(0.2f),
+		m_AttackEnd(false)
 	{
 		//タグの追加
 		AddTag(TagName);
@@ -3858,6 +3915,7 @@ namespace basecross {
 		if (m_UpdateActive) {
 			if (m_FrameCount > m_AttackSetupTime + m_BeforeAttackTime + m_AttackTime + m_ReturnDefaultTime) {
 				m_FrameCount = 0.0f;
+				m_AttackEnd = false;
 				return true;
 			}
 			if (m_FrameCount > m_AttackSetupTime + m_BeforeAttackTime + m_AttackTime) {
@@ -3872,7 +3930,15 @@ namespace basecross {
 			}
 			else if (m_FrameCount > m_AttackSetupTime + m_BeforeAttackTime) {
 				if (m_Rigidbody->m_Pos.y < m_Rigidbody->m_Scale.y / 2.0f) {
+					if (m_AttackEnd == false) {
 
+						auto FirePtr = GetStage<GameStage>()->FindTagGameObject<HandBossSpark>(L"HandBossSpark");
+						Vec3 Emitter = m_Rigidbody->m_Pos;
+						Emitter.y -= m_Rigidbody->m_Scale.y / 2.0f;;
+						FirePtr->InsertSpark(Emitter);
+
+						m_AttackEnd = true;
+					}
 				}
 				else {
 					//ローカル行列の定義
