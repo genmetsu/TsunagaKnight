@@ -1885,6 +1885,7 @@ namespace basecross {
 		m_TextureResName(TextureResName),
 		m_DefaultAnimation(DefaultAnimation),
 		m_Scale(Scale),
+		m_DefaultScale(Scale),
 		m_Qt(Qt),
 		m_Pos(Pos),
 		m_BeforePos(Pos),
@@ -2624,6 +2625,7 @@ namespace basecross {
 		m_ShootNumber = 0;
 		m_Rigidbody->m_CollType = CollType::typeSPHERE;
 		m_PtrObj->m_UsedModelColor = true;
+		m_Rigidbody->m_Scale = m_DefaultScale;
 
 		if (FindTag(L"Blue")) {
 			//メッシュとトランスフォームの差分の設定
@@ -2656,6 +2658,7 @@ namespace basecross {
 	void EnemyObject::BulletPrepareStartBehavior() {
 		AddTag(L"Shooted");
 		m_FrameCount = 0.0f;
+		m_Rigidbody->m_Scale *= 1.5f;
 		if (FindTag(L"Green")) {
 			auto PtrCannon = GetStage()->FindTagGameObject<Cannon>(L"GREEN_CANNON");
 			Vec3 new_pos = PtrCannon->GetPosition();
@@ -2737,7 +2740,7 @@ namespace basecross {
 				Vec3 Emitter = m_Rigidbody->m_Pos;
 				//Sparkの送出
 				auto SparkPtr = GetStage<GameStage>()->FindTagGameObject<MultiFire>(L"MultiFire");
-				SparkPtr->InsertFire(Emitter, 8.0f);
+				SparkPtr->InsertFire(Emitter, 5.0f);
 
 				m_BossDamageSound->Start(0, 0.8f);
 

@@ -1378,6 +1378,8 @@ namespace basecross {
 		//Å‰‚ÌHP
 		float m_DefaultHP;
 
+		Vec3 m_DefaultScale;
+
 		float m_AttackPoint;
 		//©•ª‚ğŒÅ’è‚·‚éY²‚Ì‚‚³
 		float m_BaseY;
