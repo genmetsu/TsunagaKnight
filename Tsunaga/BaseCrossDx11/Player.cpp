@@ -167,6 +167,7 @@ namespace basecross {
 		float ElapsedTime = App::GetApp()->GetElapsedTime();
 		m_PtrObj->UpdateAnimation(ElapsedTime);
 		m_StateMachine->Update();
+		CollisionWithCannon();
 	}
 
 	void Player::OnUpdate2() {
@@ -370,60 +371,6 @@ namespace basecross {
 				}
 			}
 		}
-		//大砲との衝突判定
-		vector<shared_ptr<GameObject>> CannonVec;
-		GetStage<GameStage>()->FindTagGameObjectVec(L"Cannon", CannonVec);
-		for (auto cannon : CannonVec) {
-			if (cannon) {
-				auto PtrCannon = dynamic_pointer_cast<Cannon>(cannon);
-
-				Vec3 CannonPos = PtrCannon->GetPosition();
-				float length = (CannonPos - m_Rigidbody->m_Pos).length();
-
-				float CannonRadius = PtrCannon->GetScale() / 2.0f;
-				float PlayerRadius = m_Rigidbody->m_Scale.x / 2.0f;
-
-				if (length < CannonRadius + PlayerRadius) {
-					if (PtrCannon->GetCannonClass() == 0) {
-						auto s = GetStage()->FindTagGameObject<Sword>(L"Sword");
-						s->SetEnemyToCannon(L"Green");
-						GetStage<GameStage>()->CannonStateStartBehaviour();
-						m_NowCannonClass = 0;
-						Vec3 MoveVec = m_Rigidbody->m_Pos - CannonPos;
-						MoveVec.y = 0.0f;
-						MoveVec.normalize();
-						float MoveLength = PtrCannon->GetScale() / 2.0f + GetScale() / 2.0f;
-						SetPosition(MoveVec * MoveLength * 1.5f + PtrCannon->GetPosition());
-						ChangeAnimation(L"CannonStart");
-					}
-					if (PtrCannon->GetCannonClass() == 1) {
-						auto s = GetStage()->FindTagGameObject<Sword>(L"Sword");
-						s->SetEnemyToCannon(L"Red");
-						GetStage<GameStage>()->CannonStateStartBehaviour();
-						m_NowCannonClass = 1;
-						Vec3 MoveVec = m_Rigidbody->m_Pos - CannonPos;
-						MoveVec.y = 0.0f;
-						MoveVec.normalize();
-						float MoveLength = PtrCannon->GetScale() / 2.0f + GetScale() / 2.0f;
-						SetPosition(MoveVec * MoveLength* 1.5f + PtrCannon->GetPosition());
-						ChangeAnimation(L"CannonStart");
-					}
-					if (PtrCannon->GetCannonClass() == 2) {
-						auto s = GetStage()->FindTagGameObject<Sword>(L"Sword");
-						s->SetEnemyToCannon(L"Blue");
-						GetStage<GameStage>()->CannonStateStartBehaviour();
-						m_NowCannonClass = 2;
-						Vec3 MoveVec = m_Rigidbody->m_Pos - CannonPos;
-						MoveVec.y = 0.0f;
-						MoveVec.normalize();
-						float MoveLength = PtrCannon->GetScale() / 2.0f + GetScale() / 2.0f;
-						SetPosition(MoveVec * MoveLength * 1.5f + PtrCannon->GetPosition());
-						ChangeAnimation(L"CannonStart");
-					}
-					
-				}
-			}
-		}	
 		//ボスハンドとの衝突判定
 		vector<shared_ptr<GameObject>> HandVec;
 		GetStage<GameStage>()->FindTagGameObjectVec(L"BossHand", HandVec);
@@ -481,6 +428,95 @@ namespace basecross {
 	void Player::InitVelocity() {
 		m_Rigidbody->m_Velocity.x *= 0.01f;
 		m_Rigidbody->m_Velocity.z *= 0.01f;
+	}
+
+	void Player::CollisionWithCannon() {
+		//大砲との衝突判定
+		vector<shared_ptr<GameObject>> CannonVec;
+		GetStage<GameStage>()->FindTagGameObjectVec(L"Cannon", CannonVec);
+		for (auto cannon : CannonVec) {
+			if (cannon) {
+				auto PtrCannon = dynamic_pointer_cast<Cannon>(cannon);
+
+				Vec3 CannonPos = PtrCannon->GetPosition();
+				float length = (CannonPos - m_Rigidbody->m_Pos).length();
+
+				float CannonRadius = PtrCannon->GetScale() / 2.0f;
+				float PlayerRadius = m_Rigidbody->m_Scale.x / 2.0f;
+
+				if (length < CannonRadius + PlayerRadius) {
+					if (PtrCannon->GetCannonClass() == 0) {
+						auto s = GetStage()->FindTagGameObject<Sword>(L"Sword");
+						int bullet_num = s->SetEnemyToCannon(L"Green");
+						if (bullet_num == 0) {
+							Vec3 MoveVec = m_Rigidbody->m_Pos - CannonPos;
+							MoveVec.y = 0.0f;
+							MoveVec.normalize();
+							float MoveLength = PtrCannon->GetScale() / 2.0f + GetScale() / 2.0f;
+							SetPosition(MoveVec * MoveLength + PtrCannon->GetPosition());
+							return;
+						}
+						else {
+							GetStage<GameStage>()->CannonStateStartBehaviour();
+							m_NowCannonClass = 0;
+							Vec3 MoveVec = m_Rigidbody->m_Pos - CannonPos;
+							MoveVec.y = 0.0f;
+							MoveVec.normalize();
+							float MoveLength = PtrCannon->GetScale() / 2.0f + GetScale() / 2.0f;
+							SetPosition(MoveVec * MoveLength * 1.5f + PtrCannon->GetPosition());
+							ChangeAnimation(L"CannonStart");
+							return;
+						}
+					}
+					if (PtrCannon->GetCannonClass() == 1) {
+						auto s = GetStage()->FindTagGameObject<Sword>(L"Sword");
+						int bullet_num = s->SetEnemyToCannon(L"Red");
+						if (bullet_num == 0) {
+							Vec3 MoveVec = m_Rigidbody->m_Pos - CannonPos;
+							MoveVec.y = 0.0f;
+							MoveVec.normalize();
+							float MoveLength = PtrCannon->GetScale() / 2.0f + GetScale() / 2.0f;
+							SetPosition(MoveVec * MoveLength + PtrCannon->GetPosition());
+							return;
+						}
+						else {
+							GetStage<GameStage>()->CannonStateStartBehaviour();
+							m_NowCannonClass = 1;
+							Vec3 MoveVec = m_Rigidbody->m_Pos - CannonPos;
+							MoveVec.y = 0.0f;
+							MoveVec.normalize();
+							float MoveLength = PtrCannon->GetScale() / 2.0f + GetScale() / 2.0f;
+							SetPosition(MoveVec * MoveLength* 1.5f + PtrCannon->GetPosition());
+							ChangeAnimation(L"CannonStart");
+							return;
+						}
+					}
+					if (PtrCannon->GetCannonClass() == 2) {
+						auto s = GetStage()->FindTagGameObject<Sword>(L"Sword");
+						int bullet_num = s->SetEnemyToCannon(L"Blue");
+						if (bullet_num == 0) {
+							Vec3 MoveVec = m_Rigidbody->m_Pos - CannonPos;
+							MoveVec.y = 0.0f;
+							MoveVec.normalize();
+							float MoveLength = PtrCannon->GetScale() / 2.0f + GetScale() / 2.0f;
+							SetPosition(MoveVec * MoveLength + PtrCannon->GetPosition());
+							return;
+						}
+						else {
+							GetStage<GameStage>()->CannonStateStartBehaviour();
+							m_NowCannonClass = 2;
+							Vec3 MoveVec = m_Rigidbody->m_Pos - CannonPos;
+							MoveVec.y = 0.0f;
+							MoveVec.normalize();
+							float MoveLength = PtrCannon->GetScale() / 2.0f + GetScale() / 2.0f;
+							SetPosition(MoveVec * MoveLength * 1.5f + PtrCannon->GetPosition());
+							ChangeAnimation(L"CannonStart");
+							return;
+						}
+					}
+				}
+			}
+		}
 	}
 
 	void Player::StepBehaviour() {
