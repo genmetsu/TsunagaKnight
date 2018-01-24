@@ -1419,7 +1419,7 @@ namespace basecross {
 		shared_ptr<SoundObject> m_EyeFlashSound;
 
 		shared_ptr<SoundObject> m_DamageSound;
-		shared_ptr<SoundObject> m_SawSound;
+		shared_ptr<SoundObject> m_SawSound[5];
 
 		//描画オブジェクト(weak_ptr)
 		weak_ptr<BcPNTBoneModelRenderer> m_Renderer;
@@ -2412,6 +2412,7 @@ namespace basecross {
 
 	class LD_BossEnemy : public EnemyObject
 	{
+		int m_SoundCount;
 	public:
 		//--------------------------------------------------------------------------------------
 		/*!
@@ -2442,7 +2443,20 @@ namespace basecross {
 		*/
 		//--------------------------------------------------------------------------------------
 		virtual void OppositionBehavior() override;
-
+		//--------------------------------------------------------------------------------------
+		/*!
+		@brief 攻撃が終わった後の処理
+		@return	なし
+		*/
+		//--------------------------------------------------------------------------------------
+		virtual void AttackEndBehavior() override;
+		//--------------------------------------------------------------------------------------
+		/*!
+		@brief 大砲に向かう処理
+		@return	なし
+		*/
+		//--------------------------------------------------------------------------------------
+		virtual void ToCannonBehavior() override;
 	};
 
 	//--------------------------------------------------------------------------------------
@@ -2502,6 +2516,9 @@ namespace basecross {
 		float m_TotalTime;
 
 		Vec3 m_CannonPos[3];
+
+		shared_ptr<SoundObject> m_AttackSignSound;
+		shared_ptr<SoundObject> m_AttackSound;
 
 		//Rigidbodyのshared_ptr
 		shared_ptr<Rigidbody> m_Rigidbody;
