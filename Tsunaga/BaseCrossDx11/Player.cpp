@@ -477,6 +477,7 @@ namespace basecross {
 							return;
 						}
 						else {
+							m_StateMachine->ChangeState(DefaultState::Instance());
 							ChangeAnimation(L"CannonStart");
 							m_CannonAnimation = true;
 							GetStage<GameStage>()->CannonStateStartBehaviour();
@@ -502,6 +503,7 @@ namespace basecross {
 							return;
 						}
 						else {
+							m_StateMachine->ChangeState(DefaultState::Instance());
 							ChangeAnimation(L"CannonStart");
 							m_CannonAnimation = true;
 							GetStage<GameStage>()->CannonStateStartBehaviour();
@@ -527,6 +529,7 @@ namespace basecross {
 							return;
 						}
 						else {
+							m_StateMachine->ChangeState(DefaultState::Instance());
 							ChangeAnimation(L"CannonStart");
 							m_CannonAnimation = true;
 							GetStage<GameStage>()->CannonStateStartBehaviour();
