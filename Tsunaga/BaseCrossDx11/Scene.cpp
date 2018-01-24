@@ -362,6 +362,9 @@ namespace basecross {
 		wstring MidBossDamageWav = DataDir + L"T_Bdamage.wav";
 		App::GetApp()->RegisterWav(L"MidBossDamage", MidBossDamageWav);
 
+		wstring SawBossDamageWav = DataDir + L"S_Bossdamage.wav";
+		App::GetApp()->RegisterWav(L"SawBossDamage", SawBossDamageWav);
+
 		wstring gunWav = DataDir + L"gun.wav";
 		App::GetApp()->RegisterWav(L"gun", gunWav);
 

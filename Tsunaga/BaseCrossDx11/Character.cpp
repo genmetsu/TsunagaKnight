@@ -1956,6 +1956,7 @@ namespace basecross {
 			m_SawSound[i] = ObjectFactory::Create<SoundObject>(L"chainsaw");
 		}
 		m_DamageSound = ObjectFactory::Create<SoundObject>(L"MidBossDamage");
+		m_SawDamageSound = ObjectFactory::Create<SoundObject>(L"dageki");
 
 		//s—ñ‚Ì’è‹`
 		Mat4x4 World;
@@ -2070,7 +2071,7 @@ namespace basecross {
 					m_HP--;
 
 					if (FindTag(L"SawBoss")) {
-						m_DamageSound->Start(0, 0.5f);
+						m_SawDamageSound->Start(0, 0.6f);
 						ChangeState(L"Damage");
 					}
 

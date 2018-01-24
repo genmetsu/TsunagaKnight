@@ -1419,6 +1419,8 @@ namespace basecross {
 		shared_ptr<SoundObject> m_EyeFlashSound;
 
 		shared_ptr<SoundObject> m_DamageSound;
+		shared_ptr<SoundObject> m_SawDamageSound;
+
 		shared_ptr<SoundObject> m_SawSound[5];
 
 		//描画オブジェクト(weak_ptr)
