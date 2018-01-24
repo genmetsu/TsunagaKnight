@@ -1952,7 +1952,9 @@ namespace basecross {
 		m_FriendsSound = ObjectFactory::Create<SoundObject>(L"nakama");
 		m_CannonSound = ObjectFactory::Create<SoundObject>(L"cannon");
 		m_EyeFlashSound = ObjectFactory::Create<SoundObject>(L"eye_flash");
-		m_SawSound = ObjectFactory::Create<SoundObject>(L"chainsaw");
+		for (int i = 0; i < 5; i++) {
+			m_SawSound[i] = ObjectFactory::Create<SoundObject>(L"chainsaw");
+		}
 		m_DamageSound = ObjectFactory::Create<SoundObject>(L"MidBossDamage");
 
 		//行列の定義
@@ -3037,7 +3039,7 @@ namespace basecross {
 						SparkPtr->InsertSpark(Emitter);
 
 						PtrBoss->Damage(1.0f);
-						//m_DamageSound->Start(0, 0.5f);
+						m_DamageSound->Start(0, 0.5f);
 						PtrBoss->ChangeState(L"Damage");
 						if (PtrBoss->GetHP() <= 0.0f) {
 							Vec3 p_pos = m_PlayerPtr.lock()->GetPosition();
@@ -4129,6 +4131,7 @@ namespace basecross {
 			Vec3(0.0f, XM_PI, 0.0f),
 			Vec3(0.0f, -0.5f, 0.0f)
 		);
+		m_SoundCount = 0;
 	}
 
 	LD_BossEnemy::~LD_BossEnemy()
@@ -4161,6 +4164,12 @@ namespace basecross {
 			Vec3 ToPosVec = toPos - m_Rigidbody->m_Pos;
 			//距離を求める
 			float dis = ToPosVec.length();
+
+			m_SawSound[m_SoundCount]->Start(0, 0.9f / dis);
+			m_SoundCount++;
+			if (m_SoundCount > 4) {
+				m_SoundCount = 0;
+			}
 
 			// 突進してしばらくたったら
 			if (m_FrameCount > m_StopTime + m_TackleTime)
@@ -4248,6 +4257,50 @@ namespace basecross {
 		RotateToVelocity();
 	}
 
+	void LD_BossEnemy::AttackEndBehavior() {
+		EnemyObject::AttackEndBehavior();
+		auto shptr = m_PlayerPtr.lock();
+		if (shptr) {
+			Vec3 toPos = shptr->GetPosition();
+			Vec3 ToPosVec = toPos - m_Rigidbody->m_Pos;
+			//距離を求める
+			float dis = ToPosVec.length();
+			//距離が遠かったら音を鳴らさない
+			if (dis > 15.0f) {
+
+			}
+			else {
+				m_SawSound[m_SoundCount]->Start(0, 0.9f / dis);
+			}
+			m_SoundCount++;
+			if (m_SoundCount > 4) {
+				m_SoundCount = 0;
+			}
+		}
+	}
+
+	void LD_BossEnemy::ToCannonBehavior() {
+		EnemyObject::ToCannonBehavior();
+		auto shptr = m_PlayerPtr.lock();
+		if (shptr) {
+			Vec3 toPos = shptr->GetPosition();
+			Vec3 ToPosVec = toPos - m_Rigidbody->m_Pos;
+			//距離を求める
+			float dis = ToPosVec.length();
+			//距離が遠かったら音を鳴らさない
+			if (dis > 15.0f) {
+
+			}
+			else {
+				m_SawSound[m_SoundCount]->Start(0, 0.9f / dis);
+			}
+			m_SoundCount++;
+			if (m_SoundCount > 4) {
+				m_SoundCount = 0;
+			}
+		}
+	}
+
 	//--------------------------------------------------------------------------------------
 	/// 敵のボス
 	//--------------------------------------------------------------------------------------
@@ -4309,6 +4362,8 @@ namespace basecross {
 
 		m_isDead = false;
 		m_isDamage = false;
+
+		m_AttackSignSound = ObjectFactory::Create<SoundObject>(L"gun");
 
 		auto GM = GameManager::getInstance();
 		GM->SetDefaultBossHP(m_DefaultHP);
@@ -4564,6 +4619,8 @@ namespace basecross {
 				Emitter.z -= 3.0;
 				FirePtr->InsertSigns(Emitter);
 				m_AttackFrameCount += ElapsedTime;
+				//サウンド
+				m_AttackSignSound->Start(0, 0.6f);
 			}
 			else if (m_AttackFrameCount < m_BeforeAttackTime) {
 				m_AttackFrameCount += ElapsedTime;
