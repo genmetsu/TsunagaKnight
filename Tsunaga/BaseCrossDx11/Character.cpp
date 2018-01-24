@@ -1953,6 +1953,7 @@ namespace basecross {
 		m_CannonSound = ObjectFactory::Create<SoundObject>(L"cannon");
 		m_EyeFlashSound = ObjectFactory::Create<SoundObject>(L"eye_flash");
 		m_SawSound = ObjectFactory::Create<SoundObject>(L"chainsaw");
+		m_DamageSound = ObjectFactory::Create<SoundObject>(L"MidBossDamage");
 
 		//s—ñ‚Ì’è‹`
 		Mat4x4 World;
@@ -2067,6 +2068,7 @@ namespace basecross {
 					m_HP--;
 
 					if (FindTag(L"SawBoss")) {
+						m_DamageSound->Start(0, 0.5f);
 						ChangeState(L"Damage");
 					}
 
@@ -3035,6 +3037,7 @@ namespace basecross {
 						SparkPtr->InsertSpark(Emitter);
 
 						PtrBoss->Damage(1.0f);
+						//m_DamageSound->Start(0, 0.5f);
 						PtrBoss->ChangeState(L"Damage");
 						if (PtrBoss->GetHP() <= 0.0f) {
 							Vec3 p_pos = m_PlayerPtr.lock()->GetPosition();
@@ -3812,6 +3815,7 @@ namespace basecross {
 		body.SetToBefore();
 		m_Rigidbody = PtrGameStage->AddRigidbody(body);
 
+		m_HandSound = ObjectFactory::Create<SoundObject>(L"ShakeOff03");
 
 		m_UpdateActive = true;
 
@@ -4019,6 +4023,8 @@ namespace basecross {
 						Vec3 Emitter = m_Rigidbody->m_Pos;
 						Emitter.y -= m_Rigidbody->m_Scale.y / 2.0f;;
 						FirePtr->InsertSpark(Emitter);
+
+						m_HandSound->Start(0, 0.2f);
 
 						m_AttackEnd = true;
 					}

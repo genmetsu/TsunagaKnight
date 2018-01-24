@@ -359,8 +359,8 @@ namespace basecross {
 		wstring AttackVoiceWav = DataDir + L"attack_voice.wav";
 		App::GetApp()->RegisterWav(L"attack_voice", AttackVoiceWav);
 
-		wstring tyubossdamageWav = DataDir + L"tyubossdamage.wav";
-		App::GetApp()->RegisterWav(L"tyubossdamage", tyubossdamageWav);
+		wstring MidBossDamageWav = DataDir + L"MidBossDamage.wav";
+		App::GetApp()->RegisterWav(L"MidBossDamage", MidBossDamageWav);
 
 		wstring gunWav = DataDir + L"gun.wav";
 		App::GetApp()->RegisterWav(L"gun", gunWav);
@@ -384,7 +384,7 @@ namespace basecross {
 		App::GetApp()->RegisterWav(L"Shakeoff02", Shakeoff02Wav);
 
 		wstring Shakeoff03Wav = DataDir + L"Shakeoff03.wav";
-		App::GetApp()->RegisterWav(L"Shakeoff03", Shakeoff03Wav);
+		App::GetApp()->RegisterWav(L"ShakeOff03", Shakeoff03Wav);
 
 		wstring MissileWav = DataDir + L"Missile.wav";
 		App::GetApp()->RegisterWav(L"Missile", MissileWav);
