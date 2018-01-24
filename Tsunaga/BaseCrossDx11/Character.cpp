@@ -3733,7 +3733,7 @@ namespace basecross {
 					//fireの送出
 					auto FirePtr = GetStage<GameStage>()->FindTagGameObject<MiddleBossAttackSigns>(L"MiddleBossAttackSigns");
 					Vec3 Emitter = m_Rigidbody->m_Pos;
-					Emitter.y += 0.35f;
+					Emitter.y += 0.7f;
 					FirePtr->InsertSigns(Emitter);
 
 					if (dis < 1.0f) {
@@ -3763,6 +3763,67 @@ namespace basecross {
 			}
 		}
 		m_Rigidbody->m_Pos.y = m_BaseY;
+	}
+
+	void CR_BossEnemy::ToCannonBehavior() {
+		//前回のターンからの経過時間を求める
+		float ElapsedTime = App::GetApp()->GetElapsedTime();
+		auto shptr = m_PlayerPtr.lock();
+		if (shptr) {
+			Vec3 toPos = m_CannonPos;
+			Vec3 ToPosVec = toPos - m_Rigidbody->m_Pos;
+			//プレイヤーとの距離を求める
+			Vec3 PlayerPos = shptr->GetPosition();
+			float dis = (PlayerPos - m_Rigidbody->m_Pos).length();
+
+			//大砲との衝突
+			vector<shared_ptr<GameObject>> CannonVec;
+			GetStage<GameStage>()->FindTagGameObjectVec(L"Cannon", CannonVec);
+			float CannonRadius;
+			float PlayerRadius;
+			float length;
+			for (auto cannon : CannonVec) {
+				if (cannon) {
+					auto PtrCannon = dynamic_pointer_cast<Cannon>(cannon);
+
+					Vec3 CannonPos = PtrCannon->GetPosition();
+					length = (CannonPos - m_Rigidbody->m_Pos).length();
+
+					CannonRadius = PtrCannon->GetScale() / 2.0f;
+					PlayerRadius = m_Rigidbody->m_Scale.x / 2.0f;
+
+					if (length < CannonRadius + PlayerRadius + 2.0f) {
+						CannonRadius = PtrCannon->GetScale() / 2.0f;
+						PlayerRadius = m_Rigidbody->m_Scale.x / 2.0f;
+						length = (CannonPos - m_Rigidbody->m_Pos).length();
+						break;
+					}
+				}
+			}
+
+			// プレイヤーとエネミーの距離が近くなった時の処理
+			if (dis <= m_SearchDis)
+			{
+				m_StateMachine->ChangeState(EnemyOppositionState::Instance());
+				return;
+			}
+			else if (length < CannonRadius + PlayerRadius + 2.0f) {
+				m_Rigidbody->m_Velocity = Vec3(0);
+			}
+			// 大砲に向かう処理
+			else
+			{
+				ToPosVec.normalize();
+				ToPosVec *= m_Speed;
+				if (m_UpdateActive == false) {
+					ToPosVec *= 0.0f;
+				}
+				m_Rigidbody->m_Velocity = ToPosVec;
+				m_Rigidbody->m_Pos.y = m_BaseY;
+			}
+		}
+
+		RotateToVelocity();
 	}
 
 	//--------------------------------------------------------------------------------------
@@ -4230,11 +4291,11 @@ namespace basecross {
 						dis = 1.0f;
 					}
 					m_EyeFlashSound->Start(0, 0.2f / dis);
-					//fireの送出
-					auto FirePtr = GetStage<GameStage>()->FindTagGameObject<AttackSigns>(L"AttackSigns");
+						//fireの送出
+					auto FirePtr = GetStage<GameStage>()->FindTagGameObject<MiddleBossAttackSigns>(L"MiddleBossAttackSigns");
 					Vec3 Emitter = m_Rigidbody->m_Pos;
-					Emitter.y += 0.125f;
-					FirePtr->InsertSigns(Emitter, 0.5f);
+					Emitter.y += 0.7f;
+					FirePtr->InsertSigns(Emitter);
 				}
 				// プレイヤーとエネミーの距離が遠くなったら再び大砲に向かう
 				else if (dis >= m_SearchDis * 3.0f && m_UpdateActive)
@@ -4281,8 +4342,66 @@ namespace basecross {
 	}
 
 	void LD_BossEnemy::ToCannonBehavior() {
-		EnemyObject::ToCannonBehavior();
+		
+		//前回のターンからの経過時間を求める
+		float ElapsedTime = App::GetApp()->GetElapsedTime();
 		auto shptr = m_PlayerPtr.lock();
+		if (shptr) {
+			Vec3 toPos = m_CannonPos;
+			Vec3 ToPosVec = toPos - m_Rigidbody->m_Pos;
+			//プレイヤーとの距離を求める
+			Vec3 PlayerPos = shptr->GetPosition();
+			float dis = (PlayerPos - m_Rigidbody->m_Pos).length();
+
+			//大砲との衝突
+			vector<shared_ptr<GameObject>> CannonVec;
+			GetStage<GameStage>()->FindTagGameObjectVec(L"Cannon", CannonVec);
+			float CannonRadius;
+			float PlayerRadius;
+			float length;
+			for (auto cannon : CannonVec) {
+				if (cannon) {
+					auto PtrCannon = dynamic_pointer_cast<Cannon>(cannon);
+
+					Vec3 CannonPos = PtrCannon->GetPosition();
+					length = (CannonPos - m_Rigidbody->m_Pos).length();
+
+					CannonRadius = PtrCannon->GetScale() / 2.0f;
+					PlayerRadius = m_Rigidbody->m_Scale.x / 2.0f;
+
+					if (length < CannonRadius + PlayerRadius + 2.0f) {
+						CannonRadius = PtrCannon->GetScale() / 2.0f;
+						PlayerRadius = m_Rigidbody->m_Scale.x / 2.0f;
+						length = (CannonPos - m_Rigidbody->m_Pos).length();
+						break;
+					}
+				}
+			}
+
+			// プレイヤーとエネミーの距離が近くなった時の処理
+			if (dis <= m_SearchDis)
+			{
+				m_StateMachine->ChangeState(EnemyOppositionState::Instance());
+				return;
+			}
+			else if (length < CannonRadius + PlayerRadius + 2.0f) {
+				m_Rigidbody->m_Velocity = Vec3(0);
+			}
+			// 大砲に向かう処理
+			else
+			{
+				ToPosVec.normalize();
+				ToPosVec *= m_Speed;
+				if (m_UpdateActive == false) {
+					ToPosVec *= 0.0f;
+				}
+				m_Rigidbody->m_Velocity = ToPosVec;
+				m_Rigidbody->m_Pos.y = m_BaseY;
+			}
+		}
+		
+		RotateToVelocity();
+
 		if (shptr) {
 			Vec3 toPos = shptr->GetPosition();
 			Vec3 ToPosVec = toPos - m_Rigidbody->m_Pos;
@@ -4621,7 +4740,7 @@ namespace basecross {
 				FirePtr->InsertSigns(Emitter);
 				m_AttackFrameCount += ElapsedTime;
 				//サウンド
-				m_AttackSignSound->Start(0, 0.6f);
+				m_AttackSignSound->Start(0, 0.4f);
 			}
 			else if (m_AttackFrameCount < m_BeforeAttackTime) {
 				m_AttackFrameCount += ElapsedTime;

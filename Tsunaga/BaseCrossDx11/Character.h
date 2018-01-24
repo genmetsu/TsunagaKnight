@@ -2197,6 +2197,13 @@ namespace basecross {
 		*/
 		//--------------------------------------------------------------------------------------
 		virtual void OppositionBehavior() override;
+		//--------------------------------------------------------------------------------------
+		/*!
+		@brief 大砲に向かう処理
+		@return	なし
+		*/
+		//--------------------------------------------------------------------------------------
+		virtual void ToCannonBehavior() override;
 	};
 
 	//--------------------------------------------------------------------------------------
@@ -2507,7 +2514,7 @@ namespace basecross {
 		float m_AttackFrameCount;
 		float m_AttackRate;
 
-		//
+		//飛ばすバレットの数
 		float m_AttackBulletNum;
 		//現在飛ばしたバレットの数
 		float m_NowAttackBulletNum;
