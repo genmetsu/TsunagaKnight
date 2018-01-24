@@ -1417,6 +1417,8 @@ namespace basecross {
 		shared_ptr<SoundObject> m_FriendsSound;
 		shared_ptr<SoundObject> m_CannonSound;
 		shared_ptr<SoundObject> m_EyeFlashSound;
+
+		shared_ptr<SoundObject> m_DamageSound;
 		shared_ptr<SoundObject> m_SawSound;
 
 		//描画オブジェクト(weak_ptr)
@@ -2224,6 +2226,9 @@ namespace basecross {
 		bool m_AttackEnd;
 
 		bool m_UpdateActive;
+
+		shared_ptr<SoundObject> m_HandSound;
+
 		//親オブジェクト
 		weak_ptr<GameObject> m_ParentPtr;
 		//Rigidbodyのshared_ptr
