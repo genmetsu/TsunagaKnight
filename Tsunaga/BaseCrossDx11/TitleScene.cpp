@@ -23,30 +23,30 @@ namespace basecross {
 
 	void TitleScene::OnCreate() {
 		//背景スプライトの作成
-		//AddGameObject<MultiSprite>(
-		//	L"TITLE_TX",
-		//	Vec2(1280, 720),
-		//	0.0f,
-		//	Vec2(0, 0),
-		//	1, 1
-		//	);
+		AddGameObject<MultiSprite>(
+			L"TITLE_TX",
+			Vec2(1280, 720),
+			0.0f,
+			Vec2(0, 0),
+			1, 1
+			);
 
 
-		////背景スプライトの作成
-		//AddGameObject<MultiSprite>(
-		//	L"TsunagaKnight_TX",
-		//	Vec2(1920 * 0.5f, 650 * 0.5f),
-		//	0.0f,
-		//	Vec2(0, 100),
-		//	1, 1
-		//	);
-		AddGameObject<ScoreSprite>(
+		//背景スプライトの作成
+		AddGameObject<MultiSprite>(
+			L"TsunagaKnight_TX",
+			Vec2(1920 * 0.5f, 650 * 0.5f),
+			0.0f,
+			Vec2(0, 100),
+			1, 1
+			);
+		/*AddGameObject<ScoreSprite>(
 			L"number_TX",
 			Vec2(512, 60),
 			0.0f,
 			Vec2(0, 0),
 			1, 1
-			);
+			);*/
 		//背景スプライトの作成
 		AddGameObject<MessageSprite>(
 			L"PresAnyButton_TX",

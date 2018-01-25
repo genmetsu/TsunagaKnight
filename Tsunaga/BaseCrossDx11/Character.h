@@ -1040,9 +1040,8 @@ namespace basecross {
 			m_Score = f;
 		}
 	};
-
 	//--------------------------------------------------------------------------------------
-	///	背景スプライト
+	///	スプライト
 	//--------------------------------------------------------------------------------------
 	class MultiSprite : public SpriteBase {
 		float m_TotalTime;	//頂点変更に使用するタイム
@@ -1087,6 +1086,54 @@ namespace basecross {
 		*/
 		//--------------------------------------------------------------------------------------
 		virtual ~MultiSprite() {}
+	};
+
+	//--------------------------------------------------------------------------------------
+	///	UIスプライト
+	//--------------------------------------------------------------------------------------
+	class UISprite : public SpriteBase {
+		float m_TotalTime;	//頂点変更に使用するタイム
+	public:
+		//--------------------------------------------------------------------------------------
+		/*!
+		@brief バックアップ頂点の修正(仮想関数)。派生クラスは独自の頂点初期修正を実装
+		@return	なし
+		*/
+		//--------------------------------------------------------------------------------------
+		virtual void AdjustVertex() override;
+		//--------------------------------------------------------------------------------------
+		/*!
+		@brief 頂点の変更
+		@param[in]	ElapsedTime	ターン時間
+		@param[out]	vertices	マップされた頂点データ
+		@return	なし
+		*/
+		//--------------------------------------------------------------------------------------
+		virtual void UpdateVertex(float ElapsedTime, VertexPositionColorTexture* vertices) override;
+		//--------------------------------------------------------------------------------------
+		/*!
+		@brief コンストラクタ
+		@param[in]	StagePtr	ステージのポインタ
+		@param[in]	TextureResName	初期テクスチャリソース名
+		@param[in]	StartScale	初期大きさ
+		@param[in]	StartRot	初期回転
+		@param[in]	StartPos	初期位置
+		@param[in]	XWrap	X方向のラップ数
+		@param[in]	YWrap	Y方向のラップ数
+		*/
+		//--------------------------------------------------------------------------------------
+		UISprite(const shared_ptr<Stage>& StagePtr,
+			const wstring& TextureResName,
+			const Vec2& StartScale,
+			float StartRot,
+			const Vec2& StartPos,
+			UINT XWrap, UINT YWrap);
+		//--------------------------------------------------------------------------------------
+		/*!
+		@brief デストラクタ
+		*/
+		//--------------------------------------------------------------------------------------
+		virtual ~UISprite() {}
 	};
 
 	//--------------------------------------------------------------------------------------
@@ -1545,6 +1592,20 @@ namespace basecross {
 		virtual void GetWorldMatrix(Mat4x4& m) const override;
 		//--------------------------------------------------------------------------------------
 		/*!
+		@brief 仲間になる演出の開始
+		@return	なし
+		*/
+		//--------------------------------------------------------------------------------------
+		virtual void CompliancePerformanceStartBehavior();
+		//--------------------------------------------------------------------------------------
+		/*!
+		@brief 仲間になる演出の開始
+		@return	なし
+		*/
+		//--------------------------------------------------------------------------------------
+		virtual void CompliancePerformanceBehavior();
+		//--------------------------------------------------------------------------------------
+		/*!
 		@brief 追従する行動の開始
 		@return	なし
 		*/
@@ -1797,6 +1858,20 @@ namespace basecross {
 	public:
 		//ステートのインスタンス取得
 		DECLARE_SINGLETON_INSTANCE(EnemyToCannonState)
+		virtual void Enter(const shared_ptr<EnemyObject>& Obj)override;
+		virtual void Execute(const shared_ptr<EnemyObject>& Obj)override;
+		virtual void Exit(const shared_ptr<EnemyObject>& Obj)override;
+	};
+
+	//--------------------------------------------------------------------------------------
+	///	仲間になった演出ステート（EnemyObject）
+	//--------------------------------------------------------------------------------------
+	class EnemyComplianceStartState : public ObjState<EnemyObject>
+	{
+		EnemyComplianceStartState() {}
+	public:
+		//ステートのインスタンス取得
+		DECLARE_SINGLETON_INSTANCE(EnemyComplianceStartState)
 		virtual void Enter(const shared_ptr<EnemyObject>& Obj)override;
 		virtual void Execute(const shared_ptr<EnemyObject>& Obj)override;
 		virtual void Exit(const shared_ptr<EnemyObject>& Obj)override;

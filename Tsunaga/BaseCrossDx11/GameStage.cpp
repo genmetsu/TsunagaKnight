@@ -316,7 +316,7 @@ namespace basecross {
 			1, 1
 			);
 
-		AddGameObject<MultiSprite>(
+		AddGameObject<UISprite>(
 			L"BOSS_FRAME_TX",
 			Vec2(1000, 50),
 			0.0f,
@@ -330,7 +330,7 @@ namespace basecross {
 			Vec2(-555 + 64, 330),
 			1, 1
 			);
-		AddGameObject<MultiSprite>(
+		AddGameObject<UISprite>(
 			L"CANNON_FRAME_TX",
 			Vec2(320, 40),
 			0.0f,
@@ -338,21 +338,21 @@ namespace basecross {
 			1, 1
 			);
 
-		AddGameObject<MultiSprite>(
+		AddGameObject<UISprite>(
 			L"BOSS_ICON_TX",
 			Vec2(128.0f * 0.8f, 128.0f * 0.8f),
 			0.0f,
 			Vec2(-530, -320),
 			1, 1
 			);
-		AddGameObject<MultiSprite>(
+		AddGameObject<UISprite>(
 			L"KUREHA_ICON_TX",
 			Vec2(64, 64),
 			0.0f,
 			Vec2(-600, 325),
 			1, 1
 			);
-		AddGameObject<MultiSprite>(
+		AddGameObject<UISprite>(
 			L"CANNON_ICON_TX",
 			Vec2(52, 52),
 			0.0f,
@@ -460,7 +460,7 @@ namespace basecross {
 
 			//チェインがある程度長いときは移動しているときカメラを引く
 			int now_friends_num = GM->GetFriendsNum();
-			if (now_friends_num >= 5) {
+			if (now_friends_num >= 3) {
 				Vec3 PlayerVelo = PlayerPtr->GetVelocity();
 				if (PlayerVelo.length() > 3.0f && camera.m_CameraArmLen < 5.0f) {
 					camera.m_CameraArmLen += 0.02f;
@@ -609,7 +609,7 @@ namespace basecross {
 					camera.m_CamerAt = Vec3(0, 0, 30);
 					camera.m_CameraArmLen = 100;
 					//ここ
-					m_CameraPos.z -= ElapsedTime * 50.0f;
+					m_CameraPos.z -= ElapsedTime * 500.0f;
 					camera.m_CamerEye = m_CameraPos;
 				}
 				else if (m_CameraPos.z <= -150) {

@@ -446,8 +446,8 @@ namespace basecross {
 	}
 
 	void Player::InitVelocity() {
-		m_Rigidbody->m_Velocity.x *= 0.01f;
-		m_Rigidbody->m_Velocity.z *= 0.01f;
+		m_Rigidbody->m_Velocity.x *= 0.0f;
+		m_Rigidbody->m_Velocity.z *= 0.0f;
 	}
 
 	void Player::CollisionWithCannon() {
@@ -933,12 +933,8 @@ namespace basecross {
 				if (length < EnemyRadius + SwordRadius) {
 					if (PtrEnemy->GetHP() > 0) {
 
-
-						Vec3 Emitter = m_Rigidbody->m_Pos;
-						Emitter.y -= 0.125f;
-						//Sparkの送出
-						auto SparkPtr = GetStage<GameStage>()->FindTagGameObject<MultiSpark>(L"MultiSpark");
-						SparkPtr->InsertSpark(Emitter);
+						auto PlayerPtr = GetStage()->FindTagGameObject<Player>(L"Player");
+						PlayerPtr->InitVelocity();
 
 						//ダメージ処理
 						PtrEnemy->SetHP(0.0f);

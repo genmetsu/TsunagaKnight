@@ -1249,6 +1249,36 @@ namespace basecross {
 	}
 
 	//--------------------------------------------------------------------------------------
+	///	スプライト
+	//--------------------------------------------------------------------------------------
+	MultiSprite::MultiSprite(const shared_ptr<Stage>& StagePtr,
+		const wstring& TextureResName,
+		const Vec2& StartScale,
+		float StartRot,
+		const Vec2& StartPos,
+		UINT XWrap, UINT YWrap) :
+		SpriteBase(StagePtr, TextureResName, StartScale, StartRot, StartPos, XWrap, YWrap),
+		m_TotalTime(0)
+	{
+		SetBlendState(BlendState::Trace);
+	}
+
+	void MultiSprite::AdjustVertex() {
+
+	}
+
+	void MultiSprite::UpdateVertex(float ElapsedTime, VertexPositionColorTexture* vertices) {
+		Col4 UpdateCol(1.0f, 1.0f, 1.0f, 1.0f);
+		for (size_t i = 0; i < m_SquareMesh->GetNumVertices(); i++) {
+			vertices[i] = VertexPositionColorTexture(
+				m_BackupVertices[i].position,
+				UpdateCol,
+				m_BackupVertices[i].textureCoordinate
+			);
+		}
+	}
+
+	//--------------------------------------------------------------------------------------
 	///	大砲のゲージ
 	//--------------------------------------------------------------------------------------
 	CannonGauge::CannonGauge(const shared_ptr<Stage>& StagePtr,
@@ -1642,7 +1672,7 @@ namespace basecross {
 	//--------------------------------------------------------------------------------------
 	///	背景スプライト
 	//--------------------------------------------------------------------------------------
-	MultiSprite::MultiSprite(const shared_ptr<Stage>& StagePtr,
+	UISprite::UISprite(const shared_ptr<Stage>& StagePtr,
 		const wstring& TextureResName,
 		const Vec2& StartScale,
 		float StartRot,
@@ -1654,11 +1684,11 @@ namespace basecross {
 		SetBlendState(BlendState::Trace);
 	}
 
-	void MultiSprite::AdjustVertex() {
+	void UISprite::AdjustVertex() {
 		
 	}
 
-	void MultiSprite::UpdateVertex(float ElapsedTime, VertexPositionColorTexture* vertices) {
+	void UISprite::UpdateVertex(float ElapsedTime, VertexPositionColorTexture* vertices) {
 		if (GetStage<GameStage>()->GetIsStart()) {
 			Col4 UpdateCol(1.0f, 1.0f, 1.0f, 1.0f);
 			for (size_t i = 0; i < m_SquareMesh->GetNumVertices(); i++) {
@@ -2629,7 +2659,7 @@ namespace basecross {
 		if (m_HP <= 0.0f) {
 			if (m_isDead == false) {
 				m_isDead = true;
-				m_StateMachine->ChangeState(EnemyComplianceState::Instance());
+				m_StateMachine->ChangeState(EnemyComplianceStartState::Instance());
 				return;
 			}
 		}
@@ -2655,8 +2685,79 @@ namespace basecross {
 		);
 		m_LerpToParent = m_LerpToChild = 0.2f;
 		m_Rigidbody->m_CollType = CollType::typeCAPSULE;
-		m_FriendsSound->Start(0, 0.15f);
+	}
+
+	void EnemyObject::CompliancePerformanceStartBehavior() {
+		m_FriendsSound->Start(0, 0.2f);
+		m_FrameCount = 0.0f;
 		m_PtrObj->m_UsedModelColor = false;
+
+		Vec3 Emitter = m_Rigidbody->m_Pos;
+		Emitter.y -= 0.125f;
+		//Sparkの送出
+		auto SparkPtr = GetStage<GameStage>()->FindTagGameObject<MultiSpark>(L"MultiSpark");
+		SparkPtr->InsertSpark(Emitter);
+	}
+
+	void EnemyObject::CompliancePerformanceBehavior() {
+		//前回のターンからの経過時間を求める
+		float ElapsedTime = App::GetApp()->GetElapsedTime();
+		auto shptr = m_PlayerPtr.lock();
+		if (shptr) {
+			//目標となる位置
+			Vec3 toPos = shptr->GetPosition();
+			Vec3 ToPosVec = toPos - m_Rigidbody->m_Pos;
+			// 角度をプレイヤーに向ける
+			ToPosVec.normalize();
+			ToPosVec *= 0.001f;
+			if (m_UpdateActive == false) {
+				ToPosVec *= 0.0f;
+			}
+			m_Rigidbody->m_Velocity = ToPosVec;
+			m_Rigidbody->m_Pos.y = m_BaseY;
+		}
+		
+		//拡大縮小が終わったら親に向かう処理
+		if (m_FrameCount >= 0.4f) {
+			auto parent = m_ParentPtr.lock();
+			Vec3 toPos = parent->GetPosition();
+			Vec3 MoveVec = toPos - m_Rigidbody->m_Pos;
+
+			//目的と近づいたらステートを変更
+			float dis = MoveVec.length();
+			if (dis < 0.5f) {
+				m_Rigidbody->m_Scale = m_DefaultScale;
+				m_StateMachine->ChangeState(EnemyComplianceState::Instance());
+				return;
+			}
+
+			MoveVec.normalize();
+			m_Rigidbody->m_Velocity = MoveVec * 7.0f;
+		}
+		//拡大縮小する
+		else if (m_UpdateActive) {
+			if (m_FrameCount < 0.1f) {
+				m_Rigidbody->m_Scale.y += ElapsedTime * 1.08f;
+				m_BaseY += ElapsedTime * 1.08f;
+			}
+			else if (m_FrameCount < 0.2f) {
+				m_Rigidbody->m_Scale.y -= ElapsedTime * 1.08f;
+				m_BaseY -= ElapsedTime * 1.08f;
+			}
+			else if (m_FrameCount < 0.3f) {
+				m_Rigidbody->m_Scale.y += ElapsedTime * 1.08f;
+				m_BaseY += ElapsedTime * 1.08f;
+			}
+			else if (m_FrameCount < 0.4f) {
+				m_Rigidbody->m_Scale.y -= ElapsedTime * 1.08f;
+				m_BaseY -= ElapsedTime * 1.08f;
+			}
+		}
+
+		if (m_UpdateActive) {
+			m_FrameCount += ElapsedTime;
+		}
+		RotateToVelocity();
 	}
 
 	//攻撃１行動の開始
@@ -2916,14 +3017,32 @@ namespace basecross {
 	}
 
 	//--------------------------------------------------------------------------------------
+	///	仲間になった演出ステート（EnemyObject）
+	//--------------------------------------------------------------------------------------
+	IMPLEMENT_SINGLETON_INSTANCE(EnemyComplianceStartState)
+	void EnemyComplianceStartState::Enter(const shared_ptr<EnemyObject>& Obj) {
+		Obj->RemoveTag(L"Zako");
+		Obj->AddTag(L"Chain");
+		Obj->CompliancePerformanceStartBehavior();
+	}
+
+	void EnemyComplianceStartState::Execute(const shared_ptr<EnemyObject>& Obj) {
+		Obj->CompliancePerformanceBehavior();
+	}
+
+	void EnemyComplianceStartState::Exit(const shared_ptr<EnemyObject>& Obj) {
+	
+	}
+
+	//--------------------------------------------------------------------------------------
 	///	追従ステート（EnemyObject）
 	//--------------------------------------------------------------------------------------
 	IMPLEMENT_SINGLETON_INSTANCE(EnemyComplianceState)
 
 	void EnemyComplianceState::Enter(const shared_ptr<EnemyObject>& Obj) {
 		Obj->ComplianceStartBehavior();
-		Obj->RemoveTag(L"Zako");
-		Obj->AddTag(L"Chain");
+		//Obj->RemoveTag(L"Zako");
+		//Obj->AddTag(L"Chain");
 	}
 
 	void EnemyComplianceState::Execute(const shared_ptr<EnemyObject>& Obj) {
@@ -2950,7 +3069,6 @@ namespace basecross {
 	void EnemyBulletPrepareState::Exit(const shared_ptr<EnemyObject>& Obj) {
 
 	}
-
 
 	//--------------------------------------------------------------------------------------
 	///	大砲で撃たれてる時のステート（EnemyObject）
