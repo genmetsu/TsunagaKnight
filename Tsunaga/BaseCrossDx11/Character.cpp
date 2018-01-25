@@ -472,23 +472,30 @@ namespace basecross {
 	}
 
 	void ChainEffect::InsertSpark(const Vec3& Pos1, const Vec3& Pos2) {
-		auto ParticlePtr = InsertParticle(5);
+		auto ParticlePtr = InsertParticle(8);
 		Vec3 StartPos = Pos1;
 		Vec3 EndPos = Pos2;
-		Vec3 NewPos = (StartPos + EndPos) / 2.0f;
-		NewPos.y += 0.1f;
-		ParticlePtr->m_EmitterPos = NewPos;
-		ParticlePtr->SetTextureResource(L"SPARK_TX");
-		ParticlePtr->m_MaxTime = 0.1f;
 		
 		Vec3 MoveVec = Pos2 - Pos1;
 		MoveVec.normalize();
 
+		Vec3 NewPos = (StartPos + EndPos)  / 2.0f;
+		NewPos.y += 0.1f;
+		NewPos += MoveVec * 0.2f;
+		ParticlePtr->m_EmitterPos = NewPos;
+		ParticlePtr->SetTextureResource(L"SPARK_TX");
+		ParticlePtr->m_MaxTime = 0.08f;
+		
 		vector<ParticleSprite>& pSpriteVec = ParticlePtr->GetParticleSpriteVec();
 		for (auto& rParticleSprite : ParticlePtr->GetParticleSpriteVec()) {
-			rParticleSprite.m_LocalScale = Vec2(0.1, 0.1);
+			rParticleSprite.m_LocalScale = Vec2(0.06f, 0.06f);
+
+			rParticleSprite.m_LocalPos.x = Util::RandZeroToOne() * 0.08f - 0.04f;
+			rParticleSprite.m_LocalPos.y = Util::RandZeroToOne() * 0.01f - 0.005f;
+			rParticleSprite.m_LocalPos.z = Util::RandZeroToOne() * 0.08f - 0.04f;
+
 			////各パーティクルの移動速度を指定
-			rParticleSprite.m_Velocity = MoveVec * 2.0f;
+			rParticleSprite.m_Velocity = MoveVec * -3.0f;
 			//色の指定
 			rParticleSprite.m_Color = Col4(1.0f, 1.0f, 0.0f, 0.8f);
 		}
