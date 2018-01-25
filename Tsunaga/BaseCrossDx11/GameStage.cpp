@@ -292,6 +292,7 @@ namespace basecross {
 		AddGameObject<MultiSpark>();
 		//ファイアエフェクト
 		AddGameObject<MultiFire>();
+		AddGameObject <ChainEffect>();
 		AddGameObject<AttackSigns>();
 		AddGameObject<HandBossSpark>();
 		AddGameObject<BossAttackSigns>();
@@ -595,8 +596,9 @@ namespace basecross {
 
 				Vec3 boss_pos = boss->GetPosition();
 				camera.m_CamerAt = boss_pos;
+				camera.m_CamerAt.y -= 2.0f;
 				camera.m_CameraArmLen = 30;
-				camera.m_CamerEye = Vec3(-5, 5, 40);
+				camera.m_CamerEye = Vec3(-5, 5, 50);
 				camera.m_CamerEye.x -= 4.0f;
 				camera.m_CamerEye.z -= 7.0f;
 
@@ -607,7 +609,7 @@ namespace basecross {
 					camera.m_CamerAt = Vec3(0, 0, 30);
 					camera.m_CameraArmLen = 100;
 					//ここ
-					m_CameraPos.z -= ElapsedTime * 500.0f;
+					m_CameraPos.z -= ElapsedTime * 50.0f;
 					camera.m_CamerEye = m_CameraPos;
 				}
 				else if (m_CameraPos.z <= -150) {

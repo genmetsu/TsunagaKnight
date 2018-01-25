@@ -87,6 +87,10 @@ namespace basecross {
 		void GameClearBehaviour();
 		void GameOverBehaviour();
 
+		bool GetIsStart() {
+			return m_isGameStart;
+		}
+
 		void SetIsClear(bool value) {
 			m_isClear = value;
 			GameClearBehaviour();

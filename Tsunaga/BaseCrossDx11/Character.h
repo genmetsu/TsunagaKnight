@@ -334,6 +334,22 @@ namespace basecross {
 	};
 
 	//--------------------------------------------------------------------------------------
+	//class ChainEffect : public MultiParticle;
+	//用途: 繋げているときのエフェクト
+	//--------------------------------------------------------------------------------------
+	class ChainEffect : public MultiParticle {
+	public:
+		//構築と破棄
+		ChainEffect(shared_ptr<Stage>& StagePtr);
+		virtual ~ChainEffect();
+		//初期化
+		virtual void OnCreate() override;
+		void InsertSpark(const Vec3& Pos1, const Vec3& Pos2);
+		virtual void OnUpdate() override;
+		void UpdatePosition(const Vec3& Pos1, const Vec3& Pos2);
+	};
+
+	//--------------------------------------------------------------------------------------
 	//class MultiGuardEffect : public MultiParticle;
 	//用途: エンジェルエネミーの防御エフェクト
 	//--------------------------------------------------------------------------------------

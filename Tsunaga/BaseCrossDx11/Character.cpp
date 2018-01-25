@@ -454,6 +454,55 @@ namespace basecross {
 	}
 
 	//--------------------------------------------------------------------------------------
+	//class ChainEffect : public MultiParticle;
+	//用途: 繋げているときのエフェクト
+	//--------------------------------------------------------------------------------------
+	//構築と破棄
+	ChainEffect::ChainEffect(shared_ptr<Stage>& StagePtr) :
+		MultiParticle(StagePtr)
+	{}
+	ChainEffect::~ChainEffect() {}
+
+	//初期化
+	void ChainEffect::OnCreate() {
+		//加算描画処理をする
+		SetAddType(true);
+		//タグの追加
+		AddTag(L"ChainEffect");
+	}
+
+	void ChainEffect::InsertSpark(const Vec3& Pos1, const Vec3& Pos2) {
+		auto ParticlePtr = InsertParticle(5);
+		Vec3 StartPos = Pos1;
+		Vec3 EndPos = Pos2;
+		Vec3 NewPos = (StartPos + EndPos) / 2.0f;
+		NewPos.y += 0.1f;
+		ParticlePtr->m_EmitterPos = NewPos;
+		ParticlePtr->SetTextureResource(L"SPARK_TX");
+		ParticlePtr->m_MaxTime = 0.1f;
+		
+		Vec3 MoveVec = Pos2 - Pos1;
+		MoveVec.normalize();
+
+		vector<ParticleSprite>& pSpriteVec = ParticlePtr->GetParticleSpriteVec();
+		for (auto& rParticleSprite : ParticlePtr->GetParticleSpriteVec()) {
+			rParticleSprite.m_LocalScale = Vec2(0.1, 0.1);
+			////各パーティクルの移動速度を指定
+			rParticleSprite.m_Velocity = MoveVec * 2.0f;
+			//色の指定
+			rParticleSprite.m_Color = Col4(1.0f, 1.0f, 0.0f, 0.8f);
+		}
+	}
+
+	void ChainEffect::OnUpdate() {
+		MultiParticle::OnUpdate();
+	}
+
+	void ChainEffect::UpdatePosition(const Vec3& Pos1, const Vec3& Pos2) {
+
+	}
+
+	//--------------------------------------------------------------------------------------
 	//class BossEffect : public MultiParticle;
 	//用途: ボスの防御エフェクト
 	//--------------------------------------------------------------------------------------
@@ -1220,18 +1269,30 @@ namespace basecross {
 	}
 
 	void CannonGauge::UpdateVertex(float ElapsedTime, VertexPositionColorTexture* vertices) {
-		Col4 UpdateCol(1.0f, 1.0f, 1.0f, 1.0f);
-		for (size_t i = 0; i < m_SquareMesh->GetNumVertices(); i++) {
-			vertices[i] = VertexPositionColorTexture(
-				m_BackupVertices[i].position,
-				UpdateCol,
-				m_BackupVertices[i].textureCoordinate
-			);
+		if (GetStage<GameStage>()->GetIsStart()) {
+			Col4 UpdateCol(1.0f, 1.0f, 1.0f, 1.0f);
+			for (size_t i = 0; i < m_SquareMesh->GetNumVertices(); i++) {
+				vertices[i] = VertexPositionColorTexture(
+					m_BackupVertices[i].position,
+					UpdateCol,
+					m_BackupVertices[i].textureCoordinate
+				);
+			}
+			auto player = GetStage()->FindTagGameObject<Player>(L"Player");
+			float HP = player->GetCannonHP();
+			float ratio = HP / player->GetDefaultBossHP();
+			m_Scale.x = m_DefaultSize * ratio;
 		}
-		auto player = GetStage()->FindTagGameObject<Player>(L"Player");
-		float HP = player->GetCannonHP();
-		float ratio = HP / player->GetDefaultBossHP();
-		m_Scale.x = m_DefaultSize * ratio;
+		else {
+			Col4 UpdateCol(1.0f, 1.0f, 1.0f, 0.0f);
+			for (size_t i = 0; i < m_SquareMesh->GetNumVertices(); i++) {
+				vertices[i] = VertexPositionColorTexture(
+					m_BackupVertices[i].position,
+					UpdateCol,
+					m_BackupVertices[i].textureCoordinate
+				);
+			}
+		}
 	}
 
 	//--------------------------------------------------------------------------------------
@@ -1262,18 +1323,30 @@ namespace basecross {
 	}
 
 	void BossHPGauge::UpdateVertex(float ElapsedTime, VertexPositionColorTexture* vertices) {
-		Col4 UpdateCol(1.0f, 1.0f, 1.0f, 1.0f);
-		for (size_t i = 0; i < m_SquareMesh->GetNumVertices(); i++) {
-			vertices[i] = VertexPositionColorTexture(
-				m_BackupVertices[i].position,
-				UpdateCol,
-				m_BackupVertices[i].textureCoordinate
-			);
+		if (GetStage<GameStage>()->GetIsStart()) {
+			Col4 UpdateCol(1.0f, 1.0f, 1.0f, 1.0f);
+			for (size_t i = 0; i < m_SquareMesh->GetNumVertices(); i++) {
+				vertices[i] = VertexPositionColorTexture(
+					m_BackupVertices[i].position,
+					UpdateCol,
+					m_BackupVertices[i].textureCoordinate
+				);
+			}
+			auto GM = GameManager::getInstance();
+			float bossHP = GM->GetBossHP();
+			float ratio = bossHP / GM->GetDefaultBossHP();
+			m_Scale.x = m_DefaultSize * ratio;
 		}
-		auto GM = GameManager::getInstance();
-		float bossHP = GM->GetBossHP();
-		float ratio = bossHP / GM->GetDefaultBossHP();
-		m_Scale.x = m_DefaultSize * ratio;
+		else {
+			Col4 UpdateCol(1.0f, 1.0f, 1.0f, 0.0f);
+			for (size_t i = 0; i < m_SquareMesh->GetNumVertices(); i++) {
+				vertices[i] = VertexPositionColorTexture(
+					m_BackupVertices[i].position,
+					UpdateCol,
+					m_BackupVertices[i].textureCoordinate
+				);
+			}
+		}
 	}
 
 	//--------------------------------------------------------------------------------------
@@ -1579,14 +1652,25 @@ namespace basecross {
 	}
 
 	void MultiSprite::UpdateVertex(float ElapsedTime, VertexPositionColorTexture* vertices) {
-		
-		Col4 UpdateCol(1.0f, 1.0f, 1.0f, 1.0f);
-		for (size_t i = 0; i < m_SquareMesh->GetNumVertices(); i++) {
-			vertices[i] = VertexPositionColorTexture(
-				m_BackupVertices[i].position,
-				UpdateCol,
-				m_BackupVertices[i].textureCoordinate
-			);
+		if (GetStage<GameStage>()->GetIsStart()) {
+			Col4 UpdateCol(1.0f, 1.0f, 1.0f, 1.0f);
+			for (size_t i = 0; i < m_SquareMesh->GetNumVertices(); i++) {
+				vertices[i] = VertexPositionColorTexture(
+					m_BackupVertices[i].position,
+					UpdateCol,
+					m_BackupVertices[i].textureCoordinate
+				);
+			}
+		}
+		else {
+			Col4 UpdateCol(1.0f, 1.0f, 1.0f, 0.0f);
+			for (size_t i = 0; i < m_SquareMesh->GetNumVertices(); i++) {
+				vertices[i] = VertexPositionColorTexture(
+					m_BackupVertices[i].position,
+					UpdateCol,
+					m_BackupVertices[i].textureCoordinate
+				);
+			}
 		}
 	}
 
@@ -2251,6 +2335,11 @@ namespace basecross {
 				Vec3 Velo = CalcPos - m_Rigidbody->m_BeforePos;
 				Velo /= ElapsedTime;
 				m_Rigidbody->m_Velocity = Velo;
+
+				//エフェクト
+				//Sparkの送出
+				auto SparkPtr = GetStage<GameStage>()->FindTagGameObject<ChainEffect>(L"ChainEffect");
+				SparkPtr->InsertSpark(m_Rigidbody->m_Pos, shptr->GetPosition());
 			}
 		}
 		if (m_FollowingAngelNum) {
@@ -4181,10 +4270,12 @@ namespace basecross {
 		EnemyObject(StagePtr, ParentPtr, MeshResName, TextureResName,DefaultAnimation, Scale, Qt, Pos, OwnShadowActive)
 	{
 		m_Speed = 1.0f;
-		m_HP = 15.0f;
+		m_HP = 12.0f;
 		m_DefaultHP = m_HP;
 		AddTag(L"SawBoss");
-		m_TackleSpeed = 1.3f;
+		m_TackleSpeed = 1.8f;
+		m_TackleTime = 2.0f;
+		m_AfterAttackTime = 0.3f;
 		m_SearchDis = 6.0f;
 		//メッシュとトランスフォームの差分の設定
 		m_MeshToTransformMatrix.affineTransformation(
@@ -4227,7 +4318,7 @@ namespace basecross {
 			//距離を求める
 			float dis = ToPosVec.length();
 
-			m_SawSound[m_SoundCount]->Start(0, 0.9f / dis);
+			m_SawSound[m_SoundCount]->Start(0, 0.3f / dis);
 			m_SoundCount++;
 			if (m_SoundCount > 4) {
 				m_SoundCount = 0;
@@ -4332,7 +4423,7 @@ namespace basecross {
 
 			}
 			else {
-				m_SawSound[m_SoundCount]->Start(0, 0.9f / dis);
+				m_SawSound[m_SoundCount]->Start(0, 0.3f / dis);
 			}
 			m_SoundCount++;
 			if (m_SoundCount > 4) {
@@ -4412,7 +4503,7 @@ namespace basecross {
 
 			}
 			else {
-				m_SawSound[m_SoundCount]->Start(0, 0.9f / dis);
+				m_SawSound[m_SoundCount]->Start(0, 0.3f / dis);
 			}
 			m_SoundCount++;
 			if (m_SoundCount > 4) {
