@@ -609,7 +609,7 @@ namespace basecross {
 					camera.m_CamerAt = Vec3(0, 0, 30);
 					camera.m_CameraArmLen = 100;
 					//‚±‚±
-					m_CameraPos.z -= ElapsedTime * 500.0f;
+					m_CameraPos.z -= ElapsedTime * 50.0f;
 					camera.m_CamerEye = m_CameraPos;
 				}
 				else if (m_CameraPos.z <= -150) {

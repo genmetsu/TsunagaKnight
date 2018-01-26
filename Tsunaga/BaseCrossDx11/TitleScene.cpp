@@ -24,13 +24,21 @@ namespace basecross {
 	void TitleScene::OnCreate() {
 		//背景スプライトの作成
 		AddGameObject<MultiSprite>(
-			L"TITLE_TX",
+			L"SKY_TX",
 			Vec2(1280, 720),
 			0.0f,
 			Vec2(0, 0),
 			1, 1
 			);
 
+		//背景スプライトの作成
+		AddGameObject<MultiSprite>(
+			L"TITLE_LOGO_BACK_TX",
+			Vec2(1920 * 0.7f, 960 * 0.5f),
+			0.0f,
+			Vec2(0, 80),
+			1, 1
+			);
 
 		//背景スプライトの作成
 		AddGameObject<MultiSprite>(
@@ -50,9 +58,9 @@ namespace basecross {
 		//背景スプライトの作成
 		AddGameObject<MessageSprite>(
 			L"PresAnyButton_TX",
-			Vec2(256, 60),
+			Vec2(256 * 2, 60 * 2),
 			0.0f,
-			Vec2(0, -300),
+			Vec2(0, -240),
 			1, 1
 			);
 

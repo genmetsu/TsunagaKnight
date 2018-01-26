@@ -802,7 +802,7 @@ namespace basecross {
 	}
 
 	void Sword::OnUpdate2() {
-		auto fps = App::GetApp()->GetStepTimer().GetFramesPerSecond();
+		/*auto fps = App::GetApp()->GetStepTimer().GetFramesPerSecond();
 		wstring FPS(L"\n\n\n\n\nFPS: ");
 		FPS += Util::UintToWStr(fps);
 		FPS += L"\nElapsedTime: ";
@@ -819,7 +819,7 @@ namespace basecross {
 		if (!m_StringDrawObject) {
 			m_StringDrawObject = GetStage<GameStage>()->FindTagGameObject<StringDrawObject>(L"StringDrawObject");
 		}
-		m_StringDrawObject->SetText(FPS);
+		m_StringDrawObject->SetText(FPS);*/
 	}
 
 

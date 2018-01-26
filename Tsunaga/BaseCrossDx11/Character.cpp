@@ -2908,8 +2908,10 @@ namespace basecross {
 				auto SparkPtr = GetStage<GameStage>()->FindTagGameObject<MultiFire>(L"MultiFire");
 				SparkPtr->InsertFire(Emitter, m_Scale.x * 3.0f);
 
+				SetPosition(Vec3(0, -100, 0));
 				m_HP = m_DefaultHP;
 				m_StateMachine->ChangeState(EnemyWaitingState::Instance());
+				return;
 			}
 		}
 	}
@@ -4298,6 +4300,8 @@ namespace basecross {
 			if (m_FrameCount > m_AttackSetupTime + m_BeforeAttackTime + m_AttackTime + m_ReturnDefaultTime) {
 				m_FrameCount = 0.0f;
 				m_AttackEnd = false;
+				m_PtrObj->m_Diffuse = m_DefaultDiffuse;
+				m_PtrObj->m_Emissive = m_DefaultEmissive;
 				return true;
 			}
 			if (m_FrameCount > m_AttackSetupTime + m_BeforeAttackTime + m_AttackTime) {
