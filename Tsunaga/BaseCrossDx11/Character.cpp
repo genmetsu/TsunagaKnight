@@ -2205,18 +2205,14 @@ namespace basecross {
 						//サウンドの発行
 						if (FindTag(L"Zako")) {
 							m_DeadSound->Start(0, 0.5f / p_dis);
-						}
-						else {
-							m_CannonSound->Start(0, 1.0f / p_dis);
-						}
+							Vec3 Emitter = GetPosition();
+							//Fireの送出
+							auto SparkPtr = GetStage<GameStage>()->FindTagGameObject<MultiFire>(L"MultiFire");
+							SparkPtr->InsertFire(Emitter, m_Scale.x * 3.0f);
 
-						Vec3 Emitter = GetPosition();
-						//Fireの送出
-						auto SparkPtr = GetStage<GameStage>()->FindTagGameObject<MultiFire>(L"MultiFire");
-						SparkPtr->InsertFire(Emitter, m_Scale.x * 3.0f);
-						
-						m_HP = m_DefaultHP;
-						m_StateMachine->ChangeState(EnemyWaitingState::Instance());
+							m_HP = m_DefaultHP;
+							m_StateMachine->ChangeState(EnemyWaitingState::Instance());
+						}
 					}
 					return;
 				}
@@ -2624,6 +2620,12 @@ namespace basecross {
 
 	void EnemyObject::DamageStartBehaviour() {
 		m_FrameCount = 0.0f;
+		if (m_HP > 0.0f) {
+			ChangeAnimation(L"BossDamage");
+		}
+		else {
+			ChangeAnimation(L"BossDead");
+		}
 	}
 
 	void EnemyObject::DamageBehaviour() {
@@ -2651,6 +2653,19 @@ namespace basecross {
 		else if (m_PtrObj->m_UsedModelColor == false) {
 			m_PtrObj->m_UsedModelColor = true;
 		}
+
+		if (FindTag(L"HandBoss")) {
+			//ボスハンドとの衝突判定
+			vector<shared_ptr<GameObject>> HandVec;
+			GetStage<GameStage>()->FindTagGameObjectVec(L"BossHand", HandVec);
+			for (auto hand : HandVec) {
+				if (hand) {
+					auto PtrHand = dynamic_pointer_cast<BossHand>(hand);
+					PtrHand->ChangeDamageColor();
+				}
+			}
+		}
+		MidBossCheckHealth();
 		m_Rigidbody->m_Pos.y = m_BaseY;
 		m_FrameCount += ElapsedTime;
 	}
@@ -2881,6 +2896,22 @@ namespace basecross {
 		}
 		m_Rigidbody->m_Velocity = Vec3(0);
 
+	}
+
+	void EnemyObject::MidBossCheckHealth() {
+		if (m_HP <= 0) {
+			if (m_PtrObj->m_CurrentAnimeTime > 0.99f) {
+				m_CannonSound->Start(0, 0.7f);
+
+				Vec3 Emitter = GetPosition();
+				//Fireの送出
+				auto SparkPtr = GetStage<GameStage>()->FindTagGameObject<MultiFire>(L"MultiFire");
+				SparkPtr->InsertFire(Emitter, m_Scale.x * 3.0f);
+
+				m_HP = m_DefaultHP;
+				m_StateMachine->ChangeState(EnemyWaitingState::Instance());
+			}
+		}
 	}
 
 	void EnemyObject::BulletPrepareExcuteBehavior() {
@@ -3115,7 +3146,6 @@ namespace basecross {
 
 	void EnemyDamageState::Enter(const shared_ptr<EnemyObject>& Obj) {
 		Obj->DamageStartBehaviour();
-		Obj->ChangeAnimation(L"BossDamage");
 	}
 
 	void EnemyDamageState::Execute(const shared_ptr<EnemyObject>& Obj) {
@@ -3256,24 +3286,7 @@ namespace basecross {
 						PtrBoss->Damage(1.0f);
 						m_DamageSound->Start(0, 0.5f);
 						PtrBoss->ChangeState(L"Damage");
-						if (PtrBoss->GetHP() <= 0.0f) {
-							Vec3 p_pos = m_PlayerPtr.lock()->GetPosition();
-							float p_dis = (p_pos - GetPosition()).length();
-							if (p_dis < 1.0f) {
-								p_dis = 1.0f;
-							}
-
-							m_CannonSound->Start(0, 1.0f / p_dis);
-
-							Vec3 Emitter = PtrBoss->GetPosition();
-							//Fireの送出
-							auto FirePtr = GetStage<GameStage>()->FindTagGameObject<MultiFire>(L"MultiFire");
-							FirePtr->InsertFire(Emitter, PtrBoss->GetScale() * 3.0f);
-
-							PtrBoss->ChangeState(L"Waiting");
-							//ノックバック方向の設定
-							break;
-						}
+						break;
 					}
 				}
 			}
@@ -3857,7 +3870,7 @@ namespace basecross {
 		EnemyObject(StagePtr, ParentPtr, MeshResName, TextureResName, DefaultAnimation, Scale, Qt, Pos, OwnShadowActive)
 	{
 		m_Speed = 1.5f;
-		m_HP = 5.0f;
+		m_HP = 3.0f;
 		m_DefaultHP = m_HP;
 		m_TackleSpeed = 0.0f;
 		m_BaseY = m_Scale.y / 2.0f + 0.4f;
@@ -4093,7 +4106,7 @@ namespace basecross {
 		body.SetToBefore();
 		m_Rigidbody = PtrGameStage->AddRigidbody(body);
 
-		m_HandSound = ObjectFactory::Create<SoundObject>(L"ShakeOff03");
+		m_HandSound = ObjectFactory::Create<SoundObject>(L"Shakeoff02");
 
 		m_UpdateActive = true;
 
@@ -4135,6 +4148,9 @@ namespace basecross {
 		m_PtrObj->m_FogColor = Col4(0.07f, 0.0f, 0.09f, 1.0f);
 		m_PtrObj->m_FogStart = -10.0f;
 		m_PtrObj->m_FogEnd = -100.0f;
+
+		m_DefaultDiffuse = m_PtrObj->m_Diffuse;
+		m_DefaultEmissive = m_PtrObj->m_Emissive;
 
 		//シャドウマップ描画データの構築
 		m_PtrShadowmapObj = make_shared<ShadowmapObject>();
@@ -4267,6 +4283,7 @@ namespace basecross {
 				Vec3(1.1f, -0.5f, 1.0f)
 			);
 		}
+
 		m_LerpToParent = 0.2f;
 	}
 
@@ -4292,6 +4309,8 @@ namespace basecross {
 					Quat(),
 					m_BeforePos + NewPos
 				);
+				m_PtrObj->m_Diffuse = m_DefaultDiffuse;
+				m_PtrObj->m_Emissive = m_DefaultEmissive;
 			}
 			else if (m_FrameCount > m_AttackSetupTime + m_BeforeAttackTime) {
 				if (m_Rigidbody->m_Pos.y < m_Rigidbody->m_Scale.y / 2.0f) {
@@ -4302,7 +4321,7 @@ namespace basecross {
 						Emitter.y -= m_Rigidbody->m_Scale.y / 2.0f;;
 						FirePtr->InsertSpark(Emitter);
 
-						m_HandSound->Start(0, 0.2f);
+						m_HandSound->Start(0, 0.4f);
 
 						m_AttackEnd = true;
 					}
@@ -4334,6 +4353,17 @@ namespace basecross {
 			m_FrameCount += ElapsedTime;
 		}
 		return false;
+	}
+
+	void BossHand::ChangeDamageColor() {
+		if (m_PtrObj->m_Diffuse != m_DefaultDiffuse) {
+			m_PtrObj->m_Diffuse = m_DefaultDiffuse;
+			m_PtrObj->m_Emissive = m_DefaultEmissive;
+		}
+		else {
+			m_PtrObj->m_Diffuse = Col4(1.0f, 0, 0, 1.0f);
+			m_PtrObj->m_Emissive = Col4(1.0f, 0, 0, 1.0f);
+		}
 	}
 
 	void BossHand::SetState(wstring state_name) {
@@ -4395,7 +4425,7 @@ namespace basecross {
 		EnemyObject(StagePtr, ParentPtr, MeshResName, TextureResName,DefaultAnimation, Scale, Qt, Pos, OwnShadowActive)
 	{
 		m_Speed = 1.0f;
-		m_HP = 12.0f;
+		m_HP = 10.0f;
 		m_DefaultHP = m_HP;
 		AddTag(L"SawBoss");
 		m_TackleSpeed = 1.8f;

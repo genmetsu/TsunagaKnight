@@ -1770,6 +1770,8 @@ namespace basecross {
 			m_ParentPtr = gameObject;
 		};
 
+		void MidBossCheckHealth();
+
 		void RotateToVelocity();
 		
 		void ChangeState(wstring name);
@@ -2329,14 +2331,16 @@ namespace basecross {
 
 		shared_ptr<SoundObject> m_HandSound;
 
+		Col4 m_DefaultEmissive;
+		Col4 m_DefaultDiffuse;
+
 		//親オブジェクト
 		weak_ptr<GameObject> m_ParentPtr;
 		//Rigidbodyのshared_ptr
 		shared_ptr<Rigidbody> m_Rigidbody;
 		//メッシュとの差分計算用
 		Mat4x4 m_MeshToTransformMatrix;
-		///描画データ
-		shared_ptr<BcDrawObject> m_PtrObj;
+		
 		//描画オブジェクト(weak_ptr)
 		weak_ptr<BcPNTStaticRenderer> m_Renderer;
 		//シャドウマップ用描画データ
@@ -2374,6 +2378,8 @@ namespace basecross {
 		*/
 		//--------------------------------------------------------------------------------------
 		virtual ~BossHand();
+		///描画データ
+		shared_ptr<BcDrawObject> m_PtrObj;
 		//--------------------------------------------------------------------------------------
 		/*!
 		@brief 初期化
@@ -2460,6 +2466,9 @@ namespace basecross {
 		*/
 		//--------------------------------------------------------------------------------------
 		void SetState(wstring state_name);
+
+
+		void ChangeDamageColor();
 
 		void SetUpdateActive(bool value) {
 			m_UpdateActive = value;
