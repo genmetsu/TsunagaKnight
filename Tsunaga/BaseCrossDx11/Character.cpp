@@ -510,6 +510,56 @@ namespace basecross {
 	}
 
 	//--------------------------------------------------------------------------------------
+	//class BossPrepareAttackEffect : public MultiParticle;
+	//用途: ボスの攻撃準備エフェクト
+	//--------------------------------------------------------------------------------------
+	//構築と破棄
+	BossPrepareAttackEffect::BossPrepareAttackEffect(shared_ptr<Stage>& StagePtr) :
+		MultiParticle(StagePtr)
+	{}
+	BossPrepareAttackEffect::~BossPrepareAttackEffect() {}
+
+	//初期化
+	void BossPrepareAttackEffect::OnCreate() {
+		//加算描画処理をする
+		SetAddType(true);
+		//タグの追加
+		AddTag(L"BossPrepareAttackEffect");
+	}
+
+	void BossPrepareAttackEffect::InsertSpark(const Vec3& Pos) {
+		auto ParticlePtr = InsertParticle(6);
+		ParticlePtr->m_EmitterPos = Pos;
+		ParticlePtr->SetTextureResource(L"SPARK_TX");
+		ParticlePtr->m_MaxTime = 1.5f;
+		vector<ParticleSprite>& pSpriteVec = ParticlePtr->GetParticleSpriteVec();
+		for (auto& rParticleSprite : ParticlePtr->GetParticleSpriteVec()) {
+			rParticleSprite.m_LocalPos.x = (Util::RandZeroToOne() - 0.5f) * 40.0f;
+			rParticleSprite.m_LocalPos.y = (Util::RandZeroToOne() - 0.5f) * 40.0f;
+			rParticleSprite.m_LocalPos.z = Util::RandZeroToOne() * -60.0f;
+			rParticleSprite.m_LocalScale = Vec2(4.5f, 4.5f);
+
+			Vec3 MoveVec = Pos - rParticleSprite.m_LocalPos;
+
+			float length = MoveVec.length();
+
+			MoveVec.normalize();
+
+			//各パーティクルの移動速度を指定
+			rParticleSprite.m_Velocity = MoveVec * (length / 3.0f);
+
+			rParticleSprite.m_Color = Col4(1.0f, 0.0f, 1.0f, 0.2f);
+
+
+		}
+	}
+
+	void BossPrepareAttackEffect::OnUpdate() {
+		MultiParticle::OnUpdate();
+		float ElapsedTime = App::GetApp()->GetElapsedTime();
+	}
+
+	//--------------------------------------------------------------------------------------
 	//class BossEffect : public MultiParticle;
 	//用途: ボスの防御エフェクト
 	//--------------------------------------------------------------------------------------
@@ -2908,7 +2958,7 @@ namespace basecross {
 				auto SparkPtr = GetStage<GameStage>()->FindTagGameObject<MultiFire>(L"MultiFire");
 				SparkPtr->InsertFire(Emitter, m_Scale.x * 3.0f);
 
-				SetPosition(Vec3(0, -100, 0));
+				SetPosition(Vec3(0, -100, -100));
 				m_HP = m_DefaultHP;
 				m_StateMachine->ChangeState(EnemyWaitingState::Instance());
 				return;
@@ -2967,7 +3017,7 @@ namespace basecross {
 				m_CannonSound->Start(0, 1.0f);
 				m_Bomb = true;
 			}
-			m_Rigidbody->m_Velocity = m_ToBossVec * 15.0f;
+			m_Rigidbody->m_Velocity = m_ToBossVec * 18.0f;
 
 			//ボスとの衝突判定
 			float length = (m_BossPos - m_Rigidbody->m_Pos).length();
@@ -4690,6 +4740,7 @@ namespace basecross {
 		m_BeforeAttackTime(1.0f),
 		m_AttackRate(0.2f),
 		m_AttackBulletNum(30),
+		m_PrepareAttackTime(12.0f),
 		m_BarriorChangeTime(20.0f),
 		m_isLooked(false),
 		m_TotalTime(0)
@@ -4855,11 +4906,17 @@ namespace basecross {
 			if (m_frame_count >= m_BarriorChangeTime && m_now_barrior == 2) {
 				m_now_barrior = 3;
 				m_frame_count = 0.0f;
+				//m_isLooked = true;
+				//GetStage<GameStage>()->SetActiveObjects(false);
+			}
+			if (m_frame_count >= m_PrepareAttackTime && m_now_barrior == 3) {
+				m_now_barrior = 4;
+				m_frame_count = 0.0f;
 				m_isLooked = true;
 				GetStage<GameStage>()->SetActiveObjects(false);
 			}
 
-			if (m_now_barrior == 3) {
+			if (m_now_barrior == 4) {
 				AttackMove(now_num);
 			}
 
@@ -4877,6 +4934,10 @@ namespace basecross {
 			}
 			else if (m_now_barrior == 2) {
 				SparkPtr->InsertSpark(Emitter, L"Blue");
+			}
+			else if (m_now_barrior == 3) {
+				auto PreparePtr = GetStage()->FindTagGameObject<BossPrepareAttackEffect>(L"BossPrepareAttackEffect");
+				PreparePtr->InsertSpark(m_Pos);
 			}
 		}
 

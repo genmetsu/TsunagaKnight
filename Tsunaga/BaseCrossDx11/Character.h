@@ -365,8 +365,23 @@ namespace basecross {
 	};
 
 	//--------------------------------------------------------------------------------------
+	//class BossPrepareAttackEffect : public MultiParticle;
+	//用途 ボスの攻撃準備エフェクト
+	//--------------------------------------------------------------------------------------
+	class BossPrepareAttackEffect : public MultiParticle {
+	public:
+		//構築と破棄
+		BossPrepareAttackEffect(shared_ptr<Stage>& StagePtr);
+		virtual ~BossPrepareAttackEffect();
+		//初期化
+		virtual void OnCreate() override;
+		void InsertSpark(const Vec3& Pos);
+		virtual void OnUpdate() override;
+	};
+
+	//--------------------------------------------------------------------------------------
 	//class BossEffect : public MultiParticle;
-	//用途 ボスのエフェクト
+	//用途 ボスのバリアエフェクト
 	//--------------------------------------------------------------------------------------
 	class BossEffect : public MultiParticle {
 	public:
@@ -2593,6 +2608,9 @@ namespace basecross {
 
 		Vec3 m_DefaultPos;
 
+		//攻撃の準備時間
+		float m_PrepareAttackTime;
+		//バリアを変える時間
 		float m_BarriorChangeTime;
 
 		bool m_isDead;
