@@ -370,6 +370,14 @@ namespace basecross {
 				i);
 		}
 
+		AddGameObject<PauseSprite>(
+			L"RESULT_BACK",
+			Vec2(1280, 720),
+			0.0f,
+			Vec2(0, 0),
+			1, 1
+			); 
+
 		SetActiveObjects(false);
 		//文字列描画オブジェクトの作成
 		AddGameObject<StringDrawObject>();
@@ -615,7 +623,7 @@ namespace basecross {
 				else if (m_CameraPos.z <= -150) {
 					m_FogActive = true;
 					camera.m_CameraArmLen = 2.6f;
-					
+
 					camera.m_CamerAt = PlayerPtr->GetPosition();
 					camera.m_CamerAt.y += m_StartCameraY;
 					if (m_StartCameraY > 0.5f) {
@@ -688,8 +696,8 @@ namespace basecross {
 				//PostEvent(0.0f, GetThis<ObjectInterface>(), App::GetApp()->GetScene<Scene>(), L"ToEmptyStage");
 				//SetIsFail(true);
 			}
-			
-		}
+
+		}		
 	}
 
 	void GameStage::OnDrawStage() {
@@ -767,7 +775,7 @@ namespace basecross {
 	//ゲームクリアしたあとによばれる
 	void GameStage::GameClearBehaviour() {
 		m_AudioObjectPtr->Stop(L"BGM_1");
-		
+
 		SetActiveObjects(false);
 
 		AddGameObject<ResultSprite>(
@@ -847,6 +855,7 @@ namespace basecross {
 			Vec2(130, -240),
 			1, 1
 			);
+
 	}
 
 	//ゲームおーばーしたとき
