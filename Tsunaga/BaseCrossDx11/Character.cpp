@@ -1329,6 +1329,63 @@ namespace basecross {
 	}
 
 	//--------------------------------------------------------------------------------------
+	///	ポーズ
+	//--------------------------------------------------------------------------------------
+	PauseSprite::PauseSprite(const shared_ptr<Stage>& StagePtr,
+		const wstring& TextureResName,
+		const Vec2& StartScale,
+		float StartRot,
+		const Vec2& StartPos,
+		UINT XWrap, UINT YWrap) :
+		SpriteBase(StagePtr, TextureResName, StartScale, StartRot, StartPos, XWrap, YWrap),
+		m_TotalTime(0)
+	{
+		SetBlendState(BlendState::Trace);
+	}
+
+	void PauseSprite::AdjustVertex()
+	{
+
+	}
+
+	void  PauseSprite::UpdateVertex(float ElapsedTime, VertexPositionColorTexture* vertices) {
+		auto CntlVec = App::GetApp()->GetInputDevice().GetControlerVec();
+		if (CntlVec[0].wPressedButtons & XINPUT_GAMEPAD_START) 
+		{
+			m_isPause = true;
+		}
+		if (m_isPause == true)
+		 {
+			m_TotalTime += ElapsedTime * 3.0f;
+			if (m_TotalTime >= 1.0f) {
+				m_TotalTime = 1.0f;
+			}
+			//float sin_val = sin(m_TotalTime) * 0.5f + 0.5f;
+			Col4 UpdateCol(1.0f, 1.0f, 1.0f, m_TotalTime);
+			for (size_t i = 0; i < m_SquareMesh->GetNumVertices(); i++) {
+				vertices[i] = VertexPositionColorTexture(
+					m_BackupVertices[i].position,
+					UpdateCol,
+					m_BackupVertices[i].textureCoordinate
+				);
+
+			}
+		}
+		else {
+
+			Col4 UpdateCol(1.0f, 1.0f, 1.0f, 0.0f);
+			for (size_t i = 0; i < m_SquareMesh->GetNumVertices(); i++) {
+				vertices[i] = VertexPositionColorTexture(
+					m_BackupVertices[i].position,
+					UpdateCol,
+					m_BackupVertices[i].textureCoordinate
+				);
+
+			}
+		}
+	}
+	
+	//--------------------------------------------------------------------------------------
 	///	大砲のゲージ
 	//--------------------------------------------------------------------------------------
 	CannonGauge::CannonGauge(const shared_ptr<Stage>& StagePtr,
@@ -1356,6 +1413,7 @@ namespace basecross {
 	}
 
 	void CannonGauge::UpdateVertex(float ElapsedTime, VertexPositionColorTexture* vertices) {
+		
 		if (GetStage<GameStage>()->GetIsStart()) {
 			Col4 UpdateCol(1.0f, 1.0f, 1.0f, 1.0f);
 			for (size_t i = 0; i < m_SquareMesh->GetNumVertices(); i++) {
@@ -1379,6 +1437,7 @@ namespace basecross {
 					m_BackupVertices[i].textureCoordinate
 				);
 			}
+
 		}
 	}
 

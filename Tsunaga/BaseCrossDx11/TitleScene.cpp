@@ -122,7 +122,7 @@ namespace basecross {
 		auto CntlVec = App::GetApp()->GetInputDevice().GetControlerVec();
 		if (CntlVec[0].bConnected)
 		{
-			//Bƒ{ƒ^ƒ“
+			
 			if (CntlVec[0].wPressedButtons)
 			{
 				//PostEvent(0.0f, GetThis<ObjectInterface>(), App::GetApp()->GetScene<Scene>(), L"ToGameStage");
