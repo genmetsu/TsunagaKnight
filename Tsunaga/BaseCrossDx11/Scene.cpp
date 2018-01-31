@@ -292,6 +292,8 @@ namespace basecross {
 		App::GetApp()->RegisterResource(L"BOSS_MESH", ModelMesh);
 		ModelMesh = MeshResource::CreateBoneModelMesh(DataDir, L"Yamato_Fbx_v05.bmf");
 		App::GetApp()->RegisterResource(L"YAMATO_MESH", ModelMesh);
+		ModelMesh = MeshResource::CreateBoneModelMeshWithTangent(DataDir, L"Yamato_Fbx_v05.bmf");
+		App::GetApp()->RegisterResource(L"YAMATO_MESH_WITH_TAN", ModelMesh);
 		ModelMesh = MeshResource::CreateBoneModelMesh(DataDir, L"Medium_Boss_Hand_Main.bmf");
 		App::GetApp()->RegisterResource(L"HAND_BOSS_MESH", ModelMesh);
 

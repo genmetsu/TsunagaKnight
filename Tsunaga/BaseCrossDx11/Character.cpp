@@ -117,8 +117,6 @@ namespace basecross {
 	YamatoStage::~YamatoStage() {}
 
 	void YamatoStage::OnCreate() {
-		//メッシュの取得
-		auto MeshPtr = App::GetApp()->GetResource<MeshResource>(L"YAMATO_MESH");
 
 		//メッシュとトランスフォームの差分の設定
 		m_MeshToTransformMatrix.affineTransformation(
@@ -137,6 +135,8 @@ namespace basecross {
 			m_Pos
 		);
 
+		//メッシュの取得
+		auto MeshPtr = App::GetApp()->GetResource<MeshResource>(L"YAMATO_MESH_WITH_TAN");
 		auto TexPtr = App::GetApp()->GetResource<TextureResource>(m_TextureResName);
 		auto NormTexPtr = App::GetApp()->GetResource<TextureResource>(L"YAMATO_NORMAL_TX");
 
@@ -150,9 +150,10 @@ namespace basecross {
 		m_PtrObj->m_OwnShadowmapActive = m_OwnShadowActive;
 
 		m_PtrObj->m_UsedModelColor = false;
-		m_PtrObj->m_UsedModelTextre = true;
+		m_PtrObj->m_UsedModelTextre = false;
 		m_PtrObj->m_ShadowmapUse = true;
-
+		
+		//最初はFogを入れない
 		m_PtrObj->m_FogEnabled = false;
 		m_PtrObj->m_FogColor = Col4(0.07f, 0.0f, 0.09f, 1.0f);
 		m_PtrObj->m_FogStart = -3.0f;
@@ -161,12 +162,11 @@ namespace basecross {
 		//シャドウマップ描画データの構築
 		m_PtrShadowmapObj = make_shared<ShadowmapObject>();
 		m_PtrShadowmapObj->m_MeshRes = MeshPtr;
+		//法線マップを入れる
+		m_PtrShadowmapObj->m_IsNormalmap = true;
 		//描画データの行列をコピー
 		m_PtrShadowmapObj->m_WorldMatrix = World;
 		m_PtrShadowmapObj->m_Camera = GetStage<Stage>()->GetCamera();
-
-		//法線マップを入れる
-		m_PtrShadowmapObj->m_IsNormalmap = true;
 
 	}
 
