@@ -133,6 +133,8 @@ namespace basecross {
 		App::GetApp()->RegisterTexture(L"KUREHA_TX", strTexture);
 		strTexture = DataDir + L"Ymato_TX_02.tga";
 		App::GetApp()->RegisterTexture(L"YAMATO_TX", strTexture);
+		strTexture = DataDir + L"Ymato_Normal_TX.tga";
+		App::GetApp()->RegisterTexture(L"YAMATO_NORMAL_TX", strTexture);
 		strTexture = DataDir + L"Boss_tx_2.tga";
 		App::GetApp()->RegisterTexture(L"BOSS_TX", strTexture);
 		strTexture = DataDir + L"E_Needle_UV2.png";

@@ -138,13 +138,19 @@ namespace basecross {
 		);
 
 		auto TexPtr = App::GetApp()->GetResource<TextureResource>(m_TextureResName);
+		auto NormTexPtr = App::GetApp()->GetResource<TextureResource>(L"YAMATO_NORMAL_TX");
+
 		//描画データの構築
 		m_PtrObj = make_shared<BcDrawObject>();
 		m_PtrObj->m_MeshRes = MeshPtr;
 		m_PtrObj->m_TextureRes = TexPtr;
+		m_PtrObj->m_NormalTextureRes = NormTexPtr;
 		m_PtrObj->m_WorldMatrix = World;
 		m_PtrObj->m_Camera = GetStage<Stage>()->GetCamera();
 		m_PtrObj->m_OwnShadowmapActive = m_OwnShadowActive;
+
+		m_PtrObj->m_UsedModelColor = false;
+		m_PtrObj->m_UsedModelTextre = true;
 		m_PtrObj->m_ShadowmapUse = true;
 
 		m_PtrObj->m_FogEnabled = false;
@@ -158,6 +164,9 @@ namespace basecross {
 		//描画データの行列をコピー
 		m_PtrShadowmapObj->m_WorldMatrix = World;
 		m_PtrShadowmapObj->m_Camera = GetStage<Stage>()->GetCamera();
+
+		//法線マップを入れる
+		m_PtrShadowmapObj->m_IsNormalmap = true;
 
 	}
 
@@ -206,7 +215,7 @@ namespace basecross {
 		m_PtrObj->m_Camera = GetStage<Stage>()->GetCamera();
 		auto shptr = m_Renderer.lock();
 		if (!shptr) {
-			shptr = GetStage<Stage>()->FindTagGameObject<BcPNTStaticRenderer>(L"BcPNTStaticRenderer");
+			shptr = GetStage<Stage>()->FindTagGameObject<BcPNTnTStaticModelRenderer>(L"BcPNTnTStaticModelRenderer");
 			m_Renderer = shptr;
 		}
 		shptr->AddDrawObject(m_PtrObj);
