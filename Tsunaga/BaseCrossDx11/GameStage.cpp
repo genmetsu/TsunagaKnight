@@ -378,6 +378,27 @@ namespace basecross {
 			Vec2(0, 0),
 			1, 1
 			); 
+		AddGameObject<PauseSprite>(
+			L"RETRY_LOGO",
+			Vec2(200, 50),
+			0.0f,
+			Vec2(-130, -240),
+			1, 1
+			);
+		AddGameObject<PauseSprite>(
+			L"TO_TITLE_LOGO",
+			Vec2(200, 50),
+			0.0f,
+			Vec2(130, -240),
+			1, 1
+			);
+		AddGameObject<PauseCursorSprite>(
+			L"RESULT_ARROW",
+			Vec2(320, 80),
+			0.0f,
+			Vec2(-130, -240),
+			1, 1
+			);
 
 		SetActiveObjects(false);
 		//文字列描画オブジェクトの作成

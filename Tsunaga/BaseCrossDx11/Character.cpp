@@ -1348,22 +1348,39 @@ namespace basecross {
 
 	}
 
-	void  PauseSprite::UpdateVertex(float ElapsedTime, VertexPositionColorTexture* vertices) {
+	void  PauseSprite::UpdateVertex(float ElapsedTime, VertexPositionColorTexture* vertices)
+	{
 		auto CntlVec = App::GetApp()->GetInputDevice().GetControlerVec();
 		if (CntlVec[0].wPressedButtons & XINPUT_GAMEPAD_START) 
 		{
+			if(m_TotalTime == 0.0f)
+			{ 
 			m_isPause = true;
+			}
+
+			if(m_TotalTime == 1.0f)
+			{ 
+			m_isPause = false;
+			}
 		}
+		/*else if (CntlVec[0].wPressedButtons & XINPUT_GAMEPAD_START)
+		{
+			m_isPause = false;
+		}
+*/
 		if (m_isPause == true)
 		 {
 			m_TotalTime += ElapsedTime * 3.0f;
-			if (m_TotalTime >= 1.0f) {
+			if (m_TotalTime >= 1.0f) 
+			{
 				m_TotalTime = 1.0f;
 			}
 			//float sin_val = sin(m_TotalTime) * 0.5f + 0.5f;
 			Col4 UpdateCol(1.0f, 1.0f, 1.0f, m_TotalTime);
-			for (size_t i = 0; i < m_SquareMesh->GetNumVertices(); i++) {
-				vertices[i] = VertexPositionColorTexture(
+			for (size_t i = 0; i < m_SquareMesh->GetNumVertices(); i++) 
+			{
+				vertices[i] = VertexPositionColorTexture
+				(
 					m_BackupVertices[i].position,
 					UpdateCol,
 					m_BackupVertices[i].textureCoordinate
@@ -1371,11 +1388,18 @@ namespace basecross {
 
 			}
 		}
-		else {
-
-			Col4 UpdateCol(1.0f, 1.0f, 1.0f, 0.0f);
-			for (size_t i = 0; i < m_SquareMesh->GetNumVertices(); i++) {
-				vertices[i] = VertexPositionColorTexture(
+		else if(m_isPause == false)
+		{
+			m_TotalTime -= ElapsedTime * 3.0f;
+			if (m_TotalTime <= 0.0f)
+			{
+				m_TotalTime = 0.0f;
+			}
+			Col4 UpdateCol(1.0f, 1.0f, 1.0f, m_TotalTime);
+			for (size_t i = 0; i < m_SquareMesh->GetNumVertices(); i++)
+			{
+				vertices[i] = VertexPositionColorTexture
+				(
 					m_BackupVertices[i].position,
 					UpdateCol,
 					m_BackupVertices[i].textureCoordinate
@@ -1383,6 +1407,7 @@ namespace basecross {
 
 			}
 		}
+
 	}
 	
 	//--------------------------------------------------------------------------------------
@@ -1777,7 +1802,122 @@ namespace basecross {
 			
 		}
 	}
+	//--------------------------------------------------------------------------------------
+	///	ポーズカーソル
+	//--------------------------------------------------------------------------------------
+	PauseCursorSprite::PauseCursorSprite(const shared_ptr<Stage>& StagePtr,
+		const wstring& TextureResName,
+		const Vec2& StartScale,
+		float StartRot,
+		const Vec2& StartPos,
+		UINT XWrap, UINT YWrap) :
+		SpriteBase(StagePtr, TextureResName, StartScale, StartRot, StartPos, XWrap, YWrap),
+		m_TotalTime(0)
+	{
+		SetBlendState(BlendState::Trace);
+		m_Moved = false;
+	}
 
+	void PauseCursorSprite::AdjustVertex() {
+		//頂点色を変更する
+
+	}
+
+	void  PauseCursorSprite::UpdateVertex(float ElapsedTime, VertexPositionColorTexture* vertices) {
+		auto CntlVec = App::GetApp()->GetInputDevice().GetControlerVec();
+		if (CntlVec[0].wPressedButtons & XINPUT_GAMEPAD_START)
+		{
+			if (m_TotalTime == 0.0f)
+			{
+				m_isPause = true;
+			}
+
+			if (m_TotalTime == 1.0f)
+			{
+				m_isPause = false;
+			}
+		}
+		/*else if (CntlVec[0].wPressedButtons & XINPUT_GAMEPAD_START)
+		{
+		m_isPause = false;
+		}
+		*/
+		if (m_isPause == true)
+		{
+			m_TotalTime += ElapsedTime * 3.0f;
+			if (m_TotalTime >= 1.0f)
+			{
+				m_TotalTime = 1.0f;
+			}
+			//float sin_val = sin(m_TotalTime) * 0.5f + 0.5f;
+			Col4 UpdateCol(1.0f, 1.0f, 1.0f, m_TotalTime);
+			for (size_t i = 0; i < m_SquareMesh->GetNumVertices(); i++)
+			{
+				vertices[i] = VertexPositionColorTexture
+				(
+					m_BackupVertices[i].position,
+					UpdateCol,
+					m_BackupVertices[i].textureCoordinate
+				);
+
+			}
+			//コントローラの取得
+			if (CntlVec[0].bConnected) {
+				if (CntlVec[0].fThumbLX != 0) {
+					//コントローラの向き計算
+					float MoveX = CntlVec[0].fThumbLX;
+					if (MoveX > 0) {
+						if (MoveX > 0.8f && m_Moved == false) {
+							m_Pos.x *= -1.0f;
+							m_Moved = true;
+						}
+						else if (MoveX < 0.7f && m_Moved == true) {
+							m_Moved = false;
+						}
+					}
+					else if (MoveX < 0) {
+						if (MoveX < -0.8f && m_Moved == false) {
+							m_Pos.x *= -1.0f;
+							m_Moved = true;
+						}
+						else if (MoveX > -0.7f && m_Moved == true) {
+							m_Moved = false;
+						}
+					}
+				}
+				if ((CntlVec[0].wPressedButtons & XINPUT_GAMEPAD_A)
+					|| (CntlVec[0].wPressedButtons & XINPUT_GAMEPAD_B)) {
+					if (m_Pos.x < 0) {
+						PostEvent(0.0f, GetThis<ObjectInterface>(), App::GetApp()->GetScene<Scene>(), L"ToGameStage");
+					}
+					else {
+						PostEvent(0.0f, GetThis<ObjectInterface>(), App::GetApp()->GetScene<Scene>(), L"ToTitle");
+					}
+				}
+
+			}
+		}
+		else if (m_isPause == false)
+		{
+			m_TotalTime -= ElapsedTime * 3.0f;
+			if (m_TotalTime <= 0.0f)
+			{
+				m_TotalTime = 0.0f;
+				
+			}
+			Col4 UpdateCol(1.0f, 1.0f, 1.0f, m_TotalTime);
+			for (size_t i = 0; i < m_SquareMesh->GetNumVertices(); i++)
+			{
+				vertices[i] = VertexPositionColorTexture
+				(
+					m_BackupVertices[i].position,
+					UpdateCol,
+					m_BackupVertices[i].textureCoordinate
+				);
+
+			}
+		}
+	}
 	//--------------------------------------------------------------------------------------
 	///	背景スプライト
 	//--------------------------------------------------------------------------------------
