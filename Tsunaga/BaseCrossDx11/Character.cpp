@@ -1429,7 +1429,8 @@ namespace basecross {
 		const Vec2& StartPos,
 		UINT XWrap, UINT YWrap) :
 		SpriteBase(StagePtr, TextureResName, StartScale, StartRot, StartPos, XWrap, YWrap),
-		m_TotalTime(0)
+		m_TotalTime(0),
+		m_ChangeColorTime(3.0f)
 	{
 		SetBlendState(BlendState::Trace);
 		float HelfSize = 0.5f;
@@ -1444,16 +1445,69 @@ namespace basecross {
 	}
 
 	void CannonGauge::AdjustVertex() {
+		//頂点色を変更する
+		for (size_t i = 0; i < m_BackupVertices.size(); i++) {
+			switch (i) {
+			case 0:
+				m_BackupVertices[i].color = Col4(1.0f, 0.0f, 0.0f, 1.0f);
+				break;
+			case 1:
+				m_BackupVertices[i].color = Col4(1.0f, 0.0f, 0.0f, 1.0f);
+				break;
+			case 2:
+				m_BackupVertices[i].color = Col4(1.0f, 0.0f, 0.0f, 1.0f);
+				break;
+			case 3:
+				m_BackupVertices[i].color = Col4(1.0f, 0.0f, 0.0f, 1.0f);
+				break;
+			}
+		}
 	}
 
 	void CannonGauge::UpdateVertex(float ElapsedTime, VertexPositionColorTexture* vertices) {
 		
 		if (GetStage<GameStage>()->GetIsStart()) {
-			Col4 UpdateCol(1.0f, 1.0f, 1.0f, 1.0f);
 			for (size_t i = 0; i < m_SquareMesh->GetNumVertices(); i++) {
+				if (m_TotalTime < m_ChangeColorTime) {
+					m_BackupVertices[i].color.x -= (ElapsedTime * 2.0f);
+					if (m_BackupVertices[i].color.x < 0) {
+						m_BackupVertices[i].color.x = 0.0f;
+					}
+					m_BackupVertices[i].color.y += (ElapsedTime * 2.0f);
+					if (m_BackupVertices[i].color.y > 1.0f) {
+						m_BackupVertices[i].color.y = 1.0f;
+					}
+				}
+				else if (m_TotalTime < m_ChangeColorTime * 2.0f) {
+					m_BackupVertices[i].color.y -= (ElapsedTime * 2.0f);
+					if (m_BackupVertices[i].color.y < 0.4f) {
+						m_BackupVertices[i].color.y = 0.4f;
+					}
+					m_BackupVertices[i].color.z += (ElapsedTime * 2.0f);
+					if (m_BackupVertices[i].color.z > 1.0f) {
+						m_BackupVertices[i].color.z = 1.0f;
+					}
+				}
+				else if (m_TotalTime < m_ChangeColorTime * 3.0f) {
+					m_BackupVertices[i].color.y -= (ElapsedTime * 2.0f);
+					if (m_BackupVertices[i].color.y < 0.0f) {
+						m_BackupVertices[i].color.y = 0.0f;
+					}
+					m_BackupVertices[i].color.z -= (ElapsedTime * 2.0f);
+					if (m_BackupVertices[i].color.z < 0) {
+						m_BackupVertices[i].color.z = 0.0f;
+					}
+					m_BackupVertices[i].color.x += (ElapsedTime * 2.0f);
+					if (m_BackupVertices[i].color.x > 1.0f) {
+						m_BackupVertices[i].color.x = 1.0f;
+					}
+				}
+				else if (m_TotalTime >= m_ChangeColorTime * 3.0f) {
+					m_TotalTime = 0.0f;
+				}
 				vertices[i] = VertexPositionColorTexture(
 					m_BackupVertices[i].position,
-					UpdateCol,
+					m_BackupVertices[i].color,
 					m_BackupVertices[i].textureCoordinate
 				);
 			}
@@ -1461,6 +1515,8 @@ namespace basecross {
 			float HP = player->GetCannonHP();
 			float ratio = HP / player->GetDefaultBossHP();
 			m_Scale.x = m_DefaultSize * ratio;
+
+			m_TotalTime += ElapsedTime;
 		}
 		else {
 			Col4 UpdateCol(1.0f, 1.0f, 1.0f, 0.0f);
@@ -1471,7 +1527,6 @@ namespace basecross {
 					m_BackupVertices[i].textureCoordinate
 				);
 			}
-
 		}
 	}
 
@@ -1928,7 +1983,7 @@ namespace basecross {
 		}
 	}
 	//--------------------------------------------------------------------------------------
-	///	背景スプライト
+	///	UIスプライト、演出の際表示しない
 	//--------------------------------------------------------------------------------------
 	UISprite::UISprite(const shared_ptr<Stage>& StagePtr,
 		const wstring& TextureResName,
@@ -1956,6 +2011,102 @@ namespace basecross {
 					m_BackupVertices[i].textureCoordinate
 				);
 			}
+		}
+		else {
+			Col4 UpdateCol(1.0f, 1.0f, 1.0f, 0.0f);
+			for (size_t i = 0; i < m_SquareMesh->GetNumVertices(); i++) {
+				vertices[i] = VertexPositionColorTexture(
+					m_BackupVertices[i].position,
+					UpdateCol,
+					m_BackupVertices[i].textureCoordinate
+				);
+			}
+		}
+	}
+
+	//--------------------------------------------------------------------------------------
+	///	大砲ゲージスプライト
+	//--------------------------------------------------------------------------------------
+	CannonUISprite::CannonUISprite(const shared_ptr<Stage>& StagePtr,
+		const wstring& TextureResName,
+		const Vec2& StartScale,
+		float StartRot,
+		const Vec2& StartPos,
+		UINT XWrap, UINT YWrap) :
+		SpriteBase(StagePtr, TextureResName, StartScale, StartRot, StartPos, XWrap, YWrap),
+		m_TotalTime(0),
+		m_ChangeColorTime(3.0f)
+	{
+		SetBlendState(BlendState::Trace);
+	}
+
+	void CannonUISprite::AdjustVertex() {
+		//頂点色を変更する
+		for (size_t i = 0; i < m_BackupVertices.size(); i++) {
+			switch (i) {
+			case 0:
+				m_BackupVertices[i].color = Col4(1.0f, 0.0f, 0.0f, 1.0f);
+				break;
+			case 1:
+				m_BackupVertices[i].color = Col4(1.0f, 0.0f, 0.0f, 1.0f);
+				break;
+			case 2:
+				m_BackupVertices[i].color = Col4(1.0f, 0.0f, 0.0f, 1.0f);
+				break;
+			case 3:
+				m_BackupVertices[i].color = Col4(1.0f, 0.0f, 0.0f, 1.0f);
+				break;
+			}
+		}
+	}
+
+	void CannonUISprite::UpdateVertex(float ElapsedTime, VertexPositionColorTexture* vertices) {
+		if (GetStage<GameStage>()->GetIsStart()) {
+			for (size_t i = 0; i < m_SquareMesh->GetNumVertices(); i++) {
+				if (m_TotalTime < m_ChangeColorTime) {
+					m_BackupVertices[i].color.x -= (ElapsedTime * 2.0f);
+					if (m_BackupVertices[i].color.x < 0) {
+						m_BackupVertices[i].color.x = 0.0f;
+					}
+					m_BackupVertices[i].color.y += (ElapsedTime * 2.0f);
+					if (m_BackupVertices[i].color.y > 1.0f) {
+						m_BackupVertices[i].color.y = 1.0f;
+					}
+				}
+				else if (m_TotalTime < m_ChangeColorTime * 2.0f) {
+					m_BackupVertices[i].color.y -= (ElapsedTime * 2.0f);
+					if (m_BackupVertices[i].color.y < 0.4f) {
+						m_BackupVertices[i].color.y = 0.4f;
+					}
+					m_BackupVertices[i].color.z += (ElapsedTime * 2.0f);
+					if (m_BackupVertices[i].color.z > 1.0f) {
+						m_BackupVertices[i].color.z = 1.0f;
+					}
+				}
+				else if (m_TotalTime < m_ChangeColorTime * 3.0f) {
+					m_BackupVertices[i].color.y -= (ElapsedTime * 2.0f);
+					if (m_BackupVertices[i].color.y < 0.0f) {
+						m_BackupVertices[i].color.y = 0.0f;
+					}
+					m_BackupVertices[i].color.z -= (ElapsedTime * 2.0f);
+					if (m_BackupVertices[i].color.z < 0) {
+						m_BackupVertices[i].color.z = 0.0f;
+					}
+					m_BackupVertices[i].color.x += (ElapsedTime * 2.0f);
+					if (m_BackupVertices[i].color.x > 1.0f) {
+						m_BackupVertices[i].color.x = 1.0f;
+					}
+				}
+				else if (m_TotalTime >= m_ChangeColorTime * 3.0f) {
+					m_TotalTime = 0.0f;
+				}
+				vertices[i] = VertexPositionColorTexture(
+					m_BackupVertices[i].position,
+					m_BackupVertices[i].color,
+					m_BackupVertices[i].textureCoordinate
+				);
+			}
+			m_TotalTime += ElapsedTime;
 		}
 		else {
 			Col4 UpdateCol(1.0f, 1.0f, 1.0f, 0.0f);
