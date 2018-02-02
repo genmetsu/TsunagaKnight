@@ -2605,6 +2605,8 @@ namespace basecross {
 
 		//Å‰‚ÌHP
 		float m_DefaultHP;
+		//ƒoƒŠƒA‚Ì‘Ï‹v—Í
+		float m_BarriorHP;
 
 		Vec3 m_DefaultPos;
 

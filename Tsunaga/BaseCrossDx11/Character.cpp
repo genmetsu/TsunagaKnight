@@ -3040,9 +3040,6 @@ namespace basecross {
 
 				auto BossPtr = GetStage()->FindTagGameObject<Boss>(L"BossEnemy");
 				BossPtr->Damage(1.0f);
-				if (BossPtr->GetHP() >= 0.0f) {
-					BossPtr->ChangeAnimation(L"Damage");
-				}
 
 				m_StateMachine->ChangeState(EnemyWaitingState::Instance());
 				return;
@@ -4787,6 +4784,9 @@ namespace basecross {
 		m_NowAttackBulletNum = 0;
 
 		m_HP = 75.0f;
+
+		m_BarriorHP = 5.0f;
+
 		m_DefaultHP = m_HP;
 		AddTag(L"BossEnemy");
 
@@ -4954,7 +4954,16 @@ namespace basecross {
 
 	void Boss::Damage(float value) {
 		auto player = GetStage()->FindTagGameObject<Player>(L"Player");
+		//バリアと同じ色の砲撃をした場合,バリアの耐久力を下げる
 		if (player->GetIsCannon() == m_now_barrior) {
+			m_BarriorHP--;
+			if (m_BarriorHP <= 0.0f) {
+				m_now_barrior = 3;
+				m_BarriorHP = 5.0f;
+			}
+		}
+		//攻撃準備中時の処理、ダメージを多くする
+		else if(m_now_barrior == 3) {
 			if (m_isDamage) {
 				m_DamageRate += 0.75f;
 				m_HP -= (value + m_DamageRate) * 1.7f;
@@ -4964,6 +4973,12 @@ namespace basecross {
 				SetIsDamage(true);
 				m_DamageRate++;
 			}
+			if (m_HP > 0.0f) {
+				ChangeAnimation(L"Damage");
+			}
+		}//バリアの色と違う砲撃ならダメージ無し
+		else if (player->GetIsCannon() != m_now_barrior) {
+
 		}
 		else {
 			if (m_isDamage) {
@@ -4974,6 +4989,9 @@ namespace basecross {
 				m_HP -= value;
 				SetIsDamage(true);
 				m_DamageRate++;
+			}
+			if (m_HP > 0.0f) {
+				ChangeAnimation(L"Damage");
 			}
 		}
 	}
