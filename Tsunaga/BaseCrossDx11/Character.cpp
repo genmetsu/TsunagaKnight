@@ -117,8 +117,6 @@ namespace basecross {
 	YamatoStage::~YamatoStage() {}
 
 	void YamatoStage::OnCreate() {
-		//メッシュの取得
-		auto MeshPtr = App::GetApp()->GetResource<MeshResource>(L"YAMATO_MESH");
 
 		//メッシュとトランスフォームの差分の設定
 		m_MeshToTransformMatrix.affineTransformation(
@@ -137,16 +135,25 @@ namespace basecross {
 			m_Pos
 		);
 
+		//メッシュの取得
+		auto MeshPtr = App::GetApp()->GetResource<MeshResource>(L"YAMATO_MESH_WITH_TAN");
 		auto TexPtr = App::GetApp()->GetResource<TextureResource>(m_TextureResName);
+		auto NormTexPtr = App::GetApp()->GetResource<TextureResource>(L"YAMATO_NORMAL_TX");
+
 		//描画データの構築
 		m_PtrObj = make_shared<BcDrawObject>();
 		m_PtrObj->m_MeshRes = MeshPtr;
 		m_PtrObj->m_TextureRes = TexPtr;
+		m_PtrObj->m_NormalTextureRes = NormTexPtr;
 		m_PtrObj->m_WorldMatrix = World;
 		m_PtrObj->m_Camera = GetStage<Stage>()->GetCamera();
 		m_PtrObj->m_OwnShadowmapActive = m_OwnShadowActive;
-		m_PtrObj->m_ShadowmapUse = true;
 
+		m_PtrObj->m_UsedModelColor = false;
+		m_PtrObj->m_UsedModelTextre = false;
+		m_PtrObj->m_ShadowmapUse = true;
+		
+		//最初はFogを入れない
 		m_PtrObj->m_FogEnabled = false;
 		m_PtrObj->m_FogColor = Col4(0.07f, 0.0f, 0.09f, 1.0f);
 		m_PtrObj->m_FogStart = -3.0f;
@@ -155,6 +162,8 @@ namespace basecross {
 		//シャドウマップ描画データの構築
 		m_PtrShadowmapObj = make_shared<ShadowmapObject>();
 		m_PtrShadowmapObj->m_MeshRes = MeshPtr;
+		//法線マップを入れる
+		m_PtrShadowmapObj->m_IsNormalmap = true;
 		//描画データの行列をコピー
 		m_PtrShadowmapObj->m_WorldMatrix = World;
 		m_PtrShadowmapObj->m_Camera = GetStage<Stage>()->GetCamera();
@@ -206,7 +215,7 @@ namespace basecross {
 		m_PtrObj->m_Camera = GetStage<Stage>()->GetCamera();
 		auto shptr = m_Renderer.lock();
 		if (!shptr) {
-			shptr = GetStage<Stage>()->FindTagGameObject<BcPNTStaticRenderer>(L"BcPNTStaticRenderer");
+			shptr = GetStage<Stage>()->FindTagGameObject<BcPNTnTStaticModelRenderer>(L"BcPNTnTStaticModelRenderer");
 			m_Renderer = shptr;
 		}
 		shptr->AddDrawObject(m_PtrObj);
@@ -3230,9 +3239,6 @@ namespace basecross {
 
 				auto BossPtr = GetStage()->FindTagGameObject<Boss>(L"BossEnemy");
 				BossPtr->Damage(1.0f);
-				if (BossPtr->GetHP() >= 0.0f) {
-					BossPtr->ChangeAnimation(L"Damage");
-				}
 
 				m_StateMachine->ChangeState(EnemyWaitingState::Instance());
 				return;
@@ -4977,6 +4983,9 @@ namespace basecross {
 		m_NowAttackBulletNum = 0;
 
 		m_HP = 75.0f;
+
+		m_BarriorHP = 5.0f;
+
 		m_DefaultHP = m_HP;
 		AddTag(L"BossEnemy");
 
@@ -5144,7 +5153,16 @@ namespace basecross {
 
 	void Boss::Damage(float value) {
 		auto player = GetStage()->FindTagGameObject<Player>(L"Player");
+		//バリアと同じ色の砲撃をした場合,バリアの耐久力を下げる
 		if (player->GetIsCannon() == m_now_barrior) {
+			m_BarriorHP--;
+			if (m_BarriorHP <= 0.0f) {
+				m_now_barrior = 3;
+				m_BarriorHP = 5.0f;
+			}
+		}
+		//攻撃準備中時の処理、ダメージを多くする
+		else if(m_now_barrior == 3) {
 			if (m_isDamage) {
 				m_DamageRate += 0.75f;
 				m_HP -= (value + m_DamageRate) * 1.7f;
@@ -5154,6 +5172,12 @@ namespace basecross {
 				SetIsDamage(true);
 				m_DamageRate++;
 			}
+			if (m_HP > 0.0f) {
+				ChangeAnimation(L"Damage");
+			}
+		}//バリアの色と違う砲撃ならダメージ無し
+		else if (player->GetIsCannon() != m_now_barrior) {
+
 		}
 		else {
 			if (m_isDamage) {
@@ -5164,6 +5188,9 @@ namespace basecross {
 				m_HP -= value;
 				SetIsDamage(true);
 				m_DamageRate++;
+			}
+			if (m_HP > 0.0f) {
+				ChangeAnimation(L"Damage");
 			}
 		}
 	}

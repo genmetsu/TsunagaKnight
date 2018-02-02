@@ -133,6 +133,8 @@ namespace basecross {
 		App::GetApp()->RegisterTexture(L"KUREHA_TX", strTexture);
 		strTexture = DataDir + L"Ymato_TX_02.tga";
 		App::GetApp()->RegisterTexture(L"YAMATO_TX", strTexture);
+		strTexture = DataDir + L"Ymato_Normal_TX.tga";
+		App::GetApp()->RegisterTexture(L"YAMATO_NORMAL_TX", strTexture);
 		strTexture = DataDir + L"Boss_tx_2.tga";
 		App::GetApp()->RegisterTexture(L"BOSS_TX", strTexture);
 		strTexture = DataDir + L"E_Needle_UV2.png";
@@ -290,6 +292,8 @@ namespace basecross {
 		App::GetApp()->RegisterResource(L"BOSS_MESH", ModelMesh);
 		ModelMesh = MeshResource::CreateBoneModelMesh(DataDir, L"Yamato_Fbx_v05.bmf");
 		App::GetApp()->RegisterResource(L"YAMATO_MESH", ModelMesh);
+		ModelMesh = MeshResource::CreateBoneModelMeshWithTangent(DataDir, L"Yamato_Fbx_v05.bmf");
+		App::GetApp()->RegisterResource(L"YAMATO_MESH_WITH_TAN", ModelMesh);
 		ModelMesh = MeshResource::CreateBoneModelMesh(DataDir, L"Medium_Boss_Hand_Main.bmf");
 		App::GetApp()->RegisterResource(L"HAND_BOSS_MESH", ModelMesh);
 

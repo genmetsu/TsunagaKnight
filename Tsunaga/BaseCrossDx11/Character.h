@@ -164,7 +164,7 @@ namespace basecross {
 		//描画データ
 		shared_ptr<BcDrawObject> m_PtrObj;
 		//描画オブジェクト(weak_ptr)
-		weak_ptr<BcPNTStaticRenderer> m_Renderer;
+		weak_ptr<BcPNTnTStaticModelRenderer> m_Renderer;
 		//シャドウマップ用描画データ
 		shared_ptr<ShadowmapObject> m_PtrShadowmapObj;
 		//シャドウマップ描画オブジェクト(weak_ptr)
@@ -2703,6 +2703,8 @@ namespace basecross {
 
 		//最初のHP
 		float m_DefaultHP;
+		//バリアの耐久力
+		float m_BarriorHP;
 
 		Vec3 m_DefaultPos;
 
