@@ -38,12 +38,21 @@ namespace basecross {
 
 	void GameStage::OnCreate() {
 		m_FrameCount = 0.0f;
+		m_TutorialCount = 0.0f;
 		m_isClear = false;
 		m_isFail = false;
 		m_isGameStart = false;
 		m_FogActive = false;
 		m_CameraPos = Vec3(50, 10, 150);
 		m_StartCameraY = 6.0f;
+
+		m_isAttackTuto = false;
+		m_isStepTuto = false;
+		m_isCannonTuto = false;
+		m_isBarriorTuto = false;
+		m_isBossAttackTuto = false;
+		m_isChanceTuto = false;
+		m_isCameraTuto = false;
 		
 		//シャドウマップの描画デバイスの取得
 		auto Dev = App::GetApp()->GetDeviceResources();
@@ -189,6 +198,16 @@ namespace basecross {
 				Vec3((float)rand() / 32767 * 20.0f - 10.0f, 0.125f, 60.0f - (float)rand() / 32767 * 15.0f),
 				false);
 		}
+
+		AddGameObject<NeedleEnemy>(
+			Par,
+			L"NEEDLE_MESH",
+			L"NEEDLE_TX",
+			L"30frame",
+			Vec3(0.25f, 0.25f, 0.25f),
+			Quat(Vec3(0, 1.0f, 0), XM_PI),
+			Vec3(0.0f, 0.125f, 25.0f),
+			false);
 
 		for (int i = 0; i < 20; i++) {
 			float x = (float)(i + 1);
@@ -379,6 +398,15 @@ namespace basecross {
 				i);
 		}
 
+		AddGameObject<TutorialMessageSprite>(
+			L"Tuto_Move_TX",
+			Vec2(512, 64),
+			0.0f,
+			Vec2(0, 200),
+			1, 1,
+			L"Left"
+			);
+
 		AddGameObject<PauseSprite>(
 			L"RESULT_BACK",
 			Vec2(1280, 720),
@@ -490,6 +518,77 @@ namespace basecross {
 		//コントローラの取得
 		auto CntlVec = App::GetApp()->GetInputDevice().GetControlerVec();
 		if (CntlVec[0].bConnected) {
+
+			if (m_isGameStart == true) {
+				if (m_TutorialCount >= 8.0f && m_isCameraTuto == false) {
+					AddGameObject<TutorialMessageSprite>(
+						L"Tuto_Camera_TX",
+						Vec2(512, 64),
+						0.0f,
+						Vec2(0, 200),
+						1, 1,
+						L"Right"
+						);
+					m_isCameraTuto = true;
+				}
+
+				if (m_TutorialCount >= 2.0f && m_isAttackTuto == false) {
+					AddGameObject<TutorialSprite>(
+						L"Tuto_Attack_TX",
+						Vec2(500.0f * 0.8f, 800.0f * 0.8f),
+						0.0f,
+						Vec2(440, 0),
+						1, 1
+						);
+					m_isAttackTuto = true;
+				}
+
+				if (m_TutorialCount >= 20.0f && m_isStepTuto == false) {
+					AddGameObject<TutorialSprite>(
+						L"Tuto_Step_TX",
+						Vec2(500.0f * 0.8f, 800.0f * 0.8f),
+						0.0f,
+						Vec2(440, 0),
+						1, 1
+						);
+					m_isStepTuto = true;
+				}
+
+				if (m_TutorialCount >= 40.0f && m_isCannonTuto == false) {
+					AddGameObject<TutorialSprite>(
+						L"Tuto_Cannon_TX",
+						Vec2(500.0f * 0.8f, 800.0f * 0.8f),
+						0.0f,
+						Vec2(440, 0),
+						1, 1
+						);
+					m_isCannonTuto = true;
+				}
+
+				auto PtrBoss = FindTagGameObject<Boss>(L"BossEnemy");
+				if (PtrBoss->GetIsbarrior() == true && m_isBarriorTuto == false) {
+						AddGameObject<TutorialSprite>(
+							L"Tuto_Barrior_TX",
+							Vec2(512, 128),
+							0.0f,
+							Vec2(0, 200),
+							1, 1
+							);
+						m_isBarriorTuto = true;
+				}
+				if (PtrBoss->GetNowBarrior() == 3 && m_isChanceTuto == false) {
+					AddGameObject<TutorialSprite>(
+						L"Tuto_Charge_TX",
+						Vec2(512, 128),
+						0.0f,
+						Vec2(0, 200),
+						1, 1
+						);
+					m_isChanceTuto = true;
+				}
+
+				m_TutorialCount += ElapsedTime;
+			}
 
 			auto GM = GameManager::getInstance();
 			GM->m_camera_length = camera.m_CameraArmLen;
@@ -631,6 +730,16 @@ namespace basecross {
 				}
 			}
 			else if (boss->GetIsLooked()) {
+				if (m_isBossAttackTuto == false) {
+					AddGameObject<TutorialSprite>(
+						L"Tuto_BossAttack_TX",
+						Vec2(512, 128),
+						0.0f,
+						Vec2(0, 200),
+						1, 1
+						);
+					m_isBossAttackTuto = true;
+				}
 
 				Vec3 boss_pos = boss->GetPosition();
 				camera.m_CamerAt = boss_pos;
@@ -647,7 +756,7 @@ namespace basecross {
 					camera.m_CamerAt = Vec3(0, 0, 30);
 					camera.m_CameraArmLen = 100;
 					//ここ
-					m_CameraPos.z -= ElapsedTime * 500.0f;
+					m_CameraPos.z -= ElapsedTime * 70.0f;
 					camera.m_CamerEye = m_CameraPos;
 				}
 				else if (m_CameraPos.z <= -150) {
@@ -662,6 +771,7 @@ namespace basecross {
 					else {
 						m_isGameStart = true;
 						SetActiveObjects(true);
+						
 					}
 
 					Vec3 CameraLocalEye =

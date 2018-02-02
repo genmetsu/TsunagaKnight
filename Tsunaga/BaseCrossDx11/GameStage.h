@@ -27,7 +27,17 @@ namespace basecross {
 		Vec3 m_CameraPos;
 
 		float m_FrameCount;
+		float m_TutorialCount;
 		float m_StartCameraY;
+
+		bool m_isCameraTuto;
+		bool m_isBarriorTuto;
+		bool m_isBossAttackTuto;
+		bool m_isChanceTuto;
+		bool m_isAttackTuto;
+		bool m_isStepTuto;
+		bool m_isCannonTuto;
+
 		bool m_FogActive;
 		bool m_isClear;
 		bool m_isFail;

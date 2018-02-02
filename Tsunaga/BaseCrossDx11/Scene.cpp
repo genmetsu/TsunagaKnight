@@ -177,6 +177,23 @@ namespace basecross {
 		strTexture = DataDir + L"kuro.png";
 		App::GetApp()->RegisterTexture(L"kuro_TX", strTexture);
 
+		strTexture = DataDir + L"Tutorial_Move.png";
+		App::GetApp()->RegisterTexture(L"Tuto_Move_TX", strTexture);
+		strTexture = DataDir + L"Tutorial_Camera.png";
+		App::GetApp()->RegisterTexture(L"Tuto_Camera_TX", strTexture);
+		strTexture = DataDir + L"Tutorial_Barrier.png";
+		App::GetApp()->RegisterTexture(L"Tuto_Barrior_TX", strTexture);
+		strTexture = DataDir + L"Tutorial_Charge.png";
+		App::GetApp()->RegisterTexture(L"Tuto_Charge_TX", strTexture);
+		strTexture = DataDir + L"Tutorial_Energie.png";
+		App::GetApp()->RegisterTexture(L"Tuto_BossAttack_TX", strTexture);
+		strTexture = DataDir + L"Tutorial_Attack.png";
+		App::GetApp()->RegisterTexture(L"Tuto_Attack_TX", strTexture);
+		strTexture = DataDir + L"Tutorial_Step.png";
+		App::GetApp()->RegisterTexture(L"Tuto_Step_TX", strTexture);
+		strTexture = DataDir + L"Tutorial_Cannon.png";
+		App::GetApp()->RegisterTexture(L"Tuto_Cannon_TX", strTexture);
+
 
 
 		strTexture = DataDir + L"Boss_HP_Icon.png";

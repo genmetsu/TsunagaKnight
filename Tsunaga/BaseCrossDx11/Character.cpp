@@ -1731,6 +1731,74 @@ namespace basecross {
 	//--------------------------------------------------------------------------------------
 	///	メッセージを表示するスプライト
 	//--------------------------------------------------------------------------------------
+	TutorialMessageSprite::TutorialMessageSprite(const shared_ptr<Stage>& StagePtr,
+		const wstring& TextureResName,
+		const Vec2& StartScale,
+		float StartRot,
+		const Vec2& StartPos,
+		UINT XWrap, UINT YWrap,
+		wstring tag) :
+		SpriteBase(StagePtr, TextureResName, StartScale, StartRot, StartPos, XWrap, YWrap),
+		m_TotalTime(0)
+	{
+		SetBlendState(BlendState::Trace);
+		my_tag = tag;
+		m_isPressed = false;
+	}
+
+	void TutorialMessageSprite::AdjustVertex() {
+		//ここでは何もしない
+	}
+
+	void  TutorialMessageSprite::UpdateVertex(float ElapsedTime, VertexPositionColorTexture* vertices) {
+
+		if (GetStage<GameStage>()->GetIsStart() && m_isPressed == false) {
+			m_TotalTime += (ElapsedTime * 5.0f);
+			if (m_TotalTime >= XM_2PI) {
+				m_TotalTime = 0;
+			}
+			float sin_val = sin(m_TotalTime) * 0.5f + 0.5f;
+			Col4 UpdateCol(1.0f, 1.0f, 1.0f, sin_val);
+			for (size_t i = 0; i < m_SquareMesh->GetNumVertices(); i++) {
+				vertices[i] = VertexPositionColorTexture(
+					m_BackupVertices[i].position,
+					UpdateCol,
+					m_BackupVertices[i].textureCoordinate
+				);
+			}
+			auto CntlVec = App::GetApp()->GetInputDevice().GetControlerVec();
+			if (CntlVec[0].bConnected) {
+				if (my_tag == L"Left") {
+					if (CntlVec[0].fThumbLX >= 0.3f || CntlVec[0].fThumbLX <= -0.3f
+						|| CntlVec[0].fThumbLY >= 0.3f || CntlVec[0].fThumbLY <= -0.3f) {
+						m_isPressed = true;
+					}
+				}
+				if (my_tag == L"Right") {
+					if (CntlVec[0].fThumbRX >= 0.3f || CntlVec[0].fThumbRX <= -0.3f
+						|| CntlVec[0].fThumbRY >= 0.3f || CntlVec[0].fThumbRY <= -0.3f) {
+						m_isPressed = true;
+					}
+				}
+			}
+		}
+		else {
+			Col4 UpdateCol(1.0f, 1.0f, 1.0f, 0.0f);
+			for (size_t i = 0; i < m_SquareMesh->GetNumVertices(); i++) {
+				vertices[i] = VertexPositionColorTexture(
+					m_BackupVertices[i].position,
+					UpdateCol,
+					m_BackupVertices[i].textureCoordinate
+				);
+			}
+		}
+
+		
+	}
+
+	//--------------------------------------------------------------------------------------
+	///	メッセージを表示するスプライト
+	//--------------------------------------------------------------------------------------
 	ResultSprite::ResultSprite(const shared_ptr<Stage>& StagePtr,
 		const wstring& TextureResName,
 		const Vec2& StartScale,
@@ -1778,6 +1846,61 @@ namespace basecross {
 			}
 		}
 	}
+
+	//--------------------------------------------------------------------------------------
+	///	メッセージを表示するスプライト
+	//--------------------------------------------------------------------------------------
+	TutorialSprite::TutorialSprite(const shared_ptr<Stage>& StagePtr,
+		const wstring& TextureResName,
+		const Vec2& StartScale,
+		float StartRot,
+		const Vec2& StartPos,
+		UINT XWrap, UINT YWrap) :
+		SpriteBase(StagePtr, TextureResName, StartScale, StartRot, StartPos, XWrap, YWrap),
+		m_TotalTime(0)
+	{
+		m_FrameCount = 0.0f;
+		SetBlendState(BlendState::Trace);
+	}
+
+	void TutorialSprite::AdjustVertex() {
+		//頂点色を変更する
+
+	}
+
+	void  TutorialSprite::UpdateVertex(float ElapsedTime, VertexPositionColorTexture* vertices) {
+		if (m_FrameCount < 5.0f) {
+			m_TotalTime += ElapsedTime;
+			if (m_TotalTime >= 1.0f) {
+				m_TotalTime = 1.0f;
+			}
+			//float sin_val = sin(m_TotalTime) * 0.5f + 0.5f;
+			Col4 UpdateCol(1.0f, 1.0f, 1.0f, m_TotalTime);
+			for (size_t i = 0; i < m_SquareMesh->GetNumVertices(); i++) {
+				vertices[i] = VertexPositionColorTexture(
+					m_BackupVertices[i].position,
+					UpdateCol,
+					m_BackupVertices[i].textureCoordinate
+				);
+
+			}
+			m_FrameCount += ElapsedTime;
+		}
+		else {
+
+			Col4 UpdateCol(1.0f, 1.0f, 1.0f, 0.0f);
+			for (size_t i = 0; i < m_SquareMesh->GetNumVertices(); i++) {
+				vertices[i] = VertexPositionColorTexture(
+					m_BackupVertices[i].position,
+					UpdateCol,
+					m_BackupVertices[i].textureCoordinate
+				);
+
+			}
+		}
+	}
+
+
 
 	//--------------------------------------------------------------------------------------
 	///	メッセージを表示するスプライト
@@ -2693,7 +2816,7 @@ namespace basecross {
 	}
 
 	void EnemyObject::WaitingStartBehaviour() {
-		SetPosition(Vec3(0, -100, 0));
+		SetPosition(Vec3(0, -100, -100));
 		m_Rigidbody->m_Velocity = Vec3(0, 0, 0);
 		m_Tackle = false;
 		m_FrameCount = 0.0f;
@@ -3317,7 +3440,6 @@ namespace basecross {
 				auto SparkPtr = GetStage<GameStage>()->FindTagGameObject<MultiFire>(L"MultiFire");
 				SparkPtr->InsertFire(Emitter, m_Scale.x * 3.0f);
 
-				SetPosition(Vec3(0, -100, -100));
 				m_HP = m_DefaultHP;
 				m_StateMachine->ChangeState(EnemyWaitingState::Instance());
 				return;
@@ -5091,13 +5213,13 @@ namespace basecross {
 		m_Pos(Pos),
 		m_DefaultPos(Pos),
 		m_OwnShadowActive(OwnShadowActive),
-		m_SpawnTime(3.0f),
+		m_SpawnTime(1.0f),
 		m_BulletSpeed(2.0f),
 		m_BeforeAttackTime(1.0f),
 		m_AttackRate(0.2f),
 		m_AttackBulletNum(30),
-		m_PrepareAttackTime(12.0f),
-		m_BarriorChangeTime(20.0f),
+		m_PrepareAttackTime(15.0f),
+		m_BarriorChangeTime(30.0f),
 		m_DamageFrameCount(0.0f),
 		m_isBarrior(false),
 		m_isLooked(false),
@@ -5135,7 +5257,7 @@ namespace basecross {
 		m_now_barrior = -1;
 		m_NowAttackBulletNum = 0;
 
-		m_HP = 150.0f;
+		m_HP = 100.0f;
 
 		m_BarriorHP = 5.0f;
 
@@ -5230,9 +5352,9 @@ namespace basecross {
 			m_DamageRate = 0.0f;
 		}
 
+		if (m_isDead == false) {
 
-		//ボスが生きているときの処理
-		if (m_HP > 0.0f && m_isBarrior) {
+			//スポーン処理
 			if (m_SpawnCount > m_SpawnTime) {
 				int num = rand() % 3;
 				if (num == 0) {
@@ -5248,99 +5370,92 @@ namespace basecross {
 			}
 			m_SpawnCount += ElapsedTime;
 
-			auto player = GetStage()->FindTagGameObject<Player>(L"Player");
-			//大砲を撃っているときはFrameCountしないようにする
-			int now_num = player->GetIsCannon();
-			if (now_num == 3) {
-				m_frame_count += ElapsedTime;
-			}
+			//ボスが生きているときの処理
+			if (m_isBarrior == true) {
 
-			//一定時間毎にバリアを変える
-			if (m_frame_count >= m_BarriorChangeTime && m_now_barrior == 0) {
-				m_now_barrior = 1;
-				m_frame_count = 0.0f;
-			}
-			if (m_frame_count >= m_BarriorChangeTime && m_now_barrior == 1) {
-				m_now_barrior = 2;
-				m_frame_count = 0.0f;
-			}
-			if (m_frame_count >= m_BarriorChangeTime && m_now_barrior == 2) {
-				m_now_barrior = 3;
-				m_frame_count = 0.0f;
-			}
-			if (m_frame_count >= m_PrepareAttackTime && m_now_barrior == 3) {
-				m_now_barrior = 4;
-				m_frame_count = 0.0f;
-				m_isLooked = true;
-				GetStage<GameStage>()->SetActiveObjects(false);
-			}
-
-			if (m_now_barrior == 4) {
-				AttackMove(now_num);
-			}
-
-			Vec3 Emitter = m_Rigidbody->m_Pos;
-			Emitter.x -= 3.0f;
-			Emitter.y -= 3.0f;
-			Emitter.z += 3.0f;
-			//バリアエフェクトの送出
-			auto SparkPtr = GetStage<GameStage>()->FindTagGameObject<BossEffect>(L"BossEffect");
-			if (m_now_barrior == 0) {
-				SparkPtr->InsertSpark(Emitter, L"Green");
-			}
-			else if (m_now_barrior == 1) {
-				SparkPtr->InsertSpark(Emitter, L"Red");
-			}
-			else if (m_now_barrior == 2) {
-				SparkPtr->InsertSpark(Emitter, L"Blue");
-			}
-			else if (m_now_barrior == 3) {
-				auto PreparePtr = GetStage()->FindTagGameObject<BossPrepareAttackEffect>(L"BossPrepareAttackEffect");
-				PreparePtr->InsertSpark(m_Pos);
-			}
-		}
-		else if (m_HP > 0.0f && m_isBarrior == false) {
-			if (m_SpawnCount > m_SpawnTime) {
-				int num = rand() % 3;
-				if (num == 0) {
-					SpawnEnemy(L"Green");
+				auto player = GetStage()->FindTagGameObject<Player>(L"Player");
+				//大砲を撃っているときはFrameCountしないようにする
+				int now_num = player->GetIsCannon();
+				if (now_num == 3) {
+					m_frame_count += ElapsedTime;
 				}
-				if (num == 1) {
-					SpawnEnemy(L"Red");
+
+				//一定時間毎にバリアを変える
+				if (m_frame_count >= m_BarriorChangeTime && m_now_barrior == 0) {
+					m_now_barrior = 1;
+					m_frame_count = 0.0f;
 				}
-				if (num == 2) {
-					SpawnEnemy(L"Blue");
+				if (m_frame_count >= m_BarriorChangeTime && m_now_barrior == 1) {
+					m_now_barrior = 2;
+					m_frame_count = 0.0f;
 				}
-				m_SpawnCount = 0.0f;
-			}
-			m_SpawnCount += ElapsedTime;
+				if (m_frame_count >= m_BarriorChangeTime && m_now_barrior == 2) {
+					m_now_barrior = 3;
+					m_frame_count = 0.0f;
+				}
+				if (m_frame_count >= m_BarriorChangeTime * 3.0f && m_now_barrior == -1) {
+					m_now_barrior = 3;
+					m_frame_count = 0.0f;
+				}
+				if (m_frame_count >= m_PrepareAttackTime && m_now_barrior == 3) {
+					m_now_barrior = 4;
+					m_frame_count = 0.0f;
+					m_isLooked = true;
+					GetStage<GameStage>()->SetActiveObjects(false);
+				}
+				
+				if (m_now_barrior == 4) {
+					AttackMove(now_num);
+				}
 
-			auto player = GetStage()->FindTagGameObject<Player>(L"Player");
-			//大砲を撃っているときはFrameCountしないようにする
-			int now_num = player->GetIsCannon();
-			if (now_num == 3) {
-				m_frame_count += ElapsedTime;
+				Vec3 Emitter = m_Rigidbody->m_Pos;
+				Emitter.x -= 3.0f;
+				Emitter.y -= 3.0f;
+				Emitter.z += 3.0f;
+				//バリアエフェクトの送出
+				auto SparkPtr = GetStage<GameStage>()->FindTagGameObject<BossEffect>(L"BossEffect");
+				if (m_now_barrior == 0) {
+					SparkPtr->InsertSpark(Emitter, L"Green");
+				}
+				else if (m_now_barrior == 1) {
+					SparkPtr->InsertSpark(Emitter, L"Red");
+				}
+				else if (m_now_barrior == 2) {
+					SparkPtr->InsertSpark(Emitter, L"Blue");
+				}
+				else if (m_now_barrior == 3) {
+					auto PreparePtr = GetStage()->FindTagGameObject<BossPrepareAttackEffect>(L"BossPrepareAttackEffect");
+					PreparePtr->InsertSpark(m_Pos);
+				}
 			}
+			else if (m_isBarrior == false) {
+				auto player = GetStage()->FindTagGameObject<Player>(L"Player");
+				//大砲を撃っているときはFrameCountしないようにする
+				int now_num = player->GetIsCannon();
+				if (now_num == 3) {
+					m_frame_count += ElapsedTime;
+				}
 
-			//一定時間毎にバリアを変える
-			if (m_frame_count >= m_BarriorChangeTime * 3.0f && m_now_barrior == -1) {
-				m_now_barrior = 3;
-				m_frame_count = 0.0f;
-			}
-			if (m_frame_count >= m_PrepareAttackTime && m_now_barrior == 3) {
-				m_now_barrior = 4;
-				m_frame_count = 0.0f;
-				m_isLooked = true;
-				GetStage<GameStage>()->SetActiveObjects(false);
-			}
+				//一定時間毎にバリアを変える
+				if (m_frame_count >= m_BarriorChangeTime * 3.0f && m_now_barrior == -1) {
+					m_now_barrior = 3;
+					m_frame_count = 0.0f;
+				}
+				if (m_frame_count >= m_PrepareAttackTime && m_now_barrior == 3) {
+					m_now_barrior = 4;
+					m_frame_count = 0.0f;
+					m_isLooked = true;
+					GetStage<GameStage>()->SetActiveObjects(false);
+				}
 
-			if (m_now_barrior == 4) {
-				AttackMove(now_num);
-			}
+				if (m_now_barrior == 4) {
+					AttackMove(now_num);
+				}
 
-			if (m_now_barrior == 3) {
-				auto PreparePtr = GetStage()->FindTagGameObject<BossPrepareAttackEffect>(L"BossPrepareAttackEffect");
-				PreparePtr->InsertSpark(m_Pos);
+				if (m_now_barrior == 3) {
+					auto PreparePtr = GetStage()->FindTagGameObject<BossPrepareAttackEffect>(L"BossPrepareAttackEffect");
+					PreparePtr->InsertSpark(m_Pos);
+				}
 			}
 		}
 	}
@@ -5390,8 +5505,12 @@ namespace basecross {
 
 		}
 		
-		if (m_HP <= 50.0f && m_isBarrior == false) {
+		if (m_HP <= m_DefaultHP /2.0f && m_isBarrior == false) {
+			m_HP = m_DefaultHP / 2.0f;
 			m_isBarrior = true;
+			if (m_now_barrior != 4) {
+				m_now_barrior = 0;
+			}
 		}
 	}
 
@@ -5489,10 +5608,10 @@ namespace basecross {
 			else if (m_Rigidbody->m_Pos.y >= m_DefaultPos.y && m_NowAttackBulletNum > 0) {
 				m_AttackFrameCount = 0.0f;
 				m_NowAttackBulletNum = 0;
-				if(m_HP >= 50){
+				if(m_isBarrior == false){
 					m_now_barrior = -1;
 				}
-				else {
+				else if(m_isBarrior) {
 					m_now_barrior = 0;
 				}
 			}
