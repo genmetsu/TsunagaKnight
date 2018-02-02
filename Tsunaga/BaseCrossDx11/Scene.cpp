@@ -398,6 +398,9 @@ namespace basecross {
 		wstring MissileWav = DataDir + L"Missile.wav";
 		App::GetApp()->RegisterWav(L"Missile", MissileWav);
 
+		wstring CannonDamageWav = DataDir + L"CannonDamage.wav";
+		App::GetApp()->RegisterWav(L"CannonDamage", CannonDamageWav);
+
 	}
 
 
