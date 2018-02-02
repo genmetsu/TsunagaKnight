@@ -10,7 +10,7 @@ LRESULT CALLBACK	WndProc(HWND, UINT, WPARAM, LPARAM);
 
 //定数
 const wchar_t* pClassName = L"BaseCrossDx11Class";
-const wchar_t* pWndTitle = L"BaseCrossDx11Sample";
+const wchar_t* pWndTitle = L"TsunagaKnight";
 
 
 //--------------------------------------------------------------------------------------
@@ -111,6 +111,7 @@ HWND InitInstance(HINSTANCE hInstance, int nCmdShow, bool isFullScreen, int iCli
 		hWnd,       //取得したウインドウのハンドル
 		nCmdShow    //WinMainに渡されたパラメータ
 	);
+	ShowCursor(false);
 	UpdateWindow(hWnd);
 	return hWnd;
 }
