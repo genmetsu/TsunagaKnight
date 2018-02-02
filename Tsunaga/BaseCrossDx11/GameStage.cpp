@@ -353,11 +353,19 @@ namespace basecross {
 			Vec2(-600, 325),
 			1, 1
 			);
+
 		AddGameObject<UISprite>(
 			L"CANNON_ICON_TX",
-			Vec2(52, 52),
+			Vec2(78, 78),
 			0.0f,
-			Vec2(-530, 325),
+			Vec2(-525, 325),
+			1, 1
+			);
+		AddGameObject<CannonUISprite>(
+			L"CANNON_ICON_TX",
+			Vec2(72, 72),
+			0.0f,
+			Vec2(-525, 325),
 			1, 1
 			);
 

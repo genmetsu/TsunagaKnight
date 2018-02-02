@@ -133,7 +133,7 @@ namespace basecross {
 		App::GetApp()->RegisterTexture(L"KUREHA_TX", strTexture);
 		strTexture = DataDir + L"Ymato_TX_02.tga";
 		App::GetApp()->RegisterTexture(L"YAMATO_TX", strTexture);
-		strTexture = DataDir + L"Ymato_Normal_TX.tga";
+		strTexture = DataDir + L"Ymato_Normal_TX33.tga";
 		App::GetApp()->RegisterTexture(L"YAMATO_NORMAL_TX", strTexture);
 		strTexture = DataDir + L"Boss_tx_2.tga";
 		App::GetApp()->RegisterTexture(L"BOSS_TX", strTexture);
@@ -181,15 +181,15 @@ namespace basecross {
 
 		strTexture = DataDir + L"Boss_HP_Icon.png";
 		App::GetApp()->RegisterTexture(L"BOSS_ICON_TX", strTexture);
-		strTexture = DataDir + L"Cannon_HP_Icon.png";
+		strTexture = DataDir + L"Cannon_HP_Icon_v3.png";
 		App::GetApp()->RegisterTexture(L"CANNON_ICON_TX", strTexture);
 		strTexture = DataDir + L"Boss_HP_Bar_v2.png";
 		App::GetApp()->RegisterTexture(L"BOSS_BAR_TX", strTexture);
 		strTexture = DataDir + L"Boss_HP_Frame.png";
 		App::GetApp()->RegisterTexture(L"BOSS_FRAME_TX", strTexture);
-		strTexture = DataDir + L"Cannon_HP_Bar_v2.png";
+		strTexture = DataDir + L"Cannon_HP_Bar_v3.png";
 		App::GetApp()->RegisterTexture(L"CANNON_BAR_TX", strTexture);
-		strTexture = DataDir + L"Cannon_HP_Frame.png";
+		strTexture = DataDir + L"Cannon_HP_Frame_v3.png";
 		App::GetApp()->RegisterTexture(L"CANNON_FRAME_TX", strTexture);
 		strTexture = DataDir + L"Player_HP_Bar.png";
 		App::GetApp()->RegisterTexture(L"PLAYER_BAR_TX", strTexture);
