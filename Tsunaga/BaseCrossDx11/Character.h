@@ -2750,6 +2750,9 @@ namespace basecross {
 		//HP
 		float m_HP;
 
+		//バリアを張っているか
+		bool m_isBarrior;
+
 		//カメラがボスに注目するかどうかのflg
 		bool m_isLooked;
 
@@ -2772,6 +2775,8 @@ namespace basecross {
 		bool m_UpdateActive;
 
 		float m_frame_count;
+
+		float m_DamageFrameCount;
 
 		bool m_isDamage;
 

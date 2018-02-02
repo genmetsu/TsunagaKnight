@@ -5098,6 +5098,8 @@ namespace basecross {
 		m_AttackBulletNum(30),
 		m_PrepareAttackTime(12.0f),
 		m_BarriorChangeTime(20.0f),
+		m_DamageFrameCount(0.0f),
+		m_isBarrior(false),
 		m_isLooked(false),
 		m_TotalTime(0)
 	{}
@@ -5130,10 +5132,10 @@ namespace basecross {
 		m_AttackFrameCount = 0.0f;
 
 		m_DamageRate = 0.0f;
-		m_now_barrior = 0;
+		m_now_barrior = -1;
 		m_NowAttackBulletNum = 0;
 
-		m_HP = 75.0f;
+		m_HP = 150.0f;
 
 		m_BarriorHP = 5.0f;
 
@@ -5220,17 +5222,17 @@ namespace basecross {
 
 		//ダメージを受けた後すぐまたダメージをうけるとよりダメージが増えるように
 		if (m_isDamage) {
-			m_frame_count += ElapsedTime;
+			m_DamageFrameCount += ElapsedTime;
 		}
-		if (m_frame_count >= 2.0f && m_isDamage == true) {
+		if (m_DamageFrameCount >= 2.0f && m_isDamage == true) {
 			m_isDamage = false;
-			m_frame_count = 0.0f;
+			m_DamageFrameCount = 0.0f;
 			m_DamageRate = 0.0f;
 		}
 
 
 		//ボスが生きているときの処理
-		if (m_HP > 0.0f) {
+		if (m_HP > 0.0f && m_isBarrior) {
 			if (m_SpawnCount > m_SpawnTime) {
 				int num = rand() % 3;
 				if (num == 0) {
@@ -5265,8 +5267,6 @@ namespace basecross {
 			if (m_frame_count >= m_BarriorChangeTime && m_now_barrior == 2) {
 				m_now_barrior = 3;
 				m_frame_count = 0.0f;
-				//m_isLooked = true;
-				//GetStage<GameStage>()->SetActiveObjects(false);
 			}
 			if (m_frame_count >= m_PrepareAttackTime && m_now_barrior == 3) {
 				m_now_barrior = 4;
@@ -5299,7 +5299,50 @@ namespace basecross {
 				PreparePtr->InsertSpark(m_Pos);
 			}
 		}
+		else if (m_HP > 0.0f && m_isBarrior == false) {
+			if (m_SpawnCount > m_SpawnTime) {
+				int num = rand() % 3;
+				if (num == 0) {
+					SpawnEnemy(L"Green");
+				}
+				if (num == 1) {
+					SpawnEnemy(L"Red");
+				}
+				if (num == 2) {
+					SpawnEnemy(L"Blue");
+				}
+				m_SpawnCount = 0.0f;
+			}
+			m_SpawnCount += ElapsedTime;
 
+			auto player = GetStage()->FindTagGameObject<Player>(L"Player");
+			//大砲を撃っているときはFrameCountしないようにする
+			int now_num = player->GetIsCannon();
+			if (now_num == 3) {
+				m_frame_count += ElapsedTime;
+			}
+
+			//一定時間毎にバリアを変える
+			if (m_frame_count >= m_BarriorChangeTime * 3.0f && m_now_barrior == -1) {
+				m_now_barrior = 3;
+				m_frame_count = 0.0f;
+			}
+			if (m_frame_count >= m_PrepareAttackTime && m_now_barrior == 3) {
+				m_now_barrior = 4;
+				m_frame_count = 0.0f;
+				m_isLooked = true;
+				GetStage<GameStage>()->SetActiveObjects(false);
+			}
+
+			if (m_now_barrior == 4) {
+				AttackMove(now_num);
+			}
+
+			if (m_now_barrior == 3) {
+				auto PreparePtr = GetStage()->FindTagGameObject<BossPrepareAttackEffect>(L"BossPrepareAttackEffect");
+				PreparePtr->InsertSpark(m_Pos);
+			}
+		}
 	}
 
 	void Boss::Damage(float value) {
@@ -5308,14 +5351,14 @@ namespace basecross {
 		if (player->GetIsCannon() == m_now_barrior) {
 			m_BarriorHP--;
 			if (m_BarriorHP <= 0.0f) {
-				m_now_barrior = 3;
+				m_now_barrior = -1;
 				m_BarriorHP = 5.0f;
 			}
 		}
 		//攻撃準備中時の処理、ダメージを多くする
 		else if(m_now_barrior == 3) {
 			if (m_isDamage) {
-				m_DamageRate += 0.75f;
+				m_DamageRate += 0.5f;
 				m_HP -= (value + m_DamageRate) * 1.7f;
 			}
 			else {
@@ -5326,13 +5369,11 @@ namespace basecross {
 			if (m_HP > 0.0f) {
 				ChangeAnimation(L"Damage");
 			}
-		}//バリアの色と違う砲撃ならダメージ無し
-		else if (player->GetIsCannon() != m_now_barrior) {
-
 		}
-		else {
+		//バリアを張っていなければ通常ダメージ
+		else if (m_now_barrior == -1 || m_now_barrior == 4) {
 			if (m_isDamage) {
-				m_DamageRate += 0.75f;
+				m_DamageRate += 0.5f;
 				m_HP -= (value + m_DamageRate);
 			}
 			else {
@@ -5343,6 +5384,14 @@ namespace basecross {
 			if (m_HP > 0.0f) {
 				ChangeAnimation(L"Damage");
 			}
+		}
+		//バリアの色と違う砲撃ならダメージ無し
+		else if (player->GetIsCannon() != m_now_barrior) {
+
+		}
+		
+		if (m_HP <= 50.0f && m_isBarrior == false) {
+			m_isBarrior = true;
 		}
 	}
 
@@ -5440,7 +5489,12 @@ namespace basecross {
 			else if (m_Rigidbody->m_Pos.y >= m_DefaultPos.y && m_NowAttackBulletNum > 0) {
 				m_AttackFrameCount = 0.0f;
 				m_NowAttackBulletNum = 0;
-				m_now_barrior = 0;
+				if(m_HP >= 50){
+					m_now_barrior = -1;
+				}
+				else {
+					m_now_barrior = 0;
+				}
 			}
 			else if (m_AttackFrameCount >= m_BeforeAttackTime) {
 				if (m_isLooked == true) {
@@ -5467,7 +5521,9 @@ namespace basecross {
 							Vec3 ShootPos = m_Rigidbody->m_Pos;
 							ShootPos.y = 0.4f;
 
-							Ptr->Wakeup(ShootPos, ToPosVec.normalize() * m_BulletSpeed);
+							float RandomSpeed = (Util::RandZeroToOne() + 1.0f);
+
+							Ptr->Wakeup(ShootPos, ToPosVec.normalize() * m_BulletSpeed * RandomSpeed);
 							m_NowAttackBulletNum++;
 							m_AttackFrameCount = (m_BeforeAttackTime - m_AttackRate);
 							return;

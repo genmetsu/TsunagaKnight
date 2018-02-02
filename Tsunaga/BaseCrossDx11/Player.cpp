@@ -552,7 +552,7 @@ namespace basecross {
 		//前回のターンからの経過時間を求める
 		float ElapsedTime = App::GetApp()->GetElapsedTime();
 
-		m_Rigidbody->m_Velocity += m_StepVec * (1.0f - m_FrameCount * 3.0f);
+		m_Rigidbody->m_Velocity += m_StepVec * (1.1f - m_FrameCount * 3.0f);
 		m_FrameCount += ElapsedTime;
 
 		if (m_FrameCount >= 0.3f) {
