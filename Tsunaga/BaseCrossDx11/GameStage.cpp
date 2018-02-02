@@ -968,41 +968,91 @@ namespace basecross {
 	//--------------------------------------------------------------------------------------
 	///	空のステージ（メッセージのみある）
 	//--------------------------------------------------------------------------------------
-	void EmptyStage::OnCreate() {
+	void CreditScene::OnCreate() {
 		//メッセージスプライト
-		m_MessageSprite = ObjectFactory::Create<MessageSprite>(
-			GetThis<Stage>(),
-			L"MESSAGE_TX",
-			Vec2(256, 64),
+		AddGameObject<MultiSprite>(
+			L"siro_TX",
+			Vec2(1280, 720),
 			0.0f,
 			Vec2(0, 0),
 			1, 1);
+
+		AddGameObject<MultiSprite>(
+			L"MaouDamashii_TX",
+			Vec2(256 * 2, 60 * 2),
+			0.0f,
+			Vec2(0, 240),
+			1, 1);
+
+		AddGameObject<MultiSprite>(
+			L"Onjin_TX",
+			Vec2(256 * 2, 60 * 2),
+			0.0f,
+			Vec2(0, 0),
+			1, 1);
+
+		AddGameObject<MultiSprite>(
+			L"KoukaonRabo_TX",
+			Vec2(256 * 2, 60 * 2),
+			0.0f,
+			Vec2(0, -240),
+			1, 1);
+
+		AddGameObject<DimSprite>(
+			L"kuro_TX",
+			Vec2(1280, 720),
+			0.0f,
+			Vec2(0, 0),
+			1, 1
+			);
 	}
-	void EmptyStage::OnUpdateStage() {
+	void CreditScene::OnUpdateStage() {
 		//スプライトの更新
-		m_MessageSprite->OnUpdate();
+		//m_MessageSprite->OnUpdate();
 		//自分自身の更新
-		this->OnUpdate();
-	}
-	void EmptyStage::OnUpdate() {
-		//コントローラの取得
-		auto CntlVec = App::GetApp()->GetInputDevice().GetControlerVec();
-		if (CntlVec[0].bConnected) {
-			//Bボタン
-			if (CntlVec[0].wPressedButtons & XINPUT_GAMEPAD_B) {
-				PostEvent(0.0f, GetThis<ObjectInterface>(), App::GetApp()->GetScene<Scene>(), L"ToGameStage");
-			}
+		GetRigidbodyManager()->InitRigidbody();
+		for (auto& v : GetGameObjectVec()) 
+		{
+			//各オブジェクトの更新
+			v->OnUpdate();
 		}
 	}
+	void CreditScene::OnUpdate() {
+		//コントローラの取得
+		auto CntlVec = App::GetApp()->GetInputDevice().GetControlerVec();
+		if (CntlVec[0].bConnected)
+		{
+			//Bボタン
+			if (CntlVec[0].wPressedButtons & XINPUT_GAMEPAD_B)
+			{
+				//PostEvent(0.0f, GetThis<ObjectInterface>(), App::GetApp()->GetScene<Scene>(), L"ToTitle");
+			}
 
-	void EmptyStage::OnDrawStage() {
+		}
+
+	}
+
+	void CreditScene::OnDrawStage() {
 		//描画デバイスの取得
 		auto Dev = App::GetApp()->GetDeviceResources();
 		Dev->ClearDefaultViews(Col4(0, 0, 0, 1.0f));
+
+		//シャドオウマップ描画の開始
+		Dev->ClearShadowmapViews();
+		Dev->StartShadowmapDraw();
+		for (auto& v : GetGameObjectVec())
+		{
+			//各オブジェクトの描画
+			v->OnDrawShadowmap();
+		}
+		Dev->EndShadowmapDraw();
+
 		//デフォルト描画の開始
 		Dev->StartDefaultDraw();
-		//スプライト描画
-		m_MessageSprite->OnDraw();
+		for (auto& v : GetGameObjectVec()) {
+			//各オブジェクトの描画
+			v->OnDraw();
+		}
 		//自分自身の描画
 		this->OnDraw();
 		//デフォルト描画の終了
@@ -1010,7 +1060,7 @@ namespace basecross {
 	}
 
 
-	void EmptyStage::OnDraw() {
+	void CreditScene::OnDraw() {
 		//何もしない
 	}
 

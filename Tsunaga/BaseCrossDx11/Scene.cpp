@@ -275,6 +275,18 @@ namespace basecross {
 		strTexture = DataDir + L"TitleLogoBack.png";
 		App::GetApp()->RegisterTexture(L"TITLE_LOGO_BACK_TX", strTexture);
 
+		strTexture = DataDir + L"MaouDamashii.png";
+		App::GetApp()->RegisterTexture(L"MaouDamashii_TX", strTexture);
+
+		strTexture = DataDir + L"Onjin.png";
+		App::GetApp()->RegisterTexture(L"Onjin_TX", strTexture);
+
+		strTexture = DataDir + L"KoukaonRabo.png";
+		App::GetApp()->RegisterTexture(L"KoukaonRabo_TX", strTexture);
+
+		strTexture = DataDir + L"siro.png";
+		App::GetApp()->RegisterTexture(L"siro_TX", strTexture);
+
 		//ボーンモデルのリソース
 		auto ModelMesh = MeshResource::CreateBoneModelMesh(DataDir, L"Kureha_fbx_v5.bmf");
 		App::GetApp()->RegisterResource(L"KUREHA_MESH", ModelMesh);
@@ -409,6 +421,8 @@ namespace basecross {
 		//自分自身にイベントを送る
 		//これにより各ステージやオブジェクトがCreate時にシーンにアクセスできる]
 		PostEvent(0.0f, GetThis<ObjectInterface>(), GetThis<Scene>(), L"ToTitle");
+		//PostEvent(0.0f, GetThis<ObjectInterface>(), GetThis<Scene>(), L"ToCreditScene");
+
 	}
 
 	void Scene::OnUpdate() {
@@ -420,6 +434,10 @@ namespace basecross {
 	}
 
 	void Scene::OnEvent(const shared_ptr<Event>& event) {
+		if (event->m_MsgStr == L"ToCreditScene") {
+			//アクティブステージをCreditSceneに設定
+			ResetActiveStage<CreditScene>();
+		}
 		if (event->m_MsgStr == L"ToTitle") {
 			//アクティブステージをGameStageに設定
 			ResetActiveStage<TitleScene>();
@@ -427,10 +445,6 @@ namespace basecross {
 		if (event->m_MsgStr == L"ToGameStage") {
 			//アクティブステージをGameStageに設定
 			ResetActiveStage<GameStage>();
-		}
-		else if (event->m_MsgStr == L"ToEmptyStage") {
-			//アクティブステージをEmptyStageに設定
-			ResetActiveStage<EmptyStage>();
 		}
 	}
 }
