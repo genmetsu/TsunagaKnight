@@ -2860,7 +2860,8 @@ namespace basecross {
 		//Å‰‚ÌHP
 		float m_DefaultHP;
 		//ƒoƒŠƒA‚Ì‘Ï‹v—Í
-		float m_BarriorHP;
+		float m_BarrierHP;
+		float m_DefalutBarrierHP;
 
 		Vec3 m_DefaultPos;
 

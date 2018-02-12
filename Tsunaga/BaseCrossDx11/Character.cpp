@@ -796,7 +796,7 @@ namespace basecross {
 			rParticleSprite.m_LocalScale = Vec2(0.1f, 0.1f) * Size;
 			rParticleSprite.m_LocalPos += MoveVec * 0.15f;
 			//色の指定
-			rParticleSprite.m_Color = Col4(1.0f, 0.0f, 0.0f, 1.0f);
+			rParticleSprite.m_Color = Col4(1.0f, 0.0f, 1.0f, 1.0f);
 		}
 	}
 
@@ -850,7 +850,7 @@ namespace basecross {
 			rParticleSprite.m_LocalScale = Vec2(0.1f, 0.1f);
 			rParticleSprite.m_LocalPos += (MoveVec * 1.5f);
 			//色の指定
-			rParticleSprite.m_Color = Col4(1.0f, 1.0f, 0.0f, 1.0f);
+			rParticleSprite.m_Color = Col4(1.0f, 0.0f, 1.0f, 1.0f);
 		}
 	}
 
@@ -902,7 +902,7 @@ namespace basecross {
 			rParticleSprite.m_LocalScale = Vec2(1.0f, 1.0f);
 			rParticleSprite.m_LocalPos += (MoveVec * 1.5f);
 			//色の指定
-			rParticleSprite.m_Color = Col4(1.0f, 0.0f, 0.0f, 1.0f);
+			rParticleSprite.m_Color = Col4(1.0f, 0.0f, 1.0f, 1.0f);
 		}
 	}
 
@@ -3498,7 +3498,7 @@ namespace basecross {
 				m_CannonSound->Start(0, 1.0f);
 				m_Bomb = true;
 			}
-			m_Rigidbody->m_Velocity = m_ToBossVec * 18.0f;
+			m_Rigidbody->m_Velocity = m_ToBossVec * 25.0f;
 
 			//ボスとの衝突判定
 			float length = (m_BossPos - m_Rigidbody->m_Pos).length();
@@ -5258,10 +5258,11 @@ namespace basecross {
 		m_NowAttackBulletNum = 0;
 
 		m_HP = 100.0f;
-
-		m_BarriorHP = 5.0f;
-
 		m_DefaultHP = m_HP;
+
+		m_BarrierHP = 9.0f;
+		m_DefalutBarrierHP = m_BarrierHP;
+		
 		AddTag(L"BossEnemy");
 
 		m_isDead = false;
@@ -5462,12 +5463,12 @@ namespace basecross {
 
 	void Boss::Damage(float value) {
 		auto player = GetStage()->FindTagGameObject<Player>(L"Player");
-		//バリアと同じ色の砲撃をした場合,バリアの耐久力を下げる
+		//バリアと同じ色の砲撃をした場合,バリアの耐久力を　大きく　下げる
 		if (player->GetIsCannon() == m_now_barrior) {
-			m_BarriorHP--;
-			if (m_BarriorHP <= 0.0f) {
+			m_BarrierHP -= 3.0f;
+			if (m_BarrierHP <= 0.0f) {
 				m_now_barrior = -1;
-				m_BarriorHP = 5.0f;
+				m_BarrierHP = m_DefalutBarrierHP;
 			}
 		}
 		//攻撃準備中時の処理、ダメージを多くする
@@ -5500,12 +5501,15 @@ namespace basecross {
 				ChangeAnimation(L"Damage");
 			}
 		}
-		//バリアの色と違う砲撃ならダメージ無し
+		//バリアの色と違う砲撃なら少しだけ耐久を下げる
 		else if (player->GetIsCannon() != m_now_barrior) {
-
+			m_BarrierHP -= 1.0f;
+			if (m_BarrierHP <= 0.0f) {
+				m_now_barrior = -1;
+				m_BarrierHP = m_DefalutBarrierHP;
+			}
 		}
-		
-		if (m_HP <= m_DefaultHP /2.0f && m_isBarrior == false) {
+		if (m_HP <= m_DefaultHP / 2.0f && m_isBarrior == false) {
 			m_HP = m_DefaultHP / 2.0f;
 			m_isBarrior = true;
 			if (m_now_barrior != 4) {
