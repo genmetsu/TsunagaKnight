@@ -22,7 +22,6 @@ namespace basecross {
 		//複数使用する球体の登録（リソース登録する）
 		void RegisterDefaultSphere();
 		weak_ptr<Player> m_PtrPlayer;
-		shared_ptr<MultiAudioObject> m_AudioObjectPtr;
 
 		Vec3 m_CameraPos;
 
@@ -43,6 +42,7 @@ namespace basecross {
 		bool m_isFail;
 		bool m_isGameStart;
 	public:
+		shared_ptr<MultiAudioObject> m_AudioObjectPtr;
 		//--------------------------------------------------------------------------------------
 		/*!
 		@brief コンストラクタ

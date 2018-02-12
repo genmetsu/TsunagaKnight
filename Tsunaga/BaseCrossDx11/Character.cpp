@@ -2076,9 +2076,11 @@ namespace basecross {
 					|| (CntlVec[0].wPressedButtons & XINPUT_GAMEPAD_B)) {
 					if (m_Pos.x < 0) {
 						PostEvent(0.0f, GetThis<ObjectInterface>(), App::GetApp()->GetScene<Scene>(), L"ToGameStage");
+						GetStage<GameStage>()->m_AudioObjectPtr->Stop(L"BGM_1");
 					}
 					else {
 						PostEvent(0.0f, GetThis<ObjectInterface>(), App::GetApp()->GetScene<Scene>(), L"ToTitle");
+						GetStage<GameStage>()->m_AudioObjectPtr->Stop(L"BGM_1");
 					}
 				}
 
