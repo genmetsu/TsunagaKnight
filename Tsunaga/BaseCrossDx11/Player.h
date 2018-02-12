@@ -28,6 +28,12 @@ namespace basecross {
 		bool m_JumpLock;
 		/// ステップ（回避行動）してるかどうか
 		bool m_isStep;
+		/// ダメージを受け無敵化かどうか
+		bool m_isDamaging;
+		///ダメージを受けた後の時間計測用変数
+		float m_DamageFrameCount;
+		///ダメージ後の無敵時間
+		float m_DamagingTime;
 
 		bool m_UpdateActive;
 
@@ -321,6 +327,14 @@ namespace basecross {
 		}
 		int GetIsCannon() {
 			return m_NowCannonClass;
+		}
+
+		void SetDamaging(bool value) {
+			m_isDamaging = value;
+		}
+
+		bool GetDamaging() {
+			return m_isDamaging;
 		}
 
 		void SetInvincible(bool value) {

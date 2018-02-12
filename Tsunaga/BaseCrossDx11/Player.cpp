@@ -26,7 +26,10 @@ namespace basecross {
 		m_FOV(0.707f),
 		m_NowCannonClass(3),
 		m_JumpLock(false),
-		m_isInvincible(false)
+		m_isInvincible(false),
+		m_isDamaging(false),
+		m_DamageFrameCount(0.0f),
+		m_DamagingTime(3.5f)
 	{
 		//メッシュとトランスフォームの差分の設定
 		m_MeshToTransformMatrix.affineTransformation(
@@ -173,6 +176,22 @@ namespace basecross {
 		m_StateMachine->Update();
 		CollisionWithCannon();
 
+		if (m_isDamaging) {
+			if (m_DamageFrameCount >= m_DamagingTime) {
+				m_DamageFrameCount = 0.0f;
+				m_PtrObj->m_UsedModelColor = true;
+				SetDamaging(false);
+				return;
+			}
+			//色を点滅させる
+			if (m_PtrObj->m_UsedModelColor == true) {
+				m_PtrObj->m_UsedModelColor = false;
+			}
+			else if (m_PtrObj->m_UsedModelColor == false) {
+				m_PtrObj->m_UsedModelColor = true;
+			}
+			m_DamageFrameCount += ElapsedTime;
+		}
 
 		if (m_PtrObj->m_CurrentAnimeName == L"CannonStart" && m_PtrObj->m_CurrentAnimeTime > 0.99f) {
 			ChangeAnimation(L"Default");
@@ -369,44 +388,45 @@ namespace basecross {
 
 		RunningAnimation();
 		MoveControll();
-		
-		//敵との当たり判定
-		vector<shared_ptr<GameObject>> EnemyVec;
-		GetStage<GameStage>()->FindTagGameObjectVec(L"EnemyObject", EnemyVec);
-		for (auto enemy : EnemyVec) {
-			if (enemy) {
-				auto PtrEnemy = dynamic_pointer_cast<EnemyObject>(enemy);
+		if (m_isDamaging == false) {
+			//敵との当たり判定
+			vector<shared_ptr<GameObject>> EnemyVec;
+			GetStage<GameStage>()->FindTagGameObjectVec(L"EnemyObject", EnemyVec);
+			for (auto enemy : EnemyVec) {
+				if (enemy) {
+					auto PtrEnemy = dynamic_pointer_cast<EnemyObject>(enemy);
 
-				Vec3 EnemyPos = PtrEnemy->GetPosition();
-				float length = (EnemyPos - m_Rigidbody->m_Pos).length();
+					Vec3 EnemyPos = PtrEnemy->GetPosition();
+					float length = (EnemyPos - m_Rigidbody->m_Pos).length();
 
-				float EnemyRadius = PtrEnemy->GetScale() / 2.0f;
-				float PlayerRadius = m_Rigidbody->m_Scale.x;
+					float EnemyRadius = PtrEnemy->GetScale() / 2.0f;
+					float PlayerRadius = m_Rigidbody->m_Scale.x;
 
-				if (length <= EnemyRadius + PlayerRadius) {
-					if (PtrEnemy->GetHP() > 0) {
-						DamagedStartBehaviour(EnemyPos);
-						return;
+					if (length <= EnemyRadius + PlayerRadius) {
+						if (PtrEnemy->GetHP() > 0) {
+							DamagedStartBehaviour(EnemyPos);
+							return;
+						}
 					}
 				}
 			}
-		}
-		//ボスハンドとの衝突判定
-		vector<shared_ptr<GameObject>> HandVec;
-		GetStage<GameStage>()->FindTagGameObjectVec(L"BossHand", HandVec);
-		for (auto hand : HandVec) {
-			if (hand) {
-				auto PtrHand = dynamic_pointer_cast<BossHand>(hand);
+			//ボスハンドとの衝突判定
+			vector<shared_ptr<GameObject>> HandVec;
+			GetStage<GameStage>()->FindTagGameObjectVec(L"BossHand", HandVec);
+			for (auto hand : HandVec) {
+				if (hand) {
+					auto PtrHand = dynamic_pointer_cast<BossHand>(hand);
 
-				Vec3 HandPos = PtrHand->GetPosition();
-				float length = (HandPos - m_Rigidbody->m_Pos).length();
+					Vec3 HandPos = PtrHand->GetPosition();
+					float length = (HandPos - m_Rigidbody->m_Pos).length();
 
-				float Radius = PtrHand->GetScale() / 2.0f;
-				float PlayerRadius = m_Rigidbody->m_Scale.x / 2.0f;
+					float Radius = PtrHand->GetScale() / 2.0f;
+					float PlayerRadius = m_Rigidbody->m_Scale.x / 2.0f;
 
-				if (length < Radius + PlayerRadius) {
-					DamagedStartBehaviour(HandPos);
-					return;
+					if (length < Radius + PlayerRadius) {
+						DamagedStartBehaviour(HandPos);
+						return;
+					}
 				}
 			}
 		}
@@ -562,12 +582,14 @@ namespace basecross {
 		}
 		m_Rigidbody->m_Force += m_Rigidbody->m_Gravity * m_Rigidbody->m_Mass;
 
-		//色を点滅させる
-		if (m_PtrObj->m_UsedModelColor == true) {
-			m_PtrObj->m_UsedModelColor = false;
-		}
-		else if (m_PtrObj->m_UsedModelColor == false) {
-			m_PtrObj->m_UsedModelColor = true;
+		if (m_isDamaging == false) {
+			//色を点滅させる
+			if (m_PtrObj->m_UsedModelColor == true) {
+				m_PtrObj->m_UsedModelColor = false;
+			}
+			else if (m_PtrObj->m_UsedModelColor == false) {
+				m_PtrObj->m_UsedModelColor = true;
+			}
 		}
 	}
 
@@ -699,7 +721,7 @@ namespace basecross {
 
 	void DamagedState::Enter(const shared_ptr<Player>& Obj) {
 		frame_count = 0.0f;
-		Obj->SetInvincible(true);
+		Obj->SetDamaging(true);
 	}
 
 	void DamagedState::Execute(const shared_ptr<Player>& Obj) {
@@ -713,7 +735,7 @@ namespace basecross {
 	}
 
 	void DamagedState::Exit(const shared_ptr<Player>& Obj) {
-		Obj->SetInvincible(false);
+		
 	}
 
 	//--------------------------------------------------------------------------------------

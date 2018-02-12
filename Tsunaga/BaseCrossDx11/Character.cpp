@@ -4112,13 +4112,12 @@ namespace basecross {
 		m_PtrObj->m_OwnShadowmapActive = m_OwnShadowActive;
 		m_PtrObj->m_ShadowmapUse = true;
 		if (m_my_Tag == L"Bullet") {
-			m_PtrObj->m_Diffuse = Col4(0.2f, 0.2f, 0.2f, 1.0f);
-			m_PtrObj->m_Emissive = Col4(0.0f, 0.0f, 0.0f, 1.0f);
+			m_PtrObj->m_Diffuse = Col4(0.7f, 0.0f, 0.7f, 1.0f);
+			m_PtrObj->m_Emissive = Col4(0.1f, 0.0f, 0.1f, 1.0f);
 		}
 		else if (m_my_Tag == L"BossBullet") {
-			m_PtrObj->m_Diffuse = Col4(0.2f, 0.0f, 0.2f, 1.0f);
-			m_PtrObj->m_Emissive = Col4(0.4f, 0.0f, 0.2f, 1.0f);
-
+			m_PtrObj->m_Diffuse = Col4(0.7f, 0.0f, 0.7f, 1.0f);
+			m_PtrObj->m_Emissive = Col4(0.1f, 0.0f, 0.1f, 1.0f);
 			m_BulletTime = 40.0f;
 		}
 		else {
@@ -4144,7 +4143,7 @@ namespace basecross {
 			float p_dis = (p_pos - GetPosition()).length();
 
 			if (m_my_Tag != L"PlayerBullet") {
-				if (PlayerPtr->GetInvincible() == false && p_dis < PlayerPtr->GetScale() / 2.0f + m_Rigidbody->m_Scale.x / 2.0f) {
+				if (PlayerPtr->GetInvincible() == false && PlayerPtr->GetDamaging() == false && p_dis < PlayerPtr->GetScale() / 2.0f + m_Rigidbody->m_Scale.x / 2.0f) {
 					PlayerPtr->DamagedStartBehaviour(GetPosition());
 					SetSleep();
 					return;
