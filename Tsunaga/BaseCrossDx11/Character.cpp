@@ -781,7 +781,7 @@ namespace basecross {
 
 	void AttackSigns::InsertSigns(const Vec3& Pos,float Size)
 	{
-		auto ParticlePtr = InsertParticle(2);
+		auto ParticlePtr = InsertParticle(5);
 		ParticlePtr->m_EmitterPos = Pos;
 		ParticlePtr->SetTextureResource(L"SPARK_TX");
 		ParticlePtr->m_MaxTime = 1.25f;
@@ -5475,6 +5475,7 @@ namespace basecross {
 		//攻撃準備中時の処理、ダメージを多くする
 		else if(m_now_barrior == 3) {
 			if (m_isDamage) {
+				m_DamageFrameCount = 0.0f;
 				m_DamageRate += 0.5f;
 				m_HP -= (value + m_DamageRate) * 1.7f;
 			}
@@ -5490,6 +5491,7 @@ namespace basecross {
 		//バリアを張っていなければ通常ダメージ
 		else if (m_now_barrior == -1 || m_now_barrior == 4) {
 			if (m_isDamage) {
+				m_DamageFrameCount = 0.0f;
 				m_DamageRate += 0.5f;
 				m_HP -= (value + m_DamageRate);
 			}

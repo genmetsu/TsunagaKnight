@@ -388,7 +388,7 @@ namespace basecross {
 
 		RunningAnimation();
 		MoveControll();
-		if (m_isDamaging == false) {
+		if (m_isDamaging == false && m_NowCannonClass == 3) {
 			//“G‚Æ‚Ì“–‚½‚è”»’è
 			vector<shared_ptr<GameObject>> EnemyVec;
 			GetStage<GameStage>()->FindTagGameObjectVec(L"EnemyObject", EnemyVec);
