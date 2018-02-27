@@ -69,10 +69,9 @@ namespace basecross {
 			Vec2(1280, 720),
 			0.0f,
 			Vec2(0, 0),
-			1, 1
+			1, 1,
+			L"ToGameStage"
 			);
-
-		
 
 	}
 	void TitleScene::OnDraw() {
@@ -130,61 +129,6 @@ namespace basecross {
 			}
 		}
 	}
-
-	DimSprite::DimSprite(const shared_ptr<Stage>& StagePtr, const wstring &
-		TextureResName, const Vec2 & StartScale, float StartRot, const Vec2 &
-		StartPos, UINT XWrap, UINT YWrap) :
-		SpriteBase(StagePtr, TextureResName, StartScale, StartRot, StartPos, XWrap, YWrap),
-		m_TotalTime(0)
-	{
-		SetBlendState(BlendState::Trace);
-	}
-
-
-	void DimSprite::AdjustVertex()
-	{
-	}
-
-	void DimSprite::UpdateVertex(float ElapsedTime, VertexPositionColorTexture * vertices)
-	{
-
-		auto CntlVec = App::GetApp()->GetInputDevice().GetControlerVec();
-		if (CntlVec[0].bConnected)
-		{
-			//Bƒ{ƒ^ƒ“
-			if (CntlVec[0].wPressedButtons)
-			{
-				isButtonDown = true;
-
-			}
-
-		}
-
-		if (isButtonDown == true) 
-		{
-			m_TotalTime += ElapsedTime;
-			if (m_TotalTime >= 1.0f)
-			{
-				m_TotalTime = 1.0f;
-				PostEvent(0.0f, GetThis<ObjectInterface>(), App::GetApp()->GetScene<Scene>(), L"ToGameStage");
-
-			}	
-		}
-
-		//float sin_val = sin(m_TotalTime) * 0.5f + 0.5f;
-		Col4 UpdateCol(1.0f, 1.0f, 1.0f, m_TotalTime);
-		for (size_t i = 0; i < m_SquareMesh->GetNumVertices(); i++)
-		{
-			vertices[i] = VertexPositionColorTexture
-			(
-				m_BackupVertices[i].position,
-				UpdateCol,
-				m_BackupVertices[i].textureCoordinate
-			);
-		}
-
-	}
-
 
 }
 

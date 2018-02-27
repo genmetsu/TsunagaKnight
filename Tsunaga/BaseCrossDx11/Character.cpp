@@ -814,8 +814,6 @@ namespace basecross {
 		}
 	}
 
-
-
 	//--------------------------------------------------------------------------------------
 	//class MiddleBossAttackSigns : public MultiParticle;
 	//用途:中ボスの攻撃する前兆エフェクト
@@ -1023,6 +1021,52 @@ namespace basecross {
 	}
 
 	void StepEffect::OnUpdate()
+	{
+		MultiParticle::OnUpdate();
+		float ElapsedTime = App::GetApp()->GetElapsedTime();
+		for (auto ParticlePtr : GetParticleVec()) {
+			for (auto& rParticleSprite : ParticlePtr->GetParticleSpriteVec()) {
+				if (rParticleSprite.m_Active) {
+					rParticleSprite.m_Color.w -= 0.03f;
+				}
+			}
+		}
+	}
+
+	//--------------------------------------------------------------------------------------
+	//class SwordEffect : public MultiParticle;
+	//用途: 剣のエフェクト
+	//--------------------------------------------------------------------------------------
+	SwordEffect::SwordEffect(shared_ptr<Stage>& StagePtr) :
+		MultiParticle(StagePtr)
+	{}
+	SwordEffect::~SwordEffect() {}
+
+	//初期化
+	void SwordEffect::OnCreate() {
+		//加算描画処理をする
+		SetAddType(true);
+		//タグの追加
+		AddTag(L"SwordEffect");
+	}
+
+
+	void SwordEffect::InsertEffect(const Vec3& Pos)
+	{
+		auto ParticlePtr = InsertParticle(2);
+		ParticlePtr->m_EmitterPos = Pos;
+		ParticlePtr->SetTextureResource(L"STEP_TX");
+		ParticlePtr->m_MaxTime = 0.1f;
+
+		vector<ParticleSprite>& pSpriteVec = ParticlePtr->GetParticleSpriteVec();
+		for (auto& rParticleSprite : ParticlePtr->GetParticleSpriteVec()) {
+			rParticleSprite.m_LocalScale *= 0.1f;
+			//色の指定
+			rParticleSprite.m_Color = Col4(1.0f, 1.0f, 1.0f, 0.3f);
+		}
+	}
+
+	void SwordEffect::OnUpdate()
 	{
 		MultiParticle::OnUpdate();
 		float ElapsedTime = App::GetApp()->GetElapsedTime();
@@ -1418,6 +1462,61 @@ namespace basecross {
 		}
 
 	}
+
+	//--------------------------------------------------------------------------------------
+	///	シーン変更の暗転用スプライト
+	//--------------------------------------------------------------------------------------
+	DimSprite::DimSprite(const shared_ptr<Stage>& StagePtr, const wstring &
+		TextureResName, const Vec2 & StartScale, float StartRot, const Vec2 &
+		StartPos, UINT XWrap, UINT YWrap,
+		wstring name) :
+		SpriteBase(StagePtr, TextureResName, StartScale, StartRot, StartPos, XWrap, YWrap),
+		m_TotalTime(0)
+	{
+		SetBlendState(BlendState::Trace);
+		m_scene = name;
+	}
+
+
+	void DimSprite::AdjustVertex()
+	{
+	}
+
+	void DimSprite::UpdateVertex(float ElapsedTime, VertexPositionColorTexture * vertices)
+	{
+
+		auto CntlVec = App::GetApp()->GetInputDevice().GetControlerVec();
+		if (CntlVec[0].bConnected)
+		{
+			//何かボタンが押されたら
+			if (CntlVec[0].wPressedButtons)
+			{
+				isButtonDown = true;
+			}
+		}
+
+		if (isButtonDown == true)
+		{
+			m_TotalTime += ElapsedTime;
+			if (m_TotalTime >= 1.0f)
+			{
+				m_TotalTime = 1.0f;
+				PostEvent(0.0f, GetThis<ObjectInterface>(), App::GetApp()->GetScene<Scene>(), m_scene);
+			}
+		}
+
+		Col4 UpdateCol(1.0f, 1.0f, 1.0f, m_TotalTime);
+		for (size_t i = 0; i < m_SquareMesh->GetNumVertices(); i++)
+		{
+			vertices[i] = VertexPositionColorTexture
+			(
+				m_BackupVertices[i].position,
+				UpdateCol,
+				m_BackupVertices[i].textureCoordinate
+			);
+		}
+
+	}
 	
 	//--------------------------------------------------------------------------------------
 	///	大砲のゲージ
@@ -1629,17 +1728,6 @@ namespace basecross {
 			indices.push_back(i * 4 + 3);
 			indices.push_back(i * 4 + 2);
 		}
-
-		//SetAlphaActive(m_Trace);
-		//auto PtrTransform = GetComponent<Transform>();
-		//PtrTransform->SetScale(m_StartScale.x, m_StartScale.y, 1.0f);
-		//PtrTransform->SetRotation(0, 0, 0);
-		//PtrTransform->SetPosition(m_StartPos.x, m_StartPos.y, 0.0f);
-		//頂点とインデックスを指定してスプライト作成
-		//auto PtrDraw = AddComponent<PTSpriteDraw>(m_BackupVertices, indices);
-		//PtrDraw->SetTextureResource(m_TextureKey);
-
-		//GetStage()->SetSharedGameObject(L"ScoreSprite", GetThis<ScoreSprite>());
 	}
 
 	void ScoreSprite::UpdateVertex(float ElapsedTime, VertexPositionColorTexture* vertices)
@@ -1687,9 +1775,6 @@ namespace basecross {
 
 			VerNum += 4;
 		}
-		//auto PtrDraw = GetComponent<PTSpriteDraw>();
-		//PtrDraw->UpdateVertices(NewVertices);
-	
 	}
 
 	//--------------------------------------------------------------------------------------
@@ -2024,11 +2109,6 @@ namespace basecross {
 				m_isPause = false;
 			}
 		}
-		/*else if (CntlVec[0].wPressedButtons & XINPUT_GAMEPAD_START)
-		{
-		m_isPause = false;
-		}
-		*/
 		if (m_isPause == true)
 		{
 			m_TotalTime += ElapsedTime * 3.0f;
@@ -2036,7 +2116,6 @@ namespace basecross {
 			{
 				m_TotalTime = 1.0f;
 			}
-			//float sin_val = sin(m_TotalTime) * 0.5f + 0.5f;
 			Col4 UpdateCol(1.0f, 1.0f, 1.0f, m_TotalTime);
 			for (size_t i = 0; i < m_SquareMesh->GetNumVertices(); i++)
 			{
@@ -2637,8 +2716,6 @@ namespace basecross {
 		m_PtrObj->m_Camera = GetStage<Stage>()->GetCamera();
 		m_PtrObj->m_OwnShadowmapActive = m_OwnShadowActive;
 		m_PtrObj->m_ShadowmapUse = true;
-		//m_PtrObj->m_BlendState = BlendState::AlphaBlend;
-		//m_PtrObj->m_RasterizerState = RasterizerState::DoubleDraw;
 		m_PtrObj->m_FogEnabled = true;
 		m_PtrObj->m_FogColor = Col4(0.07f, 0.0f, 0.09f, 1.0f);
 		m_PtrObj->m_FogStart = -10.0f;
@@ -2921,6 +2998,33 @@ namespace basecross {
 			//Sparkの送出
 			auto SparkPtr = GetStage<GameStage>()->FindTagGameObject<EnemyMoveEffect>(L"EnemyMoveEffect");
 			SparkPtr->InsertSpark(Emitter);
+		}
+
+		//弾との衝突判定
+		vector<shared_ptr<GameObject>> BulletVec;
+		GetStage<GameStage>()->FindTagGameObjectVec(L"Bullet", BulletVec);
+		for (auto bullet : BulletVec) {
+			if (bullet) {
+				auto PtrBullet = dynamic_pointer_cast<BulletObject>(bullet);
+
+				Vec3 BulletPos = PtrBullet->GetPosition();
+				float length = (BulletPos - m_Rigidbody->m_Pos).length();
+
+				float Radius = PtrBullet->GetScale() / 2.0f;
+				float PlayerRadius = m_Rigidbody->m_Scale.x / 2.0f;
+
+				if (length < Radius + PlayerRadius) {
+					PtrBullet->SetPosition(Vec3(0, -100, 0));
+					Vec3 Emitter = m_Rigidbody->m_Pos;
+					//Sparkの送出
+					auto SparkPtr = GetStage<GameStage>()->FindTagGameObject<AttackSpark>(L"AttackSpark");
+					SparkPtr->InsertSpark(Emitter);
+
+					m_DeadSound->Start(0, 0.1f);
+
+					return;
+				}
+			}
 		}
 
 		//大砲との衝突判定
@@ -3500,7 +3604,7 @@ namespace basecross {
 				m_CannonSound->Start(0, 1.0f);
 				m_Bomb = true;
 			}
-			m_Rigidbody->m_Velocity = m_ToBossVec * 25.0f;
+			m_Rigidbody->m_Velocity = m_ToBossVec * 28.0f;
 
 			//ボスとの衝突判定
 			float length = (m_BossPos - m_Rigidbody->m_Pos).length();
@@ -3769,30 +3873,6 @@ namespace basecross {
 				}
 			}
 		}
-		//弾との衝突判定
-		vector<shared_ptr<GameObject>> BulletVec;
-		GetStage<GameStage>()->FindTagGameObjectVec(L"Bullet", BulletVec);
-		for (auto bullet : BulletVec) {
-			if (bullet) {
-				auto PtrBullet = dynamic_pointer_cast<BulletObject>(bullet);
-
-				Vec3 BulletPos = PtrBullet->GetPosition();
-				float length = (BulletPos - m_Rigidbody->m_Pos).length();
-
-				float Radius = PtrBullet->GetScale() / 2.0f;
-				float PlayerRadius = m_Rigidbody->m_Scale.x / 2.0f;
-
-				if (length < Radius + PlayerRadius) {
-					PtrBullet->SetPosition(Vec3(0, -100, 0));
-					Vec3 Emitter = m_Rigidbody->m_Pos;
-					//Sparkの送出
-					auto SparkPtr = GetStage<GameStage>()->FindTagGameObject<AttackSpark>(L"AttackSpark");
-					SparkPtr->InsertSpark(Emitter);
-
-					return;
-				}
-			}
-		}
 		//ボスハンドとの衝突判定
 		vector<shared_ptr<GameObject>> HandVec;
 		GetStage<GameStage>()->FindTagGameObjectVec(L"BossHand", HandVec);
@@ -3816,7 +3896,7 @@ namespace basecross {
 						SparkPtr->InsertSpark(Emitter);
 
 						PtrBoss->Damage(1.0f);
-						m_DamageSound->Start(0, 0.5f);
+						m_DamageSound->Start(0, 0.3f);
 						PtrBoss->ChangeState(L"Damage");
 						break;
 					}
@@ -4958,7 +5038,7 @@ namespace basecross {
 		EnemyObject(StagePtr, ParentPtr, MeshResName, TextureResName,DefaultAnimation, Scale, Qt, Pos, OwnShadowActive)
 	{
 		m_Speed = 1.0f;
-		m_HP = 10.0f;
+		m_HP = 8.0f;
 		m_DefaultHP = m_HP;
 		AddTag(L"SawBoss");
 		m_TackleSpeed = 1.8f;
@@ -5214,7 +5294,7 @@ namespace basecross {
 		m_Pos(Pos),
 		m_DefaultPos(Pos),
 		m_OwnShadowActive(OwnShadowActive),
-		m_SpawnTime(1.0f),
+		m_SpawnTime(2.0f),
 		m_BulletSpeed(2.0f),
 		m_BeforeAttackTime(1.0f),
 		m_AttackRate(0.2f),
@@ -5334,7 +5414,7 @@ namespace basecross {
 			if (m_frame_count >= 2.0f) {
 				GetStage<GameStage>()->SetIsClear(true);
 				m_isDead = false;
-				m_Rigidbody->m_Pos = Vec3(0, -100, 0);
+				m_Rigidbody->m_Pos = Vec3(0, -100, -1000);
 				m_HP = 0.0001f;
 			}
 			m_frame_count += ElapsedTime;
@@ -5582,7 +5662,9 @@ namespace basecross {
 				auto PtrEnemy = dynamic_pointer_cast<EnemyObject>(enemy);
 				if (PtrEnemy->FindTag(tag)) {
 					PtrEnemy->ChangeState(L"ToCannon");
-					PtrEnemy->SetPosition(m_Rigidbody->m_Pos);
+					Vec3 Pos = m_Rigidbody->m_Pos;
+					Pos.x += rand() % 7 - 3;
+					PtrEnemy->SetPosition(Pos);
 					break;
 				}
 			}

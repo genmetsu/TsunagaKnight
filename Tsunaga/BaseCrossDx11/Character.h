@@ -305,7 +305,7 @@ namespace basecross {
 
 	//--------------------------------------------------------------------------------------
 	//class AttackSpark : public MultiParticle;
-	//用途: 攻撃のスパーククラス
+	//用途: 攻撃が当たった時のスパーククラス
 	//--------------------------------------------------------------------------------------
 	class AttackSpark : public MultiParticle {
 	public:
@@ -512,6 +512,22 @@ namespace basecross {
 		//構築と破棄
 		StepEffect(shared_ptr<Stage>& StagePtr);
 		virtual ~StepEffect();
+		//初期化
+		virtual void OnCreate() override;
+		void InsertEffect(const Vec3& Pos);
+		virtual void OnUpdate() override;
+
+	};
+
+	//--------------------------------------------------------------------------------------
+	//class SwordEffect : public MultiParticle;
+	//用途: 剣のエフェクト
+	//--------------------------------------------------------------------------------------
+	class SwordEffect : public MultiParticle {
+	public:
+		//構築と破棄
+		SwordEffect(shared_ptr<Stage>& StagePtr);
+		virtual ~SwordEffect();
 		//初期化
 		virtual void OnCreate() override;
 		void InsertEffect(const Vec3& Pos);
@@ -943,6 +959,57 @@ namespace basecross {
 		*/
 		//--------------------------------------------------------------------------------------
 		virtual ~TutorialSprite() {}
+	};
+
+	//--------------------------------------------------------------------------------------
+	///	暗転を作るスプライト
+	//--------------------------------------------------------------------------------------
+	class DimSprite : public SpriteBase {
+		float m_TotalTime;	//頂点変更に使用するタイム
+		wstring m_scene;
+	public:
+		bool isButtonDown;
+		//--------------------------------------------------------------------------------------
+		/*!
+		@brief バックアップ頂点の修正(仮想関数)。派生クラスは独自の頂点初期修正を実装
+		@return	なし
+		*/
+		//--------------------------------------------------------------------------------------
+		virtual void AdjustVertex() override;
+		//--------------------------------------------------------------------------------------
+		/*!
+		@brief 頂点の変更
+		@param[in]	ElapsedTime	ターン時間
+		@param[out]	vertices	マップされた頂点データ
+		@return	なし
+		*/
+		//--------------------------------------------------------------------------------------
+		virtual void UpdateVertex(float ElapsedTime, VertexPositionColorTexture* vertices) override;
+		//--------------------------------------------------------------------------------------
+		/*!
+		@brief コンストラクタ
+		@param[in]	StagePtr	ステージのポインタ
+		@param[in]	TextureResName	初期テクスチャリソース名
+		@param[in]	StartScale	初期大きさ
+		@param[in]	StartRot	初期回転
+		@param[in]	StartPos	初期位置
+		@param[in]	XWrap	X方向のラップ数
+		@param[in]	YWrap	Y方向のラップ数
+		*/
+		//--------------------------------------------------------------------------------------
+		DimSprite(const shared_ptr<Stage>& StagePtr,
+			const wstring& TextureResName,
+			const Vec2& StartScale,
+			float StartRot,
+			const Vec2& StartPos,
+			UINT XWrap, UINT YWrap,
+			wstring name);
+		//--------------------------------------------------------------------------------------
+		/*!
+		@brief デストラクタ
+		*/
+		//--------------------------------------------------------------------------------------
+		virtual ~DimSprite() {}
 	};
 
 	//--------------------------------------------------------------------------------------

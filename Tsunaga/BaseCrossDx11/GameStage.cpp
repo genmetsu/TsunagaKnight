@@ -186,7 +186,7 @@ namespace basecross {
 			Vec3(0.0f, 12.0f, 60.0f),
 			true);
 
-		for (int i = 0; i < 20; i++) {
+		for (int i = 0; i < 18; i++) {
 			float x = (float)(i + 1);
 			AddGameObject<NeedleEnemy>(
 				Par,
@@ -209,7 +209,7 @@ namespace basecross {
 			Vec3(0.0f, 0.125f, 25.0f),
 			false);
 
-		for (int i = 0; i < 20; i++) {
+		for (int i = 0; i < 13; i++) {
 			float x = (float)(i + 1);
 			AddGameObject<ShootEnemy>(
 				Par,
@@ -248,7 +248,7 @@ namespace basecross {
 				L"BossBullet");
 		}
 
-		for (int i = 0; i < 10; i++) {
+		for (int i = 0; i < 8; i++) {
 			float x = (float)(i + 1);
 			AddGameObject<AngelEnemy>(
 				Par,
@@ -317,6 +317,7 @@ namespace basecross {
 		AddGameObject<BossAttackSigns>();
 		AddGameObject<MiddleBossAttackSigns>();
 		AddGameObject<StepEffect>();
+		AddGameObject<SwordEffect>();
 		AddGameObject<ShootingEffect>();
 		AddGameObject<CannonEffect>();
 		AddGameObject<BossEffect>();
@@ -393,7 +394,7 @@ namespace basecross {
 				L"TRANS_TX",
 				Vec2(30, 30),
 				0.0f,
-				Vec2(-600, 270 - i * 30),
+				Vec2(-600, (float)270 - i * 30),
 				1, 1,
 				i);
 		}
@@ -442,7 +443,7 @@ namespace basecross {
 
 		m_AudioObjectPtr = ObjectFactory::Create<MultiAudioObject>();
 		m_AudioObjectPtr->AddAudioResource(L"BGM_1");
-		m_AudioObjectPtr->Start(L"BGM_1", XAUDIO2_LOOP_INFINITE, 0.1f);
+		m_AudioObjectPtr->Start(L"BGM_1", XAUDIO2_LOOP_INFINITE, 0.15f);
 
 	}
 
@@ -756,7 +757,7 @@ namespace basecross {
 					camera.m_CamerAt = Vec3(0, 0, 30);
 					camera.m_CameraArmLen = 100;
 					//ここ
-					m_CameraPos.z -= ElapsedTime * 700.0f;
+					m_CameraPos.z -= ElapsedTime * 70.0f;
 					camera.m_CamerEye = m_CameraPos;
 				}
 				else if (m_CameraPos.z <= -150) {
@@ -830,11 +831,6 @@ namespace basecross {
 						-cos(camera.m_CameraXZRad) * camera.m_CameraArmLen * sin(camera.m_CameraYRad)
 					);
 				camera.m_CamerEye = camera.m_CamerAt + CameraLocalEye;
-			}
-			//Bボタン
-			if (CntlVec[0].wPressedButtons & XINPUT_GAMEPAD_B) {
-				//PostEvent(0.0f, GetThis<ObjectInterface>(), App::GetApp()->GetScene<Scene>(), L"ToEmptyStage");
-				//SetIsFail(true);
 			}
 
 		}		
@@ -933,7 +929,7 @@ namespace basecross {
 			1, 1
 			);
 
-		AddGameObject<ResultSprite>(
+		/*AddGameObject<ResultSprite>(
 			L"TIME_LOGO",
 			Vec2(320, 80),
 			0.0f,
@@ -955,9 +951,9 @@ namespace basecross {
 			0.0f,
 			Vec2(300, -120),
 			1, 1
-			);
+			);*/
 
-		AddGameObject<ResultSprite>(
+		/*AddGameObject<ResultSprite>(
 			L"RANK_LOGO",
 			Vec2(400, 100),
 			0.0f,
@@ -970,6 +966,22 @@ namespace basecross {
 			Vec2(180, 180),
 			0.0f,
 			Vec2(110, 120),
+			1, 1
+			);*/
+
+		AddGameObject<ResultSprite>(
+			L"RANK_LOGO",
+			Vec2(400, 100),
+			0.0f,
+			Vec2(-100, 0),
+			1, 1
+			);
+
+		AddGameObject<ResultSprite>(
+			L"RESULT_S",
+			Vec2(240, 240),
+			0.0f,
+			Vec2(110, 0),
 			1, 1
 			);
 
@@ -998,7 +1010,7 @@ namespace basecross {
 
 	}
 
-	//ゲームおーばーしたとき
+	//ゲームオーバーしたとき
 	void GameStage::GameOverBehaviour() {
 		m_AudioObjectPtr->Stop(L"BGM_1");
 
@@ -1020,34 +1032,10 @@ namespace basecross {
 			);
 
 		AddGameObject<ResultSprite>(
-			L"TIME_LOGO",
-			Vec2(320, 80),
-			0.0f,
-			Vec2(-200, -30),
-			1, 1
-			);
-
-		AddGameObject<ResultSprite>(
-			L"LIFE_LOGO",
-			Vec2(320, 80),
-			0.0f,
-			Vec2(-250, -120),
-			1, 1
-			);
-
-		AddGameObject<ResultSprite>(
-			L"PAERCENT_LOGO",
-			Vec2(80, 80),
-			0.0f,
-			Vec2(300, -120),
-			1, 1
-			);
-
-		AddGameObject<ResultSprite>(
 			L"RANK_LOGO",
 			Vec2(400, 100),
 			0.0f,
-			Vec2(-100, 120),
+			Vec2(-100, 0),
 			1, 1
 			);
 
@@ -1055,7 +1043,7 @@ namespace basecross {
 			L"RESULT_D",
 			Vec2(180, 180),
 			0.0f,
-			Vec2(110, 120),
+			Vec2(110, 0),
 			1, 1
 			);
 		AddGameObject<ResultCursorSprite>(
@@ -1084,7 +1072,7 @@ namespace basecross {
 	}
 
 	//--------------------------------------------------------------------------------------
-	///	空のステージ（メッセージのみある）
+	///	クレジットシーン
 	//--------------------------------------------------------------------------------------
 	void CreditScene::OnCreate() {
 		//メッセージスプライト
@@ -1121,12 +1109,11 @@ namespace basecross {
 			Vec2(1280, 720),
 			0.0f,
 			Vec2(0, 0),
-			1, 1
+			1, 1,
+			L"ToTitle"
 			);
 	}
 	void CreditScene::OnUpdateStage() {
-		//スプライトの更新
-		//m_MessageSprite->OnUpdate();
 		//自分自身の更新
 		GetRigidbodyManager()->InitRigidbody();
 		for (auto& v : GetGameObjectVec()) 
@@ -1136,18 +1123,7 @@ namespace basecross {
 		}
 	}
 	void CreditScene::OnUpdate() {
-		//コントローラの取得
-		auto CntlVec = App::GetApp()->GetInputDevice().GetControlerVec();
-		if (CntlVec[0].bConnected)
-		{
-			//Bボタン
-			if (CntlVec[0].wPressedButtons & XINPUT_GAMEPAD_B)
-			{
-				//PostEvent(0.0f, GetThis<ObjectInterface>(), App::GetApp()->GetScene<Scene>(), L"ToTitle");
-			}
-
-		}
-
+		
 	}
 
 	void CreditScene::OnDrawStage() {
@@ -1155,7 +1131,7 @@ namespace basecross {
 		auto Dev = App::GetApp()->GetDeviceResources();
 		Dev->ClearDefaultViews(Col4(0, 0, 0, 1.0f));
 
-		//シャドオウマップ描画の開始
+		//シャドウマップ描画の開始
 		Dev->ClearShadowmapViews();
 		Dev->StartShadowmapDraw();
 		for (auto& v : GetGameObjectVec())
@@ -1181,8 +1157,6 @@ namespace basecross {
 	void CreditScene::OnDraw() {
 		//何もしない
 	}
-
-
 
 
 }
